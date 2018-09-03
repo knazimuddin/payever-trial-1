@@ -1,0 +1,19 @@
+dimg 'transactions-backend' do
+  docker.from 'node:8.11.3-alpine'
+
+  git do
+    add '/' do
+      to '/payever'
+    end
+  end
+
+  shell do
+    before_setup do
+      run 'cd /payever/ && npm install && npm install @nestjs/mongoose'
+    end
+  end
+
+  docker.workdir '/payever'
+  docker.cmd '/usr/local/bin/npm run start'
+  docker.expose 3000
+end
