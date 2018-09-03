@@ -1,0 +1,26 @@
+FROM node:8.11.3-alpine
+
+ADD . /payever
+
+RUN sed -i -e 's/v3.6/edge/g' /etc/apk/repositories \
+    && apk add --no-cache \
+    python \
+    build-base \
+    git \
+    bash \
+    openjdk8-jre-base \
+    # chromium dependencies
+    nss \
+    chromium-chromedriver \
+    chromium \
+    && apk upgrade --no-cache --available
+
+ENV CHROME_BIN /usr/bin/chromium-browser
+
+RUN npm install karma ng-cli ng angular-cli
+
+RUN pwd && \
+	 cd /payever && \
+	 npm install && \
+	 npm run build && \
+	 npm test
