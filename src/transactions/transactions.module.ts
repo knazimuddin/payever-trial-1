@@ -9,7 +9,7 @@ import { TransactionsSchema } from './schemas/transaction.schema';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Transaction]),
+    // TypeOrmModule.forFeature([Transaction]),
     MongooseModule.forFeature([{ name: 'TransactionsSchema', schema: TransactionsSchema }]),
   ],
   controllers: [BusinessController, DevController],

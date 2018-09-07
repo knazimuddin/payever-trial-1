@@ -9,16 +9,16 @@ import { TransactionsModule } from './transactions/transactions.module';
 @Module({
   imports: [
     TransactionsModule,
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: environment.mysql.host,
-      port: environment.mysql.port,
-      username: environment.mysql.username,
-      password: environment.mysql.password,
-      database: environment.mysql.database,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: false,
-    }),
+    // TypeOrmModule.forRoot({
+      // type: 'mysql',
+      // host: environment.mysql.host,
+      // port: environment.mysql.port,
+      // username: environment.mysql.username,
+      // password: environment.mysql.password,
+      // database: environment.mysql.database,
+      // entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      // synchronize: false,
+    // }),
     MongooseModule.forRoot(environment.mongodb),
   ],
   providers: [

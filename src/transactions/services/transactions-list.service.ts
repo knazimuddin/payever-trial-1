@@ -22,7 +22,7 @@ export class TransactionsListService {
   };
 
   constructor(
-    @InjectRepository(Transaction) private readonly transactionRepository: Repository<Transaction>,
+    // @InjectRepository(Transaction) private readonly transactionRepository: Repository<Transaction>,
   ) {}
 
   async find(
@@ -50,6 +50,7 @@ export class TransactionsListService {
       'payments.merchant_name',
     ];
 
+    /*
     const query = this.transactionRepository
       .createQueryBuilder('payments')
       .select(columns)
@@ -76,9 +77,11 @@ export class TransactionsListService {
       pagination_data,
       usage: this.getUsage(),
     };
+    */
   }
 
   async findOne(id: string): Promise<any> {
+    /*
     const query = this.transactionRepository
       .createQueryBuilder('payments')
       // .select(columns.map((column) => `payments.${column}`).join(', '))
@@ -146,9 +149,11 @@ export class TransactionsListService {
         // store: {id: '140877', name: 'DEMO 123'},
       },
     );
+    */
   }
 
-  private async getPaginationData(filters, search): Promise<PaginationData> {
+  private async getPaginationData(filters, search) {
+    /*
     return await this.transactionRepository
       .createQueryBuilder('payments')
       .andWhere(new Brackets(where => this.addSearchWhere(where, search)))
@@ -159,6 +164,7 @@ export class TransactionsListService {
         ].join(', '))
       .getRawOne()
     ;
+    */
   }
 
   private addSearchWhere(mainWhere: WhereExpression, search = null): void {
