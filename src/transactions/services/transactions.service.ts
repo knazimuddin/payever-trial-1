@@ -15,6 +15,10 @@ export class TransactionsService {
     });
   }
 
+  async findOne(uuid: string) {
+    return await this.transactionsModel.findOne({uuid})
+  }
+
   async findMany(
     page: number = null,
     limit = null,
@@ -58,7 +62,6 @@ export class TransactionsService {
       ])
     ;
 
-    console.log('total???', res);
     return res && res[0] ? res[0].total : null;
   }
 

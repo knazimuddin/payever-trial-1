@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { ApiUseTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { TransactionsService } from '../services';
+import { snakeCase } from 'lodash';
 
 @Controller('business/:businessUuid')
 @ApiUseTags('business')
@@ -48,7 +49,7 @@ export class BusinessController {
       };
 
       const sort = {};
-      sort[orderBy] = direction.toLowerCase();
+      sort[snakeCase(orderBy)] = direction.toLowerCase();
 
       return Promise.all([
         this.transactionsService.findMany(+page, +limit, sort, filtersWithBusiness, search),
@@ -56,7 +57,6 @@ export class BusinessController {
         this.transactionsService.total(filtersWithBusiness, search),
       ])
         .then((res) => {
-          console.log(res);
           return {
             collection: res[0],
             pagination_data: {
@@ -65,10 +65,23 @@ export class BusinessController {
               current: page,
             },
             filters: {},
-            usage: this.getUsage(),
+            usage: {},
           };
         });
 
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  @Get('detail/:uuid')
+  @HttpCode(HttpStatus.OK)
+  // @ApiResponse({status: HttpStatus.OK, description: 'The records have been successfully fetched.', type: GetTodoDto})
+  async getDetail(
+    @Param('uuid') uuid: string,
+  ): Promise<any> {
+    try {
+      return await this.transactionsService.findOne(uuid);
     } catch (error) {
       throw error;
     }
@@ -95,38 +108,6 @@ export class BusinessController {
       id: null, // 9???
       limit: '',
       order_by: '',
-    };
-  }
-
-  @Get(':id')
-  @HttpCode(HttpStatus.OK)
-  // @ApiResponse({status: HttpStatus.OK, description: 'The records have been successfully fetched.', type: GetTodoDto})
-  async getDetail(
-    @Param('id') id: string,
-  ): Promise<any> {
-    try {
-      // return await this.listService.findOne(id);
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  private getUsage() {
-    return {
-      statuses: Object.keys(this.getStatusTranslations()).map((key) => ({key, name: this.getStatusTranslations()[key]})),
-    };
-  }
-
-  private getStatusTranslations() {
-    return {
-      STATUS_CANCELLED: 'Cancelled',
-      STATUS_FAILED: 'Failed',
-      STATUS_DECLINED: 'Declined',
-      STATUS_IN_PROCESS: 'In progress',
-      STATUS_PAID: 'Paid',
-      STATUS_REFUNDED: 'Refunded',
-      STATUS_ACCEPTED: 'Accepted',
-      STATUS_NEW: 'New',
     };
   }
 
