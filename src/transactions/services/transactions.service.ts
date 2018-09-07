@@ -6,7 +6,8 @@ import { v4 as uuid } from 'uuid';
 @Injectable()
 export class TransactionsService {
 
-  constructor(@InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>) {}
+  constructor(@InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>) {
+  }
 
   async create(transaction: any) {
     return await this.transactionsModel.create({
@@ -31,6 +32,16 @@ export class TransactionsService {
     console.log('sort:', sort);
     console.log('filters:', filters);
     console.log('search:', search);
+
+    if (search) {
+      const regex = new RegExp(search);
+      filters['$or'] = [
+        { customer_name: regex},
+        { customer_email: regex },
+        { reference: regex },
+      ];
+    }
+
     return await this.transactionsModel
       .find(filters)
       .limit(limit)
