@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-backend
+  namespace: developers
+  annotations:
+     nodejs-auth/deploy-timestamp: {{ now }}
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-backend
+    spec:
+      imagePullSecrets:
+      - name: regsecret
+      containers:
+      - command: [ '/usr/local/bin/npm', 'run', 'start' ]
+        image: {{ tuple "transaction-backend" . |  include "dimg" }}
+        imagePullPolicy: Always
+        name: {{ .Chart.Name }}-backend
+        ports:
+        - containerPort: 3000
+          name: node
+          protocol: TCP
+        env:
+        - name: KUBERNETES_DEPLOYED
+          value: "{{ now }}"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Chart.Name }}-srv
+  namespase: developers
+spec:
+  type:  ClusterIP
+  selector:
+    app: {{ .Chart.Name }}-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: node
