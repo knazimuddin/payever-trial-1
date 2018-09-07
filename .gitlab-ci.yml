@@ -11,8 +11,8 @@ stages:
 Build to dev:
   stage: build to dev
   script:
-    - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
-    - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
+   # - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
+  #  - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
   #  - sed -i -- "s/transaction-backend/transaction-backend-dev/g" ./.helm/Chart.yaml
     - dapp dimg build --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}
     - dapp dimg push --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}  registry.devpayever.com --registry-username payever --registry-password vMnPdItXkV9T
@@ -26,8 +26,8 @@ Build to dev:
 Deploy to dev:
   stage: deploy to dev
   script:
-  - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
-  - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
+ # - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
+ # - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
  # - sed -i -- "s/transaction-backend/transaction-backend/g" ./.helm/Chart.yaml
   - sed -i -- "s/placeholder/transaction-backend/g" ./sub.sh
   - bash sub.sh
