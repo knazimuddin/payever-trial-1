@@ -47,6 +47,7 @@ export class StubService {
 
   createFakeTransaction(businessUuid) {
     const items = (Array.apply(null, {length: 3})).map(() => this.createFakeTransactionItem());
+    const customerId = Math.round(Math.random() * 1000);
 
     return {
       amount: parseFloat((Math.random() * 5000).toFixed(2)),
@@ -58,8 +59,8 @@ export class StubService {
       channel: this.randomFromArray(this.channels),
       created_at: Date.now(),
       currency: 'EUR',
-      customer_email: 'customer@shop.com',
-      customer_name: `John Doe ${Math.round(Math.random() * 1000)}`,
+      customer_email: `johndoe${customerId}@shop.com`,
+      customer_name: `John Doe ${customerId}`,
       delivery_fee: 42,
       down_payment: 0,
       fee_accepted: true,
@@ -68,7 +69,7 @@ export class StubService {
       merchant_name: 'XXXLutz',
       payment_details: '',
       payment_fee: 0,
-      reference: 'zzzz',
+      reference: `zzzz${customerId}`,
       shipping_address: this.createFakeCustomerAddress(),
       shipping_category: 'custom',
       shipping_method_name: 'Test name shipping',

@@ -9,5 +9,4 @@ export const environment: any = {
     database: 'payever_dev',
   },
   mongodb: 'mongodb://localhost:27017/transactions',
-
 };

@@ -43,6 +43,7 @@ export class BusinessController {
         // value: businessUuid,
       // };
 
+
       const filtersWithBusiness = {
         // ...filters
         business_uuid: businessUuid,
@@ -94,14 +95,14 @@ export class BusinessController {
   ): Promise<any> {
     return {
       columns_to_show : [
-        'customerName',
+        'customer_email',
+        'customer_name',
+        'merchant_email',
+        'merchant_name',
+        'specific_status',
         'status',
-        'merchantName',
-        'type',
-        'specificStatus',
-        'customerEmail',
-        'merchantEmail',
         'total',
+        'type',
       ],
       direction: '',
       filters: null,
