@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 
 export interface Filter {
-  condition: 'is' | 'isNot' | 'isIn' | 'isNotIn' | 'startsWith' | 'endsWith' | 'contains' | 'doesNotContain';
+  condition: 'is' | 'isNot' | 'isIn' | 'isNotIn' | 'startsWith' | 'endsWith' | 'contains' | 'doesNotContain' | 'isDate' | 'isNotDate' | 'afterDate' | 'beforeDate' | 'betweenDates' | 'greaterThan' | 'lessThan' | 'between';
   // 'is' | 'isNot' | 'contains' | 'doesNotContain' | 'startsWith' | 'endsWith' | 'afterDate' | 'beforeDate' | 'isDate' | 'isNotDate'| 'betweenDates' | 'greaterThan' | 'lessThan' | 'between' | 'choice'
   value: any;
 }
@@ -135,20 +135,72 @@ export class TransactionsService {
       case 'endsWith':
         mongoFilters[field] = { $regex: new RegExp(`${filter.value}$`) };
         break;
-      case 'endsWith':
-        mongoFilters[field] = { $regex: new RegExp(`${filter.value}$`) };
-        break;
       case 'contains':
         mongoFilters[field] = { $regex: new RegExp(`${filter.value}`) };
         break;
       case 'doesNotContain':
         mongoFilters[field] = { $not: new RegExp(`${filter.value}`) };
         break;
-
-
-      // { customer_name: regex},
+      case 'greaterThan':
+        mongoFilters[field] = { $gte: filter.value };
+        break;
+      case 'lessThan':
+        mongoFilters[field] = { $lte: filter.value };
+        break;
+      case 'between':
+        mongoFilters[field] = {
+          $gte: filter.value.from,
+          $lte: filter.value.to,
+        };
+        break;
+      case 'isDate':
+        mongoFilters[field] = {
+          $gte: this.getTargetDate(filter.value),
+          $lt: this.getTargetTomorrowDate(filter.value),
+        };
+        break;
+      case 'isNotDate':
+        mongoFilters[field] = {
+          $not: {
+            $gte: this.getTargetDate(filter.value),
+            $lt: this.getTargetTomorrowDate(filter.value),
+          },
+        };
+        break;
+      case 'afterDate':
+        mongoFilters[field] = {
+          $gte: this.getTargetTomorrowDate(filter.value),
+        };
+        break;
+      case 'beforeDate':
+        mongoFilters[field] = {
+          $lt: this.getTargetDate(filter.value),
+        };
+        break;
+      case 'betweenDates':
+        mongoFilters[field] = {
+          $gte: this.getTargetDate(filter.value.dateFrom),
+          $lt: this.getTargetTomorrowDate(filter.value.dateTo),
+        };
+        break;
     }
+  }
 
+  private getTargetDate(value: string) {
+    const date = new Date(value);
+    date.setUTCHours(0);
+    date.setUTCMinutes(0);
+    date.setUTCSeconds(0);
+    return date;
+  }
+
+  private getTargetTomorrowDate(value: string) {
+    const date = new Date(value);
+    date.setDate(date.getDate() + 1);
+    date.setUTCHours(0);
+    date.setUTCMinutes(0);
+    date.setUTCSeconds(0);
+    return date;
   }
 
 }
