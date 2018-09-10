@@ -29,7 +29,7 @@ export class BusinessController {
   @HttpCode(HttpStatus.OK)
   // @ApiResponse({status: HttpStatus.OK, description: 'The records have been successfully fetched.', type: GetTodoDto, isArray: true})
   async getList(
-    @Param('businessUuid') businessUuid: number,
+    @Param('businessUuid') businessUuid: string,
     @Query('orderBy') orderBy: string = 'created_at',
     @Query('direction') direction: string = 'asc',
     @Query('limit') limit: number = 3,
@@ -38,24 +38,35 @@ export class BusinessController {
     @Query('filters') filters: any = {},
   ): Promise<any> {
     try {
-      // filters.business_uuid = {
-        // condition: 'is',
-        // value: businessUuid,
-      // };
 
+      console.log('page:', page);
+      console.log('limit:', limit);
+      console.log('orderBy:', orderBy);
+      console.log('direction:', direction);
+      console.log('filters:', filters);
+      console.log('search:', search);
 
-      const filtersWithBusiness = {
-        // ...filters
-        business_uuid: businessUuid,
+      filters.business_uuid = {
+        condition: 'is',
+        value: businessUuid,
       };
 
+      // console.log('input filters', filters);
+
+
+      // const filtersWithBusiness = {
+        // ...filters
+        // business_uuid: businessUuid,
+      // };
+
+      console.log();
       const sort = {};
       sort[snakeCase(orderBy)] = direction.toLowerCase();
 
       return Promise.all([
-        this.transactionsService.findMany(+page, +limit, sort, filtersWithBusiness, search),
-        this.transactionsService.count(filtersWithBusiness, search),
-        this.transactionsService.total(filtersWithBusiness, search),
+        this.transactionsService.findMany(filters, sort, search, +page, +limit),
+        this.transactionsService.count(filters, search),
+        this.transactionsService.total(filters, search),
       ])
         .then((res) => {
           return {
@@ -91,7 +102,7 @@ export class BusinessController {
   @Get('settings')
   @HttpCode(HttpStatus.OK)
   async getSettings(
-    @Param('businessUuid') businessUuid: number,
+    @Param('businessUuid') businessUuid: string,
   ): Promise<any> {
     return {
       columns_to_show : [
