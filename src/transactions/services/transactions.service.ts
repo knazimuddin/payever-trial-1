@@ -110,18 +110,10 @@ export class TransactionsService {
   private addFilter(mongoFilters, field: string, filter: Filter) {
     switch (filter.condition) {
       case 'is':
-        if (Array.isArray(filter.value)) {
-          mongoFilters[field] = { $in: filter.value };
-        } else {
-          mongoFilters[field] = { $eq: filter.value };
-        }
+        mongoFilters[field] = { $eq: filter.value };
         break;
       case 'isNot':
-        if (Array.isArray(filter.value)) {
-          mongoFilters[field] = { $nin: filter.value };
-        } else {
-          mongoFilters[field] = { $ne: filter.value };
-        }
+        mongoFilters[field] = { $ne: filter.value };
         break;
       case 'isIn':
         mongoFilters[field] = { $in: filter.value };
