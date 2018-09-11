@@ -106,13 +106,13 @@ export class BusinessController {
   ): Promise<any> {
     return {
       columns_to_show : [
+        'created_at',
         'customer_email',
         'customer_name',
         'merchant_email',
         'merchant_name',
         'specific_status',
         'status',
-        'total',
         'type',
       ],
       direction: '',
