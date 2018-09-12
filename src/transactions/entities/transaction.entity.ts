@@ -1,6 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, Table, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Table, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 import { TransactionHistoryEntry } from './transaction-history-entry.entity';
 import { TransactionItem } from './transaction-item.entity';
+import { Address } from './address.entity';
+import { Business } from './business.entity';
 
 @Entity('payments')
 export class Transaction {
@@ -15,6 +17,18 @@ export class Transaction {
 
   @OneToMany(type => TransactionItem, items => items.transaction)
   items: TransactionItem[];
+
+  @OneToOne(type => Address)
+  @JoinColumn({name: 'address_id'})
+  billing_address: Address;
+
+  @OneToOne(type => Address)
+  @JoinColumn({name: 'shipping_address_id'})
+  shipping_address: Address;
+
+  @OneToOne(type => Business)
+  @JoinColumn({name: 'shipping_address_id'})
+  business: Business;
 
   /*** Own columns ***/
 

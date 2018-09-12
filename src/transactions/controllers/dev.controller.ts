@@ -21,16 +21,25 @@ export class DevController {
     @Param('businessUuid') businessUuid: string,
     @Param('count') count: number,
   ) {
-    return new Promise((resolve, reject) => {
-      (Array.apply(null, {length: count})).forEach(async () => {
-        try {
-          await this.transactionsService.create(this.stubService.createFakeTransaction(businessUuid));
-        } catch (e) {
-          return reject(e);
-        }
-      });
-      resolve(`${count} new fake transactions created`);
-    });
+    return await this.transactionsService.create(this.stubService.createFakeTransaction(businessUuid));
+
+    // return new Promise((resolve, reject) => {
+      // (Array.apply(null, {length: count})).forEach(async () => {
+        // try {
+          // await this.transactionsService.create(this.stubService.createFakeTransaction(businessUuid));
+        // } catch (e) {
+          // return reject(e);
+        // }
+      // });
+      // resolve(`${count} new fake transactions created`);
+    // });
+  }
+
+  @Get('clean')
+  @HttpCode(HttpStatus.OK)
+  async removeTestTransactions(
+  ) {
+    return await this.transactionsService.deleteAll();
   }
 
 }

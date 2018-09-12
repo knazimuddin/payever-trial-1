@@ -5,7 +5,6 @@ import { v4 as uuid } from 'uuid';
 
 export interface Filter {
   condition: 'is' | 'isNot' | 'isIn' | 'isNotIn' | 'startsWith' | 'endsWith' | 'contains' | 'doesNotContain' | 'isDate' | 'isNotDate' | 'afterDate' | 'beforeDate' | 'betweenDates' | 'greaterThan' | 'lessThan' | 'between';
-  // 'is' | 'isNot' | 'contains' | 'doesNotContain' | 'startsWith' | 'endsWith' | 'afterDate' | 'beforeDate' | 'isDate' | 'isNotDate'| 'betweenDates' | 'greaterThan' | 'lessThan' | 'between' | 'choice'
   value: any;
 }
 
@@ -22,8 +21,24 @@ export class TransactionsService {
     });
   }
 
+  async deleteAll() {
+    return await this.transactionsModel.collection.drop();
+  }
+
+  async createOrUpdate(transaction: any) {
+    if (transaction.uuid) {
+      const existing = await this.transactionsModel.findOne({uuid: transaction.uuid});
+      if (existing) {
+        return this.transactionsModel.findOneAndUpdate({uuid: transaction.uuid}, transaction);
+      }
+    }
+
+    return this.create(transaction);
+  }
+
   async findOne(uuid: string) {
-    return await this.transactionsModel.findOne({uuid});
+    const transaction = await this.transactionsModel.findOne({uuid});
+    return transaction.toObject({virtuals: true});
   }
 
   async findMany(
