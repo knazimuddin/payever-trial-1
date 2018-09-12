@@ -53,7 +53,7 @@ export class StubService {
       amount: parseFloat((Math.random() * 5000).toFixed(2)),
       amount_refunded: 0,
       amount_rest: 0,
-      billing_address: {},
+      billing_address: this.createFakeBillingAddress(),
       // business_address - will be resolved on FE via business_uuid
       business_uuid: businessUuid,
       channel: this.randomFromArray(this.channels),
@@ -113,6 +113,25 @@ export class StubService {
       fax : null,
       first_name : 'John',
       last_name : 'Doe',
+      mobile_phone : '+12341234',
+      phone : '+23452345',
+      salutation : 'SALUTATION_MR',
+      social_security_number : '1234567890',
+      street : 'Am Sandtorkai',
+      type : 'billing',
+      zip_code : '20457',
+    };
+  }
+
+  createFakeBillingAddress() {
+    return {
+      city : 'Berlin',
+      company_name : null,
+      country : 'DE',
+      country_name : 'Germany',
+      fax : null,
+      first_name : 'Martin',
+      last_name : 'Saigger',
       mobile_phone : '+12341234',
       phone : '+23452345',
       salutation : 'SALUTATION_MR',
