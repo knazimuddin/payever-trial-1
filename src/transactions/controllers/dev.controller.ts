@@ -21,18 +21,11 @@ export class DevController {
     @Param('businessUuid') businessUuid: string,
     @Param('count') count: number,
   ) {
-    return await this.transactionsService.create(this.stubService.createFakeTransaction(businessUuid));
+    (Array.apply(null, {length: count})).forEach(async () => {
+      await this.transactionsService.create(this.stubService.createFakeTransaction(businessUuid));
+    });
 
-    // return new Promise((resolve, reject) => {
-      // (Array.apply(null, {length: count})).forEach(async () => {
-        // try {
-          // await this.transactionsService.create(this.stubService.createFakeTransaction(businessUuid));
-        // } catch (e) {
-          // return reject(e);
-        // }
-      // });
-      // resolve(`${count} new fake transactions created`);
-    // });
+    return `${count} new fake transactions created`;
   }
 
   @Get('clean')
