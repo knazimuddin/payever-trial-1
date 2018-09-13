@@ -50,7 +50,7 @@ export const TransactionRefundItemSchema = new Schema({
 export const TransactionHistoryEntrySchema = new Schema({
   action: String,
   amount: Number,
-  created_at: String,
+  created_at: Date,
   // custom_data: any[],
   is_restock_items: Boolean,
   params: String,
