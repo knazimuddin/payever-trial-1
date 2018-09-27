@@ -59,8 +59,8 @@ export class TransactionItem {
   @Column()
   weight: number;
 
-  @Column()
-  product_variant_uuid: string;
+  // @Column()
+  // product_variant_uuid: string;
 
   @Column()
   uuid: string;

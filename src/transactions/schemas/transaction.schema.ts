@@ -96,7 +96,7 @@ export const TransactionsSchema = new Schema({
   store_id: String,
   store_name: String,
   total: {type: Number, required: true},
-  total_fee: {type: Number, required: true},
+  // total_fee: {type: Number, required: true},
   type: {type: String, required: true},
   updated_at: Date,
   uuid: {type: String, required: true},

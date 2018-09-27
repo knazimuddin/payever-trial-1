@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Brackets, SelectQueryBuilder, WhereExpression } from 'typeorm';
-import { Transaction } from '../entities/transaction.entity';
 import { snakeCase } from 'lodash';
 
 interface PaginationData {

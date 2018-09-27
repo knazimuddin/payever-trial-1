@@ -1,5 +1,4 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { environment } from './environments';

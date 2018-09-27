@@ -4,7 +4,8 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { MigrationService, TransactionsService } from '../services';
+import { MigrationService } from '../services';
+import { TransactionsService } from '../services';
 
 @Controller('migration')
 export class MigrationController {
@@ -18,7 +19,9 @@ export class MigrationController {
   @HttpCode(HttpStatus.OK)
   async fetch(
   ) {
-    const mysqlData = await this.migrationService.find();
+    let mysqlData = await this.migrationService.find();
+    // mysqlData = mysqlData.map((d) => d.payments_flow);
+    console.log(mysqlData);
     return 'fetched';
   }
 
@@ -36,14 +39,13 @@ export class MigrationController {
   async migrate(
   ) {
     const mysqlData = await this.migrationService.find();
-    const entry = mysqlData.find((transaction) => {
-      return transaction.items.length > 0 && transaction.history.length > 0;
-    });
-    console.log('entry.uuid', entry.uuid);
-    console.log('entry.business_uuid', entry.business_uuid);
-    console.log('entry.history', entry.history);
+    // const testEntry = mysqlData.find((transaction) => {
+      // return transaction.items.length > 0 && transaction.history.length > 0;
+    // });
 
-    // this.transactionsService.createOrUpdate(entry);
+    // console.log(testEntry.business);
+
+    mysqlData.forEach(entry => this.transactionsService.createOrUpdate(entry));
 
     return 'inserted';
   }

@@ -3,6 +3,7 @@ import { TransactionHistoryEntry } from './transaction-history-entry.entity';
 import { TransactionItem } from './transaction-item.entity';
 import { Address } from './address.entity';
 import { Business } from './business.entity';
+import { PaymentsFlow } from './payment-flow.entity';
 
 @Entity('payments')
 export class Transaction {
@@ -27,8 +28,12 @@ export class Transaction {
   shipping_address: Address;
 
   @OneToOne(type => Business)
-  @JoinColumn({name: 'shipping_address_id'})
+  @JoinColumn({name: 'business_id', referencedColumnName: 'id'})
   business: Business;
+
+  @OneToOne(type => PaymentsFlow)
+  @JoinColumn({name: 'id', referencedColumnName: 'payment_id'})
+  payments_flow: PaymentsFlow;
 
   /*** Own columns ***/
 
@@ -65,8 +70,8 @@ export class Transaction {
   @Column()
   updated_at: Date;
 
-  @Column()
-  credit_reference: string;
+  @Column({name: 'credit_reference'})
+  reference: string;
 
   @Column()
   amount: number;

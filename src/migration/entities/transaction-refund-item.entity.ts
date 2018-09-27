@@ -10,7 +10,7 @@ export class TransactionRefundItem {
 
   @ManyToOne(type => TransactionHistoryEntry, history => history.refund_items)
   @JoinColumn({name: 'payment_history_id'})
-  history_entry: number;
+  history_entry: any;
 
   @Column()
   payment_history_id: number;

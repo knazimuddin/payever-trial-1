@@ -12,9 +12,17 @@ import {
   UseGuards,
   Query,
 } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { ApiUseTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { TransactionsService } from '../services';
 import { snakeCase } from 'lodash';
+import { Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
+
+import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
+import { MessageFactory, MessageBusService } from '@pe/nest-kit/modules/message';
+
+import { TransactionsService } from '../services';
+import { environment } from '../../environments';
 
 @Controller('business/:businessUuid')
 @ApiUseTags('business')
@@ -23,7 +31,16 @@ import { snakeCase } from 'lodash';
 @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.'})
 export class BusinessController {
 
-  constructor(private readonly transactionsService: TransactionsService) {}
+  rabbitClient: ClientProxy;
+
+  private messageFactory: MessageFactory = new MessageFactory();
+  private messageBusService: MessageBusService = new MessageBusService({
+    rsa: environment.rsa,
+  });
+
+  constructor(private readonly transactionsService: TransactionsService) {
+    this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
+  }
 
   @Get('list')
   @HttpCode(HttpStatus.OK)
@@ -92,11 +109,44 @@ export class BusinessController {
   async getDetail(
     @Param('uuid') uuid: string,
   ): Promise<any> {
-    try {
-      return await this.transactionsService.findOne(uuid);
-    } catch (error) {
-      throw error;
-    }
+    return new Promise(async(resolve, reject) => {
+      try {
+        const transaction = await this.transactionsService.findOne(uuid);
+
+        this.fixDates(transaction);
+
+        const actionsPayload = {
+          action: 'action.list',
+          data: {
+            payment: transaction,
+            business: {
+              id: 1 // dummy id
+            },
+          },
+        };
+
+        this.rabbitClient.send(
+          { event: 'rpc_payment_santander_de' }, // hardcoded!
+          this.messageFactory.createMessage('payment_option.santander_installment.action', actionsPayload),
+        ).pipe(
+          map((m) => this.messageBusService.unwrapMessage(m)),
+          map((actionsResponse) => {
+            console.log(actionsResponse);
+            const actions = JSON.parse(actionsResponse.payload).result; // move json parse into transport layer
+            return Object.keys(actions).map((key) => ({
+              action: key,
+              enabled: actions[key],
+            }));
+          }),
+          tap((actions) => console.log('tap', actions)),
+        ).subscribe((actions) => {
+          resolve({ ...transaction, actions });
+        });
+
+      } catch (error) {
+        throw error;
+      }
+    });
   }
 
   @Get('settings')
@@ -121,6 +171,15 @@ export class BusinessController {
       limit: '',
       order_by: '',
     };
+  }
+
+  private fixDates(transaction) {
+    Object.keys(transaction).forEach((key) => {
+      if (transaction[key] instanceof Date) {
+        console.log('fixing date:', key);
+        transaction[key] = transaction[key].toISOString().split('.')[0] + "+00:00";
+      }
+    });
   }
 
 }
