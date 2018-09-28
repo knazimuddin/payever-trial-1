@@ -113,6 +113,9 @@ export class BusinessController {
       try {
         const transaction = await this.transactionsService.findOne(uuid);
 
+        resolve(transaction);
+
+        /*
         this.fixDates(transaction);
 
         const actionsPayload = {
@@ -142,6 +145,7 @@ export class BusinessController {
         ).subscribe((actions) => {
           resolve({ ...transaction, actions });
         });
+        */
 
       } catch (error) {
         throw error;
