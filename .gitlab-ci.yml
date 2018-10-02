@@ -84,7 +84,7 @@ Build to staging:
     - dapp dimg build --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}
     - dapp dimg push --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}  registry.devpayever.com --registry-username payever --registry-password vMnPdItXkV9T
   tags:
-    - deploy
+    - staging
   only:
     - branches
   except:
@@ -105,7 +105,7 @@ Deploy to staging:
       --set global.ciProjectName=$CI_PROJECT_NAME
       registry.devpayever.com
   tags:
-    - deploy
+    - staging
   only:
     - branches
   except:
@@ -125,12 +125,12 @@ Build to prod:
     - dapp dimg build --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}
     - dapp dimg push --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}  registry.devpayever.com --registry-username payever --registry-password vMnPdItXkV9T
   tags:
-    - deploy
+    - prod
   only:
     - master
 
 .staging-deploy: &staging-deploy
-  tags: [deploy]
+  tags: [prod]
   only:
     - master
   stage: manual product deploy
