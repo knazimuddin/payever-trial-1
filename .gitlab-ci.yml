@@ -1,38 +1,57 @@
 stages:
-  - build to dev
-  - deploy to dev
-  - testing
-  - build staging
-  - deploy staging
-  - manual build production
-  - manual product deploy
-  - post build test
+  - test_build
+  - test
+  - showroom_build
+  - showroom_deploy
+  - stage_build
+  - stage_deploy
+  - prod_build
+  - prod_deploy
+
+test_build:
+  stage: test_build
+  tags:
+    - deploy
+  only:
+    variables:
+      - $IN_STAGE_TYPE == "test"
+  script:
+    - echo "test build"
+
+test:
+  stage: test
+  tags:
+    - deploy
+  only:
+    variables:
+      - $IN_STAGE_TYPE == "test"
+  script:
+    - echo "test"
 
 Build to dev:
-  stage: build to dev
+  stage: showroom_build
   script:
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
-  #  - sed -i -- "s/transaction-backend/transaction-backend-dev/g" ./.helm/Chart.yaml
+    - sed -i -- "s/transaction-backend/transaction-backend/g" ./.helm/Chart.yaml
     - dapp dimg build --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}
     - dapp dimg push --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}  registry.devpayever.com --registry-username payever --registry-password vMnPdItXkV9T
   tags:
     - deploy
   only:
-    - branches
-  except:
-    - master
+    variables:
+      - $IN_STAGE_TYPE == "deploy"
 
 Deploy to dev:
-  stage: deploy to dev
+  stage: showroom_deploy
   script:
-  - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
-  - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
- # - sed -i -- "s/transaction-backend/transaction-backend/g" ./.helm/Chart.yaml
-  - sed -i -- "s/placeholder/transaction-backend/g" ./sub.sh
-  - bash sub.sh
-  - dapp --version
-  - dapp kube deploy
+    - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
+    - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
+    - sed -i -- "s/transaction-backend/transaction-backend/g" ./.helm/Chart.yaml
+    - sed -i -- "s/placeholder/transaction-backend/g" ./sub.sh
+    - bash sub.sh
+    - dapp --version
+    - dapp kube deploy
       --name transaction-backend
       --namespace developers
       --set "global.env=stage"
@@ -42,62 +61,33 @@ Deploy to dev:
   tags:
     - deploy
   only:
-    - branches
-  except:
-    - master
+    variables:
+      - $IN_STAGE_TYPE == "deploy"
 
-test unit:
-  when: manual
-  stage: testing
-  tags: [deploy]
-  script:
-   - echo "test unit"
-   - echo $CI_JOB_STAGE
-   - docker build -f Dockerfile.test .
-  only:
-    - branches
-  except:
-    - master
-  
-test integration:
-  when: manual
-  stage: testing
-  tags: [deploy]
-  script:
-   - docker build -f Dockerfile.e2e .
-   - echo "test integration"
-  only:
-    - branches
-  except:
-    - master
-    
 Build to staging:
-  stage: build staging
-  when: manual
+  stage: stage_build
   script:
     - bash sub_stage.sh
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/staging/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/staging/g" ./.helm/templates/02-backend-ingress.yaml
-    - sed -i "s/.devpayever.com/.payever.org/g" ./.helm/templates/02-backend-ingress.yaml
     - dapp dimg build --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}
     - dapp dimg push --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}  registry.devpayever.com --registry-username payever --registry-password vMnPdItXkV9T
   tags:
     - staging
   only:
-    - branches
-  except:
     - master
-  
+
 Deploy to staging:
-  stage: deploy staging
-  when: manual
+  stage: stage_deploy
   script:
-  - dapp --version
-  - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
-  - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
-  - dapp kube deploy
+    - dapp --version
+    - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
+    - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
+    - sed -i "s/developers/staging/g" ./.helm/templates/01-backend.yaml
+    - sed -i "s/developers/staging/g" ./.helm/templates/02-backend-ingress.yaml
+    - dapp kube deploy
       --name transaction-backend
       --namespace staging
       --set "global.env=stage"
@@ -107,12 +97,11 @@ Deploy to staging:
   tags:
     - staging
   only:
-    - branches
-  except:
     - master
-    
-Build to prod:  
-  stage: manual build production
+
+
+Build to prod:
+  stage: prod_build
   when: manual
   script:
     - bash sub_prod.sh
@@ -127,35 +116,26 @@ Build to prod:
   tags:
     - prod
   only:
-    - master
+    - production
 
-.staging-deploy: &staging-deploy
-  tags: [prod]
-  only:
-    - master
-  stage: manual product deploy
+deploy to prod:
+  stage: prod_deploy
   when: manual
   script:
-  - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
-  - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
-  - sed -i "s/developers/production/g" ./.helm/templates/01-backend.yaml
-  - sed -i "s/developers/production/g" ./.helm/templates/02-backend-ingress.yaml
-  - sed -i "s/.devpayever.com/.payever.org/g" ./.helm/templates/02-backend-ingress.yaml
-  - sed -i "s/custom-tls-cert-com/custom-tls-cert-org/g" ./.helm/templates/02-backend-ingress.yaml
-  - dapp --version
-  - dapp kube deploy
+    - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
+    - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
+    - sed -i "s/developers/production/g" ./.helm/templates/01-backend.yaml
+    - sed -i "s/developers/production/g" ./.helm/templates/02-backend-ingress.yaml
+    - sed -i "s/.devpayever.com/.payever.org/g" ./.helm/templates/02-backend-ingress.yaml
+    - sed -i "s/custom-tls-cert-com/custom-tls-cert-org/g" ./.helm/templates/02-backend-ingress.yaml
+    - dapp --version
+    - dapp kube deploy
       --namespace production
       --set "global.env=stage"
       --set "global.git_rev=${CI_BUILD_REF:-$CI_COMMIT_SHA}"
       --set global.ciProjectName=$CI_PROJECT_NAME
       registry.devpayever.com
-deploy to prod:
-  <<: *staging-deploy
-
-post build test:
-  when: manual
-  stage: post build test
   tags:
-    - deploy
-  script:
-   - docker rmi $(docker images -q)
+    - prod
+  only:
+    - production

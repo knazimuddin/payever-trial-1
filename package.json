@@ -1,0 +1,51 @@
+{
+  "scripts": {
+    "start": "NODE_ENV=production ts-node src/main.ts",
+    "start:dev": "nodemon",
+    "start:migration:dev": "nodemon --watch src --exec 'ts-node src/migration-main.ts'",
+    "test": "jest --config=jest.json",
+    "test:watch": "jest --watch --config=jest.json",
+    "test:coverage": "jest --config=jest.json --coverage --coverageDirectory=coverage",
+    "e2e": "jest --config=e2e/jest-e2e.json --forceExit",
+    "e2e:watch": "jest --watch --config=e2e/jest-e2e.json",
+    "pre-commit": "npm run tslint:fix && npm run test && npm run e2e",
+    "tslint": "tslint --project tsconfig.json",
+    "tslint:fix": "tslint --project tsconfig.json --fix"
+  },
+  "dependencies": {
+    "@nestjs/common": "^5.2.0",
+    "@nestjs/core": "^5.2.0",
+    "@nestjs/microservices": "^5.3.8",
+    "@nestjs/mongoose": "^5.2.0",
+    "@nestjs/swagger": "^2.2.0",
+    "@nestjs/testing": "^5.2.0",
+    "@nestjs/typeorm": "^5.2.0",
+    "@nestjs/websockets": "^5.2.0",
+    "@pe/nest-kit": "1.0.0-NEST-1.49",
+    "@types/mongoose": "^5.2.3",
+    "@types/uuid": "^3.4.3",
+    "class-transformer": "^0.1.7",
+    "class-validator": "^0.8.1",
+    "cors": "^2.8.4",
+    "lodash": "^4.17.10",
+    "lodash-es": "^4.17.10",
+    "mongoose": "^5.2.6",
+    "mysql": "^2.16.0",
+    "nodemon": "^1.18.3",
+    "reflect-metadata": "^0.1.12",
+    "rxjs": "^6.2.2",
+    "typeorm": "^0.2.7",
+    "typescript": "^2.8.0",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^20.0.8",
+    "@types/node": "^7.0.41",
+    "jest": "^20.0.4",
+    "supertest": "^3.0.0",
+    "ts-jest": "^20.0.14",
+    "ts-loader": "^4.4.2",
+    "ts-node": "^6.0.0",
+    "tslint": "^5.9.1"
+  }
+}

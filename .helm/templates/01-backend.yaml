@@ -16,7 +16,7 @@ spec:
       - name: regsecret
       containers:
       - command: [ '/usr/local/bin/npm', 'run', 'start' ]
-        image: {{ tuple "transaction-backend" . |  include "dimg" }}
+        image: {{ tuple "transactions-backend" . |  include "dimg" }}
         imagePullPolicy: Always
         name: {{ .Chart.Name }}-backend
         ports:
