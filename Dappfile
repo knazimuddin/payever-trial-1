@@ -15,5 +15,5 @@ dimg 'transactions-backend' do
 
   docker.workdir '/payever'
   docker.cmd '/usr/local/bin/npm run start'
-  docker.expose 3000
+  docker.expose "3000"
 end
