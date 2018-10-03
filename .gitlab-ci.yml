@@ -85,6 +85,7 @@ Deploy to staging:
     - dapp --version
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
+    - sed -i -- "s/transaction-backend/transaction-backend-staging/g" ./.helm/Chart.yaml
     - sed -i "s/developers/staging/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/staging/g" ./.helm/templates/02-backend-ingress.yaml
     - dapp kube deploy
