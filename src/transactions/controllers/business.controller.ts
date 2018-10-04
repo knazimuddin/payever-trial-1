@@ -11,17 +11,19 @@ import {
   Post,
   UseGuards,
   Query,
+  InternalServerErrorException,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { ApiUseTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { snakeCase } from 'lodash';
-import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, tap, timeout, catchError, take } from 'rxjs/operators';
 
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
-import { MessageFactory, MessageBusService } from '@pe/nest-kit/modules/message';
+import { MessageBusService } from '@pe/nest-kit/modules/message';
+import { ActionPayloadDto } from '../dto';
 
-import { TransactionsService } from '../services';
+import { TransactionsService, MicroRoutingService, MessagingService } from '../services';
 import { environment } from '../../environments';
 
 @Controller('business/:businessUuid')
@@ -33,12 +35,15 @@ export class BusinessController {
 
   rabbitClient: ClientProxy;
 
-  private messageFactory: MessageFactory = new MessageFactory();
   private messageBusService: MessageBusService = new MessageBusService({
     rsa: environment.rsa,
   });
 
-  constructor(private readonly transactionsService: TransactionsService) {
+  constructor(
+    private readonly transactionsService: TransactionsService,
+    // private readonly microRoutingService: MicroRoutingService,
+    private readonly messagingService: MessagingService,
+  ) {
     this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
   }
 
@@ -68,15 +73,6 @@ export class BusinessController {
         value: businessUuid,
       };
 
-      // console.log('input filters', filters);
-
-
-      // const filtersWithBusiness = {
-        // ...filters
-        // business_uuid: businessUuid,
-      // };
-
-      console.log();
       const sort = {};
       sort[snakeCase(orderBy)] = direction.toLowerCase();
 
@@ -111,31 +107,53 @@ export class BusinessController {
   ): Promise<any> {
     return new Promise(async(resolve, reject) => {
       try {
+        console.log('findOne');
         const transaction = await this.transactionsService.findOne(uuid);
 
-        resolve(transaction);
-
-        /*
-        this.fixDates(transaction);
-
-        const actionsPayload = {
+        console.log('create payload');
+        const payload = {
           action: 'action.list',
-          data: {
-            payment: transaction,
-            business: {
-              id: 1 // dummy id
-            },
-          },
+          data: this.createPayloadData(transaction),
         };
 
-        this.rabbitClient.send(
-          { event: 'rpc_payment_santander_de' }, // hardcoded!
-          this.messageFactory.createMessage('payment_option.santander_installment.action', actionsPayload),
+        console.log('create micro msg');
+        const message = this.messageBusService.createPaymentMicroMessage(transaction.type, 'action', payload, !environment.production);
+
+        console.log('rabbit send');
+
+        // let response: string;
+
+        // setTimeout(() => {
+          // if (!response) reject('RPC Timeout');
+        // }, 10000);
+
+        // response = await this.rabbitClient.send(
+          // // { channel: this.microRoutingService.getChannelByPaymentType(transaction.type) },
+          // { channel: this.messageBusService.getChannelByPaymentType(transaction.type, !environment.production) },
+          // message,
+        // ).toPromise();
+
+        console.log('got response');
+        // const unwrappedMessage = this.messageBusService.unwrapRpcMessage(response);
+
+        // const actions = Object.keys(unwrappedMessage).map((key) => ({
+          // action: key,
+          // enabled: actions[key],
+        // }));
+
+        // resolve({ ...transaction, actions });
+
+        await this.rabbitClient.send(
+          // { channel: this.microRoutingService.getChannelByPaymentType(transaction.type) },
+          { channel: this.messageBusService.getChannelByPaymentType(transaction.type, !environment.production) },
+          message,
         ).pipe(
-          map((m) => this.messageBusService.unwrapMessage(m)),
-          map((actionsResponse) => {
-            console.log(actionsResponse);
-            const actions = JSON.parse(actionsResponse.payload).result; // move json parse into transport layer
+          take(1),
+          // timeout(20000),
+          // catchError(error => of(`Request timed out after 20000`)),
+          map((m) => this.messageBusService.unwrapRpcMessage(m)),
+          tap((m) => console.log('unwrapped message', m)),
+          map((actions) => {
             return Object.keys(actions).map((key) => ({
               action: key,
               enabled: actions[key],
@@ -145,7 +163,80 @@ export class BusinessController {
         ).subscribe((actions) => {
           resolve({ ...transaction, actions });
         });
-        */
+
+      } catch (error) {
+        reject(new InternalServerErrorException(error));
+      }
+    });
+  }
+
+  @Post(':uuid/action/:action')
+  @HttpCode(HttpStatus.OK)
+  // @ApiResponse({status: HttpStatus.OK, description: 'The records have been successfully fetched.', type: GetTodoDto})
+  async runAction(
+    @Param('uuid') uuid: string,
+    @Param('action') action: string,
+    @Body() actionPayload: ActionPayloadDto,
+  ): Promise<any> {
+    return new Promise(async(resolve, reject) => {
+      let transaction: any;
+      let credentials: any;
+
+      try {
+        transaction = await this.transactionsService.findOne(uuid);
+      } catch(e) {
+        throw new InternalServerErrorException(`could not retrieve transaction: ${e}`);
+      }
+
+      try {
+        credentials = await this.messagingService.getCredentials(transaction);
+      } catch(e) {
+        throw new InternalServerErrorException(`could not retrieve credentials: ${e}`);
+      }
+
+      try {
+        console.log('action fields', actionPayload);
+
+        const dto = this.createPayloadData(transaction);
+        dto.action = 'cancel';
+
+        if (actionPayload.fields) {
+          dto.fields = actionPayload.fields;
+        }
+
+        if (actionPayload.files) {
+          dto.files = actionPayload.files;
+        }
+
+        dto.credentials = credentials;
+
+        const payload = {
+          action: 'action.do',
+          data: dto,
+        };
+
+        this.rabbitClient.send(
+          { channel: this.messageBusService.getChannelByPaymentType(transaction.type, !environment.production) },
+          this.messageBusService.createPaymentMicroMessage(transaction.type, 'action', payload, !environment.production),
+        ).pipe(
+          map((m) => this.messageBusService.unwrapRpcMessage(m)),
+          // tap((m) => console.log('unwrapped message', m)),
+          map((actions) => {
+            return Object.keys(actions).map((key) => ({
+              action: key,
+              enabled: actions[key],
+            }));
+          }),
+          // tap((reply) => console.log('tap', reply)),
+          tap((reply) => {
+            // @TODO save results???
+            // this.transactionsService.update({...transaction,
+              // status: '???'
+            // });
+          }),
+        ).subscribe((reply) => {
+          resolve({ ...transaction, reply });
+        });
 
       } catch (error) {
         throw error;
@@ -177,13 +268,38 @@ export class BusinessController {
     };
   }
 
+  private createPayloadData(transaction: any): any {
+    this.fixDates(transaction);
+    this.fixId(transaction);
+    transaction.address = transaction.billing_address;
+    // @TODO this should be done on BE side
+    transaction.reference = transaction.uuid;
+
+    try {
+      transaction.payment_details = JSON.parse(transaction.payment_details);
+    } catch(e) {
+    }
+
+    return {
+      payment: transaction,
+      payment_details: transaction.payment_details,
+      business: {
+        id: 1 // dummy id - php guys say it doesnot affect anything... but can we trust it?)
+      },
+    };
+  }
+
   private fixDates(transaction) {
     Object.keys(transaction).forEach((key) => {
       if (transaction[key] instanceof Date) {
-        console.log('fixing date:', key);
+        // @TODO fix time shift issues
         transaction[key] = transaction[key].toISOString().split('.')[0] + "+00:00";
       }
     });
+  }
+
+  private fixId(transaction) {
+    transaction.id = transaction.original_id;
   }
 
 }

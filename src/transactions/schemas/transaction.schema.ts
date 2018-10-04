@@ -70,11 +70,13 @@ export const TransactionsSchema = new Schema({
   // }],
   billing_address: AddressSchema,
   // business_address - will be resolved on FE via business_uuid
+  business_option_id: Number,
   business_uuid: {type: String, required: true},
   channel: String, // 'store', ...
+  channel_set_id: Number,
   created_at: {type: Date, required: true},
   currency: {type: String, required: true},
-  customer_email: {type: String, required: true},
+  customer_email: {type: String},
   customer_name: {type: String, required: true},
   delivery_fee: Number,
   down_payment: Number,
@@ -83,6 +85,7 @@ export const TransactionsSchema = new Schema({
   items: [TransactionItemSchema],
   merchant_email: String,
   merchant_name: String,
+  original_id: String, // id from mysql db
   payment_details: String, // Serialized big object
   payment_fee: Number,
   reference: String,
@@ -92,7 +95,7 @@ export const TransactionsSchema = new Schema({
   shipping_option_name: String,
   specific_status: String,
   status: {type: String, required: true},
-  status_color: {type: String, required: true},
+  status_color: {type: String},
   store_id: String,
   store_name: String,
   total: {type: Number, required: true},

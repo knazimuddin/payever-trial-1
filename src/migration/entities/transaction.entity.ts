@@ -11,6 +11,9 @@ export class Transaction {
   @PrimaryGeneratedColumn()
   id: string;
 
+  @Column({name: 'id'})
+  original_id: string;
+
   /*** Relations ***/
 
   @OneToMany(type => TransactionHistoryEntry, history => history.transaction)
@@ -106,8 +109,8 @@ export class Transaction {
   @Column()
   business_shipping_option_id: number;
 
-  @Column()
-  details: string;
+  @Column({name: 'details'})
+  payment_details: string;
 
   @Column()
   details_array: string;
