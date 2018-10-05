@@ -59,6 +59,10 @@ export class TransactionsService {
       transaction.merchant_email = transaction.business.company_email;
     }
 
+    if (transaction.payment_flow) {
+      transaction.payment_flow_id = transaction.payment_flow.id;
+    }
+
     if (transaction.history && transaction.history.length) {
       const updatedHistory = transaction.history.map((historyItem) => {
         return this.prepareTransactionHistoryItemForInsert(historyItem.action, historyItem.created_at, historyItem);

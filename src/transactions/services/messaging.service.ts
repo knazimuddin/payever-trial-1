@@ -42,14 +42,42 @@ export class MessagingService {
     }
   }
 
-  async getActions(transaction) {
+  async getPaymentFlow(flowId: string) {
     return new Promise((resolve, reject) => {
       const payload = {
-        action: 'action.list',
-        data: this.createPayloadData(transaction),
+        'payment_flow_id': flowId,
       };
+      const message = this.messageBusService.createMessage('retrive_payment_flow', payload);
 
-      // return await this.runPaymentRpc(transaction, payload, 'action');
+      try {
+        this.rabbitClient.send(
+          { channel: 'rpc_checkout_micro' },
+          message,
+        ).pipe(
+          take(1),
+          map((msg) => this.messageBusService.unwrapRpcMessage(msg)),
+          map((response) => response.payment_flow_d_t_o),
+          tap((msg) => console.log('PAYMENT FLOW MSG', msg)),
+          catchError((e) => {
+            console.error(`Error while sending rpc call:`, e);
+            reject(e);
+            return of(null);
+          }),
+        ).subscribe((actions) => {
+          resolve(actions);
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  async getActions(transaction) {
+    return new Promise(async (resolve, reject) => {
+      const payload = {
+        action: 'action.list',
+        data: await this.createPayloadData(transaction),
+      };
 
       try {
         const message = this.messageBusService.createPaymentMicroMessage(transaction.type, 'action', payload, !environment.production);
@@ -82,17 +110,9 @@ export class MessagingService {
   }
 
   async runAction(transaction, action, actionPayload) {
-    let credentials;
-
     console.log('check transaction', transaction);
 
-    try {
-      credentials = await this.getCredentials(transaction);
-    } catch (e) {
-      throw new Error(`could not retrieve credentials: ${e}`);
-    }
-
-    const dto = this.createPayloadData(transaction);
+    const dto = await this.createPayloadData(transaction);
     dto.action = action;
 
     if (actionPayload.fields) {
@@ -102,8 +122,6 @@ export class MessagingService {
     if (actionPayload.files) {
       dto.files = actionPayload.files;
     }
-
-    dto.credentials = credentials;
 
     const payload = {
       action: 'action.do',
@@ -118,17 +136,7 @@ export class MessagingService {
   }
 
   async updateStatus(transaction) {
-    let credentials;
-
-    try {
-      credentials = await this.getCredentials(transaction);
-    } catch (e) {
-      throw new Error(`could not retrieve credentials: ${e}`);
-    }
-
-    const dto = this.createPayloadData(transaction);
-
-    dto.credentials = credentials;
+    const dto = await this.createPayloadData(transaction);
 
     const payload = {
       action: 'status',
@@ -149,7 +157,6 @@ export class MessagingService {
       update.specific_status = result.payment.specific_status;
     }
 
-    // const transactionUpdated = {...transaction, status: result.status, specific_status: result.specific_status };
     this.transactionsService.prepareTransactionForInsert(transaction);
     await this.transactionsService.updateByUuid(transaction.uuid, update);
     return transaction;
@@ -163,11 +170,6 @@ export class MessagingService {
       ).pipe(
         map((m) => this.messageBusService.unwrapRpcMessage(m)),
         tap((m) => console.log('UNWRAPPED RPC RESPONSE', m)),
-        // tap((reply) => {
-          // updating statuses
-          // this.transactionsService.prepareTransactionForInsert(transaction);
-          // this.transactionsService.update(transaction);
-        // }),
         catchError((e) => {
           reject(e);
           return of(null);
@@ -178,7 +180,9 @@ export class MessagingService {
     });
   }
 
-  private createPayloadData(transaction: any): any {
+  private async createPayloadData(transaction: any) {
+    let dto: any = {};
+
     this.fixDates(transaction);
     this.fixId(transaction);
     transaction.address = transaction.billing_address;
@@ -191,13 +195,21 @@ export class MessagingService {
       // just skipping payment_details
     }
 
-    return {
+    dto = {...dto,
       payment: transaction,
       payment_details: transaction.payment_details,
       business: {
         id: 1 // dummy id - php guys say it doesnot affect anything... but can we trust it?)
       },
     };
+
+    dto.credentials = await this.getCredentials(transaction);
+
+    if (transaction.payment_flow_id) {
+      dto.payment_flow = await this.getPaymentFlow(transaction.payment_flow_id);
+    }
+
+    return dto;
   }
 
   private fixDates(transaction) {

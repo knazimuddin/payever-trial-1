@@ -62,14 +62,7 @@ export const TransactionHistoryEntrySchema = new Schema({
 
 export const TransactionsSchema = new Schema({
   amount: Number,
-  // amount_refunded: Number,
-  // amount_rest: Number,
-  // available_refund_items: [{
-    // payment_item_id: String,
-    // count: 1,
-  // }],
   billing_address: AddressSchema,
-  // business_address - will be resolved on FE via business_uuid
   business_option_id: Number,
   business_uuid: {type: String},
   channel: String, // 'store', ...
@@ -88,6 +81,7 @@ export const TransactionsSchema = new Schema({
   original_id: String, // id from mysql db
   payment_details: String, // Serialized big object
   payment_fee: Number,
+  payment_flow_id: String,
   reference: String,
   shipping_address: {type: AddressSchema},
   shipping_category: String,
@@ -99,7 +93,6 @@ export const TransactionsSchema = new Schema({
   store_id: String,
   store_name: String,
   total: {type: Number, required: true},
-  // total_fee: {type: Number, required: true},
   type: {type: String, required: true},
   updated_at: Date,
   uuid: {type: String, required: true},

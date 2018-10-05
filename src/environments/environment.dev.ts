@@ -70,6 +70,11 @@ export const environment: any = {
         rpc: true,
       },
       {
+        name: 'rpc_checkout_micro',
+        options: { autoDelete: true, durable: false },
+        rpc: true,
+      },
+      {
         name: 'async_events_transactions_micro',
         options: {
           durable: true,
