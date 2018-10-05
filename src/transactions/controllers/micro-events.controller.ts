@@ -7,7 +7,7 @@ import { map, tap, timeout, catchError, take } from 'rxjs/operators';
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { ActionPayloadDto } from '../dto';
 
-import { TransactionsService, MicroRoutingService, MessagingService } from '../services';
+import { TransactionsService, MessagingService } from '../services';
 import { environment } from '../../environments';
 
 @Controller()
@@ -28,6 +28,13 @@ export class MicroEventsController {
   async onActionCompletedEvent(msg: any) {
     const data = this.messageBusService.unwrapMessage(msg.data);
     console.log('ACTION.COMPLETED', data);
+    const searchParams = data.payment.uuid ? {uuid: data.payment.uuid} : {original_id: data.payment.id};
+    const transaction = await this.transactionsService.findOneByParams(searchParams);
+    // TODO use message bus message created time
+    const historyItem = this.transactionsService.prepareTransactionHistoryItemForInsert(data.action, Date.now(), data);
+    transaction.history = transaction.history || [];
+    transaction.history.push(historyItem);
+    return await this.transactionsService.updateByUuid(transaction.uuid, transaction);
   }
 
   @MessagePattern({
@@ -38,13 +45,14 @@ export class MicroEventsController {
   async onHistoryAddEvent(msg: any) {
     const data = this.messageBusService.unwrapMessage(msg.data);
     console.log('HISTORY.ADD', data);
-
-    const transaction = await this.transactionsService.findOneByParams({ original_id: data.payment.id });
-
-    const historyItem = this.preparePhpTransactionHistoryItemForInsert(data);
+    // @TODO use only uuid later, no original_id
+    const searchParams = data.payment.uuid ? {uuid: data.payment.uuid} : {original_id: data.payment.id};
+    const transaction = await this.transactionsService.findOneByParams(searchParams);
+    // TODO use message bus message created time
+    const historyItem = this.transactionsService.prepareTransactionHistoryItemForInsert(data.history_type, Date.now(), data);
     transaction.history = transaction.history || [];
     transaction.history.push(historyItem);
-    return await this.transactionsService.update(transaction);
+    return await this.transactionsService.updateByUuid(transaction.uuid, transaction);
   }
 
   @MessagePattern({
@@ -55,10 +63,9 @@ export class MicroEventsController {
   async onTransactionCreateEvent(msg: any) {
     const data = this.messageBusService.unwrapMessage(msg.data);
     console.log('PAYMENT.CREATE', data);
-
     const transaction: any = data.payment;
-    this.preparePhpTransactionForInsert(transaction);
-    this.transactionsService.create(transaction);
+    this.transactionsService.prepareTransactionForInsert(transaction);
+    await this.transactionsService.create(transaction);
   }
 
   @MessagePattern({
@@ -69,7 +76,7 @@ export class MicroEventsController {
   async onTransactionRemoveEvent(msg: any) {
     const data = this.messageBusService.unwrapMessage(msg.data);
     console.log('PAYMENT.REMOVE', data);
-    this.transactionsService.removeByUuid(data.uuid);
+    return await this.transactionsService.removeByUuid(data.payment.uuid);
   }
 
   @MessagePattern({
@@ -82,24 +89,8 @@ export class MicroEventsController {
     console.log('PAYMENT.UPDATE', data);
 
     const transaction: any = data.payment;
-    this.preparePhpTransactionForInsert(transaction);
-    this.transactionsService.update(transaction);
-  }
-
-  private preparePhpTransactionForInsert(transaction) {
-    transaction.billing_address = transaction.address;
-    transaction.original_id = transaction.id;
-    transaction.business_uuid = transaction.business.uuid;
-    transaction.type = transaction.payment_type;
-    transaction.payment_details = JSON.stringify(transaction.payment_details);
-  }
-
-  private preparePhpTransactionHistoryItemForInsert(data) {
-    return {
-      ...data.data,
-      action: data.history_type,
-      created_at: Date.now(),
-    };
+    this.transactionsService.prepareTransactionForInsert(transaction);
+    return await this.transactionsService.updateByUuid(transaction.uuid, transaction);
   }
 
 }

@@ -71,7 +71,7 @@ export const TransactionsSchema = new Schema({
   billing_address: AddressSchema,
   // business_address - will be resolved on FE via business_uuid
   business_option_id: Number,
-  business_uuid: {type: String, required: true},
+  business_uuid: {type: String},
   channel: String, // 'store', ...
   channel_set_id: Number,
   created_at: {type: Date, required: true},

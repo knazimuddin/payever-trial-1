@@ -7,7 +7,7 @@ import { map, tap, timeout, catchError, take } from 'rxjs/operators';
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { ActionPayloadDto } from '../dto';
 
-import { TransactionsService, MicroRoutingService, MessagingService } from '../services';
+import { TransactionsService, MessagingService } from '../services';
 import { environment } from '../../environments';
 
 @Controller()
@@ -29,31 +29,36 @@ export class MigrateEventsController {
     const data = this.messageBusService.unwrapMessage(msg.data);
     console.log('ACTION.MIGRATE!');
     const transaction: any = data.payment;
-    this.preparePhpTransactionForInsert(transaction);
+    this.transactionsService.prepareTransactionForInsert(transaction);
     this.transactionsService.createOrUpdate(transaction);
   }
 
-  private preparePhpTransactionForInsert(transaction) {
-    transaction.billing_address = transaction.address;
-    transaction.original_id = transaction.id;
-    transaction.business_uuid = transaction.business.uuid;
-    transaction.type = transaction.payment_type;
-    transaction.payment_details = JSON.stringify(transaction.payment_details);
+  // private prepareTransactionForInsert(transaction) {
+    // transaction.billing_address = transaction.address;
+    // transaction.original_id = transaction.id;
+    // transaction.type = transaction.payment_type;
+    // transaction.payment_details = JSON.stringify(transaction.payment_details);
 
-    if (transaction.history && transaction.history.length) {
-      const updatedHistory = transaction.history.map((historyItem) => {
-        return this.preparePhpTransactionHistoryItemForInsert(historyItem);
-      });
-    }
-  }
+    // if (transaction.business) {
+      // transaction.business_uuid = transaction.business.uuid;
+      // transaction.merchant_name = transaction.business.company_name;
+      // transaction.merchant_email = transaction.business.company_email;
+    // }
 
-  private preparePhpTransactionHistoryItemForInsert(data) {
-    return {
-      ...data.data,
-      action: data.history_type,
-      created_at: Date.now(),
-      is_restock_items: data.items_restocked,
-    };
-  }
+    // if (transaction.history && transaction.history.length) {
+      // const updatedHistory = transaction.history.map((historyItem) => {
+        // return this.prepareTransactionHistoryItemForInsert(historyItem);
+      // });
+    // }
+  // }
+
+  // private prepareTransactionHistoryItemForInsert(data) {
+    // return {
+      // ...data.data,
+      // action: data.history_type,
+      // created_at: Date.now(),
+      // is_restock_items: data.items_restocked,
+    // };
+  // }
 
 }

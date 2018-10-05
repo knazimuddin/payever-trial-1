@@ -9,64 +9,17 @@ export interface Filter {
 }
 
 @Injectable()
-export class TransactionsService {
+export class TransactionsGridService {
 
   constructor(@InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>) {
   }
 
-  async create(transaction: any) {
-    if (!transaction.uuid) {
-      transaction.uuid = uuid();
-    }
-    return await this.transactionsModel.create(transaction);
-  }
-
-  async update(transaction: any) {
-    return this.transactionsModel.findOneAndUpdate({uuid: transaction.uuid}, transaction);
-  }
-
-  async deleteAll() {
-    return await this.transactionsModel.collection.drop();
-  }
-
-  async createOrUpdate(transaction: any) {
-    if (transaction.uuid) {
-      const existing = await this.transactionsModel.findOne({uuid: transaction.uuid});
-      if (existing) {
-        return this.transactionsModel.findOneAndUpdate({uuid: transaction.uuid}, transaction);
-      }
-    }
-    return this.create(transaction);
-  }
-
-  async findOne(uuid: string) {
-    return this.findOneByParams({uuid});
-  }
-
-  async findOneByParams(params) {
-    const transaction = await this.transactionsModel.findOne(params);
-    return transaction ? transaction.toObject({virtuals: true}) : null;
-  }
-
-  async removeByUuid(uuid: string) {
-    return this.transactionsModel.findOneAndRemove({uuid});
-  }
-
-  async findMany(
-    filters = {},
-    sort = {},
-    search = null,
-    page: number = null,
-    limit = null,
-  ) {
-
+  async findMany(filters = {}, sort = {}, search = null, page: number = null, limit = null) {
     const mongoFilters = {};
 
     if (filters) {
       this.addFilters(mongoFilters, filters);
     }
-
-    console.log('filters processed', mongoFilters);
 
     if (search) {
       this.addSearchFilters(mongoFilters, search);
@@ -126,13 +79,12 @@ export class TransactionsService {
   }
 
   private addFilters(mongoFilters: any, inputFilters: {[key: string]: Filter}) {
-    console.log('adding filters...');
     Object.keys(inputFilters).forEach((key) => this.addFilter(mongoFilters, key, inputFilters[key]));
   }
 
-
-  // is|isNot|contains|doesNotContain|startsWith|endsWith|afterDate|beforeDate|isDate|isNotDate|betweenDates|greaterThan|lessThan|between|choice ",
-
+  /**
+   * is|isNot|contains|doesNotContain|startsWith|endsWith|afterDate|beforeDate|isDate|isNotDate|betweenDates|greaterThan|lessThan|between|choice ",
+   */
   private addFilter(mongoFilters, field: string, filter: Filter) {
     switch (filter.condition) {
       case 'is':
