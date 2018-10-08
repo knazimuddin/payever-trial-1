@@ -26,7 +26,7 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   async onActionCompletedEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
+    const data: any = this.messageBusService.unwrapMessage(msg.data);
     console.log('ACTION.COMPLETED', data);
     const searchParams = data.payment.uuid ? {uuid: data.payment.uuid} : {original_id: data.payment.id};
     const transaction = await this.transactionsService.findOneByParams(searchParams);
@@ -34,7 +34,7 @@ export class MicroEventsController {
     const historyItem = this.transactionsService.prepareTransactionHistoryItemForInsert(data.action, Date.now(), data);
     transaction.history = transaction.history || [];
     transaction.history.push(historyItem);
-    return await this.transactionsService.updateByUuid(transaction.uuid, transaction);
+    return await this.transactionsService.updateByUuid(transaction.uuid, Object.assign({}, transaction, data.payment));
   }
 
   @MessagePattern({

@@ -11,12 +11,9 @@ export const environment: any = {
     database: 'payever_dev',
   },
   mongodb: 'mongodb://localhost:27017/transactions',
-  // mongodb: 'mongodb://stage-mongo:ANUza5qvv0PyVEguriBWKtNmTVOsSWn8Cm8HhHlhir0CmRvJIJ1NsFomoBUWZVmqQgkwA4UEeUBEmuz7uQvIlw%3D%3D@stage-mongo.documents.azure.com:10255/transactions?ssl=true&replicaSet=globaldb',
   checkoutMicroUrlBase: 'https://showroom63.payever.de/',
 
   rabbitmq: {
-    // urls: ['amqp://guest:guest@localhost'],
-    // queue: 'rpc_queue',
     urls: ['amqp://payever:Iengeaboo2TuKeiz0gie@showroom63.payever.de/paf'],
     queues: [
       {

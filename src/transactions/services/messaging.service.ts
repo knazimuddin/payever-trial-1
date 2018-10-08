@@ -226,10 +226,14 @@ export class MessagingService {
   }
 
   private prepareActionFields(transaction, action: string, fields: any) {
+    // @TODO should I copy all fields to the root of 'fields' by default?
     if (action === 'refund' && fields.payment_return) {
-      fields.amount = fields.payment_return.amount || fields['amount'] || 0;
-      fields.reason = fields.payment_return.reason || fields['reason'] || null;
+      fields.amount = fields.payment_return.amount || fields.amount || 0;
+      fields.reason = fields.payment_return.reason || fields.reason || null;
       fields.refunded_amount = transaction.amount_refunded;
+    }
+    if (action === 'change_amount' && fields.payment_change_amount) {
+      fields.amount = fields.payment_change_amount.amount || fields.amount || 0;
     }
     return fields;
   }
