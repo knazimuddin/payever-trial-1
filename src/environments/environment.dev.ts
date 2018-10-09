@@ -11,10 +11,10 @@ export const environment: any = {
     database: 'payever_dev',
   },
   mongodb: 'mongodb://localhost:27017/transactions',
-  checkoutMicroUrlBase: 'https://showroom63.payever.de/',
+  checkoutMicroUrlBase: 'https://showroom100.payever.de/',
 
   rabbitmq: {
-    urls: ['amqp://payever:Iengeaboo2TuKeiz0gie@showroom63.payever.de/paf'],
+    urls: ['amqp://payever:Iengeaboo2TuKeiz0gie@showroom100.payever.de/paf'],
     queues: [
       {
         name: 'rpc_payment_santander_de',

@@ -7,7 +7,7 @@ export const environment: any = {
   checkoutMicroUrlBase: 'https://showroom100.payever.de/',
 
   rabbitmq: {
-    urls: ['amqp://payever:Iengeaboo2TuKeiz0gie@showroom100.payever.de/paf'],
+    urls: ['amqp://payever:Iengeaboo2TuKeiz0gie@127.0.0.1:5672/paf'],
     queues: [
       {
         name: 'rpc_payment_santander_de',

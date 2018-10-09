@@ -226,7 +226,7 @@ export class MessagingService {
   }
 
   private prepareActionFields(transaction, action: string, fields: any) {
-    // @TODO should I copy all fields to the root of 'fields' by default?
+    // @TODO ask FE to remove wrapper object
     if (action === 'refund' && fields.payment_return) {
       fields.amount = fields.payment_return.amount || fields.amount || 0;
       fields.reason = fields.payment_return.reason || fields.reason || null;
