@@ -6,6 +6,8 @@ export const environment: any = {
   mongodb: 'mongodb://stage-mongo:ANUza5qvv0PyVEguriBWKtNmTVOsSWn8Cm8HhHlhir0CmRvJIJ1NsFomoBUWZVmqQgkwA4UEeUBEmuz7uQvIlw%3D%3D@stage-mongo.documents.azure.com:10255/transactions?ssl=true&replicaSet=globaldb',
   checkoutMicroUrlBase: 'https://showroom100.payever.de/',
 
+  stub: true,
+
   rabbitmq: {
     urls: ['amqp://payever:Iengeaboo2TuKeiz0gie@127.0.0.1:5672/paf'],
     queues: [

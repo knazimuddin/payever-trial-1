@@ -80,9 +80,9 @@ export class MessagingService {
       };
 
       try {
-        const message = this.messageBusService.createPaymentMicroMessage(transaction.type, 'action', payload, !environment.production);
+        const message = this.messageBusService.createPaymentMicroMessage(transaction.type, 'action', payload, environment.stub);
         this.rabbitClient.send(
-          { channel: this.messageBusService.getChannelByPaymentType(transaction.type, !environment.production) },
+          { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
           message,
         ).pipe(
           take(1),
@@ -165,8 +165,8 @@ export class MessagingService {
   private async runPaymentRpc(transaction, payload, messageIdentifier) {
     return new Promise((resolve, reject) => {
       this.rabbitClient.send(
-        { channel: this.messageBusService.getChannelByPaymentType(transaction.type, !environment.production) },
-        this.messageBusService.createPaymentMicroMessage(transaction.type, messageIdentifier, payload, !environment.production),
+        { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
+        this.messageBusService.createPaymentMicroMessage(transaction.type, messageIdentifier, payload, environment.stub),
       ).pipe(
         map((m) => this.messageBusService.unwrapRpcMessage(m)),
         tap((m) => console.log('UNWRAPPED RPC RESPONSE', m)),
