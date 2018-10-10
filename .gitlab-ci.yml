@@ -75,7 +75,7 @@ Build to staging:
     - dapp dimg build --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}
     - dapp dimg push --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}  registry.devpayever.com --registry-username payever --registry-password vMnPdItXkV9T
   tags:
-    - deploy
+    - staging
   only:
     - master
 
@@ -86,6 +86,7 @@ Deploy to staging:
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/staging/g" ./.helm/templates/01-backend.yaml
+    - sed -i -- "s/transaction-backend/transaction-backend-staging/g" ./.helm/Chart.yaml
     - sed -i "s/developers/staging/g" ./.helm/templates/02-backend-ingress.yaml
     - dapp kube deploy
       --name transaction-backend
@@ -95,7 +96,7 @@ Deploy to staging:
       --set global.ciProjectName=$CI_PROJECT_NAME
       registry.devpayever.com
   tags:
-    - deploy
+    - staging
   only:
     - master
 
