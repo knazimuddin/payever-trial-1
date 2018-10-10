@@ -37,10 +37,6 @@ export class BusinessController {
 
   rabbitClient: ClientProxy;
 
-  private messageBusService: MessageBusService = new MessageBusService({
-    rsa: environment.rsa,
-  });
-
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly transactionsGridService: TransactionsGridService,
