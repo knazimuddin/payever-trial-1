@@ -82,6 +82,7 @@ export const TransactionsSchema = new Schema({
   payment_details: String, // Serialized big object
   payment_fee: Number,
   payment_flow_id: String,
+  place: String,
   reference: String,
   shipping_address: {type: AddressSchema},
   shipping_category: String,

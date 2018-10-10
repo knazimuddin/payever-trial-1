@@ -104,14 +104,17 @@ export class BusinessController {
       throw new NotFoundException();
     }
 
+    if (!transaction) {
+      throw new NotFoundException();
+    }
+
     try {
       actions = await this.messagingService.getActions(transaction);
     } catch (e) {
-      // console.log('e', e);
       throw new BadRequestException(`Error occured while getting transaction actions: ${e}`);
     }
 
-    return {...transaction, actions, _test: 42};
+    return {...transaction, actions};
   }
 
   @Post(':uuid/action/:action')
@@ -123,7 +126,8 @@ export class BusinessController {
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<any> {
     let transaction: any;
-    let actionResult: any;
+    let updatedTransaction: any;
+    let actions: any;
 
     console.log('payload', actionPayload);
 
@@ -134,13 +138,26 @@ export class BusinessController {
     }
 
     try {
-      actionResult = await this.messagingService.runAction(transaction, action, actionPayload);
+      updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
     } catch (e) {
       console.log('Error occured during running action', e);
       throw new BadRequestException(`Error occured during running action: ${e}`);
     }
 
-    return {...transaction, actionResult};
+    // Send update to php
+    try {
+      await this.messagingService.sendTransactionUpdate(updatedTransaction);
+    } catch (e) {
+      throw new BadRequestException(`Error occured while sending transaction update: ${e}`);
+    }
+
+    try {
+      actions = await this.messagingService.getActions(updatedTransaction);
+    } catch (e) {
+      throw new BadRequestException(`Error occured while getting transaction actions: ${e}`);
+    }
+
+    return updatedTransaction;
   }
 
   @Get(':uuid/update-status')
@@ -162,6 +179,13 @@ export class BusinessController {
       updatedTransaction = await this.messagingService.updateStatus(transaction);
     } catch (e) {
       throw new BadRequestException(`Error occured during status update: ${e}`);
+    }
+
+    // Send update to php
+    try {
+      await this.messagingService.sendTransactionUpdate(updatedTransaction);
+    } catch (e) {
+      throw new BadRequestException(`Error occured while sending transaction update: ${e}`);
     }
 
     return updatedTransaction;

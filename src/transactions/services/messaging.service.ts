@@ -29,10 +29,14 @@ export class MessagingService {
     if (transaction.channel_set_id) {
       // remove this branch when all transaction.business_option_id will be synced with new DB
       const paymentOptionsList = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/payment-options`).toPromise()).data as any[];
+      console.log('paymentOptionsList', paymentOptionsList);
       const paymentOption = paymentOptionsList.find((po) => po.payment_method === transaction.type);
+      console.log('paymentOption', paymentOption);
       const businessPaymentOptions = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/channel-set/${transaction.channel_set_id}`).toPromise()).data as any[];
       const businessPaymentOption = businessPaymentOptions.find((bpo) => bpo.payment_option_id === paymentOption.id);
+      console.log('businessPaymentOption', businessPaymentOption);
       const paymentMethodData = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${businessPaymentOption.id}`).toPromise()).data;
+      console.log('paymentMethodData', paymentMethodData);
       return paymentMethodData.credentials;
     } else {
       console.log('check business payment option id', transaction.business_option_id);
@@ -74,13 +78,16 @@ export class MessagingService {
 
   async getActions(transaction) {
     return new Promise(async (resolve, reject) => {
-      const payload = {
-        action: 'action.list',
-        data: await this.createPayloadData(transaction),
-      };
-
       try {
+        const payload = {
+          action: 'action.list',
+          data: await this.createPayloadData(transaction),
+        };
+
         const message = this.messageBusService.createPaymentMicroMessage(transaction.type, 'action', payload, environment.stub);
+
+        console.log('CHECK MESSAGE BEFORE SEND', message);
+
         this.rabbitClient.send(
           { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
           message,
@@ -110,8 +117,6 @@ export class MessagingService {
   }
 
   async runAction(transaction, action, actionPayload) {
-    console.log('check transaction', transaction);
-
     const dto = await this.createPayloadData(transaction);
     dto.action = action;
 
@@ -130,9 +135,19 @@ export class MessagingService {
 
     console.log('RUN ACTION PAYLOAD:', payload.data);
 
-    const updatedTransaction: any = await this.runPaymentRpc(transaction, payload, 'action');
+    const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
+
+    console.log('RPC ACTION RESULT:', rpcResult);
+
+    const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
+    console.log('updatedTransaction', updatedTransaction);
+    updatedTransaction.payment_details = rpcResult.payment_details;
+    updatedTransaction.items = rpcResult.payment_items;
+    updatedTransaction.place = rpcResult.workflow_state;
     this.transactionsService.prepareTransactionForInsert(updatedTransaction);
     await this.transactionsService.updateByUuid(updatedTransaction.uuid, updatedTransaction);
+
+    return updatedTransaction;
   }
 
   async updateStatus(transaction) {
@@ -160,6 +175,18 @@ export class MessagingService {
     this.transactionsService.prepareTransactionForInsert(transaction);
     await this.transactionsService.updateByUuid(transaction.uuid, update);
     return transaction;
+  }
+
+  async sendTransactionUpdate(transaction) {
+    this.transformTransactionForPhp(transaction);
+
+    const message = this.messageBusService.createMessage('transactions_app.payment.updated', {
+      payment: transaction,
+    });
+
+    console.log('message to php', message);
+
+    this.rabbitClient.send({ channel: 'async_events' }, message).subscribe();
   }
 
   private async runPaymentRpc(transaction, payload, messageIdentifier) {
@@ -190,7 +217,7 @@ export class MessagingService {
     transaction.reference = transaction.uuid;
 
     try {
-      transaction.payment_details = JSON.parse(transaction.payment_details);
+      transaction.payment_details = transaction.payment_details ? JSON.parse(transaction.payment_details) : {};
     } catch(e) {
       // just skipping payment_details
     }
@@ -236,6 +263,10 @@ export class MessagingService {
       fields.amount = fields.payment_change_amount.amount || fields.amount || 0;
     }
     return fields;
+  }
+
+  private transformTransactionForPhp(transaction) {
+    transaction.id = transaction.original_id;
   }
 
 }
