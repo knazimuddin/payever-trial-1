@@ -50,7 +50,7 @@ export class TransactionsService {
   prepareTransactionForInsert(transaction) {
     transaction.billing_address = transaction.address;
     transaction.original_id = transaction.id;
-    transaction.type = transaction.payment_type;
+    transaction.type = transaction.type || transaction.payment_type;
     transaction.payment_details = JSON.stringify(transaction.payment_details);
 
     if (transaction.business) {

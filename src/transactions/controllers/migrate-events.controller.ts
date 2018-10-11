@@ -27,7 +27,7 @@ export class MigrateEventsController {
   })
   async onActionMigrateEvent(msg: any) {
     const data = this.messageBusService.unwrapMessage(msg.data);
-    console.log('ACTION.MIGRATE!');
+    console.log('ACTION.MIGRATE!', data.payment);
     const transaction: any = data.payment;
     this.transactionsService.prepareTransactionForInsert(transaction);
     this.transactionsService.createOrUpdate(transaction);

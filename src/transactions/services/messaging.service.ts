@@ -133,20 +133,19 @@ export class MessagingService {
       data: dto,
     };
 
+    console.log('RUN ACTION for TRANSACTION', transaction);
+
     console.log('RUN ACTION PAYLOAD:', payload.data);
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
 
     console.log('RPC ACTION RESULT:', rpcResult);
-
     const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
-    console.log('updatedTransaction', updatedTransaction);
     updatedTransaction.payment_details = rpcResult.payment_details;
     updatedTransaction.items = rpcResult.payment_items;
     updatedTransaction.place = rpcResult.workflow_state;
     this.transactionsService.prepareTransactionForInsert(updatedTransaction);
     await this.transactionsService.updateByUuid(updatedTransaction.uuid, updatedTransaction);
-
     return updatedTransaction;
   }
 
@@ -157,6 +156,8 @@ export class MessagingService {
       action: 'status',
       data: dto,
     };
+
+    console.log('UPDATE STATUS for TRANSACTION:', transaction);
 
     const result: any = await this.runPaymentRpc(transaction, payload, 'payment');
 
