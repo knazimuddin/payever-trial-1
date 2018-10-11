@@ -186,7 +186,7 @@ export class MessagingService {
 
     console.log('message to php', message);
 
-    this.rabbitClient.send({ channel: 'async_events' }, message).subscribe();
+    this.rabbitClient.send({ channel: 'transactions_app.payment.updated', exchange: 'async_events' }, message).subscribe();
   }
 
   private async runPaymentRpc(transaction, payload, messageIdentifier) {
