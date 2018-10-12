@@ -57,7 +57,6 @@ export const TransactionHistoryEntrySchema = new Schema({
   payment_status: String,
   reason: String,
   refund_items: [TransactionRefundItemSchema],
-  // uuid: String,
 });
 
 export const TransactionsSchema = new Schema({
@@ -104,7 +103,7 @@ TransactionsSchema.virtual('amount_refunded').get(function() {
 
   if (this.history) {
     this.history
-      .filter((entry) => entry.action === 'refund')
+      .filter((entry) => entry.action === 'refund' || entry.action === 'return')
       .forEach((entry) => totalRefunded += (entry.amount || 0))
     ;
   }
