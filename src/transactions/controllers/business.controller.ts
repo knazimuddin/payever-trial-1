@@ -137,12 +137,21 @@ export class BusinessController {
       throw new NotFoundException();
     }
 
+    this.transactionsService.updateByUuid(transaction.uuid, {action_running: true});
+
+    if (transaction.action_running) {
+      throw new BadRequestException(`Cannot run action now, another action is already in process.`);
+    }
+
     try {
       updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
     } catch (e) {
       console.log('Error occured during running action', e);
       throw new BadRequestException(`Error occured during running action: ${e}`);
+    } finally {
+      this.transactionsService.updateByUuid(transaction.uuid, {action_running: false});
     }
+
 
     // Send update to php
     try {

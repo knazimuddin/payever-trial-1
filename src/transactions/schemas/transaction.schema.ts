@@ -60,6 +60,7 @@ export const TransactionHistoryEntrySchema = new Schema({
 });
 
 export const TransactionsSchema = new Schema({
+  action_running: { type: Boolean, required: false, default: false },
   amount: Number,
   billing_address: AddressSchema,
   business_option_id: Number,
