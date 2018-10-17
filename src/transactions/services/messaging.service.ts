@@ -213,6 +213,12 @@ export class MessagingService {
   private async createPayloadData(transaction: any) {
     transaction = Object.assign({}, transaction); // making clone before manipulations
 
+    try {
+      transaction.payment_details = transaction.payment_details ? JSON.parse(transaction.payment_details) : {};
+    } catch(e) {
+      // just skipping payment_details
+    }
+
     let dto: any = {};
     let businessPaymentOption;
 
