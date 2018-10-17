@@ -140,13 +140,13 @@ export class BusinessController {
     }
 
     try {
-      this.transactionsService.updateByUuid(transaction.uuid, {action_running: true});
+      await this.transactionsService.updateByUuid(transaction.uuid, {action_running: true});
       updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
     } catch (e) {
       console.log('Error occured during running action', e);
       throw new BadRequestException(`Error occured during running action: ${e}`);
     } finally {
-      this.transactionsService.updateByUuid(transaction.uuid, {action_running: false});
+      await this.transactionsService.updateByUuid(transaction.uuid, {action_running: false});
     }
 
     // Send update to php
