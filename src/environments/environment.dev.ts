@@ -116,7 +116,7 @@ export const environment: any = {
         options: { durable: true },
       },
     ],
-    prefetchCount: 0,
+    prefetchCount: 1,
     isGlobalPrefetchCount: false,
   },
 
