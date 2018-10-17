@@ -211,6 +211,8 @@ export class MessagingService {
   }
 
   private async createPayloadData(transaction: any) {
+    transaction = Object.assign({}, transaction); // making clone before manipulations
+
     let dto: any = {};
     let businessPaymentOption;
 
