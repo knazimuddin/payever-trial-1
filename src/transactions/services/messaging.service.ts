@@ -222,12 +222,6 @@ export class MessagingService {
     // @TODO this should be done on BE side
     transaction.reference = transaction.uuid;
 
-    try {
-      transaction.payment_details = transaction.payment_details ? JSON.parse(transaction.payment_details) : {};
-    } catch(e) {
-      // just skipping payment_details
-    }
-
     dto = {...dto,
       payment: transaction,
       payment_details: transaction.payment_details,

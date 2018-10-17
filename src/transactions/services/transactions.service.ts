@@ -40,7 +40,7 @@ export class TransactionsService {
 
   async findOneByParams(params) {
     const transaction = await this.transactionsModel.findOne(params);
-    return transaction ? transaction.toObject({virtuals: true}) : null;
+    return transaction ? this.prepareTransactionForOutput(transaction.toObject({virtuals: true})) : null;
   }
 
   async removeByUuid(uuid: string) {
@@ -82,6 +82,15 @@ export class TransactionsService {
     }
 
     return result;
+  }
+
+  private prepareTransactionForOutput(transaction) {
+    try {
+      transaction.payment_details = transaction.payment_details ? JSON.parse(transaction.payment_details) : {};
+    } catch(e) {
+      // just skipping payment_details
+    }
+    return transaction;
   }
 
 }
