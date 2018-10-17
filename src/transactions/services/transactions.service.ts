@@ -17,6 +17,11 @@ export class TransactionsService {
   }
 
   async updateByUuid(uuid, data: any) {
+    // a bit dirty, sorry
+    if (typeof(data.payment_details) !== 'string') {
+      data.payment_details = JSON.stringify(data.payment_details);
+    }
+
     return this.transactionsModel.findOneAndUpdate({uuid}, data);
   }
 
