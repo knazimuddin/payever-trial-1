@@ -88,7 +88,7 @@ export class MessagingService {
 
         const message = this.messageBusService.createPaymentMicroMessage(transaction.type, 'action', payload, environment.stub);
 
-        console.log('CHECK MESSAGE BEFORE SEND', message);
+        // console.log('CHECK MESSAGE BEFORE SEND', message);
 
         this.rabbitClient.send(
           { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
@@ -135,9 +135,7 @@ export class MessagingService {
       data: dto,
     };
 
-    // console.log('RUN ACTION for TRANSACTION', transaction);
-
-    console.log('RUN ACTION PAYLOAD:', payload.data);
+    // console.log('RUN ACTION PAYLOAD:', payload.data);
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
 
@@ -188,7 +186,7 @@ export class MessagingService {
       payment: transaction,
     });
 
-    console.log('message to php', message);
+    // console.log('message to php', message);
 
     this.rabbitClient.send({ channel: 'transactions_app.payment.updated', exchange: 'async_events' }, message).subscribe();
   }
@@ -200,7 +198,7 @@ export class MessagingService {
         this.messageBusService.createPaymentMicroMessage(transaction.type, messageIdentifier, payload, environment.stub),
       ).pipe(
         map((m) => this.messageBusService.unwrapRpcMessage(m)),
-        tap((m) => console.log('UNWRAPPED RPC RESPONSE', m)),
+        // tap((m) => console.log('UNWRAPPED RPC RESPONSE', m)),
         catchError((e) => {
           reject(e);
           return of(null);

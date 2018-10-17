@@ -114,7 +114,7 @@ export class BusinessController {
       throw new BadRequestException(`Error occured while getting transaction actions: ${e}`);
     }
 
-    return {...transaction, actions, _hello: 42};
+    return {...transaction, actions};
   }
 
   @Post(':uuid/action/:action')
