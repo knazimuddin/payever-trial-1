@@ -146,6 +146,7 @@ export class MessagingService {
     updatedTransaction.payment_details = rpcResult.payment_details;
     updatedTransaction.items = rpcResult.payment_items;
     updatedTransaction.place = rpcResult.workflow_state;
+    delete updatedTransaction.history; // we do not update history here. History events comming separately, there is a chance to overwrite saved history here
     this.transactionsService.prepareTransactionForInsert(updatedTransaction);
     await this.transactionsService.updateByUuid(updatedTransaction.uuid, updatedTransaction);
     return updatedTransaction;
