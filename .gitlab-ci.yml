@@ -31,6 +31,8 @@ test:
 Build to dev:
   stage: showroom_build
   script:
+    - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
+    - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i -- "s/transaction-backend/transaction-backend/g" ./.helm/Chart.yaml
@@ -45,6 +47,8 @@ Build to dev:
 Deploy to dev:
   stage: showroom_deploy
   script:
+    - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
+    - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i -- "s/transaction-backend/transaction-backend/g" ./.helm/Chart.yaml
@@ -68,6 +72,8 @@ Build to staging:
   stage: stage_build
   script:
     - bash sub_stage.sh
+    - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
+    - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/staging/g" ./.helm/templates/01-backend.yaml
@@ -83,6 +89,8 @@ Deploy to staging:
   stage: stage_deploy
   script:
     - dapp --version
+    - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
+    - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i -- "s/transaction-backend/transaction-backend-staging/g" ./.helm/Chart.yaml
@@ -106,6 +114,8 @@ Build to prod:
   when: manual
   script:
     - bash sub_prod.sh
+    - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
+    - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/production/g" ./.helm/templates/01-backend.yaml
@@ -123,6 +133,8 @@ deploy to prod:
   stage: prod_deploy
   when: manual
   script:
+    - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
+    - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
     - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/production/g" ./.helm/templates/01-backend.yaml

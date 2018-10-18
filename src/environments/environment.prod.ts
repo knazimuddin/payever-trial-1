@@ -10,12 +10,12 @@ export const environment: any = {
     password: 'root',
     database: 'test',
   },
-  mongodb: 'mongodb://stage-mongo:ANUza5qvv0PyVEguriBWKtNmTVOsSWn8Cm8HhHlhir0CmRvJIJ1NsFomoBUWZVmqQgkwA4UEeUBEmuz7uQvIlw%3D%3D@stage-mongo.documents.azure.com:10255/transactions?ssl=true&replicaSet=globaldb',
+  mongodb: 'SED_MONGO_URL',
   checkoutMicroUrlBase: 'https://showroom63.payever.de/',
 
   rabbitmq: {
     // urls: ['amqp://guest:guest@localhost'],
-    urls: ['amqp://payever:Iengeaboo2TuKeiz0gie@showroom63.payever.de/paf'],
+    urls: ['SED_RABBITMQ_URL'],
     queue: 'rpc_payment_santander_de',
     // queue: 'rpc_queue',
     prefetchCount: 0,
