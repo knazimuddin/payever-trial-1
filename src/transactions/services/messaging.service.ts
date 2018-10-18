@@ -135,7 +135,7 @@ export class MessagingService {
       data: dto,
     };
 
-    // console.log('RUN ACTION PAYLOAD:', payload.data);
+    console.log('RUN ACTION PAYLOAD:', payload.data);
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
 
