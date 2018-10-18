@@ -269,7 +269,7 @@ export class MessagingService {
 
   private prepareActionFields(transaction, action: string, fields: any) {
     // @TODO ask FE to remove wrapper object
-    if (action === 'refund' && fields.payment_return) {
+    if ((action === 'refund' || action === 'return') && fields.payment_return) {
       fields.amount = fields.payment_return.amount || fields.amount || 0;
       fields.reason = fields.payment_return.reason || fields.reason || null;
       fields.refunded_amount = transaction.amount_refunded;
