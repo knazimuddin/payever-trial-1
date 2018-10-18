@@ -212,10 +212,13 @@ export class MessagingService {
   private async createPayloadData(transaction: any) {
     transaction = Object.assign({}, transaction); // making clone before manipulations
 
-    try {
-      transaction.payment_details = transaction.payment_details ? JSON.parse(transaction.payment_details) : {};
-    } catch(e) {
-      // just skipping payment_details
+    if (typeof(transaction.payment_details) === 'string') {
+      try {
+        transaction.payment_details = JSON.parse(transaction.payment_details);
+      } catch(e) {
+        transaction.payment_details = {};
+        // just skipping payment_details
+      }
     }
 
     let dto: any = {};
@@ -270,6 +273,8 @@ export class MessagingService {
       fields.amount = fields.payment_return.amount || fields.amount || 0;
       fields.reason = fields.payment_return.reason || fields.reason || null;
       fields.refunded_amount = transaction.amount_refunded;
+      // php BE asked for camel case version of this field too
+      fields.refundedAmount = fields.refunded_amount;
     }
     if (action === 'change_amount' && fields.payment_change_amount) {
       fields.amount = fields.payment_change_amount.amount || fields.amount || 0;
