@@ -158,24 +158,18 @@ export class MessagingService {
       data: dto,
     };
 
-    // console.log('UPDATE STATUS for TRANSACTION:', transaction);
-
     const result: any = await this.runPaymentRpc(transaction, payload, 'payment');
 
-    // console.log('UPDATE STATUS RESULT', result);
-
-    const update: any = {};
-
-    if (result.payment.status) {
-      update.status = result.payment.status;
-    }
-
-    if (result.payment.specific_status) {
-      update.specific_status = result.payment.specific_status;
-    }
+    // const update: any = {};
+    // if (result.payment.status) {
+      // update.status = result.payment.status;
+    // }
+    // if (result.payment.specific_status) {
+      // update.specific_status = result.payment.specific_status;
+    // }
 
     this.transactionsService.prepareTransactionForInsert(transaction);
-    await this.transactionsService.updateByUuid(transaction.uuid, update);
+    await this.transactionsService.updateByUuid(transaction.uuid, transaction);
     return transaction;
   }
 
