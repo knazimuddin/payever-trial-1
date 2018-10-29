@@ -160,6 +160,8 @@ export class MessagingService {
 
     const result: any = await this.runPaymentRpc(transaction, payload, 'payment');
 
+    console.log('update status result', result);
+
     // const update: any = {};
     // if (result.payment.status) {
       // update.status = result.payment.status;
@@ -169,6 +171,7 @@ export class MessagingService {
     // }
 
     this.transactionsService.prepareTransactionForInsert(transaction);
+    console.log('prepare transaction result', transaction);
     await this.transactionsService.updateByUuid(transaction.uuid, transaction);
     return transaction;
   }

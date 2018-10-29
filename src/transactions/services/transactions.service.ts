@@ -53,10 +53,19 @@ export class TransactionsService {
   }
 
   prepareTransactionForInsert(transaction) {
-    transaction.billing_address = transaction.address;
-    transaction.original_id = transaction.id;
+    if (transaction.address) {
+      transaction.billing_address = transaction.address;
+    }
+
+    if (transaction.id) {
+      transaction.original_id = transaction.id;
+    }
+
     transaction.type = transaction.type || transaction.payment_type;
-    transaction.payment_details = JSON.stringify(transaction.payment_details);
+
+    if (transaction.payment_details) {
+      transaction.payment_details = JSON.stringify(transaction.payment_details);
+    }
 
     if (transaction.business) {
       transaction.business_uuid = transaction.business.uuid;
