@@ -1,7 +1,7 @@
 {{ $_ := env "CI_COMMIT_REF_SLUG" | set . "CommitRefSlug" }}
 
 dimg: {{ .CommitRefSlug }}
-from: node:8.11.3-alpine
+from: node:8.11.3
 docker:
   USER: payever
   WORKDIR: /payever
