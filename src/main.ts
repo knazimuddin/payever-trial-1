@@ -32,9 +32,5 @@ async function bootstrap() {
 
   await app.startAllMicroservicesAsync();
   await app.listen(environment.port, () => console.log('app started at port', environment.port));
-
-  // @TODO remove
-  console.log('Hello, if you see it then latest changes were deployed');
-
 }
 bootstrap();
