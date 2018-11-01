@@ -34,7 +34,7 @@ Build to dev:
     - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
     - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
     #- sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
-    - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
+    - sed -i -- "s/transactions-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i -- "s/transaction-backend/transaction-backend/g" ./.helm/Chart.yaml
     - dapp dimg build --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}
     - dapp dimg push --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}  registry.devpayever.com --registry-username payever --registry-password vMnPdItXkV9T
@@ -50,7 +50,7 @@ Deploy to dev:
     - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
     - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
     #- sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
-    - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
+    - sed -i -- "s/transactions-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i -- "s/transaction-backend/transaction-backend/g" ./.helm/Chart.yaml
     - sed -i -- "s/placeholder/transaction-backend/g" ./sub.sh
     - bash sub.sh
@@ -75,7 +75,7 @@ Build to staging:
     - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
     - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
     #- sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
-    - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
+    - sed -i -- "s/transactions-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/staging/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/staging/g" ./.helm/templates/02-backend-ingress.yaml
     - dapp dimg build --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}
@@ -92,7 +92,7 @@ Deploy to staging:
     - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
     - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
     #- sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
-    - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
+    - sed -i -- "s/transactions-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i -- "s/transaction-backend/transaction-backend-staging/g" ./.helm/Chart.yaml
     - sed -i "s/developers/staging/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/staging/g" ./.helm/templates/02-backend-ingress.yaml
@@ -117,7 +117,7 @@ Build to prod:
     - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
     - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
     #- sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
-    - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
+    - sed -i -- "s/transactions-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/production/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/production/g" ./.helm/templates/02-backend-ingress.yaml
     - sed -i "s/.devpayever.com/.payever.org/g" ./.helm/templates/02-backend-ingress.yaml
@@ -136,7 +136,7 @@ deploy to prod:
     - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
     - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
     #- sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./Dappfile
-    - sed -i -- "s/transaction-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
+    - sed -i -- "s/transactions-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/production/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/production/g" ./.helm/templates/02-backend-ingress.yaml
     - sed -i "s/.devpayever.com/.payever.org/g" ./.helm/templates/02-backend-ingress.yaml
