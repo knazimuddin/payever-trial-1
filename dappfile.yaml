@@ -10,11 +10,11 @@ docker:
 
 mount:
   - from: build_dir
-    to: /home/payever/.npm
+    to: /payever/.npm
 
 shell:
   beforeInstall:
-    - chmod 777 /home/payever/.npm
+    - chmod 777 /payever/.npm
     - groupadd -g 242 payever
     - useradd -m -d /payever -g 242 -u 242 -s /bin/bash payever
   install:
