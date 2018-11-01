@@ -20,7 +20,7 @@ shell:
   install:
     - cd /payever
     - su -c 'npm install' payever
-    - su -c 'install @nestjs/mongoose' payever
+    - su -c 'npm install @nestjs/mongoose' payever
 
 git:
   - add: /
