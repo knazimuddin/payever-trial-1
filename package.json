@@ -1,7 +1,9 @@
 {
   "scripts": {
-    "start": "NODE_ENV=production ts-node src/main.ts",
-    "start:dev": "nodemon",
+    "start:prod": "NODE_ENV=production ts-node src/main.ts",
+    "start:staging": "NODE_ENV=staging ts-node src/main.ts",
+    "start:dev": "NODE_ENV=development ts-node src/main.ts",
+    "start:serve": "nodemon",
     "start:migration:dev": "nodemon --watch src --exec 'ts-node src/migration-main.ts'",
     "test": "jest --config=jest.json",
     "test:watch": "jest --watch --config=jest.json",
