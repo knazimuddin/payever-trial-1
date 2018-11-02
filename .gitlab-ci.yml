@@ -44,6 +44,7 @@ Deploy to dev:
   script:
    # - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
    # - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
+    - sed -i -- "s/start/start:dev/g" ./.helm/templates/01-backend.yaml
     - sed -i -- "s/transactions-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i -- "s/transaction-backend/transaction-backend/g" ./.helm/Chart.yaml
     - sed -i -- "s/placeholder/transaction-backend/g" ./sub.sh
@@ -79,11 +80,12 @@ Deploy to staging:
     - dapp --version
    # - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
    # - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
+    - sed -i -- "s/start/start:staging/g" ./.helm/templates/01-backend.yaml
     - sed -i -- "s/transactions-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i -- "s/transaction-backend/transaction-backend-staging/g" ./.helm/Chart.yaml
     - sed -i "s/developers/staging/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/staging/g" ./.helm/templates/02-backend-ingress.yaml
-    - sed -i "s/developers/staging/g" ./.helm/templates/03-configmap.yaml
+   # - sed -i "s/developers/staging/g" ./.helm/templates/03-configmap.yaml
     - dapp kube deploy
       --name transaction-backend
       --namespace staging
@@ -102,14 +104,6 @@ Build to prod:
   when: manual
   script:
     - bash sub_prod.sh
-    - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
-    - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
-    - sed -i -- "s/transactions-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
-    - sed -i "s/developers/production/g" ./.helm/templates/01-backend.yaml
-    - sed -i "s/developers/production/g" ./.helm/templates/02-backend-ingress.yaml
-    - sed -i "s/developers/production/g" ./.helm/templates/03-configmap.yaml
-    - sed -i "s/.devpayever.com/.payever.org/g" ./.helm/templates/02-backend-ingress.yaml
-    - sed -i "s/custom-tls-cert-com/custom-tls-cert-org/g" ./.helm/templates/02-backend-ingress.yaml
     - dapp dimg build --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}
     - dapp dimg push --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}  registry.devpayever.com --registry-username payever --registry-password vMnPdItXkV9T
   tags:
@@ -121,12 +115,13 @@ deploy to prod:
   stage: prod_deploy
   when: manual
   script:
-    - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
-    - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
+   # - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
+   # - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
+    - sed -i -- "s/start/start:prod/g" ./.helm/templates/01-backend.yaml
     - sed -i -- "s/transactions-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/production/g" ./.helm/templates/01-backend.yaml
     - sed -i "s/developers/production/g" ./.helm/templates/02-backend-ingress.yaml
-    - sed -i "s/developers/production/g" ./.helm/templates/03-configmap.yaml
+   # - sed -i "s/developers/production/g" ./.helm/templates/03-configmap.yaml
     - sed -i "s/.devpayever.com/.payever.org/g" ./.helm/templates/02-backend-ingress.yaml
     - sed -i "s/custom-tls-cert-com/custom-tls-cert-org/g" ./.helm/templates/02-backend-ingress.yaml
     - dapp --version
