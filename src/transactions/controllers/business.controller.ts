@@ -98,7 +98,7 @@ export class BusinessController {
     let transaction;
     let actions;
 
-    console.log('test 42');
+    console.log('detail page action');
 
     try {
       transaction = await this.transactionsService.findOneByParams({uuid});
@@ -168,6 +168,7 @@ export class BusinessController {
   ): Promise<any> {
     let transaction: any;
     let updatedTransaction: any;
+    let actions: any;
 
     try {
       transaction = await this.transactionsService.findOne(uuid);
@@ -176,9 +177,15 @@ export class BusinessController {
     }
 
     try {
-      updatedTransaction = await this.messagingService.updateStatus(transaction);
+      await this.messagingService.updateStatus(transaction);
     } catch (e) {
       throw new BadRequestException(`Error occured during status update: ${e}`);
+    }
+
+    try {
+      updatedTransaction = await this.transactionsService.findOneByParams({uuid});
+    } catch (e) {
+      throw new NotFoundException();
     }
 
     // Send update to php
@@ -188,7 +195,13 @@ export class BusinessController {
       throw new BadRequestException(`Error occured while sending transaction update: ${e}`);
     }
 
-    return updatedTransaction;
+    try {
+      actions = await this.messagingService.getActions(transaction);
+    } catch (e) {
+      throw new BadRequestException(`Error occured while getting transaction actions: ${e}`);
+    }
+
+    return {...updatedTransaction, actions};
   }
 
   @Get('settings')

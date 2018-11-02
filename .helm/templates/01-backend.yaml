@@ -26,6 +26,17 @@ spec:
         env:
         - name: KUBERNETES_DEPLOYED
           value: "{{ now }}"
+        volumeMounts:
+        - name: {{ .Chart.Name }}-environment
+          mountPath: /payever/src/environments/environment.prod.ts
+          subPath: environment.prod.ts
+      volumes:
+      - name: {{ .Chart.Name }}-environment
+        configMap:
+          name: {{ .Chart.Name }}-environment
+          items:
+          - key: environment
+            path: environment.prod.ts
 ---
 apiVersion: v1
 kind: Service
