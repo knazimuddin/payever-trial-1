@@ -1,19 +1,26 @@
-import { Module } from '@nestjs/common';
+import { Module, HttpModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { BusinessController, DevController } from './controllers';
-import { TransactionsService, TransactionsListService, StubService } from './services';
+import { BusinessController, DevController, MicroEventsController, MigrateEventsController } from './controllers';
+import { TransactionsService, TransactionsGridService, StubService, MessagingService } from './services';
 import { TransactionsSchema } from './schemas/transaction.schema';
 
 @Module({
   imports: [
+    HttpModule,
     MongooseModule.forFeature([{ name: 'TransactionsSchema', schema: TransactionsSchema }]),
   ],
-  controllers: [BusinessController, DevController],
+  controllers: [
+    BusinessController,
+    DevController,
+    MicroEventsController,
+    MigrateEventsController,
+  ],
   providers: [
     TransactionsService,
-    TransactionsListService,
+    TransactionsGridService,
     StubService,
+    MessagingService,
   ],
 })
 export class TransactionsModule {}

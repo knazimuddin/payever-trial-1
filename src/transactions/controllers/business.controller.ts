@@ -11,17 +11,21 @@ import {
   Post,
   UseGuards,
   Query,
+  InternalServerErrorException,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { ApiUseTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { snakeCase } from 'lodash';
-import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { map, tap, timeout, catchError, take } from 'rxjs/operators';
 
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
-import { MessageFactory, MessageBusService } from '@pe/nest-kit/modules/message';
+import { MessageBusService } from '@pe/nest-kit/modules/message';
+import { ActionPayloadDto } from '../dto';
 
-import { TransactionsService } from '../services';
+import { TransactionsService, TransactionsGridService, MessagingService } from '../services';
 import { environment } from '../../environments';
 
 @Controller('business/:businessUuid')
@@ -33,12 +37,11 @@ export class BusinessController {
 
   rabbitClient: ClientProxy;
 
-  private messageFactory: MessageFactory = new MessageFactory();
-  private messageBusService: MessageBusService = new MessageBusService({
-    rsa: environment.rsa,
-  });
-
-  constructor(private readonly transactionsService: TransactionsService) {
+  constructor(
+    private readonly transactionsService: TransactionsService,
+    private readonly transactionsGridService: TransactionsGridService,
+    private readonly messagingService: MessagingService,
+  ) {
     this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
   }
 
@@ -55,35 +58,18 @@ export class BusinessController {
     @Query('filters') filters: any = {},
   ): Promise<any> {
     try {
-
-      console.log('page:', page);
-      console.log('limit:', limit);
-      console.log('orderBy:', orderBy);
-      console.log('direction:', direction);
-      console.log('filters:', filters);
-      console.log('search:', search);
-
       filters.business_uuid = {
         condition: 'is',
         value: businessUuid,
       };
 
-      // console.log('input filters', filters);
-
-
-      // const filtersWithBusiness = {
-        // ...filters
-        // business_uuid: businessUuid,
-      // };
-
-      console.log();
       const sort = {};
       sort[snakeCase(orderBy)] = direction.toLowerCase();
 
       return Promise.all([
-        this.transactionsService.findMany(filters, sort, search, +page, +limit),
-        this.transactionsService.count(filters, search),
-        this.transactionsService.total(filters, search),
+        this.transactionsGridService.findMany(filters, sort, search, +page, +limit),
+        this.transactionsGridService.count(filters, search),
+        this.transactionsGridService.total(filters, search),
       ])
         .then((res) => {
           return {
@@ -109,48 +95,113 @@ export class BusinessController {
   async getDetail(
     @Param('uuid') uuid: string,
   ): Promise<any> {
-    return new Promise(async(resolve, reject) => {
-      try {
-        const transaction = await this.transactionsService.findOne(uuid);
+    let transaction;
+    let actions;
 
-        resolve(transaction);
+    console.log('detail page action');
 
-        /*
-        this.fixDates(transaction);
+    try {
+      transaction = await this.transactionsService.findOneByParams({uuid});
+    } catch (e) {
+      throw new NotFoundException();
+    }
 
-        const actionsPayload = {
-          action: 'action.list',
-          data: {
-            payment: transaction,
-            business: {
-              id: 1 // dummy id
-            },
-          },
-        };
+    if (!transaction) {
+      throw new NotFoundException();
+    }
 
-        this.rabbitClient.send(
-          { event: 'rpc_payment_santander_de' }, // hardcoded!
-          this.messageFactory.createMessage('payment_option.santander_installment.action', actionsPayload),
-        ).pipe(
-          map((m) => this.messageBusService.unwrapMessage(m)),
-          map((actionsResponse) => {
-            console.log(actionsResponse);
-            const actions = JSON.parse(actionsResponse.payload).result; // move json parse into transport layer
-            return Object.keys(actions).map((key) => ({
-              action: key,
-              enabled: actions[key],
-            }));
-          }),
-          tap((actions) => console.log('tap', actions)),
-        ).subscribe((actions) => {
-          resolve({ ...transaction, actions });
-        });
-        */
+    try {
+      actions = await this.messagingService.getActions(transaction);
+    } catch (e) {
+      throw new BadRequestException(`Error occured while getting transaction actions: ${e}`);
+    }
 
-      } catch (error) {
-        throw error;
-      }
-    });
+    return {...transaction, actions};
+  }
+
+  @Post(':uuid/action/:action')
+  @HttpCode(HttpStatus.OK)
+  // @ApiResponse({status: HttpStatus.OK, description: 'The records have been successfully fetched.', type: GetTodoDto})
+  async runAction(
+    @Param('uuid') uuid: string,
+    @Param('action') action: string,
+    @Body() actionPayload: ActionPayloadDto,
+  ): Promise<any> {
+    let transaction: any;
+    let updatedTransaction: any;
+    let actions: any;
+
+    try {
+      transaction = await this.transactionsService.findOne(uuid);
+    } catch (e) {
+      throw new NotFoundException();
+    }
+
+    try {
+      updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
+    } catch (e) {
+      console.log('Error occured during running action', e);
+      throw new BadRequestException(`Error occured during running action: ${e}`);
+    }
+
+    // Send update to php
+    try {
+      await this.messagingService.sendTransactionUpdate(updatedTransaction);
+    } catch (e) {
+      throw new BadRequestException(`Error occured while sending transaction update: ${e}`);
+    }
+
+    try {
+      actions = await this.messagingService.getActions(updatedTransaction);
+    } catch (e) {
+      throw new BadRequestException(`Error occured while getting transaction actions: ${e}`);
+    }
+
+    return updatedTransaction;
+  }
+
+  @Get(':uuid/update-status')
+  @HttpCode(HttpStatus.OK)
+  // @ApiResponse({status: HttpStatus.OK, description: 'The records have been successfully fetched.', type: GetTodoDto})
+  async updateStatus(
+    @Param('uuid') uuid: string,
+  ): Promise<any> {
+    let transaction: any;
+    let updatedTransaction: any;
+    let actions: any;
+
+    try {
+      transaction = await this.transactionsService.findOne(uuid);
+    } catch (e) {
+      throw new NotFoundException();
+    }
+
+    try {
+      await this.messagingService.updateStatus(transaction);
+    } catch (e) {
+      throw new BadRequestException(`Error occured during status update: ${e}`);
+    }
+
+    try {
+      updatedTransaction = await this.transactionsService.findOneByParams({uuid});
+    } catch (e) {
+      throw new NotFoundException();
+    }
+
+    // Send update to php
+    try {
+      await this.messagingService.sendTransactionUpdate(updatedTransaction);
+    } catch (e) {
+      throw new BadRequestException(`Error occured while sending transaction update: ${e}`);
+    }
+
+    try {
+      actions = await this.messagingService.getActions(transaction);
+    } catch (e) {
+      throw new BadRequestException(`Error occured while getting transaction actions: ${e}`);
+    }
+
+    return {...updatedTransaction, actions};
   }
 
   @Get('settings')
@@ -175,15 +226,6 @@ export class BusinessController {
       limit: '',
       order_by: '',
     };
-  }
-
-  private fixDates(transaction) {
-    Object.keys(transaction).forEach((key) => {
-      if (transaction[key] instanceof Date) {
-        console.log('fixing date:', key);
-        transaction[key] = transaction[key].toISOString().split('.')[0] + "+00:00";
-      }
-    });
   }
 
 }

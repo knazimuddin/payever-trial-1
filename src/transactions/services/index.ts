@@ -1,3 +1,4 @@
-export * from './transactions-list.service';
-export * from './transactions.service';
+export * from './messaging.service';
 export * from './stub.service';
+export * from './transactions-grid.service';
+export * from './transactions.service';
