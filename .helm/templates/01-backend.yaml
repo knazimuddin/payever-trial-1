@@ -36,7 +36,7 @@ spec:
           name: {{ .Chart.Name }}-environment
           items:
           - key: environment
-            path: environment.prod.t
+            path: environment.prod.ts
 ---
 apiVersion: v1
 kind: Service
