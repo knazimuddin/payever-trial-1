@@ -1,0 +1,29 @@
+{{ $_ := env "CI_COMMIT_REF_SLUG" | set . "CommitRefSlug" }}
+
+dimg: {{ .CommitRefSlug }}
+from: node:8.11.3
+docker:
+  USER: payever
+  WORKDIR: /payever
+  EXPOSE: "3000"
+  CMD: '/usr/local/bin/npm run start'
+
+mount:
+  - from: build_dir
+    to: /payever/.npm
+
+shell:
+  beforeInstall:
+    - chmod 777 /payever/.npm
+    - groupadd -g 242 payever
+    - useradd -m -d /payever -g 242 -u 242 -s /bin/bash payever
+  install:
+    - cd /payever
+    - su -c 'npm install' payever
+    - su -c 'npm install @nestjs/mongoose' payever
+
+git:
+  - add: /
+    to: /payever
+    owner: payever
+    group: payever
