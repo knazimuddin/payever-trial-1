@@ -3,13 +3,13 @@ import * as path from 'path';
 export const environment: any = {
   production: true,
   port: 3000,
-  mongodb: 'mongodb://stage-mongo:ANUza5qvv0PyVEguriBWKtNmTVOsSWn8Cm8HhHlhir0CmRvJIJ1NsFomoBUWZVmqQgkwA4UEeUBEmuz7uQvIlw%3D%3D@stage-mongo.documents.azure.com:10255/transactions?ssl=true&replicaSet=globaldb',
+  mongodb: 'SED_MONGO_URL',
   checkoutMicroUrlBase: 'https://showroom100.payever.de/',
 
   stub: true,
 
   rabbitmq: {
-    urls: ['amqp://payever:Iengeaboo2TuKeiz0gie@showroom100.payever.de:5672/paf'],
+    urls: ['SED_RABBITMQ_URL'],
     queues: [
       {
         name: 'rpc_payment_santander_de',
