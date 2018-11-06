@@ -77,6 +77,10 @@ export class TransactionsService {
       transaction.payment_flow_id = transaction.payment_flow.id;
     }
 
+    if (transaction.channel) {
+      transaction.channel_uuid = transaction.channel.uuid;
+    }
+
     if (transaction.history && transaction.history.length) {
       const updatedHistory = transaction.history.map((historyItem) => {
         return this.prepareTransactionHistoryItemForInsert(historyItem.action, historyItem.created_at, historyItem);
