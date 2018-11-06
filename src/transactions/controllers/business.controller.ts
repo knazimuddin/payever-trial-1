@@ -214,7 +214,6 @@ export class BusinessController {
         'created_at',
         'customer_email',
         'customer_name',
-        'original_id',
         'merchant_email',
         'merchant_name',
         'specific_status',

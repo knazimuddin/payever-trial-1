@@ -57,10 +57,6 @@ export class TransactionsService {
       transaction.billing_address = transaction.address;
     }
 
-    if (transaction.id) {
-      transaction.original_id = transaction.id;
-    }
-
     transaction.type = transaction.type || transaction.payment_type;
 
     if (transaction.payment_details) {

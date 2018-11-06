@@ -65,6 +65,11 @@ export class MicroEventsController {
     console.log('PAYMENT.CREATE', data);
     const transaction: any = data.payment;
     this.transactionsService.prepareTransactionForInsert(transaction);
+
+    if (data.payment.id) {
+      transaction.original_id = data.payment.id;
+    }
+
     await this.transactionsService.create(transaction);
   }
 
