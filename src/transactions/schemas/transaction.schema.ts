@@ -66,7 +66,7 @@ export const TransactionsSchema = new Schema({
   business_uuid: {type: String},
   channel: String, // 'store', ...
   channel_uuid: String,
-  channel_set_id: Number,
+  channel_set_uuid: Number,
   created_at: {type: Date, required: true},
   currency: {type: String, required: true},
   customer_email: {type: String},
