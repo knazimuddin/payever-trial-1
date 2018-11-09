@@ -16,11 +16,9 @@ export class TransactionsGridService {
 
   async findMany(filters = {}, sort = {}, search = null, page: number = null, limit = null) {
     const mongoFilters = {};
-
     if (filters) {
       this.addFilters(mongoFilters, filters);
     }
-
     if (search) {
       this.addSearchFilters(mongoFilters, search);
     }
@@ -41,6 +39,9 @@ export class TransactionsGridService {
     if (filters) {
       this.addFilters(mongoFilters, filters);
     }
+    if (search) {
+      this.addSearchFilters(mongoFilters, search);
+    }
 
     return await this.transactionsModel
       .count(mongoFilters)
@@ -54,6 +55,9 @@ export class TransactionsGridService {
     const mongoFilters = {};
     if (filters) {
       this.addFilters(mongoFilters, filters);
+    }
+    if (search) {
+      this.addSearchFilters(mongoFilters, search);
     }
 
     const res = await this.transactionsModel
@@ -70,11 +74,13 @@ export class TransactionsGridService {
   }
 
   private addSearchFilters(filters: any, search: string) {
+    search = search.replace(/^#/, ''); // cutting # symbol
     const regex = new RegExp(search);
-    filters['$or'] = [
+    filters.$or = [
       { customer_name: regex},
       { customer_email: regex },
       { reference: regex },
+      { original_id: regex },
     ];
   }
 
