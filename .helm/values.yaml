@@ -1,0 +1,12 @@
+namespace: default
+
+replicaCount: 1
+
+image:
+  repository: registry.devpayever.com/nodejs-backend/transactions/master
+  tag: latest
+  pullPolicy: Always
+
+service:
+  externalPort: 80
+  containerPort: 3000
