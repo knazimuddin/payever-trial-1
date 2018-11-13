@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { environment } from './environments';
 
 import { TransactionsModule } from './transactions/transactions.module';
+import { StatusModule } from './status/status.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { TransactionsModule } from './transactions/transactions.module';
       // synchronize: false,
     // }),
     MongooseModule.forRoot(environment.mongodb),
+    StatusModule,
   ],
   providers: [
     {

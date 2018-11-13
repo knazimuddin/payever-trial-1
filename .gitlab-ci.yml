@@ -1,12 +1,17 @@
 stages:
   - test_build
   - test
-  - showroom_build
+  - build
   - showroom_deploy
-  - stage_build
   - stage_deploy
-  - prod_build
   - prod_deploy
+
+variables:
+  REPOSITORY: "$REGISTRY_SERVER/$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
+
+before_script:
+  - echo "$REPOSITORY:$CI_COMMIT_SHA"
+
 
 test_build:
   stage: test_build
@@ -28,109 +33,84 @@ test:
   script:
     - echo "test"
 
-Build to dev:
-  stage: showroom_build
+
+
+Build:
+  stage: build
   script:
-    - dapp dimg build --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}
-    - dapp dimg push --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}  registry.devpayever.com --registry-username payever --registry-password vMnPdItXkV9T
+    - dapp dimg build --verbose --name $CI_PROJECT_PATH_SLUG
+    - dapp dimg push --verbose --name $CI_PROJECT_PATH_SLUG $REPOSITORY --tag=$CI_COMMIT_SHA --registry-username $REGISTRY_LOGIN --registry-password $REGISTRY_PASSWORD
   tags:
     - deploy
-  only:
+  except:
     variables:
-      - $IN_STAGE_TYPE == "deploy"
+      - $IN_STAGE_TYPE == "test"
 
-Deploy to dev:
+
+Deploy to showroom:
   stage: showroom_deploy
+  when: manual
+  environment:
+    name: showroom
   script:
-   # - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
-   # - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
-    - sed -i -- "s/start/start:dev/g" ./.helm/templates/01-backend.yaml
-    - sed -i -- "s/transactions-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
-    - sed -i -- "s/transaction-backend/transaction-backend/g" ./.helm/Chart.yaml
-    - sed -i -- "s/placeholder/transaction-backend/g" ./sub.sh
-    - bash sub.sh
     - dapp --version
     - dapp kube deploy
-      --name transaction-backend
-      --namespace developers
-      --set "global.env=stage"
-      --set "global.git_rev=${CI_BUILD_REF:-$CI_COMMIT_SHA}"
-      --set global.ciProjectName=$CI_PROJECT_NAME
-      registry.devpayever.com
+      --verbose
+      --name $CI_PROJECT_PATH_SLUG
+      --namespace $NAMESPACE
+      --set "namespace=$NAMESPACE"
+      --set "image.repository=$REPOSITORY"
+      --set "image.tag=$CI_COMMIT_SHA"
+      $REPOSITORY
+  variables:
+    NAMESPACE: developers
   tags:
     - deploy
-  only:
+  except:
     variables:
-      - $IN_STAGE_TYPE == "deploy"
-
-Build to staging:
-  stage: stage_build
-  script:
-    - bash sub_stage.sh
-    - dapp dimg build --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}
-    - dapp dimg push --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}  registry.devpayever.com --registry-username payever --registry-password vMnPdItXkV9T
-  tags:
-    - staging
-  only:
-    - master
+      - $IN_STAGE_TYPE == "test"
+      - $CI_BUILD_REF_NAME == "master"
+      - $CI_BUILD_REF_NAME == "production"
 
 Deploy to staging:
   stage: stage_deploy
+  environment:
+    name: staging
   script:
     - dapp --version
-   # - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
-   # - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
-    - sed -i -- "s/start/start:staging/g" ./.helm/templates/01-backend.yaml
-    - sed -i -- "s/transactions-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
-    - sed -i -- "s/transaction-backend/transaction-backend-staging/g" ./.helm/Chart.yaml
-    - sed -i "s/developers/staging/g" ./.helm/templates/01-backend.yaml
-    - sed -i "s/developers/staging/g" ./.helm/templates/02-backend-ingress.yaml
-   # - sed -i "s/developers/staging/g" ./.helm/templates/03-configmap.yaml
     - dapp kube deploy
-      --name transaction-backend
-      --namespace staging
-      --set "global.env=stage"
-      --set "global.git_rev=${CI_BUILD_REF:-$CI_COMMIT_SHA}"
-      --set global.ciProjectName=$CI_PROJECT_NAME
-      registry.devpayever.com
+      --verbose
+      --name $CI_PROJECT_PATH_SLUG
+      --namespace $NAMESPACE
+      --set "namespace=$NAMESPACE"
+      --set "image.repository=$REPOSITORY"
+      --set "image.tag=$CI_COMMIT_SHA"
+      $REPOSITORY
+  variables:
+    NAMESPACE: staging
   tags:
     - staging
   only:
     - master
 
-
-Build to prod:
-  stage: prod_build
-  when: manual
-  script:
-    - bash sub_prod.sh
-    - dapp dimg build --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}
-    - dapp dimg push --name transaction-backend --build-dir ~/dapp_build/${CI_PROJECT_NAME} ${CI_REGISTRY_IMAGE}  registry.devpayever.com --registry-username payever --registry-password vMnPdItXkV9T
-  tags:
-    - prod
-  only:
-    - production
 
 deploy to prod:
   stage: prod_deploy
   when: manual
+  environment:
+    name: production
   script:
-   # - sed -i -- "s|SED_MONGO_URL|$CI_MONGO_URL|g" ./.helm/templates/03-configmap.yaml
-   # - sed -i -- "s|SED_RABBITMQ_URL|$CI_RABBITMQ_URL|g" ./.helm/templates/03-configmap.yaml
-    - sed -i -- "s/start/start:prod/g" ./.helm/templates/01-backend.yaml
-    - sed -i -- "s/transactions-backend/$CI_COMMIT_REF_SLUG/g" ./.helm/templates/01-backend.yaml
-    - sed -i "s/developers/production/g" ./.helm/templates/01-backend.yaml
-    - sed -i "s/developers/production/g" ./.helm/templates/02-backend-ingress.yaml
-   # - sed -i "s/developers/production/g" ./.helm/templates/03-configmap.yaml
-    - sed -i "s/.devpayever.com/.payever.org/g" ./.helm/templates/02-backend-ingress.yaml
-    - sed -i "s/custom-tls-cert-com/custom-tls-cert-org/g" ./.helm/templates/02-backend-ingress.yaml
     - dapp --version
     - dapp kube deploy
-      --namespace production
-      --set "global.env=stage"
-      --set "global.git_rev=${CI_BUILD_REF:-$CI_COMMIT_SHA}"
-      --set global.ciProjectName=$CI_PROJECT_NAME
-      registry.devpayever.com
+      --verbose
+      --name $CI_PROJECT_PATH_SLUG
+      --namespace $NAMESPACE
+      --set "namespace=$NAMESPACE"
+      --set "image.repository=$REPOSITORY"
+      --set "image.tag=$CI_COMMIT_SHA"
+      $REPOSITORY
+  variables:
+    NAMESPACE: production
   tags:
     - prod
   only:

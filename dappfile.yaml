@@ -1,6 +1,4 @@
-{{ $_ := env "CI_COMMIT_REF_SLUG" | set . "CommitRefSlug" }}
-
-dimg: {{ .CommitRefSlug }}
+dimg: ~
 from: node:8.11.3
 docker:
   USER: payever
@@ -20,7 +18,6 @@ shell:
   install:
     - cd /payever
     - su -c 'npm install' payever
-    - su -c 'npm install @nestjs/mongoose' payever
 
 git:
   - add: /
