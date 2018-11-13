@@ -1,42 +1,66 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
+
 metadata:
-  name: {{ .Chart.Name }}-backend
-  namespace: developers
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.namespace }}
+
+  labels:
+    app: {{ .Chart.Name }}
+
   annotations:
-     nodejs-auth/deploy-timestamp: {{ now }}
+    {{ .Chart.Name }}/deploy-timestamp: {{ now }}
+
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
+
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}-backend
+        app: {{ .Chart.Name }}
+
     spec:
       imagePullSecrets:
-      - name: regsecret
+        - name: regsecret
+
       containers:
-      - command: [ '/usr/local/bin/npm', 'run', 'start' ]
-        image: {{ tuple "transactions-backend" . |  include "dimg" }}
-        imagePullPolicy: Always
-        name: {{ .Chart.Name }}-backend
-        ports:
-        - containerPort: 3000
-          name: node
-          protocol: TCP
-        env:
-        - name: KUBERNETES_DEPLOYED
-          value: "{{ now }}"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Chart.Name }}-srv
-  namespase: developers
-spec:
-  type:  ClusterIP
-  selector:
-    app: {{ .Chart.Name }}-backend
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: node
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: [ '/usr/local/bin/npm', 'run', 'start' ]
+
+          ports:
+            - containerPort: {{ .Values.service.containerPort }}
+              protocol: TCP
+
+          livenessProbe:
+            httpGet:
+              path: /api/status
+              port: {{ .Values.service.containerPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+          readinessProbe:
+            httpGet:
+              path: /api/status
+              port: {{ .Values.service.containerPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+          envFrom:
+            - configMapRef:
+                name: {{ .Chart.Name }}
+
+            - configMapRef:
+                name: nodejs-micro-url-map
+
+            - secretRef:
+                name: {{ .Chart.Name }}
+
+          env:
+            - name: KUBERNETES_DEPLOYED
+              value: "{{ now }}"

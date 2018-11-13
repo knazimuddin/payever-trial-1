@@ -1,4 +1,4 @@
 apiVersion: v1
 description: A Helm chart for Kubernetes
-name: transactions-backend
+name: nodejs-backend-transactions
 version: 0.1.0
