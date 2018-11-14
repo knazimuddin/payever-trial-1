@@ -71,6 +71,7 @@ export class MicroEventsController {
     }
 
     await this.transactionsService.create(transaction);
+    console.log('TRANSACTION CREATE COMPLETED');
   }
 
   @MessagePattern({
@@ -95,7 +96,8 @@ export class MicroEventsController {
 
     const transaction: any = data.payment;
     this.transactionsService.prepareTransactionForInsert(transaction);
-    return await this.transactionsService.updateByUuid(transaction.uuid, transaction);
+    await this.transactionsService.updateByUuid(transaction.uuid, transaction);
+    console.log('TRANSACTION UPDATE COMPLETED');
   }
 
 }
