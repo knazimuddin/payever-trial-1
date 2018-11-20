@@ -1,4 +1,4 @@
-import { Injectable, HttpService } from '@nestjs/common';
+import { Injectable, HttpService, Request, Headers } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Observable, of } from 'rxjs';
 import { map, tap, timeout, catchError, take } from 'rxjs/operators';
@@ -21,29 +21,28 @@ export class MessagingService {
   constructor(
     private readonly httpService: HttpService,
     private readonly transactionsService: TransactionsService,
+    // @Request() private readonly request,
   ) {
     this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
   }
 
-  async getBusinessPaymentOption(transaction: any) {
+  async getBusinessPaymentOption(transaction: any, headers) {
     if (transaction.channel_set_id) {
       // remove this branch when all transaction.business_option_id will be synced with new DB
       const paymentOptionsList = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/payment-options`).toPromise()).data as any[];
-      // console.log('paymentOptionsList', paymentOptionsList);
       const paymentOption = paymentOptionsList.find((po) => po.payment_method === transaction.type);
-      // console.log('paymentOption', paymentOption);
       const businessPaymentOptions = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/channel-set/${transaction.channel_set_id}`).toPromise()).data as any[];
       const businessPaymentOption = businessPaymentOptions.find((bpo) => bpo.payment_option_id === paymentOption.id);
-      // console.log('businessPaymentOption', businessPaymentOption);
-      const paymentMethodData = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${businessPaymentOption.id}`).toPromise()).data;
-      // console.log('paymentMethodData', paymentMethodData);
-      // return paymentMethodData.credentials;
+      const paymentMethodData = (await this.httpService.get(
+        `${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${businessPaymentOption.id}`,
+        { headers: { authorization: headers.authorization } },
+      ).toPromise()).data;
       return paymentMethodData;
     } else {
-      // console.log('check business payment option id', transaction.business_option_id);
-      // console.log(`${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${transaction.business_option_id}`);
-      const paymentMethodData = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${transaction.business_option_id}`).toPromise()).data;
-      // return paymentMethodData.credentials;
+      const paymentMethodData = (await this.httpService.get(
+        `${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${transaction.business_option_id}`,
+        { headers: { authorization: headers.authorization } },
+      ).toPromise()).data;
       return paymentMethodData;
     }
   }
@@ -78,12 +77,12 @@ export class MessagingService {
     });
   }
 
-  async getActions(transaction) {
+  async getActions(transaction, headers) {
     return new Promise(async (resolve, reject) => {
       try {
         const payload = {
           action: 'action.list',
-          data: await this.createPayloadData(transaction),
+          data: await this.createPayloadData(transaction, headers),
         };
 
         const message = this.messageBusService.createPaymentMicroMessage(transaction.type, 'action', payload, environment.stub);
@@ -118,8 +117,8 @@ export class MessagingService {
     });
   }
 
-  async runAction(transaction, action, actionPayload) {
-    const dto = await this.createPayloadData(transaction);
+  async runAction(transaction, action, actionPayload, headers) {
+    const dto = await this.createPayloadData(transaction, headers);
     dto.action = action;
 
     if (actionPayload.fields) {
@@ -150,8 +149,8 @@ export class MessagingService {
     return updatedTransaction;
   }
 
-  async updateStatus(transaction) {
-    const dto = await this.createPayloadData(transaction);
+  async updateStatus(transaction, headers) {
+    const dto = await this.createPayloadData(transaction, headers);
 
     const payload = {
       action: 'status',
@@ -206,7 +205,7 @@ export class MessagingService {
     });
   }
 
-  private async createPayloadData(transaction: any) {
+  private async createPayloadData(transaction: any, headers: any) {
     transaction = Object.assign({}, transaction); // making clone before manipulations
 
     if (typeof(transaction.payment_details) === 'string') {
@@ -236,7 +235,7 @@ export class MessagingService {
     };
 
     try {
-      businessPaymentOption = await this.getBusinessPaymentOption(transaction);
+      businessPaymentOption = await this.getBusinessPaymentOption(transaction, headers);
     } catch (e) {
       throw new Error(`Cannot resolve business payment option: ${e}`);
     }
