@@ -140,7 +140,7 @@ export class BusinessController {
     }
 
     try {
-      updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
+      updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload, headers);
     } catch (e) {
       console.log('Error occured during running action', e);
       throw new BadRequestException(`Error occured during running action: ${e}`);
@@ -180,7 +180,7 @@ export class BusinessController {
     }
 
     try {
-      await this.messagingService.updateStatus(transaction);
+      await this.messagingService.updateStatus(transaction, headers);
     } catch (e) {
       throw new BadRequestException(`Error occured during status update: ${e}`);
     }
