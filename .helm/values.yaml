@@ -6,6 +6,7 @@ image:
   repository: registry.devpayever.com/nodejs-backend/transactions/master
   tag: latest
   pullPolicy: Always
+  pullSecretName: regsecret
 
 service:
   externalPort: 80
