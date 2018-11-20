@@ -1,26 +1,36 @@
-dimg: ~
-from: node:8.11.3
+artifact: {{ env "CI_PROJECT_PATH_SLUG" }}
+from: {{ env "BUILD_NODE_IMAGE" }}
+
+mount:
+  - from: build_dir
+    to: /payever/.npm
+shell:
+  install:
+    - cd /payever
+    - npm install
+
+git:
+  - add: /
+    to: /payever
+    owner: payever
+    group: payever
+    stageDependencies:
+      install:
+      - package.json
+      - package-lock.json
+
+---
+dimg: {{ env "CI_PROJECT_PATH" }}/{{ env "CI_COMMIT_REF_SLUG" }}
+from: {{ env "PROD_NODE_IMAGE" }}
 docker:
   USER: payever
   WORKDIR: /payever
   EXPOSE: "3000"
   CMD: '/usr/local/bin/npm run start'
-
-mount:
-  - from: build_dir
-    to: /payever/.npm
-
-shell:
-  beforeInstall:
-    - chmod 777 /payever/.npm
-    - groupadd -g 242 payever
-    - useradd -m -d /payever -g 242 -u 242 -s /bin/bash payever
-  install:
-    - cd /payever
-    - su -c 'npm install' payever
-
-git:
-  - add: /
+import:
+  - artifact: {{ env "CI_PROJECT_PATH_SLUG" }}
+    add: /payever
     to: /payever
+    after: install
     owner: payever
     group: payever
