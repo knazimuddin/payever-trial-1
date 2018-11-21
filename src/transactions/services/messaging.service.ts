@@ -32,6 +32,7 @@ export class MessagingService {
 
   getBusinessPaymentOption(transaction: any) {
     return this.bpoService.findOneById(transaction.business_option_id);
+
   }
 
   // async getBusinessPaymentOption(transaction: any, headers) {
