@@ -236,6 +236,7 @@ export class MessagingService {
 
     try {
       businessPaymentOption = await this.getBusinessPaymentOption(transaction, headers);
+      console.log('businessPaymentOption', businessPaymentOption);
     } catch (e) {
       throw new Error(`Cannot resolve business payment option: ${e}`);
     }
@@ -244,6 +245,7 @@ export class MessagingService {
 
     if (transaction.payment_flow_id) {
       dto.payment_flow = await this.getPaymentFlow(transaction.payment_flow_id);
+      console.log('payment_flow', dto.payment_flow);
       dto.payment_flow.business_payment_option = businessPaymentOption;
     }
 
