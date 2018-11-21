@@ -39,7 +39,7 @@ Build:
   stage: build
   script:
     - dapp dimg build --verbose --name $CI_PROJECT_PATH_SLUG
-    - dapp dimg push --verbose --name $CI_PROJECT_PATH_SLUG $REPOSITORY --tag=$CI_COMMIT_SHA --registry-username $REGISTRY_LOGIN --registry-password $REGISTRY_PASSWORD
+    - dapp dimg push --verbose --name $CI_PROJECT_PATH_SLUG $REGISTRY_SERVER --tag=$CI_COMMIT_SHA --registry-username $REGISTRY_LOGIN --registry-password $REGISTRY_PASSWORD
   tags:
     - deploy
   except:
@@ -61,6 +61,7 @@ Deploy to showroom:
       --set "namespace=$NAMESPACE"
       --set "image.repository=$REPOSITORY"
       --set "image.tag=$CI_COMMIT_SHA"
+      --set "image.pullSecretName=$REGISTRY_PULL_SECRET_NAME"
       $REPOSITORY
   variables:
     NAMESPACE: developers
@@ -85,6 +86,7 @@ Deploy to staging:
       --set "namespace=$NAMESPACE"
       --set "image.repository=$REPOSITORY"
       --set "image.tag=$CI_COMMIT_SHA"
+      --set "image.pullSecretName=$REGISTRY_PULL_SECRET_NAME"
       $REPOSITORY
   variables:
     NAMESPACE: staging
@@ -108,6 +110,7 @@ deploy to prod:
       --set "namespace=$NAMESPACE"
       --set "image.repository=$REPOSITORY"
       --set "image.tag=$CI_COMMIT_SHA"
+      --set "image.pullSecretName=$REGISTRY_PULL_SECRET_NAME"
       $REPOSITORY
   variables:
     NAMESPACE: production
