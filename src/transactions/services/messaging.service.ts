@@ -1,11 +1,14 @@
-import { Injectable, HttpService, Request, Headers } from '@nestjs/common';
+import { Injectable, HttpService } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Observable, of } from 'rxjs';
-import { map, tap, timeout, catchError, take } from 'rxjs/operators';
+import { map, tap, catchError, take } from 'rxjs/operators';
 
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
-import { TransactionsService } from '../services/transactions.service';
+
+import { TransactionsService } from './transactions.service';
+import { BusinessPaymentOptionService } from './business-payment-option.service';
+import { PaymentFlowService } from './payment-flow.service';
 
 import { environment } from '../../environments';
 
@@ -21,31 +24,41 @@ export class MessagingService {
   constructor(
     private readonly httpService: HttpService,
     private readonly transactionsService: TransactionsService,
-    // @Request() private readonly request,
+    private readonly bpoService: BusinessPaymentOptionService,
+    private readonly flowService: PaymentFlowService,
   ) {
     this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
   }
 
-  async getBusinessPaymentOption(transaction: any, headers) {
-    if (transaction.channel_set_id) {
-      // remove this branch when all transaction.business_option_id will be synced with new DB
-      const paymentOptionsList = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/payment-options`).toPromise()).data as any[];
-      const paymentOption = paymentOptionsList.find((po) => po.payment_method === transaction.type);
-      const businessPaymentOptions = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/channel-set/${transaction.channel_set_id}`).toPromise()).data as any[];
-      const businessPaymentOption = businessPaymentOptions.find((bpo) => bpo.payment_option_id === paymentOption.id);
-      const paymentMethodData = (await this.httpService.get(
-        `${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${businessPaymentOption.id}`,
-        { headers: { authorization: headers.authorization } },
-      ).toPromise()).data;
-      return paymentMethodData;
-    } else {
-      const paymentMethodData = (await this.httpService.get(
-        `${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${transaction.business_option_id}`,
-        { headers: { authorization: headers.authorization } },
-      ).toPromise()).data;
-      return paymentMethodData;
-    }
+  getBusinessPaymentOption(transaction: any) {
+    // return this.bpoService.findOneById(transaction.business_option_id);
+    return this.bpoService.findOneById(254);
   }
+
+  // async getBusinessPaymentOption(transaction: any, headers) {
+    // if (transaction.channel_set_id) {
+      // // remove this branch when all transaction.business_option_id will be synced with new DB
+      // const paymentOptionsList = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/payment-options`).toPromise()).data as any[];
+      // const paymentOption = paymentOptionsList.find((po) => po.payment_method === transaction.type);
+      // const businessPaymentOptions = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/channel-set/${transaction.channel_set_id}`).toPromise()).data as any[];
+      // const businessPaymentOption = businessPaymentOptions.find((bpo) => bpo.payment_option_id === paymentOption.id);
+      // const paymentMethodData = (await this.httpService.get(
+        // `${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${businessPaymentOption.id}`,
+        // { headers: { authorization: headers.authorization } },
+      // ).toPromise()).data;
+      // return paymentMethodData;
+    // } else {
+      // const paymentMethodData = (await this.httpService.get(
+        // `${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${transaction.business_option_id}`,
+        // { headers: { authorization: headers.authorization } },
+      // ).toPromise()).data;
+      // return paymentMethodData;
+    // }
+  // }
+
+  // getPaymentFlow(flowId: string) {
+    // return this.flowService.findOne(flowId);
+  // }
 
   async getPaymentFlow(flowId: string) {
     return new Promise((resolve, reject) => {
@@ -235,7 +248,7 @@ export class MessagingService {
     };
 
     try {
-      businessPaymentOption = await this.getBusinessPaymentOption(transaction, headers);
+      businessPaymentOption = await this.getBusinessPaymentOption(transaction);
       console.log('businessPaymentOption', businessPaymentOption);
     } catch (e) {
       throw new Error(`Cannot resolve business payment option: ${e}`);
