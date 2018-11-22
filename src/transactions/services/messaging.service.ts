@@ -35,27 +35,7 @@ export class MessagingService {
 
   }
 
-  // async getBusinessPaymentOption(transaction: any, headers) {
-    // if (transaction.channel_set_id) {
-      // // remove this branch when all transaction.business_option_id will be synced with new DB
-      // const paymentOptionsList = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/payment-options`).toPromise()).data as any[];
-      // const paymentOption = paymentOptionsList.find((po) => po.payment_method === transaction.type);
-      // const businessPaymentOptions = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/channel-set/${transaction.channel_set_id}`).toPromise()).data as any[];
-      // const businessPaymentOption = businessPaymentOptions.find((bpo) => bpo.payment_option_id === paymentOption.id);
-      // const paymentMethodData = (await this.httpService.get(
-        // `${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${businessPaymentOption.id}`,
-        // { headers: { authorization: headers.authorization } },
-      // ).toPromise()).data;
-      // return paymentMethodData;
-    // } else {
-      // const paymentMethodData = (await this.httpService.get(
-        // `${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${transaction.business_option_id}`,
-        // { headers: { authorization: headers.authorization } },
-      // ).toPromise()).data;
-      // return paymentMethodData;
-    // }
-  // }
-
+  // Uncomment when payment flow will be retrieved from local projection
   // getPaymentFlow(flowId: string) {
     // return this.flowService.findOne(flowId);
   // }
@@ -75,7 +55,6 @@ export class MessagingService {
           take(1),
           map((msg) => this.messageBusService.unwrapRpcMessage(msg)),
           map((response) => response.payment_flow_d_t_o),
-          // tap((msg) => console.log('PAYMENT FLOW MSG', msg)),
           catchError((e) => {
             console.error(`Error while sending rpc call:`, e);
             reject(e);
@@ -100,15 +79,12 @@ export class MessagingService {
 
         const message = this.messageBusService.createPaymentMicroMessage(transaction.type, 'action', payload, environment.stub);
 
-        // console.log('CHECK MESSAGE BEFORE SEND', message);
-
         this.rabbitClient.send(
           { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
           message,
         ).pipe(
           take(1),
           map((msg) => this.messageBusService.unwrapRpcMessage(msg)),
-          // tap((msg) => console.log('unwrapped message', msg)),
           map((actions) => {
             return Object.keys(actions).map((key) => ({
               action: key,
@@ -151,7 +127,6 @@ export class MessagingService {
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
 
-    // console.log('RPC ACTION RESULT:', rpcResult);
     const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
     updatedTransaction.payment_details = rpcResult.payment_details;
     updatedTransaction.items = rpcResult.payment_items;
@@ -174,14 +149,6 @@ export class MessagingService {
 
     console.log('update status result', result);
 
-    // const update: any = {};
-    // if (result.payment.status) {
-      // update.status = result.payment.status;
-    // }
-    // if (result.payment.specific_status) {
-      // update.specific_status = result.payment.specific_status;
-    // }
-
     this.transactionsService.prepareTransactionForInsert(transaction);
     console.log('prepare transaction result', transaction);
     await this.transactionsService.updateByUuid(transaction.uuid, transaction);
@@ -195,8 +162,6 @@ export class MessagingService {
       payment: transaction,
     });
 
-    // console.log('message to php', message);
-
     this.rabbitClient.send({ channel: 'transactions_app.payment.updated', exchange: 'async_events' }, message).subscribe();
   }
 
@@ -207,7 +172,6 @@ export class MessagingService {
         this.messageBusService.createPaymentMicroMessage(transaction.type, messageIdentifier, payload, environment.stub),
       ).pipe(
         map((m) => this.messageBusService.unwrapRpcMessage(m)),
-        // tap((m) => console.log('UNWRAPPED RPC RESPONSE', m)),
         catchError((e) => {
           reject(e);
           return of(null);
