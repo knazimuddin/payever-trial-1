@@ -1,11 +1,14 @@
 import { Injectable, HttpService } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Observable, of } from 'rxjs';
-import { map, tap, timeout, catchError, take } from 'rxjs/operators';
+import { map, tap, catchError, take } from 'rxjs/operators';
 
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
-import { TransactionsService } from '../services/transactions.service';
+
+import { TransactionsService } from './transactions.service';
+import { BusinessPaymentOptionService } from './business-payment-option.service';
+import { PaymentFlowService } from './payment-flow.service';
 
 import { environment } from '../../environments';
 
@@ -21,32 +24,21 @@ export class MessagingService {
   constructor(
     private readonly httpService: HttpService,
     private readonly transactionsService: TransactionsService,
+    private readonly bpoService: BusinessPaymentOptionService,
+    private readonly flowService: PaymentFlowService,
   ) {
     this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
   }
 
-  async getBusinessPaymentOption(transaction: any) {
-    if (transaction.channel_set_id) {
-      // remove this branch when all transaction.business_option_id will be synced with new DB
-      const paymentOptionsList = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/payment-options`).toPromise()).data as any[];
-      // console.log('paymentOptionsList', paymentOptionsList);
-      const paymentOption = paymentOptionsList.find((po) => po.payment_method === transaction.type);
-      // console.log('paymentOption', paymentOption);
-      const businessPaymentOptions = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/channel-set/${transaction.channel_set_id}`).toPromise()).data as any[];
-      const businessPaymentOption = businessPaymentOptions.find((bpo) => bpo.payment_option_id === paymentOption.id);
-      // console.log('businessPaymentOption', businessPaymentOption);
-      const paymentMethodData = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${businessPaymentOption.id}`).toPromise()).data;
-      // console.log('paymentMethodData', paymentMethodData);
-      // return paymentMethodData.credentials;
-      return paymentMethodData;
-    } else {
-      // console.log('check business payment option id', transaction.business_option_id);
-      // console.log(`${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${transaction.business_option_id}`);
-      const paymentMethodData = (await this.httpService.get(`${environment.checkoutMicroUrlBase}api/rest/v1/business-payment-option/${transaction.business_option_id}`).toPromise()).data;
-      // return paymentMethodData.credentials;
-      return paymentMethodData;
-    }
+  getBusinessPaymentOption(transaction: any) {
+    return this.bpoService.findOneById(transaction.business_option_id);
+
   }
+
+  // Uncomment when payment flow will be retrieved from local projection
+  // getPaymentFlow(flowId: string) {
+    // return this.flowService.findOne(flowId);
+  // }
 
   async getPaymentFlow(flowId: string) {
     return new Promise((resolve, reject) => {
@@ -63,7 +55,6 @@ export class MessagingService {
           take(1),
           map((msg) => this.messageBusService.unwrapRpcMessage(msg)),
           map((response) => response.payment_flow_d_t_o),
-          // tap((msg) => console.log('PAYMENT FLOW MSG', msg)),
           catchError((e) => {
             console.error(`Error while sending rpc call:`, e);
             reject(e);
@@ -78,17 +69,15 @@ export class MessagingService {
     });
   }
 
-  async getActions(transaction) {
+  async getActions(transaction, headers) {
     return new Promise(async (resolve, reject) => {
       try {
         const payload = {
           action: 'action.list',
-          data: await this.createPayloadData(transaction),
+          data: await this.createPayloadData(transaction, headers),
         };
 
         const message = this.messageBusService.createPaymentMicroMessage(transaction.type, 'action', payload, environment.stub);
-
-        // console.log('CHECK MESSAGE BEFORE SEND', message);
 
         this.rabbitClient.send(
           { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
@@ -96,7 +85,6 @@ export class MessagingService {
         ).pipe(
           take(1),
           map((msg) => this.messageBusService.unwrapRpcMessage(msg)),
-          // tap((msg) => console.log('unwrapped message', msg)),
           map((actions) => {
             return Object.keys(actions).map((key) => ({
               action: key,
@@ -118,8 +106,8 @@ export class MessagingService {
     });
   }
 
-  async runAction(transaction, action, actionPayload) {
-    const dto = await this.createPayloadData(transaction);
+  async runAction(transaction, action, actionPayload, headers) {
+    const dto = await this.createPayloadData(transaction, headers);
     dto.action = action;
 
     if (actionPayload.fields) {
@@ -139,7 +127,6 @@ export class MessagingService {
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
 
-    // console.log('RPC ACTION RESULT:', rpcResult);
     const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
     updatedTransaction.payment_details = rpcResult.payment_details;
     updatedTransaction.items = rpcResult.payment_items;
@@ -150,8 +137,8 @@ export class MessagingService {
     return updatedTransaction;
   }
 
-  async updateStatus(transaction) {
-    const dto = await this.createPayloadData(transaction);
+  async updateStatus(transaction, headers) {
+    const dto = await this.createPayloadData(transaction, headers);
 
     const payload = {
       action: 'status',
@@ -161,14 +148,6 @@ export class MessagingService {
     const result: any = await this.runPaymentRpc(transaction, payload, 'payment');
 
     console.log('update status result', result);
-
-    // const update: any = {};
-    // if (result.payment.status) {
-      // update.status = result.payment.status;
-    // }
-    // if (result.payment.specific_status) {
-      // update.specific_status = result.payment.specific_status;
-    // }
 
     this.transactionsService.prepareTransactionForInsert(transaction);
     console.log('prepare transaction result', transaction);
@@ -183,8 +162,6 @@ export class MessagingService {
       payment: transaction,
     });
 
-    // console.log('message to php', message);
-
     this.rabbitClient.send({ channel: 'transactions_app.payment.updated', exchange: 'async_events' }, message).subscribe();
   }
 
@@ -195,7 +172,6 @@ export class MessagingService {
         this.messageBusService.createPaymentMicroMessage(transaction.type, messageIdentifier, payload, environment.stub),
       ).pipe(
         map((m) => this.messageBusService.unwrapRpcMessage(m)),
-        // tap((m) => console.log('UNWRAPPED RPC RESPONSE', m)),
         catchError((e) => {
           reject(e);
           return of(null);
@@ -206,7 +182,7 @@ export class MessagingService {
     });
   }
 
-  private async createPayloadData(transaction: any) {
+  private async createPayloadData(transaction: any, headers: any) {
     transaction = Object.assign({}, transaction); // making clone before manipulations
 
     if (typeof(transaction.payment_details) === 'string') {
@@ -237,6 +213,7 @@ export class MessagingService {
 
     try {
       businessPaymentOption = await this.getBusinessPaymentOption(transaction);
+      console.log('businessPaymentOption', businessPaymentOption);
     } catch (e) {
       throw new Error(`Cannot resolve business payment option: ${e}`);
     }
@@ -245,6 +222,7 @@ export class MessagingService {
 
     if (transaction.payment_flow_id) {
       dto.payment_flow = await this.getPaymentFlow(transaction.payment_flow_id);
+      console.log('payment_flow', dto.payment_flow);
       dto.payment_flow.business_payment_option = businessPaymentOption;
     }
 

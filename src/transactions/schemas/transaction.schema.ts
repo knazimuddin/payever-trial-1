@@ -51,7 +51,6 @@ export const TransactionHistoryEntrySchema = new Schema({
   action: String,
   amount: Number,
   created_at: Date,
-  // custom_data: any[],
   is_restock_items: Boolean,
   params: String,
   payment_status: String,
@@ -66,7 +65,8 @@ export const TransactionsSchema = new Schema({
   business_option_id: Number,
   business_uuid: {type: String},
   channel: String, // 'store', ...
-  channel_set_id: Number,
+  channel_uuid: String,
+  channel_set_uuid: String,
   created_at: {type: Date, required: true},
   currency: {type: String, required: true},
   customer_email: {type: String},

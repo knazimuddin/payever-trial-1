@@ -57,10 +57,6 @@ export class TransactionsService {
       transaction.billing_address = transaction.address;
     }
 
-    if (transaction.id) {
-      transaction.original_id = transaction.id;
-    }
-
     transaction.type = transaction.type || transaction.payment_type;
 
     if (transaction.payment_details) {
@@ -75,6 +71,10 @@ export class TransactionsService {
 
     if (transaction.payment_flow) {
       transaction.payment_flow_id = transaction.payment_flow.id;
+    }
+
+    if (transaction.channel_set) {
+      transaction.channel_set_uuid = transaction.channel_set.uuid;
     }
 
     if (transaction.history && transaction.history.length) {
