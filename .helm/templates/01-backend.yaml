@@ -15,9 +15,10 @@ spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
     type: RollingUpdate
+
     rollingUpdate:
-        maxSurge: 1
-        maxUnavailable: 0
+      maxSurge: 1
+      maxUnavailable: 0
 
 
   selector:
@@ -42,7 +43,6 @@ spec:
             preStop:
               exec:
                 command: ["sleep", "15"]
-
 
           ports:
             - containerPort: {{ .Values.service.containerPort }}

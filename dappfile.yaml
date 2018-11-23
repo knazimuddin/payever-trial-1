@@ -4,10 +4,14 @@ from: {{ env "BUILD_NODE_IMAGE" }}
 mount:
   - from: build_dir
     to: /payever/.npm
+
 shell:
   install:
     - cd /payever
     - npm install
+
+  setup:
+    - echo '{{ env "CI_COMMIT_SHA" }}' > /payever/version
 
 git:
   - add: /
@@ -16,21 +20,25 @@ git:
     group: payever
     stageDependencies:
       install:
-      - package.json
-      - package-lock.json
+        - package.json
+        - package-lock.json
+      setup:
+        - "*"
 
 ---
 dimg: {{ env "CI_PROJECT_PATH" }}/{{ env "CI_COMMIT_REF_SLUG" }}
 from: {{ env "PROD_NODE_IMAGE" }}
+
 docker:
   USER: payever
   WORKDIR: /payever
   EXPOSE: "3000"
   CMD: '/usr/local/bin/npm run start'
+
 import:
   - artifact: {{ env "CI_PROJECT_PATH_SLUG" }}
     add: /payever
     to: /payever
-    after: install
+    after: setup
     owner: payever
     group: payever
