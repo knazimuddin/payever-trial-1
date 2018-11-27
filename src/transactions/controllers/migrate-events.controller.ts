@@ -6,7 +6,7 @@ import { map, tap, timeout, catchError, take } from 'rxjs/operators';
 
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { ActionPayloadDto } from '../dto';
-
+import { RabbitRoutingKeys } from '../../enums';
 import { TransactionsService, MessagingService } from '../services';
 import { environment } from '../../environments';
 
@@ -22,7 +22,7 @@ export class MigrateEventsController {
 
   @MessagePattern({
     channel: 'async_events_transactions_micro',
-    name: 'payever.event.payment.migrate',
+    name: RabbitRoutingKeys.PaymentMigrate,
     origin: 'rabbitmq',
   })
   async onActionMigrateEvent(msg: any) {
