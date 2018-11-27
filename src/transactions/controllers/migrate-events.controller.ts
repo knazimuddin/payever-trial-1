@@ -30,7 +30,13 @@ export class MigrateEventsController {
     console.log('ACTION.MIGRATE!', data.payment);
     const transaction: any = data.payment;
     this.transactionsService.prepareTransactionForInsert(transaction);
-    this.transactionsService.createOrUpdate(transaction);
+
+    if (data.payment.id) {
+      transaction.original_id = data.payment.id;
+    }
+
+    await this.transactionsService.createOrUpdate(transaction);
+    console.log('TRANSACTION MIGRATE COMPLETED');
   }
 
 }
