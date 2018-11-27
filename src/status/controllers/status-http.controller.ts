@@ -1,5 +1,6 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiResponse } from '@nestjs/swagger';
+import { readFileSync, existsSync } from "fs";
 
 @Controller('status')
 export class StatusHttpController {
@@ -12,6 +13,7 @@ export class StatusHttpController {
   public async status(): Promise<{}> {
     return {
       status: 'ok',
+      version: existsSync('./version') ? readFileSync('./version', 'utf8').trim() : 'unknown',
     };
   }
 }
