@@ -1,10 +1,10 @@
 export enum RabbitRoutingKeys {
   PaymentActionCompleted = 'payever.event.payment.action.completed',
   PaymentHistoryAdd = 'payever.microservice.payment.history.add',
-  PaymentCreated = 'payever.event.payment.created',
-  PaymentUpdated = 'payever.event.payment.updated',
-  PaymentRemoved = 'payever.event.payment.removed',
-  PaymentMigrate = 'payever.event.payment.migrate',
+  PaymentCreated = 'checkout.event.payment.created',
+  PaymentUpdated = 'checkout.event.payment.updated',
+  PaymentRemoved = 'checkout.event.payment.removed',
+  PaymentMigrate = 'checkout.event.payment.migrate',
 
   // Draft
   BpoCreated = 'checkout.event.business-payment-option.created',
