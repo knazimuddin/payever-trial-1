@@ -31,7 +31,7 @@
     "lodash-es": "^4.17.10",
     "mongoose": "^5.2.6",
     "mysql": "^2.16.0",
-    "nodemon": "^1.18.3",
+    "nodemon": "^1.18.7",
     "php-serialize": "^2.0.1",
     "php-unserialize": "0.0.1",
     "reflect-metadata": "^0.1.12",
