@@ -99,8 +99,6 @@ export class BusinessController {
     let transaction;
     let actions;
 
-    console.log('detail page action');
-
     try {
       transaction = await this.transactionsService.findOneByParams({uuid});
     } catch (e) {

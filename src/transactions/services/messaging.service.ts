@@ -91,7 +91,6 @@ export class MessagingService {
               enabled: actions[key],
             }));
           }),
-          tap((actions) => console.log('actions:', actions)),
           catchError((e) => {
             console.error(`Error while sending rpc call:`, e);
             reject(e);
@@ -123,8 +122,6 @@ export class MessagingService {
       data: dto,
     };
 
-    console.log('RUN ACTION PAYLOAD:', payload.data);
-
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
 
     const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
@@ -147,10 +144,7 @@ export class MessagingService {
 
     const result: any = await this.runPaymentRpc(transaction, payload, 'payment');
 
-    console.log('update status result', result);
-
     this.transactionsService.prepareTransactionForInsert(transaction);
-    console.log('prepare transaction result', transaction);
     await this.transactionsService.updateByUuid(transaction.uuid, transaction);
     return transaction;
   }
@@ -213,7 +207,6 @@ export class MessagingService {
 
     try {
       businessPaymentOption = await this.getBusinessPaymentOption(transaction);
-      console.log('businessPaymentOption', businessPaymentOption);
     } catch (e) {
       throw new Error(`Cannot resolve business payment option: ${e}`);
     }
@@ -222,7 +215,6 @@ export class MessagingService {
 
     if (transaction.payment_flow_id) {
       dto.payment_flow = await this.getPaymentFlow(transaction.payment_flow_id);
-      console.log('payment_flow', dto.payment_flow);
       dto.payment_flow.business_payment_option = businessPaymentOption;
     }
 
