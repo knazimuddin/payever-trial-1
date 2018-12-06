@@ -178,7 +178,8 @@ export class BusinessController {
     try {
       await this.messagingService.updateStatus(transaction, headers);
     } catch (e) {
-      throw new BadRequestException(`Error occured during status update: ${e}`);
+      console.error(`Error occured during status update: ${e}`);
+      throw new BadRequestException(`Error occured during status update. Please try again later.`);
     }
 
     try {
