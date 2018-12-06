@@ -110,7 +110,8 @@ export class BusinessController {
     try {
       actions = await this.messagingService.getActions(transaction, headers);
     } catch (e) {
-      throw new BadRequestException(`Error occured while getting transaction actions: ${e}`);
+      console.error(`Error occured while getting transaction actions: ${e}`);
+      actions = [];
     }
 
     return {...transaction, actions};
@@ -151,7 +152,8 @@ export class BusinessController {
     try {
       actions = await this.messagingService.getActions(updatedTransaction, headers);
     } catch (e) {
-      throw new BadRequestException(`Error occured while getting transaction actions: ${e}`);
+      console.error(`Error occured while getting transaction actions: ${e}`);
+      actions = [];
     }
 
     return updatedTransaction;
@@ -195,7 +197,8 @@ export class BusinessController {
     try {
       actions = await this.messagingService.getActions(transaction, headers);
     } catch (e) {
-      throw new BadRequestException(`Error occured while getting transaction actions: ${e}`);
+      console.error(`Error occured while getting transaction actions: ${e}`);
+      actions = [];
     }
 
     return {...updatedTransaction, actions};
