@@ -47,7 +47,6 @@ export class BusinessController {
 
   @Get('list')
   @HttpCode(HttpStatus.OK)
-  // @ApiResponse({status: HttpStatus.OK, description: 'The records have been successfully fetched.', type: GetTodoDto, isArray: true})
   async getList(
     @Param('businessUuid') businessUuid: string,
     @Query('orderBy') orderBy: string = 'created_at',
@@ -91,7 +90,6 @@ export class BusinessController {
 
   @Get('detail/:uuid')
   @HttpCode(HttpStatus.OK)
-  // @ApiResponse({status: HttpStatus.OK, description: 'The records have been successfully fetched.', type: GetTodoDto})
   async getDetail(
     @Param('uuid') uuid: string,
     @Headers() headers: any,
@@ -120,7 +118,6 @@ export class BusinessController {
 
   @Post(':uuid/action/:action')
   @HttpCode(HttpStatus.OK)
-  // @ApiResponse({status: HttpStatus.OK, description: 'The records have been successfully fetched.', type: GetTodoDto})
   async runAction(
     @Param('uuid') uuid: string,
     @Param('action') action: string,
@@ -162,7 +159,6 @@ export class BusinessController {
 
   @Get(':uuid/update-status')
   @HttpCode(HttpStatus.OK)
-  // @ApiResponse({status: HttpStatus.OK, description: 'The records have been successfully fetched.', type: GetTodoDto})
   async updateStatus(
     @Param('uuid') uuid: string,
     @Headers() headers: any,
