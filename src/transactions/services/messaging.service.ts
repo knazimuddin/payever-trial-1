@@ -1,7 +1,7 @@
 import { Injectable, HttpService } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { Observable, of } from 'rxjs';
-import { map, tap, catchError, take } from 'rxjs/operators';
+import { map, tap, catchError, take, timeout } from 'rxjs/operators';
 
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
@@ -21,6 +21,8 @@ export class MessagingService {
     rsa: environment.rsa,
   });
 
+  private readonly rpcTimeout: number = 5000;
+
   constructor(
     private readonly httpService: HttpService,
     private readonly transactionsService: TransactionsService,
@@ -32,7 +34,6 @@ export class MessagingService {
 
   getBusinessPaymentOption(transaction: any) {
     return this.bpoService.findOneById(transaction.business_option_id);
-
   }
 
   // Uncomment when payment flow will be retrieved from local projection
@@ -53,10 +54,11 @@ export class MessagingService {
           message,
         ).pipe(
           take(1),
+          timeout(this.rpcTimeout),
           map((msg) => this.messageBusService.unwrapRpcMessage(msg)),
           map((response) => response.payment_flow_d_t_o),
           catchError((e) => {
-            console.error(`Error while sending rpc call:`, e);
+            console.error(`Error while resolving payment flow by rpc call:`, e);
             reject(e);
             return of(null);
           }),
@@ -71,38 +73,39 @@ export class MessagingService {
 
   async getActions(transaction, headers) {
     return new Promise(async (resolve, reject) => {
+      let payload: any;
       try {
-        const payload = {
+        payload = {
           action: 'action.list',
           data: await this.createPayloadData(transaction, headers),
         };
-
-        const message = this.messageBusService.createPaymentMicroMessage(transaction.type, 'action', payload, environment.stub);
-
-        this.rabbitClient.send(
-          { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
-          message,
-        ).pipe(
-          take(1),
-          map((msg) => this.messageBusService.unwrapRpcMessage(msg)),
-          map((actions) => {
-            return Object.keys(actions).map((key) => ({
-              action: key,
-              enabled: actions[key],
-            }));
-          }),
-          tap((actions) => console.log('actions:', actions)),
-          catchError((e) => {
-            console.error(`Error while sending rpc call:`, e);
-            reject(e);
-            return of(null);
-          }),
-        ).subscribe((actions) => {
-          resolve(actions);
-        });
       } catch (error) {
-        reject(error);
+        console.error('Could not prepare payload for actions call:', error);
+        resolve([]);
       }
+
+      const message = this.messageBusService.createPaymentMicroMessage(transaction.type, 'action', payload, environment.stub);
+
+      this.rabbitClient.send(
+        { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
+        message,
+      ).pipe(
+        take(1),
+        timeout(this.rpcTimeout),
+        map((msg) => this.messageBusService.unwrapRpcMessage(msg)),
+        map((actions) => {
+          return Object.keys(actions).map((key) => ({
+            action: key,
+            enabled: actions[key],
+          }));
+        }),
+        catchError((e) => {
+          console.error(`Error while resolving actions by rpc call:`, e);
+          return of([]);
+        }),
+      ).subscribe((actions) => {
+        resolve(actions);
+      });
     });
   }
 
@@ -122,8 +125,6 @@ export class MessagingService {
       action: 'action.do',
       data: dto,
     };
-
-    console.log('RUN ACTION PAYLOAD:', payload.data);
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
 
@@ -147,10 +148,7 @@ export class MessagingService {
 
     const result: any = await this.runPaymentRpc(transaction, payload, 'payment');
 
-    console.log('update status result', result);
-
     this.transactionsService.prepareTransactionForInsert(transaction);
-    console.log('prepare transaction result', transaction);
     await this.transactionsService.updateByUuid(transaction.uuid, transaction);
     return transaction;
   }
@@ -213,7 +211,6 @@ export class MessagingService {
 
     try {
       businessPaymentOption = await this.getBusinessPaymentOption(transaction);
-      console.log('businessPaymentOption', businessPaymentOption);
     } catch (e) {
       throw new Error(`Cannot resolve business payment option: ${e}`);
     }
@@ -222,7 +219,6 @@ export class MessagingService {
 
     if (transaction.payment_flow_id) {
       dto.payment_flow = await this.getPaymentFlow(transaction.payment_flow_id);
-      console.log('payment_flow', dto.payment_flow);
       dto.payment_flow.business_payment_option = businessPaymentOption;
     }
 

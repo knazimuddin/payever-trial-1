@@ -47,7 +47,6 @@ export class BusinessController {
 
   @Get('list')
   @HttpCode(HttpStatus.OK)
-  // @ApiResponse({status: HttpStatus.OK, description: 'The records have been successfully fetched.', type: GetTodoDto, isArray: true})
   async getList(
     @Param('businessId') businessId: string,
     @Query('orderBy') orderBy: string = 'created_at',
@@ -91,15 +90,12 @@ export class BusinessController {
 
   @Get('detail/:uuid')
   @HttpCode(HttpStatus.OK)
-  // @ApiResponse({status: HttpStatus.OK, description: 'The records have been successfully fetched.', type: GetTodoDto})
   async getDetail(
     @Param('uuid') uuid: string,
     @Headers() headers: any,
   ): Promise<any> {
     let transaction;
     let actions;
-
-    console.log('detail page action');
 
     try {
       transaction = await this.transactionsService.findOneByParams({uuid});
@@ -114,7 +110,8 @@ export class BusinessController {
     try {
       actions = await this.messagingService.getActions(transaction, headers);
     } catch (e) {
-      throw new BadRequestException(`Error occured while getting transaction actions: ${e}`);
+      console.error(`Error occured while getting transaction actions: ${e}`);
+      actions = [];
     }
 
     return {...transaction, actions};
@@ -122,7 +119,6 @@ export class BusinessController {
 
   @Post(':uuid/action/:action')
   @HttpCode(HttpStatus.OK)
-  // @ApiResponse({status: HttpStatus.OK, description: 'The records have been successfully fetched.', type: GetTodoDto})
   async runAction(
     @Param('uuid') uuid: string,
     @Param('action') action: string,
@@ -156,7 +152,8 @@ export class BusinessController {
     try {
       actions = await this.messagingService.getActions(updatedTransaction, headers);
     } catch (e) {
-      throw new BadRequestException(`Error occured while getting transaction actions: ${e}`);
+      console.error(`Error occured while getting transaction actions: ${e}`);
+      actions = [];
     }
 
     return updatedTransaction;
@@ -164,7 +161,6 @@ export class BusinessController {
 
   @Get(':uuid/update-status')
   @HttpCode(HttpStatus.OK)
-  // @ApiResponse({status: HttpStatus.OK, description: 'The records have been successfully fetched.', type: GetTodoDto})
   async updateStatus(
     @Param('uuid') uuid: string,
     @Headers() headers: any,
@@ -182,7 +178,8 @@ export class BusinessController {
     try {
       await this.messagingService.updateStatus(transaction, headers);
     } catch (e) {
-      throw new BadRequestException(`Error occured during status update: ${e}`);
+      console.error(`Error occured during status update: ${e}`);
+      throw new BadRequestException(`Error occured during status update. Please try again later.`);
     }
 
     try {
@@ -201,7 +198,8 @@ export class BusinessController {
     try {
       actions = await this.messagingService.getActions(transaction, headers);
     } catch (e) {
-      throw new BadRequestException(`Error occured while getting transaction actions: ${e}`);
+      console.error(`Error occured while getting transaction actions: ${e}`);
+      actions = [];
     }
 
     return {...updatedTransaction, actions};

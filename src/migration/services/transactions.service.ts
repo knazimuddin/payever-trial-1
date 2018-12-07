@@ -13,12 +13,10 @@ export class TransactionsService {
     if (transaction.uuid) {
       const existing = await this.transactionsModel.findOne({uuid: transaction.uuid});
       if (existing) {
-        console.log('record exists');
         return this.transactionsModel.findOneAndUpdate({uuid: transaction.uuid}, transaction);
       }
     }
 
-    console.log('creating new record');
     return await this.transactionsModel.create(transaction);
   }
 

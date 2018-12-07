@@ -22,7 +22,7 @@ export class TransactionsService {
       data.payment_details = JSON.stringify(data.payment_details);
     }
 
-    return this.transactionsModel.findOneAndUpdate({uuid}, data);
+    return await this.transactionsModel.findOneAndUpdate({uuid}, data);
   }
 
   async deleteAll() {
@@ -36,7 +36,7 @@ export class TransactionsService {
         return this.transactionsModel.findOneAndUpdate({uuid: transaction.uuid}, transaction);
       }
     }
-    return this.create(transaction);
+    return await this.create(transaction);
   }
 
   async findOne(uuid: string) {
@@ -49,7 +49,7 @@ export class TransactionsService {
   }
 
   async removeByUuid(uuid: string) {
-    return this.transactionsModel.findOneAndRemove({uuid});
+    return await this.transactionsModel.findOneAndRemove({uuid});
   }
 
   prepareTransactionForInsert(transaction) {
