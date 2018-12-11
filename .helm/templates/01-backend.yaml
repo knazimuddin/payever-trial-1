@@ -56,6 +56,7 @@ spec:
             periodSeconds: 5
 
           readinessProbe:
+            failureThreshold: 15
             httpGet:
               path: /api/status
               port: {{ .Values.service.containerPort }}
