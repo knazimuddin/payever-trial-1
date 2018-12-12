@@ -5,15 +5,30 @@ import { RabbitRoutingKeys } from '../enums';
 
 dotenv.config();
 const env = process.env;
+const isNumeric = (n) => {
+  return !isNaN(parseInt(n, 10)) && isFinite(n);
+};
 
 export const environment: any = {
   production: env.PRODUCTION_MODE === 'true',
   port: env.APP_PORT,
   mongodb: env.MONGODB_URL,
-  checkoutMicroUrlBase: env.MICRO_URL_OLD_CHECKOUT,
+  checkoutMicroUrlBase: env.MICRO_URL_PHP_CHECKOUT,
 
   stub: env.STUB === 'true',
-
+  refreshTokenExpiresIn: (isNumeric(env.JWT_REFRESH_TOKEN_EXPIRES_IN) ?
+    parseInt(env.JWT_REFRESH_TOKEN_EXPIRES_IN, 10) :
+    env.JWT_REFRESH_TOKEN_EXPIRES_IN),
+  jwtOptions: {
+    // this should be set to PEM encoded private key for RSA/ECDSA for production
+    // @see https://github.com/auth0/node-jsonwebtoken#jwtsignpayload-secretorprivatekey-options-callback
+    secretOrPrivateKey: env.JWT_SECRET_TOKEN,
+    signOptions: {
+      expiresIn: (isNumeric(env.JWT_EXPIRES_IN) ?
+        parseInt(env.JWT_EXPIRES_IN, 10) :
+        env.JWT_EXPIRES_IN),
+    },
+  },
   rabbitmq: {
     urls: [env.RABBITMQ_URL],
     queues: [
