@@ -14,7 +14,7 @@ import {
   TransactionsService,
 } from '../services';
 import { environment } from '../../environments';
-import { RabbitRoutingKeys } from '../../enums';
+import { RabbitRoutingKeys, RabbitChannels } from '../../enums';
 
 @Controller()
 export class MicroEventsController {
@@ -31,7 +31,7 @@ export class MicroEventsController {
   }
 
   @MessagePattern({
-    channel: 'async_events_transactions_micro',
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentActionCompleted,
     origin: 'rabbitmq',
   })
@@ -48,7 +48,7 @@ export class MicroEventsController {
   }
 
   @MessagePattern({
-    channel: 'async_events_transactions_micro',
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentHistoryAdd,
     origin: 'rabbitmq',
   })
@@ -66,7 +66,7 @@ export class MicroEventsController {
   }
 
   @MessagePattern({
-    channel: 'async_events_transactions_micro',
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentCreated,
     origin: 'rabbitmq',
   })
@@ -85,7 +85,7 @@ export class MicroEventsController {
   }
 
   @MessagePattern({
-    channel: 'async_events_transactions_micro',
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentUpdated,
     origin: 'rabbitmq',
   })
@@ -100,7 +100,7 @@ export class MicroEventsController {
   }
 
   @MessagePattern({
-    channel: 'async_events_transactions_micro',
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentRemoved,
     origin: 'rabbitmq',
   })
@@ -111,7 +111,7 @@ export class MicroEventsController {
   }
 
   @MessagePattern({
-    channel: 'async_events_transactions_micro',
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.BpoCreated,
     origin: 'rabbitmq',
   })
@@ -126,7 +126,7 @@ export class MicroEventsController {
   }
 
   @MessagePattern({
-    channel: 'async_events_transactions_micro',
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.BpoUpdated,
     origin: 'rabbitmq',
   })
@@ -139,7 +139,7 @@ export class MicroEventsController {
   }
 
   @MessagePattern({
-    channel: 'async_events_transactions_micro',
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentFlowCreated,
     origin: 'rabbitmq',
   })
@@ -147,12 +147,25 @@ export class MicroEventsController {
     const data = this.messageBusService.unwrapMessage(msg.data);
     console.log('FLOW.CREATE', data);
     const flow: any = data.flow;
-    await this.bpoService.createOrUpdate(flow);
+    await this.flowService.createOrUpdate(flow);
     console.log('FLOW.CREATE COMPLETED');
   }
 
   @MessagePattern({
-    channel: 'async_events_transactions_micro',
+    channel: RabbitChannels.Transactions,
+    name: RabbitRoutingKeys.PaymentFlowMigrate,
+    origin: 'rabbitmq',
+  })
+  async onPaymentFlowMigrateEvent(msg: any) {
+    const data = this.messageBusService.unwrapMessage(msg.data);
+    console.log('FLOW.MIGRATE', data);
+    const flow: any = data.flow;
+    await this.flowService.createOrUpdate(flow);
+    console.log('FLOW.MIGRATE COMPLETED');
+  }
+
+  @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentFlowUpdated,
     origin: 'rabbitmq',
   })
@@ -160,12 +173,12 @@ export class MicroEventsController {
     const data = this.messageBusService.unwrapMessage(msg.data);
     console.log('FLOW.UPDATE', data);
     const flow: any = data.flow;
-    await this.bpoService.createOrUpdate(flow);
+    await this.flowService.createOrUpdate(flow);
     console.log('FLOW.UPDATE COMPLETED');
   }
 
   @MessagePattern({
-    channel: 'async_events_transactions_micro',
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentFlowRemoved,
     origin: 'rabbitmq',
   })
@@ -173,7 +186,7 @@ export class MicroEventsController {
     const data = this.messageBusService.unwrapMessage(msg.data);
     console.log('FLOW.REMOVE', data);
     const flow: any = data.flow;
-    await this.bpoService.removeById(flow.id);
+    await this.flowService.removeById(flow.id);
     console.log('FLOW.REMOVE COMPLETED');
   }
 

@@ -37,38 +37,8 @@ export class MessagingService {
   }
 
   // Uncomment when payment flow will be retrieved from local projection
-  // getPaymentFlow(flowId: string) {
-    // return this.flowService.findOne(flowId);
-  // }
-
-  async getPaymentFlow(flowId: string) {
-    return new Promise((resolve, reject) => {
-      const payload = {
-        'payment_flow_id': flowId,
-      };
-      const message = this.messageBusService.createMessage('retrive_payment_flow', payload);
-
-      try {
-        this.rabbitClient.send(
-          { channel: 'rpc_checkout_micro' },
-          message,
-        ).pipe(
-          take(1),
-          timeout(this.rpcTimeout),
-          map((msg) => this.messageBusService.unwrapRpcMessage(msg)),
-          map((response) => response.payment_flow_d_t_o),
-          catchError((e) => {
-            console.error(`Error while resolving payment flow by rpc call:`, e);
-            reject(e);
-            return of(null);
-          }),
-        ).subscribe((actions) => {
-          resolve(actions);
-        });
-      } catch (error) {
-        reject(error);
-      }
-    });
+  getPaymentFlow(flowId: string) {
+    return this.flowService.findOne(flowId);
   }
 
   async getActions(transaction, headers) {
@@ -139,7 +109,13 @@ export class MessagingService {
   }
 
   async updateStatus(transaction, headers) {
-    const dto = await this.createPayloadData(transaction, headers);
+    let dto;
+
+    try {
+      dto = await this.createPayloadData(transaction, headers);
+    } catch (e) {
+      throw new Error(`Cannot prepare dto for update status: ${e}`);
+    }
 
     const payload = {
       action: 'status',
@@ -194,6 +170,7 @@ export class MessagingService {
 
     let dto: any = {};
     let businessPaymentOption;
+    let paymentFlow;
 
     this.fixDates(transaction);
     this.fixId(transaction);
@@ -215,10 +192,20 @@ export class MessagingService {
       throw new Error(`Cannot resolve business payment option: ${e}`);
     }
 
+    try {
+      paymentFlow = await this.getPaymentFlow(transaction.payment_flow_id);
+    } catch (e) {
+      throw new Error(`Cannot resolve payment flow: ${e}`);
+    }
+
+    if (!paymentFlow) {
+      throw new Error(`Payment flow cannot be null.`);
+    }
+
     dto.credentials = businessPaymentOption.credentials;
 
     if (transaction.payment_flow_id) {
-      dto.payment_flow = await this.getPaymentFlow(transaction.payment_flow_id);
+      dto.payment_flow = paymentFlow;
       dto.payment_flow.business_payment_option = businessPaymentOption;
     }
 

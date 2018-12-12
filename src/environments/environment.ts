@@ -127,8 +127,6 @@ export const environment: any = {
             source: 'async_events',
             routingKey: RabbitRoutingKeys.BpoUpdated,
           },
-
-          // Draft
           {
             source: 'async_events',
             routingKey: RabbitRoutingKeys.PaymentFlowCreated,
@@ -140,6 +138,10 @@ export const environment: any = {
           {
             source: 'async_events',
             routingKey: RabbitRoutingKeys.PaymentFlowRemoved,
+          },
+          {
+            source: 'async_events',
+            routingKey: RabbitRoutingKeys.PaymentFlowMigrate,
           },
         ],
       },
