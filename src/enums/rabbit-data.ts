@@ -1,3 +1,7 @@
+export enum RabbitChannels {
+  Transactions = 'async_events_transactions_micro',
+}
+
 export enum RabbitRoutingKeys {
   PaymentActionCompleted = 'payever.event.payment.action.completed',
   PaymentHistoryAdd = 'payever.microservice.payment.history.add',
@@ -6,11 +10,11 @@ export enum RabbitRoutingKeys {
   PaymentRemoved = 'checkout.event.payment.removed',
   PaymentMigrate = 'checkout.event.payment.migrate',
 
-  // Draft
   BpoCreated = 'checkout.event.business-payment-option.created',
   BpoUpdated = 'checkout.event.business-payment-option.updated',
 
-  PaymentFlowCreated = 'payever.event.payment_flow.created',
-  PaymentFlowUpdated = 'payever.event.payment_flow.updated',
-  PaymentFlowRemoved = 'payever.event.payment_flow.removed',
+  PaymentFlowCreated = 'checkout.event.payment-flow.created',
+  PaymentFlowUpdated = 'checkout.event.payment-flow.updated',
+  PaymentFlowRemoved = 'checkout.event.payment-flow.removed',
+  PaymentFlowMigrate = 'checkout.event.payment-flow.migrate',
 }
