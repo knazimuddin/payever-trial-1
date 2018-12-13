@@ -80,7 +80,14 @@ export class MessagingService {
   }
 
   async runAction(transaction, action, actionPayload, headers) {
-    const dto = await this.createPayloadData(transaction, headers);
+    let dto;
+
+    try {
+      dto = await this.createPayloadData(transaction, headers);
+    } catch (e) {
+      throw new Error(`Cannot prepare dto for run action: ${e}`);
+    }
+
     dto.action = action;
 
     if (actionPayload.fields) {
@@ -131,11 +138,9 @@ export class MessagingService {
 
   async sendTransactionUpdate(transaction) {
     this.transformTransactionForPhp(transaction);
-
-    const message = this.messageBusService.createMessage('transactions_app.payment.updated', {
-      payment: transaction,
-    });
-
+    const payload: any = { payment: transaction };
+    console.log(`SEND 'transactions_app.payment.updated', payload:`, payload );
+    const message = this.messageBusService.createMessage('transactions_app.payment.updated', payload);
     this.rabbitClient.send({ channel: 'transactions_app.payment.updated', exchange: 'async_events' }, message).subscribe();
   }
 
@@ -145,6 +150,8 @@ export class MessagingService {
         { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
         this.messageBusService.createPaymentMicroMessage(transaction.type, messageIdentifier, payload, environment.stub),
       ).pipe(
+        take(1),
+        timeout(this.rpcTimeout),
         map((m) => this.messageBusService.unwrapRpcMessage(m)),
         catchError((e) => {
           reject(e);
