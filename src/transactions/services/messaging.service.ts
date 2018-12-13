@@ -138,11 +138,9 @@ export class MessagingService {
 
   async sendTransactionUpdate(transaction) {
     this.transformTransactionForPhp(transaction);
-
-    const message = this.messageBusService.createMessage('transactions_app.payment.updated', {
-      payment: transaction,
-    });
-
+    const payload: any = { payment: transaction };
+    console.log(`SEND 'transactions_app.payment.updated', payload:`, payload );
+    const message = this.messageBusService.createMessage('transactions_app.payment.updated', payload);
     this.rabbitClient.send({ channel: 'transactions_app.payment.updated', exchange: 'async_events' }, message).subscribe();
   }
 
