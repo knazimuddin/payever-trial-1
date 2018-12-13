@@ -18,17 +18,19 @@ import {
 import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { ApiUseTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { snakeCase } from 'lodash';
-
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
-import { MessageBusService } from '@pe/nest-kit/modules/message';
+import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
+
 import { ActionPayloadDto } from '../dto';
 
 import { TransactionsService, TransactionsGridService, MessagingService } from '../services';
 import { environment } from '../../environments';
 
-@Controller('business/:businessUuid')
+@Controller('business/:businessId')
 @ApiUseTags('business')
+@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
+@Roles(RolesEnum.merchant)
 @ApiResponse({status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.'})
 @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.'})
 export class BusinessController {
@@ -46,7 +48,7 @@ export class BusinessController {
   @Get('list')
   @HttpCode(HttpStatus.OK)
   async getList(
-    @Param('businessUuid') businessUuid: string,
+    @Param('businessId') businessId: string,
     @Query('orderBy') orderBy: string = 'created_at',
     @Query('direction') direction: string = 'asc',
     @Query('limit') limit: number = 3,
@@ -57,7 +59,7 @@ export class BusinessController {
     try {
       filters.business_uuid = {
         condition: 'is',
-        value: businessUuid,
+        value: businessId,
       };
 
       const sort = {};
@@ -206,7 +208,7 @@ export class BusinessController {
   @Get('settings')
   @HttpCode(HttpStatus.OK)
   async getSettings(
-    @Param('businessUuid') businessUuid: string,
+    @Param('businessId') businessId: string,
   ): Promise<any> {
     return {
       columns_to_show : [

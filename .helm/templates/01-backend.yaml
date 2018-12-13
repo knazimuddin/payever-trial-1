@@ -52,10 +52,11 @@ spec:
             httpGet:
               path: /api/status
               port: {{ .Values.service.containerPort }}
-            initialDelaySeconds: 5
+            initialDelaySeconds: 80
             periodSeconds: 5
 
           readinessProbe:
+            failureThreshold: 15
             httpGet:
               path: /api/status
               port: {{ .Values.service.containerPort }}
