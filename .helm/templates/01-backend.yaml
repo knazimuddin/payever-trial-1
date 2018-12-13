@@ -68,7 +68,7 @@ spec:
                 name: {{ .Chart.Name }}
 
             - configMapRef:
-                name: nodejs-micro-url-map
+                name: micro-url-map
 
             - secretRef:
                 name: {{ .Chart.Name }}
