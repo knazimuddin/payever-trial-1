@@ -18,8 +18,6 @@ import {
 import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { ApiUseTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { snakeCase } from 'lodash';
-import { Observable, of } from 'rxjs';
-import { map, tap, timeout, catchError, take } from 'rxjs/operators';
 
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
 import { MessageBusService } from '@pe/nest-kit/modules/message';
@@ -138,8 +136,8 @@ export class BusinessController {
     try {
       updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload, headers);
     } catch (e) {
-      console.log('Error occured during running action', e);
-      throw new BadRequestException(`Error occured during running action: ${e}`);
+      console.log('Error occured during running action:\n', e);
+      throw new BadRequestException(e);
     }
 
     // Send update to php

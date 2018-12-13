@@ -80,7 +80,14 @@ export class MessagingService {
   }
 
   async runAction(transaction, action, actionPayload, headers) {
-    const dto = await this.createPayloadData(transaction, headers);
+    let dto;
+
+    try {
+      dto = await this.createPayloadData(transaction, headers);
+    } catch (e) {
+      throw new Error(`Cannot prepare dto for run action: ${e}`);
+    }
+
     dto.action = action;
 
     if (actionPayload.fields) {
@@ -145,6 +152,8 @@ export class MessagingService {
         { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
         this.messageBusService.createPaymentMicroMessage(transaction.type, messageIdentifier, payload, environment.stub),
       ).pipe(
+        take(1),
+        timeout(this.rpcTimeout),
         map((m) => this.messageBusService.unwrapRpcMessage(m)),
         catchError((e) => {
           reject(e);
