@@ -3,7 +3,7 @@ from: {{ env "BUILD_NODE_IMAGE" }}
 
 mount:
   - from: build_dir
-    to: /payever/.npm
+    to: /root/.npm
 
 shell:
   install:
@@ -11,6 +11,7 @@ shell:
     - npm install
 
   setup:
+    - chmod 755 /payever/deploy -R
     - echo '{{ env "CI_COMMIT_SHA" }}' > /payever/version
 
 git:
@@ -28,12 +29,6 @@ git:
 ---
 dimg: {{ env "CI_PROJECT_PATH" }}/{{ env "CI_COMMIT_REF_SLUG" }}
 from: {{ env "PROD_NODE_IMAGE" }}
-
-docker:
-  USER: payever
-  WORKDIR: /payever
-  EXPOSE: "3000"
-  CMD: '/usr/local/bin/npm run start'
 
 import:
   - artifact: {{ env "CI_PROJECT_PATH_SLUG" }}

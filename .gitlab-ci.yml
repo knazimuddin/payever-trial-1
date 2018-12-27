@@ -2,31 +2,32 @@ stages:
   - test_build
   - test
   - build
-  - showroom_deploy
-  - stage_deploy
-  - prod_deploy
+  - deploy
 
 variables:
   REPOSITORY: "$REGISTRY_SERVER/$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
+  DIST_IMAGE: "$REGISTRY_SERVER/$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA"
+  HELM_RELEASE_NAME: "$CI_PROJECT_PATH_SLUG-$NAMESPACE"
 
 before_script:
-  - echo "$REPOSITORY:$CI_COMMIT_SHA"
+  - echo "$DIST_IMAGE"
+  - echo "$HELM_RELEASE_NAME"
 
 
-test_build:
+Test build:
   stage: test_build
   tags:
-    - deploy
+    - test
   only:
     variables:
       - $IN_STAGE_TYPE == "test"
   script:
     - echo "test build"
 
-test:
+Test:
   stage: test
   tags:
-    - deploy
+    - test
   only:
     variables:
       - $IN_STAGE_TYPE == "test"
@@ -38,56 +39,57 @@ test:
 Build:
   stage: build
   script:
-    - dapp dimg build --verbose --name $CI_PROJECT_PATH_SLUG
-    - dapp dimg push --verbose --name $CI_PROJECT_PATH_SLUG $REGISTRY_SERVER --tag=$CI_COMMIT_SHA --registry-username $REGISTRY_LOGIN --registry-password $REGISTRY_PASSWORD
+    - dapp version
+    - dapp bp
+      --name $CI_PROJECT_PATH_SLUG
+      --repo $REGISTRY_SERVER
+      --registry-username $REGISTRY_LOGIN
+      --registry-password $REGISTRY_PASSWORD
+      --tag $CI_COMMIT_SHA
   tags:
-    - deploy
+    - build
   except:
     variables:
       - $IN_STAGE_TYPE == "test"
 
 
 Deploy to showroom:
-  stage: showroom_deploy
+  stage: deploy
   when: manual
   environment:
     name: showroom
   script:
-    - dapp --version
-    - dapp kube deploy
-      --verbose
+    - dapp version
+    - dapp deploy $HELM_RELEASE_NAME
       --name $CI_PROJECT_PATH_SLUG
       --namespace $NAMESPACE
+      --tag=$CI_COMMIT_SHA
       --set "namespace=$NAMESPACE"
-      --set "image.repository=$REPOSITORY"
-      --set "image.tag=$CI_COMMIT_SHA"
+      --set "image.nodejs=$DIST_IMAGE"
       --set "image.pullSecretName=$REGISTRY_PULL_SECRET_NAME"
-      $REPOSITORY
+      --repo $REGISTRY_SERVER
   variables:
     NAMESPACE: developers
   tags:
-    - deploy
+    - showroom
   except:
     variables:
       - $IN_STAGE_TYPE == "test"
-      - $CI_BUILD_REF_NAME == "master"
-      - $CI_BUILD_REF_NAME == "production"
 
 Deploy to staging:
-  stage: stage_deploy
+  stage: deploy
   environment:
     name: staging
   script:
-    - dapp --version
-    - dapp kube deploy
-      --verbose
+    - dapp version
+    - dapp deploy $HELM_RELEASE_NAME
       --name $CI_PROJECT_PATH_SLUG
       --namespace $NAMESPACE
+      --tag=$CI_COMMIT_SHA
       --set "namespace=$NAMESPACE"
-      --set "image.repository=$REPOSITORY"
-      --set "image.tag=$CI_COMMIT_SHA"
+      --set "image.nodejs=$DIST_IMAGE"
       --set "image.pullSecretName=$REGISTRY_PULL_SECRET_NAME"
-      $REPOSITORY
+      --repo $REGISTRY_SERVER
   variables:
     NAMESPACE: staging
   tags:
@@ -96,22 +98,21 @@ Deploy to staging:
     - master
 
 
-deploy to prod:
-  stage: prod_deploy
+Deploy to prod:
+  stage: deploy
   when: manual
   environment:
     name: production
   script:
-    - dapp --version
-    - dapp kube deploy
-      --verbose
+    - dapp version
+    - dapp deploy $HELM_RELEASE_NAME
       --name $CI_PROJECT_PATH_SLUG
       --namespace $NAMESPACE
+      --tag=$CI_COMMIT_SHA
       --set "namespace=$NAMESPACE"
-      --set "image.repository=$REPOSITORY"
-      --set "image.tag=$CI_COMMIT_SHA"
+      --set "image.nodejs=$DIST_IMAGE"
       --set "image.pullSecretName=$REGISTRY_PULL_SECRET_NAME"
-      $REPOSITORY
+      --repo $REGISTRY_SERVER
   variables:
     NAMESPACE: production
   tags:
