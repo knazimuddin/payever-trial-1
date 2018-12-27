@@ -82,7 +82,7 @@ Deploy to staging:
     name: staging
   script:
     - dapp version
-    - dapp deploy
+    - dapp deploy $HELM_RELEASE_NAME
       --name $CI_PROJECT_PATH_SLUG
       --namespace $NAMESPACE
       --tag=$CI_COMMIT_SHA
@@ -105,7 +105,7 @@ Deploy to prod:
     name: production
   script:
     - dapp version
-    - dapp deploy
+    - dapp deploy $HELM_RELEASE_NAME
       --name $CI_PROJECT_PATH_SLUG
       --namespace $NAMESPACE
       --tag=$CI_COMMIT_SHA
