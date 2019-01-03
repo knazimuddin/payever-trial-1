@@ -23,16 +23,15 @@ import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 
 import { ActionPayloadDto } from '../dto';
 
-import { TransactionsService, TransactionsGridService, MessagingService } from '../services';
+import { TransactionsService, TransactionsGridService, MessagingService, BusinessPaymentOptionService } from '../services';
 import { environment } from '../../environments';
 
 @Controller('business/:businessId')
 @ApiUseTags('business')
 // @UseGuards(JwtAuthGuard) TODO: add auth later there, turned off for staging at the moment for quick tests
 @ApiBearerAuth()
-@Roles(RolesEnum.merchant)
-@ApiResponse({status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.'})
-@ApiResponse({status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.'})
+@ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
+@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class BusinessController {
 
   rabbitClient: ClientProxy;
@@ -40,6 +39,7 @@ export class BusinessController {
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly transactionsGridService: TransactionsGridService,
+    private readonly bpoService: BusinessPaymentOptionService,
     private readonly messagingService: MessagingService,
   ) {
     this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
@@ -47,6 +47,7 @@ export class BusinessController {
 
   @Get('list')
   @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant)
   async getList(
     @Param('businessId') businessId: string,
     @Query('orderBy') orderBy: string = 'created_at',
@@ -88,8 +89,25 @@ export class BusinessController {
     }
   }
 
+  @Get('detail/reference/:reference')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  async getDetailByReference(@Param('reference') reference: string) {
+    try {
+      const transaction = await this.transactionsService.findOneByParams({ reference });
+      if (!transaction) {
+        throw new NotFoundException();
+      }
+
+      return { ...transaction };
+    } catch (e) {
+      throw new NotFoundException();
+    }
+  }
+
   @Get('detail/:uuid')
   @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant)
   async getDetail(
     @Param('uuid') uuid: string,
     @Headers() headers: any,
@@ -98,7 +116,7 @@ export class BusinessController {
     let actions;
 
     try {
-      transaction = await this.transactionsService.findOneByParams({uuid});
+      transaction = await this.transactionsService.findOneByParams({ uuid });
     } catch (e) {
       throw new NotFoundException();
     }
@@ -114,11 +132,12 @@ export class BusinessController {
       actions = [];
     }
 
-    return {...transaction, actions};
+    return { ...transaction, actions };
   }
 
   @Post(':uuid/action/:action')
   @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant, RolesEnum.oauth)
   async runAction(
     @Param('uuid') uuid: string,
     @Param('action') action: string,
@@ -161,6 +180,7 @@ export class BusinessController {
 
   @Get(':uuid/update-status')
   @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant)
   async updateStatus(
     @Param('uuid') uuid: string,
     @Headers() headers: any,
@@ -183,7 +203,7 @@ export class BusinessController {
     }
 
     try {
-      updatedTransaction = await this.transactionsService.findOneByParams({uuid});
+      updatedTransaction = await this.transactionsService.findOneByParams({ uuid });
     } catch (e) {
       throw new NotFoundException();
     }
@@ -202,16 +222,17 @@ export class BusinessController {
       actions = [];
     }
 
-    return {...updatedTransaction, actions};
+    return { ...updatedTransaction, actions };
   }
 
   @Get('settings')
   @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant)
   async getSettings(
     @Param('businessId') businessId: string,
   ): Promise<any> {
     return {
-      columns_to_show : [
+      columns_to_show: [
         'created_at',
         'customer_email',
         'customer_name',
