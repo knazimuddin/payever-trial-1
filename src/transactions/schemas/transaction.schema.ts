@@ -51,30 +51,25 @@ export const TransactionHistoryEntrySchema = new Schema({
   action: String,
   amount: Number,
   created_at: Date,
-  // custom_data: any[],
   is_restock_items: Boolean,
   params: String,
   payment_status: String,
   reason: String,
   refund_items: [TransactionRefundItemSchema],
-  // uuid: String,
 });
 
 export const TransactionsSchema = new Schema({
+  action_running: { type: Boolean, required: false, default: false },
   amount: Number,
-  // amount_refunded: Number,
-  // amount_rest: Number,
-  // available_refund_items: [{
-    // payment_item_id: String,
-    // count: 1,
-  // }],
   billing_address: AddressSchema,
-  // business_address - will be resolved on FE via business_uuid
-  business_uuid: {type: String, required: true},
+  business_option_id: Number,
+  business_uuid: {type: String},
   channel: String, // 'store', ...
+  channel_uuid: String,
+  channel_set_uuid: String,
   created_at: {type: Date, required: true},
   currency: {type: String, required: true},
-  customer_email: {type: String, required: true},
+  customer_email: {type: String},
   customer_name: {type: String, required: true},
   delivery_fee: Number,
   down_payment: Number,
@@ -83,8 +78,11 @@ export const TransactionsSchema = new Schema({
   items: [TransactionItemSchema],
   merchant_email: String,
   merchant_name: String,
+  original_id: String, // id from mysql db
   payment_details: String, // Serialized big object
   payment_fee: Number,
+  payment_flow_id: String,
+  place: String,
   reference: String,
   shipping_address: {type: AddressSchema},
   shipping_category: String,
@@ -92,11 +90,10 @@ export const TransactionsSchema = new Schema({
   shipping_option_name: String,
   specific_status: String,
   status: {type: String, required: true},
-  status_color: {type: String, required: true},
+  status_color: {type: String},
   store_id: String,
   store_name: String,
   total: {type: Number, required: true},
-  // total_fee: {type: Number, required: true},
   type: {type: String, required: true},
   updated_at: Date,
   uuid: {type: String, required: true},
@@ -107,7 +104,7 @@ TransactionsSchema.virtual('amount_refunded').get(function() {
 
   if (this.history) {
     this.history
-      .filter((entry) => entry.action === 'refund')
+      .filter((entry) => entry.action === 'refund' || entry.action === 'return')
       .forEach((entry) => totalRefunded += (entry.amount || 0))
     ;
   }

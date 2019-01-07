@@ -4,6 +4,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ApplicationModule } from './app.module';
 import * as cors from 'cors';
 
+import { RabbitmqServer } from '@pe/nest-kit/modules/rabbitmq';
+
 import { environment } from './environments';
 
 async function bootstrap() {
@@ -24,6 +26,13 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api-docs', app, document);
 
-  await app.listen(environment.port);
+  app.connectMicroservice({
+    strategy: new RabbitmqServer(environment.rabbitmq),
+  });
+
+  await app.startAllMicroservicesAsync();
+  await app.listen(environment.port, () => console.log('app started at port', environment.port));
 }
+
+console.log('before bootstrap');
 bootstrap();

@@ -1,0 +1,39 @@
+artifact: {{ env "CI_PROJECT_PATH_SLUG" }}
+from: {{ env "BUILD_NODE_IMAGE" }}
+
+mount:
+  - from: build_dir
+    to: /root/.npm
+
+shell:
+  install:
+    - cd /payever
+    - npm install
+
+  setup:
+    - chmod 755 /payever/deploy -R
+    - echo '{{ env "CI_COMMIT_SHA" }}' > /payever/version
+
+git:
+  - add: /
+    to: /payever
+    owner: payever
+    group: payever
+    stageDependencies:
+      install:
+        - package.json
+        - package-lock.json
+      setup:
+        - "*"
+
+---
+dimg: {{ env "CI_PROJECT_PATH" }}/{{ env "CI_COMMIT_REF_SLUG" }}
+from: {{ env "PROD_NODE_IMAGE" }}
+
+import:
+  - artifact: {{ env "CI_PROJECT_PATH_SLUG" }}
+    add: /payever
+    to: /payever
+    after: setup
+    owner: payever
+    group: payever

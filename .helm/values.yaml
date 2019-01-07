@@ -1,0 +1,11 @@
+namespace: default
+
+replicaCount: 1
+
+image:
+  nodejs: registry.devpayever.com/nodejs-backend/transactions/master
+  pullSecretName: regsecret
+
+service:
+  externalPort: 80
+  containerPort: 3000

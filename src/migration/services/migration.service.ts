@@ -24,8 +24,6 @@ export class MigrationService {
       .leftJoinAndSelect('history.refund_items', 'refund_items')
     ;
 
-    console.log(query.getQueryAndParameters());
-
     return this.format(await query.getMany());
 
   }
