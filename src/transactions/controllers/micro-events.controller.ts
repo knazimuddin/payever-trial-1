@@ -13,6 +13,7 @@ import {
 } from '../services';
 import { environment } from '../../environments';
 import { RabbitRoutingKeys, RabbitChannels } from '../../enums';
+import { StatisticsService } from '../services/statistics.service';
 
 @Controller()
 export class MicroEventsController {
@@ -25,8 +26,8 @@ export class MicroEventsController {
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly flowService: PaymentFlowService,
-  ) {
-  }
+    private readonly statisticsService: StatisticsService,
+  ) {}
 
   @MessagePattern({
     channel: RabbitChannels.Transactions,
@@ -42,6 +43,7 @@ export class MicroEventsController {
     const historyItem = this.transactionsService.prepareTransactionHistoryItemForInsert(data.action, Date.now(), data);
     transaction.history = transaction.history || [];
     transaction.history.push(historyItem);
+    await this.statisticsService.processRefundedTransaction(transaction.uuid, data);
     return await this.transactionsService.updateByUuid(transaction.uuid, Object.assign({}, transaction, data.payment));
   }
 
@@ -93,6 +95,7 @@ export class MicroEventsController {
 
     const transaction: any = data.payment;
     this.transactionsService.prepareTransactionForInsert(transaction);
+    await this.statisticsService.processAcceptedTransaction(transaction.uuid, transaction);
     await this.transactionsService.updateByUuid(transaction.uuid, transaction);
     console.log('TRANSACTION UPDATE COMPLETED');
   }
@@ -122,9 +125,6 @@ export class MicroEventsController {
       ...business_payment_option,
     };
     await this.bpoService.createOrUpdate(bpo);
-    // remove debug count!
-    // const count = await this.bpoService.count();
-    // console.log(`BPO.CREATE COMPLETED, total: ${count}`);
   }
 
   @MessagePattern({
