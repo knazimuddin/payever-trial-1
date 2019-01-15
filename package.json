@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "ts-node src/main.ts",
-    "serve": "nodemon",
+    "server": "nodemon",
     "start:migration:dev": "nodemon --watch src --exec 'ts-node src/migration-main.ts'",
     "test": "jest --config=jest.json",
     "test:watch": "jest --watch --config=jest.json",
