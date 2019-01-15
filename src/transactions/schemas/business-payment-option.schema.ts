@@ -1,4 +1,5 @@
 import { Schema } from 'mongoose';
+import { v4 as uuid } from 'uuid';
 
 const CredentialsSchema = new Schema({
   vendorNumber: String,
@@ -10,7 +11,9 @@ const CredentialsSchema = new Schema({
 
 export const BusinessPaymentOptionSchema = new Schema({
   payment_option_id: Number,
-  id: Number,
+  _id: { type: String, default: uuid },
+  id: { type: Number, unique: true },
+  uuid: { type: String, unique: true },
   accept_fee: Boolean,
   status: String,
   fixed_fee: Number,
@@ -19,9 +22,7 @@ export const BusinessPaymentOptionSchema = new Schema({
   options: String, // json of options array
   completed: Boolean,
   shop_redirect_enabled: Boolean,
-  uuid: String,
 });
-
 
 // {
   // payment_option_id: 9,

@@ -115,12 +115,16 @@ export class MicroEventsController {
   })
   async onBpoCreatedEvent(msg: any) {
     const data = this.messageBusService.unwrapMessage(msg.data);
+    const business_payment_option = data.business_payment_option;
     console.log('BPO.CREATE', data);
-    const bpo: any = data.business_payment_option;
+    const bpo: any = {
+      _id: data.business_payment_option.uuid,
+      ...business_payment_option,
+    };
     await this.bpoService.createOrUpdate(bpo);
     // remove debug count!
-    const count = await this.bpoService.count();
-    console.log(`BPO.CREATE COMPLETED, total: ${count}`);
+    // const count = await this.bpoService.count();
+    // console.log(`BPO.CREATE COMPLETED, total: ${count}`);
   }
 
   @MessagePattern({
