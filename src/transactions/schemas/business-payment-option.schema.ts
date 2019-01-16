@@ -1,27 +1,20 @@
 import { Schema } from 'mongoose';
-
-const CredentialsSchema = new Schema({
-  vendorNumber: String,
-  password: String,
-  isDownPaymentAllowed: Boolean,
-  isEmailNotificationAllowed: Boolean,
-  clickAndCollect: Boolean,
-});
+import { v4 as uuid } from 'uuid';
 
 export const BusinessPaymentOptionSchema = new Schema({
   payment_option_id: Number,
-  id: Number,
+  _id: { type: String, default: uuid },
+  id: { type: Number, unique: true },
+  uuid: { type: String, unique: true },
   accept_fee: Boolean,
   status: String,
   fixed_fee: Number,
   variable_fee: Number,
-  credentials: CredentialsSchema,
+  credentials: Schema.Types.Mixed,
   options: String, // json of options array
   completed: Boolean,
   shop_redirect_enabled: Boolean,
-  uuid: String,
 });
-
 
 // {
   // payment_option_id: 9,
