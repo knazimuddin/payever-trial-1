@@ -27,7 +27,7 @@ git:
         - "*"
 
 ---
-dimg: {{ env "CI_PROJECT_PATH" }}/{{ env "CI_COMMIT_REF_SLUG" }}
+dimg: {{ env "IMAGE_NAME" }}
 from: {{ env "PROD_NODE_IMAGE" }}
 
 import:
