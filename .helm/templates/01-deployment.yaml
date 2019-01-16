@@ -7,6 +7,8 @@ metadata:
 
   labels:
     app: {{ .Chart.Name }}
+    tier: app
+    layer: nodejs-backend
 
   annotations:
     {{ .Chart.Name }}/deploy-timestamp: {{ now }}
@@ -31,6 +33,18 @@ spec:
         app: {{ .Chart.Name }}
 
     spec:
+      priorityClassName: app-9stars
+
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_worker
+                operator: In
+                values:
+                - "true"
+
       imagePullSecrets:
         - name: {{ .Values.image.pullSecretName }}
 

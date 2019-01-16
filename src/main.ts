@@ -1,10 +1,10 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { ApplicationModule } from './app.module';
-import * as cors from 'cors';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { RabbitmqServer } from '@pe/nest-kit/modules/rabbitmq';
+import * as cors from 'cors';
+import { ApplicationModule } from './app.module';
 
 import { environment } from './environments';
 
@@ -31,8 +31,7 @@ async function bootstrap() {
   });
 
   await app.startAllMicroservicesAsync();
-  await app.listen(environment.port, () => console.log('app started at port', environment.port));
+  await app.listen(environment.port, () => console.log('Transactions app started at port', environment.port));
 }
 
-console.log('before bootstrap');
-bootstrap();
+bootstrap().then();
