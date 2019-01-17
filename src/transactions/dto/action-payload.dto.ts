@@ -97,6 +97,13 @@ class UpdateData {
 class VoidData {}
 
 class ChangeAmountData {
+  @IsNumber()
+  @Min(0)
+  @IsNotEmpty()
+  amount: number;
+}
+
+class CaptureData {
   @IsString()
   amount: string;
 }
@@ -108,6 +115,9 @@ class ReminderData {
 
 class FieldsDto {
   /* Remove this layer of wrapping */
+  @IsOptional()
+  @ValidateNested()
+  payment_capture: CaptureData;
 
   @IsOptional()
   @ValidateNested()
