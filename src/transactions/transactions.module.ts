@@ -11,6 +11,7 @@ import {
   TransactionsService,
 } from './services';
 import { TransactionsSchema, PaymentFlowSchema, BusinessPaymentOptionSchema } from './schemas';
+import { StatisticsService } from './services/statistics.service';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { TransactionsSchema, PaymentFlowSchema, BusinessPaymentOptionSchema } fr
     StubService,
     TransactionsGridService,
     TransactionsService,
+    StatisticsService,
   ],
 })
 export class TransactionsModule {}

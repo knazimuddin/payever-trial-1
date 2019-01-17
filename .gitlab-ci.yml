@@ -4,118 +4,183 @@ stages:
   - build
   - deploy
 
-variables:
-  REPOSITORY: "$REGISTRY_SERVER/$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
-  DIST_IMAGE: "$REGISTRY_SERVER/$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG:$CI_COMMIT_SHA"
-  HELM_RELEASE_NAME: "$CI_PROJECT_PATH_SLUG-$NAMESPACE"
-
-before_script:
-  - echo "$DIST_IMAGE"
-  - echo "$HELM_RELEASE_NAME"
-
 
 Test build:
+  image: "$BUILD_NODE_IMAGE"
   stage: test_build
   tags:
     - test
+  artifacts:
+    untracked: true
+    paths:
+      - node_modules/
+    name: "$CI_COMMIT_REF_NAME"
+    expire_in: 1h
   only:
     variables:
       - $IN_STAGE_TYPE == "test"
+  before_script:
+    - node -v
+    - npm -v
   script:
-    - echo "test build"
+    - npm install
 
-Test:
+
+
+.Test: &test
+  image: "$TEST_NODE_IMAGE"
   stage: test
   tags:
     - test
   only:
     variables:
       - $IN_STAGE_TYPE == "test"
+  before_script:
+    - node -v
+    - npm -v
+
+Test security:
+  <<: *test
   script:
-    - echo "test"
+    - npm audit
+
+
+Test lint:
+  <<: *test
+  allow_failure: true
+  script:
+    - tslint -p ./tsconfig.json -c /config/tslint.json
+
+
+Test license:
+  <<: *test
+  script:
+    - license-checker --json > license.json
+    - curl -o - -w "\n%{http_code}\n" -H "Content-Type:application/json" $INTEGRATOR_URL/api/license/check -d "@license.json"| tee >(tail -n 1 | cmp <(echo 2xx) - ) | tee >(grep "char 2"; echo $? > status-code) && grep 0 status-code
 
 
 
-Build:
+
+.Build: &build
   stage: build
-  script:
+  except:
+    variables:
+      - $IN_STAGE_TYPE == "test"
+      - $IN_STAGE_TYPE == "deploy"
+      - $CI_COMMIT_REF_NAME == "production"
+  before_script:
+    - echo "$REGISTRY_SERVER/$IMAGE_NAME:$IMAGE_TAG"
     - dapp version
+  script:
     - dapp bp
       --name $CI_PROJECT_PATH_SLUG
       --repo $REGISTRY_SERVER
       --registry-username $REGISTRY_LOGIN
       --registry-password $REGISTRY_PASSWORD
-      --tag $CI_COMMIT_SHA
+      --tag $IMAGE_TAG
+
+
+Branch build:
+  <<: *build
   tags:
-    - build
+    - branch_build
+  only:
+    - branches
+  variables:
+    IMAGE_NAME: "$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
+    IMAGE_TAG: "$CI_COMMIT_SHA"
+
+
+Tag build:
+  <<: *build
+  tags:
+    - tag_build
+  only:
+    - tags
+  variables:
+    IMAGE_NAME: "$CI_PROJECT_PATH"
+    IMAGE_TAG: "$CI_COMMIT_TAG"
+
+
+
+.Deploy: &deploy
+  stage: deploy
   except:
     variables:
       - $IN_STAGE_TYPE == "test"
+      - $IN_STAGE_TYPE == "deploy"
+      - $CI_COMMIT_REF_NAME == "production"
+  before_script:
+    - echo "$REGISTRY_SERVER/$IMAGE_NAME:$IMAGE_TAG"
+    - dapp version
+  script:
+    - dapp deploy $CI_PROJECT_PATH_SLUG-$NAMESPACE
+      --name $CI_PROJECT_PATH_SLUG
+      --tag=$IMAGE_TAG
+      --set "namespace=$NAMESPACE"
+      --set "image.nodejs=$REGISTRY_SERVER/$IMAGE_NAME:$IMAGE_TAG"
+      --set "image.pullSecretName=$REGISTRY_PULL_SECRET_NAME"
+      --repo $REGISTRY_SERVER
 
 
 Deploy to showroom:
-  stage: deploy
+  <<: *deploy
   when: manual
-  environment:
-    name: showroom
-  script:
-    - dapp version
-    - dapp deploy $HELM_RELEASE_NAME
-      --name $CI_PROJECT_PATH_SLUG
-      --namespace $NAMESPACE
-      --tag=$CI_COMMIT_SHA
-      --set "namespace=$NAMESPACE"
-      --set "image.nodejs=$DIST_IMAGE"
-      --set "image.pullSecretName=$REGISTRY_PULL_SECRET_NAME"
-      --repo $REGISTRY_SERVER
-  variables:
-    NAMESPACE: developers
   tags:
-    - showroom
+    - showroom_deploy
+  environment:
+    name: test
+  variables:
+    IMAGE_NAME: "$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
+    IMAGE_TAG: "$CI_COMMIT_SHA"
+    NAMESPACE: developers
+  only:
+    - branches
   except:
     variables:
       - $IN_STAGE_TYPE == "test"
+      - $CI_COMMIT_REF_NAME == "production"
+      - $CI_COMMIT_REF_NAME == "master"
 
-Deploy to staging:
-  stage: deploy
-  environment:
-    name: staging
-  script:
-    - dapp version
-    - dapp deploy $HELM_RELEASE_NAME
-      --name $CI_PROJECT_PATH_SLUG
-      --namespace $NAMESPACE
-      --tag=$CI_COMMIT_SHA
-      --set "namespace=$NAMESPACE"
-      --set "image.nodejs=$DIST_IMAGE"
-      --set "image.pullSecretName=$REGISTRY_PULL_SECRET_NAME"
-      --repo $REGISTRY_SERVER
-  variables:
-    NAMESPACE: staging
+
+Deploy to test:
+  <<: *deploy
   tags:
-    - staging
+    - test_deploy
+  environment:
+    name: test
+  variables:
+    IMAGE_NAME: "$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
+    IMAGE_TAG: "$CI_COMMIT_SHA"
+    NAMESPACE: developers
   only:
     - master
 
 
-Deploy to prod:
-  stage: deploy
+Deploy to staging:
+  <<: *deploy
+  tags:
+    - staging_deploy
+  environment:
+    name: staging
+  variables:
+    IMAGE_NAME: "$CI_PROJECT_PATH"
+    IMAGE_TAG: "$CI_COMMIT_TAG"
+    NAMESPACE: staging
+  only:
+    - tags
+
+
+Deploy to production:
+  <<: *deploy
   when: manual
+  tags:
+    - production_deploy
   environment:
     name: production
-  script:
-    - dapp version
-    - dapp deploy $HELM_RELEASE_NAME
-      --name $CI_PROJECT_PATH_SLUG
-      --namespace $NAMESPACE
-      --tag=$CI_COMMIT_SHA
-      --set "namespace=$NAMESPACE"
-      --set "image.nodejs=$DIST_IMAGE"
-      --set "image.pullSecretName=$REGISTRY_PULL_SECRET_NAME"
-      --repo $REGISTRY_SERVER
   variables:
+    IMAGE_NAME: "$CI_PROJECT_PATH"
+    IMAGE_TAG: "$CI_COMMIT_TAG"
     NAMESPACE: production
-  tags:
-    - prod
   only:
-    - production
+    - tags
