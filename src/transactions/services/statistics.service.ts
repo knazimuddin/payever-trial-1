@@ -3,7 +3,6 @@ import { ClientProxy } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
 import { Model } from 'mongoose';
-import { v4 as uuid } from 'uuid';
 import { environment } from '../../environments';
 
 @Injectable()
@@ -37,6 +36,9 @@ export class StatisticsService {
               id: existing.uuid,
               amount: updating.amount,
               date: updating.updated_at,
+              channel_set: {
+                id: existing.channel_set_uuid,
+              },
               business: {
                 id: existing.business_uuid,
               },
@@ -68,6 +70,9 @@ export class StatisticsService {
               id: existing.uuid,
               amount: refund.data.amount,
               date: existing.updated_at,
+              channel_set: {
+                id: existing.channel_set_uuid,
+              },
               business: {
                 id: existing.business_uuid,
               },
