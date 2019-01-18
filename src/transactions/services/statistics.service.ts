@@ -36,6 +36,7 @@ export class StatisticsService {
               id: existing.uuid,
               amount: updating.amount,
               date: updating.updated_at,
+              items: existing.items,
               channel_set: {
                 id: existing.channel_set_uuid,
               },
@@ -70,6 +71,7 @@ export class StatisticsService {
               id: existing.uuid,
               amount: refund.data.amount,
               date: existing.updated_at,
+              items: existing.items,
               channel_set: {
                 id: existing.channel_set_uuid,
               },
