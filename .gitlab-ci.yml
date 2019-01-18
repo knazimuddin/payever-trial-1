@@ -61,13 +61,19 @@ Test license:
 
 
 
-.Build: &build
+Build:
   stage: build
+  tags:
+    - build
+  only:
+    - branches
+  variables:
+    IMAGE_NAME: "$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
+    IMAGE_TAG: "$CI_COMMIT_SHA"
   except:
     variables:
       - $IN_STAGE_TYPE == "test"
       - $IN_STAGE_TYPE == "deploy"
-      - $CI_COMMIT_REF_NAME == "production"
   before_script:
     - echo "$REGISTRY_SERVER/$IMAGE_NAME:$IMAGE_TAG"
     - dapp version
@@ -80,26 +86,25 @@ Test license:
       --tag $IMAGE_TAG
 
 
-Branch build:
-  <<: *build
+Tagging image:
+  stage: build
   tags:
-    - branch_build
-  only:
-    - branches
-  variables:
-    IMAGE_NAME: "$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
-    IMAGE_TAG: "$CI_COMMIT_SHA"
-
-
-Tag build:
-  <<: *build
-  tags:
-    - tag_build
+    - production_deploy
   only:
     - tags
   variables:
-    IMAGE_NAME: "$CI_PROJECT_PATH"
-    IMAGE_TAG: "$CI_COMMIT_TAG"
+    BRANCH_IMAGE: "$REGISTRY_SERVER/$CI_PROJECT_PATH/master:$CI_COMMIT_SHA"
+    TAG_IMAGE: "$REGISTRY_SERVER/$CI_PROJECT_PATH:$CI_COMMIT_TAG"
+  except:
+    variables:
+      - $IN_STAGE_TYPE == "deploy"
+  before_script:
+    - echo "$BRANCH_IMAGE"
+    - echo "$TAG_IMAGE"
+  script:
+    - docker pull $BRANCH_IMAGE
+    - docker tag $BRANCH_IMAGE $TAG_IMAGE
+    - docker push $TAG_IMAGE
 
 
 
@@ -108,8 +113,6 @@ Tag build:
   except:
     variables:
       - $IN_STAGE_TYPE == "test"
-      - $IN_STAGE_TYPE == "deploy"
-      - $CI_COMMIT_REF_NAME == "production"
   before_script:
     - echo "$REGISTRY_SERVER/$IMAGE_NAME:$IMAGE_TAG"
     - dapp version
@@ -129,32 +132,13 @@ Deploy to showroom:
   tags:
     - showroom_deploy
   environment:
-    name: test
+    name: showroom
   variables:
     IMAGE_NAME: "$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
     IMAGE_TAG: "$CI_COMMIT_SHA"
     NAMESPACE: developers
   only:
     - branches
-  except:
-    variables:
-      - $IN_STAGE_TYPE == "test"
-      - $CI_COMMIT_REF_NAME == "production"
-      - $CI_COMMIT_REF_NAME == "master"
-
-
-Deploy to test:
-  <<: *deploy
-  tags:
-    - test_deploy
-  environment:
-    name: test
-  variables:
-    IMAGE_NAME: "$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
-    IMAGE_TAG: "$CI_COMMIT_SHA"
-    NAMESPACE: developers
-  only:
-    - master
 
 
 Deploy to staging:
@@ -164,16 +148,15 @@ Deploy to staging:
   environment:
     name: staging
   variables:
-    IMAGE_NAME: "$CI_PROJECT_PATH"
-    IMAGE_TAG: "$CI_COMMIT_TAG"
+    IMAGE_NAME: "$CI_PROJECT_PATH/$CI_COMMIT_REF_SLUG"
+    IMAGE_TAG: "$CI_COMMIT_SHA"
     NAMESPACE: staging
   only:
-    - tags
+    - master
 
 
 Deploy to production:
   <<: *deploy
-  when: manual
   tags:
     - production_deploy
   environment:
