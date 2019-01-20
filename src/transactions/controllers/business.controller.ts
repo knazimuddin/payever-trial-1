@@ -1,30 +1,32 @@
 import {
+  BadRequestException,
   Body,
   Controller,
-  Delete,
   Get,
   Headers,
   HttpCode,
   HttpStatus,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-  Query,
-  InternalServerErrorException,
-  BadRequestException,
   NotFoundException,
+  Param,
+  Post,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ClientProxy, MessagePattern } from '@nestjs/microservices';
-import { ApiUseTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { snakeCase } from 'lodash';
-import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
+import { ClientProxy } from '@nestjs/microservices';
+import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
+import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
+import { snakeCase } from 'lodash';
+import { environment } from '../../environments';
 
 import { ActionPayloadDto } from '../dto';
 
-import { TransactionsService, TransactionsGridService, MessagingService, BusinessPaymentOptionService } from '../services';
-import { environment } from '../../environments';
+import {
+  BusinessPaymentOptionService,
+  MessagingService,
+  TransactionsGridService,
+  TransactionsService,
+} from '../services';
 
 @Controller('business/:businessId')
 @ApiUseTags('business')
@@ -34,7 +36,7 @@ import { environment } from '../../environments';
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class BusinessController {
 
-  rabbitClient: ClientProxy;
+  private rabbitClient: ClientProxy;
 
   constructor(
     private readonly transactionsService: TransactionsService,
@@ -48,7 +50,7 @@ export class BusinessController {
   @Get('list')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
-  async getList(
+  public async getList(
     @Param('businessId') businessId: string,
     @Query('orderBy') orderBy: string = 'created_at',
     @Query('direction') direction: string = 'asc',
@@ -57,58 +59,50 @@ export class BusinessController {
     @Query('query') search: string,
     @Query('filters') filters: any = {},
   ): Promise<any> {
-    try {
-      filters.business_uuid = {
-        condition: 'is',
-        value: businessId,
-      };
+    filters.business_uuid = {
+      condition: 'is',
+      value: businessId,
+    };
 
-      const sort = {};
-      sort[snakeCase(orderBy)] = direction.toLowerCase();
+    const sort = {};
+    sort[snakeCase(orderBy)] = direction.toLowerCase();
 
-      return Promise.all([
+    return Promise
+      .all([
         this.transactionsGridService.findMany(filters, sort, search, +page, +limit),
         this.transactionsGridService.count(filters, search),
         this.transactionsGridService.total(filters, search),
       ])
-        .then((res) => {
-          return {
-            collection: res[0],
-            pagination_data: {
-              totalCount: res[1],
-              total: res[2],
-              current: page,
-            },
-            filters: {},
-            usage: {},
-          };
-        });
-
-    } catch (error) {
-      throw error;
-    }
+      .then((res) => {
+        return {
+          collection: res[0],
+          pagination_data: {
+            totalCount: res[1],
+            total: res[2],
+            current: page,
+          },
+          filters: {},
+          usage: {},
+        };
+      });
   }
 
   @Get('detail/reference/:reference')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
-  async getDetailByReference(@Param('reference') reference: string) {
-    try {
-      const transaction = await this.transactionsService.findOneByParams({ reference });
-      if (!transaction) {
-        throw new NotFoundException();
-      }
-
-      return { ...transaction };
-    } catch (e) {
+  public async getDetailByReference(@Param('reference') reference: string) {
+    const transaction = await this.transactionsService.findOneByParams({ reference });
+    if (!transaction) {
       throw new NotFoundException();
     }
+
+    return { ...transaction };
   }
 
   @Get('detail/:uuid')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
-  async getDetail(
+  public async getDetail(
     @Param('uuid') uuid: string,
     @Headers() headers: any,
   ): Promise<any> {
@@ -138,7 +132,7 @@ export class BusinessController {
   @Post(':uuid/action/:action')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
-  async runAction(
+  public async runAction(
     @Param('uuid') uuid: string,
     @Param('action') action: string,
     @Body() actionPayload: ActionPayloadDto,
@@ -169,10 +163,9 @@ export class BusinessController {
     }
 
     try {
-      actions = await this.messagingService.getActions(updatedTransaction, headers);
+      await this.messagingService.getActions(updatedTransaction, headers);
     } catch (e) {
       console.error(`Error occured while getting transaction actions: ${e}`);
-      actions = [];
     }
 
     return updatedTransaction;
@@ -181,7 +174,7 @@ export class BusinessController {
   @Get(':uuid/update-status')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
-  async updateStatus(
+  public async updateStatus(
     @Param('uuid') uuid: string,
     @Headers() headers: any,
   ): Promise<any> {
@@ -228,7 +221,7 @@ export class BusinessController {
   @Get('settings')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
-  async getSettings(
+  public async getSettings(
     @Param('businessId') businessId: string,
   ): Promise<any> {
     return {
@@ -249,5 +242,4 @@ export class BusinessController {
       order_by: '',
     };
   }
-
 }

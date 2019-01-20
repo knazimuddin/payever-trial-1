@@ -6,53 +6,60 @@ import { v4 as uuidFactory } from 'uuid';
 @Injectable()
 export class TransactionsService {
 
-  constructor(@InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>) {
-  }
+  constructor(
+    @InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>,
+  ) {}
 
-  async create(transaction: any) {
+  public async create(transaction: any) {
     if (!transaction.uuid) {
       transaction.uuid = uuidFactory();
     }
-    return await this.transactionsModel.create(transaction);
+
+    return this.transactionsModel.create(transaction);
   }
 
-  async updateByUuid(uuid, data: any) {
+  public async updateByUuid(uuid, data: any) {
     // a bit dirty, sorry
     if (typeof(data.payment_details) !== 'string') {
       data.payment_details = JSON.stringify(data.payment_details);
     }
 
-    return await this.transactionsModel.findOneAndUpdate({uuid}, data);
+    return this.transactionsModel.findOneAndUpdate({uuid}, data);
   }
 
-  async deleteAll() {
-    return await this.transactionsModel.collection.drop();
+  public async deleteAll() {
+    return this.transactionsModel.collection.drop();
   }
 
-  async createOrUpdate(transaction: any) {
+  public async createOrUpdate(transaction: any) {
     if (transaction.uuid) {
       const existing = await this.transactionsModel.findOne({uuid: transaction.uuid});
       if (existing) {
         return this.transactionsModel.findOneAndUpdate({uuid: transaction.uuid}, transaction);
       }
     }
-    return await this.create(transaction);
+
+    return this.create(transaction);
   }
 
-  async findOne(uuid: string) {
-    return await this.findOneByParams({uuid});
+  public async findOne(uuid: string) {
+    return this.findOneByParams({uuid});
   }
 
-  async findOneByParams(params) {
+  public async findOneByParams(params) {
     const transaction = await this.transactionsModel.findOne(params);
-    return transaction ? this.prepareTransactionForOutput(transaction.toObject({virtuals: true})) : null;
+
+    return transaction
+      ? this.prepareTransactionForOutput(transaction.toObject({virtuals: true}))
+      : null
+    ;
   }
 
-  async removeByUuid(uuid: string) {
-    return await this.transactionsModel.findOneAndRemove({uuid});
+  public async removeByUuid(uuid: string) {
+    return this.transactionsModel.findOneAndRemove({uuid});
   }
 
-  prepareTransactionForInsert(transaction) {
+  public prepareTransactionForInsert(transaction) {
     if (transaction.address) {
       transaction.billing_address = transaction.address;
     }
@@ -78,13 +85,13 @@ export class TransactionsService {
     }
 
     if (transaction.history && transaction.history.length) {
-      const updatedHistory = transaction.history.map((historyItem) => {
+      transaction.history.map((historyItem) => {
         return this.prepareTransactionHistoryItemForInsert(historyItem.action, historyItem.created_at, historyItem);
       });
     }
   }
 
-  prepareTransactionHistoryItemForInsert(historyType, createdAt, data) {
+  public prepareTransactionHistoryItemForInsert(historyType, createdAt, data) {
     const result: any = {
       ...data.data,
       action: historyType,
@@ -101,10 +108,10 @@ export class TransactionsService {
   private prepareTransactionForOutput(transaction) {
     try {
       transaction.payment_details = transaction.payment_details ? JSON.parse(transaction.payment_details) : {};
-    } catch(e) {
+    } catch (e) {
       // just skipping payment_details
     }
+
     return transaction;
   }
-
 }

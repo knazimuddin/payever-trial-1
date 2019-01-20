@@ -2,10 +2,9 @@ import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 
 import { MessageBusService } from '@pe/nest-kit/modules/message';
-import { ActionPayloadDto } from '../dto';
 import { RabbitRoutingKeys } from '../../enums';
-import { TransactionsService, MessagingService } from '../services';
 import { environment } from '../../environments';
+import { TransactionsService } from '../services';
 
 @Controller()
 export class MigrateEventsController {
@@ -22,7 +21,7 @@ export class MigrateEventsController {
     name: RabbitRoutingKeys.PaymentMigrate,
     origin: 'rabbitmq',
   })
-  async onActionMigrateEvent(msg: any) {
+  public async onActionMigrateEvent(msg: any) {
     const data = this.messageBusService.unwrapMessage(msg.data);
     console.log('ACTION.MIGRATE!', data.payment);
     const transaction: any = data.payment;
@@ -35,5 +34,4 @@ export class MigrateEventsController {
     await this.transactionsService.createOrUpdate(transaction);
     console.log('TRANSACTION MIGRATE COMPLETED');
   }
-
 }

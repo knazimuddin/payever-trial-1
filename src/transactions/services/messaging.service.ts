@@ -1,16 +1,16 @@
-import { Injectable, HttpService } from '@nestjs/common';
+import { HttpService, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { Observable, of } from 'rxjs';
-import { map, tap, catchError, take, timeout } from 'rxjs/operators';
 
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
+import { of } from 'rxjs';
+import { catchError, map, take, timeout } from 'rxjs/operators';
 
-import { TransactionsService } from './transactions.service';
+import { environment } from '../../environments';
 import { BusinessPaymentOptionService } from './business-payment-option.service';
 import { PaymentFlowService } from './payment-flow.service';
 
-import { environment } from '../../environments';
+import { TransactionsService } from './transactions.service';
 
 @Injectable()
 export class MessagingService {
@@ -32,16 +32,16 @@ export class MessagingService {
     this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
   }
 
-  getBusinessPaymentOption(transaction: any) {
+  public getBusinessPaymentOption(transaction: any) {
     return this.bpoService.findOneById(transaction.business_option_id);
   }
 
   // Uncomment when payment flow will be retrieved from local projection
-  getPaymentFlow(flowId: string) {
+  public getPaymentFlow(flowId: string) {
     return this.flowService.findOne(flowId);
   }
 
-  async getActions(transaction, headers) {
+  public async getActions(transaction, headers) {
     return new Promise(async (resolve, reject) => {
       let payload: any;
       try {
@@ -54,7 +54,12 @@ export class MessagingService {
         resolve([]);
       }
 
-      const message = this.messageBusService.createPaymentMicroMessage(transaction.type, 'action', payload, environment.stub);
+      const message = this.messageBusService.createPaymentMicroMessage(
+        transaction.type,
+        'action',
+        payload,
+        environment.stub,
+      );
 
       this.rabbitClient.send(
         { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
@@ -71,6 +76,7 @@ export class MessagingService {
         }),
         catchError((e) => {
           console.error(`Error while resolving actions by rpc call:`, e);
+
           return of([]);
         }),
       ).subscribe((actions) => {
@@ -79,7 +85,7 @@ export class MessagingService {
     });
   }
 
-  async runAction(transaction, action, actionPayload, headers) {
+  public async runAction(transaction, action, actionPayload, headers) {
     let dto;
 
     try {
@@ -109,13 +115,16 @@ export class MessagingService {
     updatedTransaction.payment_details = rpcResult.payment_details;
     updatedTransaction.items = rpcResult.payment_items;
     updatedTransaction.place = rpcResult.workflow_state;
-    delete updatedTransaction.history; // we do not update history here. History events comming separately, there is a chance to overwrite saved history here
+    // We do not update history here.
+    // History events coming separately, there is a chance to overwrite saved history here
+    delete updatedTransaction.history;
     this.transactionsService.prepareTransactionForInsert(updatedTransaction);
     await this.transactionsService.updateByUuid(updatedTransaction.uuid, updatedTransaction);
+
     return updatedTransaction;
   }
 
-  async updateStatus(transaction, headers) {
+  public async updateStatus(transaction, headers) {
     let dto;
 
     try {
@@ -129,32 +138,45 @@ export class MessagingService {
       data: dto,
     };
 
-    const result: any = await this.runPaymentRpc(transaction, payload, 'payment');
+    await this.runPaymentRpc(transaction, payload, 'payment');
 
     this.transactionsService.prepareTransactionForInsert(transaction);
     await this.transactionsService.updateByUuid(transaction.uuid, transaction);
+
     return transaction;
   }
 
-  async sendTransactionUpdate(transaction) {
+  public async sendTransactionUpdate(transaction) {
     this.transformTransactionForPhp(transaction);
     const payload: any = { payment: transaction };
     console.log(`SEND 'transactions_app.payment.updated', payload:`, payload );
     const message = this.messageBusService.createMessage('transactions_app.payment.updated', payload);
-    this.rabbitClient.send({ channel: 'transactions_app.payment.updated', exchange: 'async_events' }, message).subscribe();
+    this.rabbitClient
+      .send(
+        { channel: 'transactions_app.payment.updated', exchange: 'async_events' },
+        message,
+      )
+      .subscribe()
+    ;
   }
 
   private async runPaymentRpc(transaction, payload, messageIdentifier) {
     return new Promise((resolve, reject) => {
       this.rabbitClient.send(
         { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
-        this.messageBusService.createPaymentMicroMessage(transaction.type, messageIdentifier, payload, environment.stub),
+        this.messageBusService.createPaymentMicroMessage(
+          transaction.type,
+          messageIdentifier,
+          payload,
+          environment.stub,
+        ),
       ).pipe(
         take(1),
         timeout(this.rpcTimeout),
         map((m) => this.messageBusService.unwrapRpcMessage(m)),
         catchError((e) => {
           reject(e);
+
           return of(null);
         }),
       ).subscribe((reply) => {
@@ -169,7 +191,7 @@ export class MessagingService {
     if (typeof(transaction.payment_details) === 'string') {
       try {
         transaction.payment_details = JSON.parse(transaction.payment_details);
-      } catch(e) {
+      } catch (e) {
         transaction.payment_details = {};
         // just skipping payment_details
       }
@@ -185,11 +207,13 @@ export class MessagingService {
     // @TODO this should be done on BE side
     transaction.reference = transaction.uuid;
 
-    dto = {...dto,
+    dto = {
+      ...dto,
       payment: transaction,
       payment_details: transaction.payment_details,
       business: {
-        id: 1 // dummy id - php guys say it doesnot affect anything... but can we trust it?)
+        // dummy id - php guys say it does not affect anything... but can we trust it?)
+        id: 1,
       },
     };
 
@@ -244,11 +268,11 @@ export class MessagingService {
     if (action === 'change_amount' && fields.payment_change_amount) {
       fields.amount = fields.payment_change_amount.amount || fields.amount || 0;
     }
+
     return fields;
   }
 
   private transformTransactionForPhp(transaction) {
     transaction.id = transaction.original_id;
   }
-
 }
