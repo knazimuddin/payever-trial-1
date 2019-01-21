@@ -81,7 +81,7 @@ spec:
             failureThreshold: 15
 
           resources:
-{{ toYaml .Values.resources | indent 10 }}
+{{ toYaml .Values.resources | indent 12 }}
 
           envFrom:
             - configMapRef:
