@@ -5,6 +5,7 @@ import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
 import { TransactionsService } from '../services';
+import { StatisticsService } from '../services/statistics.service';
 
 @Controller()
 export class MigrateEventsController {
@@ -13,8 +14,10 @@ export class MigrateEventsController {
     rsa: environment.rsa,
   });
 
-  constructor(private readonly transactionsService: TransactionsService) {
-  }
+  constructor(
+    private readonly transactionsService: TransactionsService,
+    private readonly statisticsService: StatisticsService,
+  ) {}
 
   @MessagePattern({
     channel: 'async_events_transactions_micro',
@@ -31,7 +34,8 @@ export class MigrateEventsController {
       transaction.original_id = data.payment.id;
     }
 
-    await this.transactionsService.createOrUpdate(transaction);
+    const created = await this.transactionsService.createOrUpdate(transaction);
+    await this.statisticsService.processMigratedTransaction(created);
     console.log('TRANSACTION MIGRATE COMPLETED');
   }
 }

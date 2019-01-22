@@ -3,6 +3,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
 import { Model } from 'mongoose';
+import { RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
 
 @Injectable()
@@ -11,7 +12,7 @@ export class StatisticsService {
   private rabbitClient: ClientProxy;
 
   constructor(
-    @InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>
+    @InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>,
   ) {
     this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
   }
@@ -27,11 +28,11 @@ export class StatisticsService {
       await this.rabbitClient
         .send(
           {
-            channel: 'transactions.event.payment.add',
+            channel: RabbitRoutingKeys.TransactionsPaymentAdd,
             exchange: 'async_events',
           },
           {
-            name: 'transactions.event.payment.add',
+            name: RabbitRoutingKeys.TransactionsPaymentAdd,
             payload: {
               id: existing.uuid,
               amount: updating.amount,
@@ -42,6 +43,69 @@ export class StatisticsService {
               },
               business: {
                 id: existing.business_uuid,
+              },
+            },
+          },
+        )
+        .subscribe()
+      ;
+    }
+  }
+
+  public async processMigratedTransaction(transaction: any) {
+    if (transaction.status === 'STATUS_ACCEPTED' || transaction.status === 'STATUS_PAID') {
+      await this.rabbitClient
+        .send(
+          {
+            channel: RabbitRoutingKeys.TransactionsPaymentAdd,
+            exchange: 'async_events',
+          },
+          {
+            name: RabbitRoutingKeys.TransactionsPaymentAdd,
+            payload: {
+              id: transaction.uuid,
+              amount: transaction.amount,
+              date: transaction.updated_at,
+              items: transaction.items,
+              channel_set: {
+                id: transaction.channel_set_uuid,
+              },
+              business: {
+                id: transaction.business_uuid,
+              },
+            },
+          },
+        )
+        .subscribe()
+      ;
+    }
+
+    if (transaction.status === 'STATUS_REFUNDED') {
+      let refundedAmount: number = 0.0;
+      for (const item of transaction.history) {
+        if (item.action === 'refund') {
+          refundedAmount = Number(refundedAmount) + Number(item.amount);
+        }
+      }
+
+      await this.rabbitClient
+        .send(
+          {
+            channel: RabbitRoutingKeys.TransactionsPaymentAdd,
+            exchange: 'async_events',
+          },
+          {
+            name: RabbitRoutingKeys.TransactionsPaymentAdd,
+            payload: {
+              id: transaction.uuid,
+              amount: Number(transaction.amount) - Number(refundedAmount),
+              date: transaction.updated_at,
+              items: transaction.items,
+              channel_set: {
+                id: transaction.channel_set_uuid,
+              },
+              business: {
+                id: transaction.business_uuid,
               },
             },
           },
@@ -62,11 +126,11 @@ export class StatisticsService {
       await this.rabbitClient
         .send(
           {
-            channel: 'transactions.event.payment.subtract',
+            channel: RabbitRoutingKeys.TransactionsPaymentSubtract,
             exchange: 'async_events',
           },
           {
-            name: 'transactions.event.payment.subtract',
+            name: RabbitRoutingKeys.TransactionsPaymentSubtract,
             payload: {
               id: existing.uuid,
               amount: refund.data.amount,
