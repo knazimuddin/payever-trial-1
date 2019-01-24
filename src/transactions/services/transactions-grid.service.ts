@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { v4 as uuid } from 'uuid';
+import { FilterConditionEnum } from '../enum';
 
 export interface Filter {
-  condition: 'is' | 'isNot' | 'isIn' | 'isNotIn' | 'startsWith' | 'endsWith' | 'contains' | 'doesNotContain' | 'isDate' | 'isNotDate' | 'afterDate' | 'beforeDate' | 'betweenDates' | 'greaterThan' | 'lessThan' | 'between';
+  condition: FilterConditionEnum;
   value: any;
 }
 
@@ -14,7 +14,7 @@ export class TransactionsGridService {
   constructor(@InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>) {
   }
 
-  async findMany(filters = {}, sort = {}, search = null, page: number = null, limit = null) {
+  public async findMany(filters = {}, sort = {}, search = null, page: number = null, limit = null) {
     const mongoFilters = {};
     if (filters) {
       this.addFilters(mongoFilters, filters);
@@ -23,7 +23,7 @@ export class TransactionsGridService {
       this.addSearchFilters(mongoFilters, search);
     }
 
-    return await this.transactionsModel
+    return this.transactionsModel
       .find(mongoFilters)
       .limit(limit)
       .skip(limit * (page - 1))
@@ -31,7 +31,7 @@ export class TransactionsGridService {
       .exec();
   }
 
-  async count(
+  public async count(
     filters,
     search = null,
   ) {
@@ -43,12 +43,12 @@ export class TransactionsGridService {
       this.addSearchFilters(mongoFilters, search);
     }
 
-    return await this.transactionsModel
+    return this.transactionsModel
       .count(mongoFilters)
       .exec();
   }
 
-  async total(
+  public async total(
     filters = {},
     search = null,
   ) {
@@ -89,53 +89,55 @@ export class TransactionsGridService {
   }
 
   /**
-   * is|isNot|contains|doesNotContain|startsWith|endsWith|afterDate|beforeDate|isDate|isNotDate|betweenDates|greaterThan|lessThan|between|choice ",
+   * is|isNot|contains|doesNotContain|startsWith
+   * |endsWith|afterDate|beforeDate|isDate|isNotDate
+   * |betweenDates|greaterThan|lessThan|between|choice
    */
   private addFilter(mongoFilters, field: string, filter: Filter) {
     switch (filter.condition) {
-      case 'is':
+      case FilterConditionEnum.Is:
         mongoFilters[field] = { $eq: filter.value };
         break;
-      case 'isNot':
+      case FilterConditionEnum.IsNot:
         mongoFilters[field] = { $ne: filter.value };
         break;
-      case 'isIn':
+      case FilterConditionEnum.IsIn:
         mongoFilters[field] = { $in: filter.value };
         break;
-      case 'isNotIn':
+      case FilterConditionEnum.IsNotIn:
         mongoFilters[field] = { $nin: filter.value };
         break;
-      case 'startsWith':
+      case FilterConditionEnum.StartsWith:
         mongoFilters[field] = { $regex: new RegExp(`^${filter.value}`) };
         break;
-      case 'endsWith':
+      case FilterConditionEnum.EndsWith:
         mongoFilters[field] = { $regex: new RegExp(`${filter.value}$`) };
         break;
-      case 'contains':
+      case FilterConditionEnum.Contains:
         mongoFilters[field] = { $regex: new RegExp(`${filter.value}`) };
         break;
-      case 'doesNotContain':
+      case FilterConditionEnum.DoesNotContain:
         mongoFilters[field] = { $not: new RegExp(`${filter.value}`) };
         break;
-      case 'greaterThan':
+      case FilterConditionEnum.GreaterThan:
         mongoFilters[field] = { $gte: filter.value };
         break;
-      case 'lessThan':
+      case FilterConditionEnum.LessThan:
         mongoFilters[field] = { $lte: filter.value };
         break;
-      case 'between':
+      case FilterConditionEnum.Between:
         mongoFilters[field] = {
           $gte: filter.value.from,
           $lte: filter.value.to,
         };
         break;
-      case 'isDate':
+      case FilterConditionEnum.IsDate:
         mongoFilters[field] = {
           $gte: this.getTargetDate(filter.value),
           $lt: this.getTargetTomorrowDate(filter.value),
         };
         break;
-      case 'isNotDate':
+      case FilterConditionEnum.IsNotDate:
         mongoFilters[field] = {
           $not: {
             $gte: this.getTargetDate(filter.value),
@@ -143,17 +145,17 @@ export class TransactionsGridService {
           },
         };
         break;
-      case 'afterDate':
+      case FilterConditionEnum.AfterDate:
         mongoFilters[field] = {
           $gte: this.getTargetTomorrowDate(filter.value),
         };
         break;
-      case 'beforeDate':
+      case FilterConditionEnum.BeforeDate:
         mongoFilters[field] = {
           $lt: this.getTargetDate(filter.value),
         };
         break;
-      case 'betweenDates':
+      case FilterConditionEnum.BetweenDates:
         mongoFilters[field] = {
           $gte: this.getTargetDate(filter.value.dateFrom),
           $lt: this.getTargetTomorrowDate(filter.value.dateTo),
@@ -167,6 +169,7 @@ export class TransactionsGridService {
     date.setUTCHours(0);
     date.setUTCMinutes(0);
     date.setUTCSeconds(0);
+
     return date;
   }
 
@@ -176,7 +179,7 @@ export class TransactionsGridService {
     date.setUTCHours(0);
     date.setUTCMinutes(0);
     date.setUTCSeconds(0);
+
     return date;
   }
-
 }

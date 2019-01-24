@@ -1,16 +1,10 @@
-import {
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
-import { MigrationService } from '../services';
-import { TransactionsService } from '../services';
+import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
 import * as Serialize from 'php-serialize';
+import { MigrationService, TransactionsService } from '../services';
 
 class GeneralSerializer {
-  fix() {
-    const fixObjectKeys = function(obj) {
+  public fix() {
+    const fixObjectKeys = (obj) => {
       Object.keys(obj).forEach((key) => {
         const fixedKey = key.replace(/\0\*\0/g, '');
         obj[fixedKey] = obj[key];
@@ -34,17 +28,18 @@ export class MigrationController {
 
   @Get('fetch')
   @HttpCode(HttpStatus.OK)
-  async fetch(
+  public async fetch(
   ) {
-    let mysqlData = await this.migrationService.find();
+    const mysqlData = await this.migrationService.find();
     // mysqlData = mysqlData.map((d) => d.payments_flow);
     console.log(mysqlData);
+
     return 'fetched';
   }
 
   @Get('insert')
   @HttpCode(HttpStatus.OK)
-  async insert(
+  public async insert(
   ) {
     // const mysqlData = await this.migrationService.find();
     // console.log(mysqlData);
@@ -53,7 +48,7 @@ export class MigrationController {
 
   @Get('migrate')
   @HttpCode(HttpStatus.OK)
-  async migrate(
+  public async migrate(
   ) {
     const mysqlData = await this.migrationService.find();
 
@@ -107,7 +102,7 @@ export class MigrationController {
           });
           transaction.payment_details.fix();
           transaction.payment_details = JSON.stringify(transaction.payment_details);
-        } catch(e) {
+        } catch (e) {
           console.log('unserialization error - payment details not saved for transaction: ', transaction.uuid);
         }
       }
@@ -116,5 +111,4 @@ export class MigrationController {
 
     return 'inserted';
   }
-
 }

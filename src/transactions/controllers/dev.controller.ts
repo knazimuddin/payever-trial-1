@@ -1,11 +1,5 @@
-import {
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-} from '@nestjs/common';
-import { TransactionsService, StubService } from '../services';
+import { Controller, Get, HttpCode, HttpStatus, Param } from '@nestjs/common';
+import { StubService, TransactionsService } from '../services';
 
 @Controller('dev')
 export class DevController {
@@ -17,7 +11,7 @@ export class DevController {
 
   @Get('create/:businessUuid/:count')
   @HttpCode(HttpStatus.OK)
-  async createTestTransactions(
+  public async createTestTransactions(
     @Param('businessUuid') businessUuid: string,
     @Param('count') count: number,
   ) {
@@ -30,9 +24,8 @@ export class DevController {
 
   @Get('clean')
   @HttpCode(HttpStatus.OK)
-  async removeTestTransactions(
+  public async removeTestTransactions(
   ) {
-    return await this.transactionsService.deleteAll();
+    return this.transactionsService.deleteAll();
   }
-
 }

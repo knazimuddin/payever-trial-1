@@ -5,10 +5,11 @@ import { Model } from 'mongoose';
 @Injectable()
 export class PaymentFlowService {
 
-  constructor(@InjectModel('PaymentFlowSchema') private readonly model: Model<any>) {
-  }
+  constructor(
+    @InjectModel('PaymentFlowSchema') private readonly model: Model<any>,
+  ) {}
 
-  async createOrUpdate(flow: any) {
+  public async createOrUpdate(flow: any) {
     if (flow.id) {
       flow = this.wrap(flow);
       const existing = await this.model.findOne({id: flow.id});
@@ -20,21 +21,22 @@ export class PaymentFlowService {
     }
   }
 
-  async findOne(id: string) {
-    return await this.findOneByParams({id});
+  public async findOne(id: string) {
+    return this.findOneByParams({id});
   }
 
-  async findOneByParams(params) {
+  public async findOneByParams(params) {
     const flow = await this.model.findOne(params);
+
     return flow ? this.unwrap(flow.toObject({virtuals: true})) : null;
   }
 
-  async removeById(id: string) {
+  public async removeById(id: string) {
     return this.model.findOneAndRemove({id});
   }
 
   private async create(flow: any) {
-    return await this.model.create(flow);
+    return this.model.create(flow);
   }
 
   private wrap(flow) {
@@ -44,5 +46,4 @@ export class PaymentFlowService {
   private unwrap(flow) {
     return flow;
   }
-
 }

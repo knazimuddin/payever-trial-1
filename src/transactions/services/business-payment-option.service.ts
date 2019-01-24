@@ -8,11 +8,11 @@ export class BusinessPaymentOptionService {
   constructor(@InjectModel('BusinessPaymentOptionSchema') private readonly model: Model<any>) {
   }
 
-  async count() {
-    return await this.model.count({}).exec();
+  public async count() {
+    return this.model.count({}).exec();
   }
 
-  async createOrUpdate(bpo: any) {
+  public async createOrUpdate(bpo: any) {
     if (bpo.uuid) {
       bpo = this.wrap(bpo);
       const existing = await this.model.findOne({uuid: bpo.uuid});
@@ -24,21 +24,37 @@ export class BusinessPaymentOptionService {
     }
   }
 
-  async findOneById(id: number) {
-    return await this.findOneByParams({id});
+  public async findOneById(id: number) {
+    return this.findOneByParams({id});
   }
 
-  async findOneByParams(params) {
+  public async findOneByParams(params) {
     const bpo = await this.model.findOne(params);
-    return bpo ? this.unwrap(bpo.toObject({virtuals: true})) : null;
+
+    return bpo
+      ? this.unwrap(bpo.toObject({virtuals: true}))
+      : null
+    ;
   }
 
-  async removeById(id: string) {
+  public async removeById(id: string) {
     return this.model.findOneAndRemove({id});
   }
 
+  public unwrap(bpo) {
+    if (bpo.options) {
+      try {
+        bpo.options = JSON.parse(bpo.options);
+      } catch (e) {
+        // nothing we should do
+      }
+    }
+
+    return bpo;
+  }
+
   private async create(bpo: any) {
-    return await this.model.create(bpo);
+    return this.model.create(bpo);
   }
 
   private wrap(bpo) {
@@ -53,18 +69,7 @@ export class BusinessPaymentOptionService {
         // nothing we should do
       }
     }
+
     return bpo;
   }
-
-  unwrap(bpo) {
-    if (bpo.options) {
-      try {
-        bpo.options = JSON.parse(bpo.options);
-      } catch (e) {
-        // nothing we should do
-      }
-    }
-    return bpo;
-  }
-
 }
