@@ -112,8 +112,10 @@ export class MessagingService {
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
 
     const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
-    updatedTransaction.payment_details = rpcResult.payment_details;
-    updatedTransaction.items = rpcResult.payment_items;
+    updatedTransaction.payment_details = rpcResult.payment_details && rpcResult.payment_details.length
+      ? rpcResult.payment_details : transaction.payment_details;
+    updatedTransaction.items = rpcResult.payment_items && rpcResult.payment_items.length
+      ? rpcResult.payment_items : transaction.items;
     updatedTransaction.place = rpcResult.workflow_state;
     // We do not update history here.
     // History events coming separately, there is a chance to overwrite saved history here
@@ -149,7 +151,7 @@ export class MessagingService {
   public async sendTransactionUpdate(transaction) {
     this.transformTransactionForPhp(transaction);
     const payload: any = { payment: transaction };
-    console.log(`SEND 'transactions_app.payment.updated', payload:`, payload );
+    console.log(`SEND 'transactions_app.payment.updated', payload:`, payload);
     const message = this.messageBusService.createMessage('transactions_app.payment.updated', payload);
     this.rabbitClient
       .send(
@@ -157,7 +159,7 @@ export class MessagingService {
         message,
       )
       .subscribe()
-    ;
+      ;
   }
 
   private async runPaymentRpc(transaction, payload, messageIdentifier) {
@@ -188,7 +190,7 @@ export class MessagingService {
   private async createPayloadData(transaction: any, headers: any) {
     transaction = Object.assign({}, transaction); // making clone before manipulations
 
-    if (typeof(transaction.payment_details) === 'string') {
+    if (typeof (transaction.payment_details) === 'string') {
       try {
         transaction.payment_details = JSON.parse(transaction.payment_details);
       } catch (e) {

@@ -152,7 +152,7 @@ export class BusinessController {
       updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload, headers);
     } catch (e) {
       console.log('Error occured during running action:\n', e);
-      throw new BadRequestException(e);
+      throw new BadRequestException(e.message);
     }
 
     // Send update to php
