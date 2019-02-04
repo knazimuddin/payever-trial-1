@@ -140,7 +140,17 @@ export class MessagingService {
       data: dto,
     };
 
-    await this.runPaymentRpc(transaction, payload, 'payment');
+    const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'payment');
+    const rpcPayment: any = rpcResult.payment;
+
+    transaction = Object.assign(
+      {},
+      transaction,
+      {
+        status: rpcPayment.status ? rpcPayment.status : transaction.status,
+        specific_status: rpcPayment.specific_status ? rpcPayment.specific_status : transaction.specific_status,
+      }
+    );
 
     this.transactionsService.prepareTransactionForInsert(transaction);
     await this.transactionsService.updateByUuid(transaction.uuid, transaction);
