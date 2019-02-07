@@ -25,7 +25,7 @@ export class TransactionsService {
         entity: transaction.business_uuid,
         app: 'transaction',
       },
-      `You have new transaction in ${transaction.store_name}`,
+      `notification.transactions.title.new_transaction ${transaction.store_name}`,
       {
         storeId: transaction.store_id,
       },
