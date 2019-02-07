@@ -25,9 +25,9 @@ export class TransactionsService {
         entity: transaction.business_uuid,
         app: 'transaction',
       },
-      `notification.transactions.title.new_transaction ${transaction.store_name}`,
+      `notification.transactions.title.new_transaction`,
       {
-        storeId: transaction.store_id,
+        transactionId: transaction.uuid,
       },
     );
     return this.transactionsModel.create(transaction);
