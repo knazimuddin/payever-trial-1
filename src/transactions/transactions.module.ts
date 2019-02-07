@@ -1,7 +1,13 @@
 import { Module, HttpModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { BusinessController, DevController, MicroEventsController, MigrateEventsController } from './controllers';
+import {
+  BusinessController,
+  DevController,
+  MicroEventsController,
+  MigrateEventsController,
+  UserController
+} from './controllers';
 import {
   BusinessPaymentOptionService,
   MessagingService,
@@ -25,6 +31,7 @@ import { StatisticsService } from './services/statistics.service';
     DevController,
     MicroEventsController,
     MigrateEventsController,
+    UserController
   ],
   providers: [
     BusinessPaymentOptionService,

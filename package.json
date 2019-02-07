@@ -48,6 +48,7 @@
     "ts-jest": "^20.0.14",
     "ts-loader": "^4.5.0",
     "ts-node": "^6.0.0",
+    "tsconfig-paths": "^3.5.0",
     "tslint": "^5.12.1"
   }
 }
