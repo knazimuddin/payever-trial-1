@@ -75,4 +75,28 @@ export class UserController {
         };
       });
   }
+
+  @Get('settings')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.user)
+  public async getSettings(
+  ): Promise<any> {
+    return {
+      columns_to_show: [
+        'created_at',
+        'customer_email',
+        'customer_name',
+        'merchant_email',
+        'merchant_name',
+        'specific_status',
+        'status',
+        'type',
+      ],
+      direction: '',
+      filters: null,
+      id: null, // 9???
+      limit: '',
+      order_by: '',
+    };
+  }
 }
