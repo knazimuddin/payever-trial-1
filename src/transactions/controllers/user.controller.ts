@@ -1,8 +1,8 @@
 import {
   Controller,
-  Get,
+  Get, Headers,
   HttpCode,
-  HttpStatus,
+  HttpStatus, NotFoundException,
   Param,
   Query,
   UseGuards,
@@ -74,6 +74,29 @@ export class UserController {
           usage: {},
         };
       });
+  }
+
+  @Get('detail/:uuid')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.user)
+  public async getDetail(
+    @Param('uuid') uuid: string,
+    @Headers() headers: any,
+  ): Promise<any> {
+    let transaction;
+    let actions = [];
+
+    try {
+      transaction = await this.transactionsService.findOneByParams({ uuid });
+    } catch (e) {
+      throw new NotFoundException();
+    }
+
+    if (!transaction) {
+      throw new NotFoundException();
+    }
+
+    return { ...transaction, actions };
   }
 
   @Get('settings')
