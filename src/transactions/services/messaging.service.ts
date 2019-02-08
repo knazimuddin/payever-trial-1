@@ -149,8 +149,8 @@ export class MessagingService {
       {
         status: rpcPayment.status ? rpcPayment.status : transaction.status,
         specific_status: rpcPayment.specific_status ? rpcPayment.specific_status : transaction.specific_status,
-        payment_details: rpcPayment.payment_details && rpcPayment.payment_details.length
-          ? rpcPayment.payment_details : transaction.payment_details,
+        payment_details: rpcResult.payment_details && rpcResult.payment_details.length
+          ? rpcResult.payment_details : transaction.payment_details,
       }
     );
 
