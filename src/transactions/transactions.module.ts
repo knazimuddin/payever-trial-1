@@ -2,7 +2,13 @@ import { Module, HttpModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 
-import { BusinessController, DevController, MicroEventsController, MigrateEventsController } from './controllers';
+import {
+  BusinessController,
+  DevController,
+  MicroEventsController,
+  MigrateEventsController,
+  UserController
+} from './controllers';
 import {
   BusinessPaymentOptionService,
   MessagingService,
@@ -30,6 +36,7 @@ import {environment} from '../environments';
     DevController,
     MicroEventsController,
     MigrateEventsController,
+    UserController
   ],
   providers: [
     BusinessPaymentOptionService,

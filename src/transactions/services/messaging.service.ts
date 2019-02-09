@@ -143,17 +143,18 @@ export class MessagingService {
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'payment');
     const rpcPayment: any = rpcResult.payment;
 
-    transaction = Object.assign(
+    const updatedTransaction: any = Object.assign(
       {},
       transaction,
       {
         status: rpcPayment.status ? rpcPayment.status : transaction.status,
         specific_status: rpcPayment.specific_status ? rpcPayment.specific_status : transaction.specific_status,
+        payment_details: rpcResult.payment_details ? rpcResult.payment_details : transaction.payment_details,
       }
     );
 
-    this.transactionsService.prepareTransactionForInsert(transaction);
-    await this.transactionsService.updateByUuid(transaction.uuid, transaction);
+    this.transactionsService.prepareTransactionForInsert(updatedTransaction);
+    await this.transactionsService.updateByUuid(transaction.uuid, updatedTransaction);
 
     return transaction;
   }

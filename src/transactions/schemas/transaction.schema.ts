@@ -97,6 +97,7 @@ export const TransactionsSchema = new Schema({
   type: {type: String, required: true},
   updated_at: Date,
   uuid: {type: String, required: true},
+  user_uuid: String,
 });
 
 TransactionsSchema.virtual('amount_refunded').get(function() {
