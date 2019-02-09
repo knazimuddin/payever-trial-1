@@ -15,7 +15,7 @@ import { TransactionsService } from './transactions.service';
 @Injectable()
 export class MessagingService {
 
-  private rabbitClient: ClientProxy;
+  private rabbitClient: RabbitmqClient;
 
   private messageBusService: MessageBusService = new MessageBusService({
     rsa: environment.rsa,
@@ -164,13 +164,12 @@ export class MessagingService {
     const payload: any = { payment: transaction };
     console.log(`SEND 'transactions_app.payment.updated', payload:`, payload);
     const message = this.messageBusService.createMessage('transactions_app.payment.updated', payload);
-    this.rabbitClient
-      .send(
+
+    await this.rabbitClient
+      .sendAsync(
         { channel: 'transactions_app.payment.updated', exchange: 'async_events' },
         message,
-      )
-      .subscribe()
-      ;
+      );
   }
 
   private async runPaymentRpc(transaction, payload, messageIdentifier) {
