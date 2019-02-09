@@ -1,3 +1,4 @@
+import { ApmModule } from '@pe/nest-kit/modules/apm';
 import { Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtAuthModule } from '@pe/nest-kit/modules/auth';
@@ -18,6 +19,7 @@ import { TransactionsModule } from './transactions/transactions.module';
       },
     ),
     StatusModule,
+    ApmModule.register(),
   ],
   providers: [
   ],

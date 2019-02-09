@@ -15,6 +15,7 @@ import {
   StubService,
   TransactionsGridService,
   TransactionsService,
+  DtoValidationService,
 } from './services';
 import { TransactionsSchema, PaymentFlowSchema, BusinessPaymentOptionSchema } from './schemas';
 import { StatisticsService } from './services/statistics.service';
@@ -41,6 +42,7 @@ import { StatisticsService } from './services/statistics.service';
     TransactionsGridService,
     TransactionsService,
     StatisticsService,
+    DtoValidationService,
   ],
 })
 export class TransactionsModule {}

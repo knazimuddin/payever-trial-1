@@ -26,6 +26,7 @@ import {
   MessagingService,
   TransactionsGridService,
   TransactionsService,
+  DtoValidationService,
 } from '../services';
 
 @Controller('business/:businessId')
@@ -41,7 +42,7 @@ export class BusinessController {
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly transactionsGridService: TransactionsGridService,
-    private readonly bpoService: BusinessPaymentOptionService,
+    private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
   ) {
     this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
@@ -140,8 +141,8 @@ export class BusinessController {
   ): Promise<any> {
     let transaction: any;
     let updatedTransaction: any;
-    let actions: any;
 
+    this.dtoValidation.checkFileUploadDto(actionPayload);
     try {
       transaction = await this.transactionsService.findOne(uuid);
     } catch (e) {
@@ -152,7 +153,7 @@ export class BusinessController {
       updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload, headers);
     } catch (e) {
       console.log('Error occured during running action:\n', e);
-      throw new BadRequestException(e.message);
+      throw new BadRequestException(e);
     }
 
     // Send update to php
