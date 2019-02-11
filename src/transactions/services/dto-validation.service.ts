@@ -9,9 +9,11 @@ export class DtoValidationService {
    * @param uploadDto dto to validate
    */
   public checkFileUploadDto(uploadDto: ActionPayloadDto): void {
-    for (const file of uploadDto.files) {
-      if (file.url && file.url.indexOf(' ') > -1) {
-        file.url = encodeURI(file.url);
+    if (uploadDto && uploadDto.files && typeof uploadDto.files[Symbol.iterator] === 'function') {
+      for (const file of uploadDto.files) {
+        if (file.url && file.url.indexOf(' ') > -1) {
+          file.url = encodeURI(file.url);
+        }
       }
     }
   }
