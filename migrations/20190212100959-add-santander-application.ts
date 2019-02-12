@@ -55,6 +55,7 @@ async function up(db) {
   }
 
   await transactionsDb.collection('transactionsschemas').bulkWrite(updates);
+  await client.close();
   console.log(`Completed in ${Date.now() - now}ms`)
 
   return null;
