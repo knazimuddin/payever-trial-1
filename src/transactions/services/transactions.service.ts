@@ -8,7 +8,7 @@ export class TransactionsService {
 
   constructor(
     @InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>,
-  ) {}
+  ) { }
 
   public async create(transaction: any) {
     if (!transaction.uuid) {
@@ -20,12 +20,12 @@ export class TransactionsService {
 
   public async updateByUuid(uuid, data: any) {
     // a bit dirty, sorry
-    if (typeof(data.payment_details) !== 'string') {
+    if (typeof (data.payment_details) !== 'string') {
       this.setSantanderApplication(data);
       data.payment_details = JSON.stringify(data.payment_details);
     }
 
-    return this.transactionsModel.findOneAndUpdate({uuid}, data);
+    return this.transactionsModel.findOneAndUpdate({ uuid }, data);
   }
 
   public async deleteAll() {
@@ -34,9 +34,9 @@ export class TransactionsService {
 
   public async createOrUpdate(transaction: any) {
     if (transaction.uuid) {
-      const existing = await this.transactionsModel.findOne({uuid: transaction.uuid});
+      const existing = await this.transactionsModel.findOne({ uuid: transaction.uuid });
       if (existing) {
-        return this.transactionsModel.findOneAndUpdate({uuid: transaction.uuid}, transaction);
+        return this.transactionsModel.findOneAndUpdate({ uuid: transaction.uuid }, transaction);
       }
     }
 
@@ -44,20 +44,20 @@ export class TransactionsService {
   }
 
   public async findOne(uuid: string) {
-    return this.findOneByParams({uuid});
+    return this.findOneByParams({ uuid });
   }
 
   public async findOneByParams(params) {
     const transaction = await this.transactionsModel.findOne(params);
 
     return transaction
-      ? this.prepareTransactionForOutput(transaction.toObject({virtuals: true}))
+      ? this.prepareTransactionForOutput(transaction.toObject({ virtuals: true }))
       : null
-    ;
+      ;
   }
 
   public async removeByUuid(uuid: string) {
-    return this.transactionsModel.findOneAndRemove({uuid});
+    return this.transactionsModel.findOneAndRemove({ uuid });
   }
 
   public prepareTransactionForInsert(transaction) {
@@ -109,22 +109,19 @@ export class TransactionsService {
 
   private setSantanderApplication(transaction: any): void {
     transaction.santander_application = [];
-     if (transaction.payment_details.application_no) {
-       transaction.santander_application.push(transaction.payment_details.application_no);
-     }
 
-     if (transaction.payment_details.finance_id) {
-       transaction.santander_application.push(transaction.payment_details.application_no);
-     }
+    if (transaction.payment_details.finance_id) {
+      transaction.santander_application.push(transaction.payment_details.finance_id);
+    }
 
-     if (transaction.payment_details.application_no) {
-       transaction.santander_application.push(transaction.payment_details.application_no);
-     }
+    if (transaction.payment_details.application_no) {
+      transaction.santander_application.push(transaction.payment_details.application_no);
+    }
 
-     if (transaction.payment_details.application_number) {
-       transaction.santander_application.push(transaction.payment_details.application_no);
-     }
- }
+    if (transaction.payment_details.application_number) {
+      transaction.santander_application.push(transaction.payment_details.application_number);
+    }
+  }
 
   private prepareTransactionForOutput(transaction) {
     try {
