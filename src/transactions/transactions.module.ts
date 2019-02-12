@@ -19,7 +19,6 @@ import {
 } from './services';
 import { TransactionsSchema, PaymentFlowSchema, BusinessPaymentOptionSchema } from './schemas';
 import { StatisticsService } from './services/statistics.service';
-import { TransactionMapper } from './mappers';
 
 @Module({
   imports: [
@@ -44,7 +43,6 @@ import { TransactionMapper } from './mappers';
     TransactionsService,
     StatisticsService,
     DtoValidationService,
-    TransactionMapper,
   ],
 })
 export class TransactionsModule {}
