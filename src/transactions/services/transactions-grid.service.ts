@@ -77,6 +77,8 @@ export class TransactionsGridService {
     search = search.replace(/^#/, ''); // cutting # symbol
     const regex = new RegExp(search);
     filters.$or = [
+      { merchant_name: regex},
+      { merchant_email: regex},
       { customer_name: regex},
       { customer_email: regex },
       { reference: regex },
