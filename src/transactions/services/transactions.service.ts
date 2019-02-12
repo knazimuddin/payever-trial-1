@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { v4 as uuidFactory } from 'uuid';
+import { TransactionMapper } from '../mappers';
 
 @Injectable()
 export class TransactionsService {
 
   constructor(
     @InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>,
+    private readonly transactionMapper: TransactionMapper,
   ) {}
 
   public async create(transaction: any) {
@@ -19,12 +21,9 @@ export class TransactionsService {
   }
 
   public async updateByUuid(uuid, data: any) {
-    // a bit dirty, sorry
-    if (typeof(data.payment_details) !== 'string') {
-      data.payment_details = JSON.stringify(data.payment_details);
-    }
+    const transaction = this.transactionMapper.mapExternalToLocalTransaction(data);
 
-    return this.transactionsModel.findOneAndUpdate({uuid}, data);
+    return this.transactionsModel.findOneAndUpdate({uuid}, transaction);
   }
 
   public async deleteAll() {
@@ -60,29 +59,7 @@ export class TransactionsService {
   }
 
   public prepareTransactionForInsert(transaction) {
-    if (transaction.address) {
-      transaction.billing_address = transaction.address;
-    }
-
-    transaction.type = transaction.type || transaction.payment_type;
-
-    if (transaction.payment_details) {
-      transaction.payment_details = JSON.stringify(transaction.payment_details);
-    }
-
-    if (transaction.business) {
-      transaction.business_uuid = transaction.business.uuid;
-      transaction.merchant_name = transaction.business.company_name;
-      transaction.merchant_email = transaction.business.company_email;
-    }
-
-    if (transaction.payment_flow) {
-      transaction.payment_flow_id = transaction.payment_flow.id;
-    }
-
-    if (transaction.channel_set) {
-      transaction.channel_set_uuid = transaction.channel_set.uuid;
-    }
+    transaction = this.transactionMapper.mapExternalToLocalTransaction(transaction);
 
     if (transaction.history && transaction.history.length) {
       transaction.history.map((historyItem) => {
