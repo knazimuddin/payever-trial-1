@@ -12,12 +12,9 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
 import { snakeCase } from 'lodash';
-import { environment } from '../../environments';
 
 import { ActionPayloadDto } from '../dto';
 
@@ -36,16 +33,12 @@ import {
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class BusinessController {
-
-  private rabbitClient: ClientProxy;
-
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly transactionsGridService: TransactionsGridService,
     private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
   ) {
-    this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
   }
 
   @Get('list')
@@ -64,28 +57,7 @@ export class BusinessController {
       condition: 'is',
       value: businessId,
     };
-
-    const sort = {};
-    sort[snakeCase(orderBy)] = direction.toLowerCase();
-
-    return Promise
-      .all([
-        this.transactionsGridService.findMany(filters, sort, search, +page, +limit),
-        this.transactionsGridService.count(filters, search),
-        this.transactionsGridService.total(filters, search),
-      ])
-      .then((res) => {
-        return {
-          collection: res[0],
-          pagination_data: {
-            totalCount: res[1],
-            total: res[2],
-            current: page,
-          },
-          filters: {},
-          usage: {},
-        };
-      });
+    return this.transactionsGridService.getList(filters, orderBy, direction, search, +page, +limit);
   }
 
   @Get('detail/reference/:reference')

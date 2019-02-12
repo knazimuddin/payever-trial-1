@@ -6,7 +6,8 @@ import {
   DevController,
   MicroEventsController,
   MigrateEventsController,
-  UserController
+  UserController,
+  AdminController
 } from './controllers';
 import {
   BusinessPaymentOptionService,
@@ -32,7 +33,8 @@ import { StatisticsService } from './services/statistics.service';
     DevController,
     MicroEventsController,
     MigrateEventsController,
-    UserController
+    UserController,
+    AdminController
   ],
   providers: [
     BusinessPaymentOptionService,
