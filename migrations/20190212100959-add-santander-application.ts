@@ -1,9 +1,19 @@
+import { MongoClient, ObjectId } from 'mongodb';
+
 async function up(db) {
-  const transactions = await db._find('transactionsschemas', {});
+  const transactionsConnectionString = db.connectionString;
+  const client = new MongoClient(transactionsConnectionString);
+  await client.connect();
+
+  const transactionsDb = await client.db();
+
+  const now = Date.now();
+  const transactions = await transactionsDb.collection('transactionsschemas').find().toArray();
   const count_total = transactions.length;
   let counter = 0;
   console.log(`Processing total ${count_total} entries...`)
 
+  const updates = [];
   for (const transaction of transactions) {
     if (!transaction.santander_application) {
       const santander_applications = [];
@@ -27,15 +37,15 @@ async function up(db) {
         santander_applications.push(appNoMatch[1])
       }
 
-      await db._run(
-        'update',
-        'transactionsschemas',
+      updates.push(
         {
-          query: { _id: transaction._id },
-          update: { $set: { santander_applications } },
-          options: {},
-        },
-      );
+          updateOne:
+          {
+            filter: { _id: transaction._id },
+            update: { $set: { santander_applications } }
+          }
+        }
+      )
     }
 
     counter++;
@@ -43,6 +53,9 @@ async function up(db) {
       console.log(`Processed ${counter} of ${count_total}`)
     }
   }
+
+  await transactionsDb.collection('transactionsschemas').bulkWrite(updates);
+  console.log(`Completed in ${Date.now() - now}ms`)
 
   return null;
 }

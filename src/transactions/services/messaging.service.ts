@@ -21,7 +21,7 @@ export class MessagingService {
     rsa: environment.rsa,
   });
 
-  private readonly rpcTimeout: number = 15000;
+  private readonly rpcTimeout: number = 30000;
 
   constructor(
     private readonly httpService: HttpService,
