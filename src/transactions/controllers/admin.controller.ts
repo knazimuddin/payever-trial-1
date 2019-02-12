@@ -9,20 +9,21 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum, User, UserTokenInterface } from '@pe/nest-kit/modules/auth';
+import { snakeCase } from 'lodash';
 
 import {
   TransactionsGridService,
   TransactionsService,
 } from '../services';
 
-@Controller('user')
-@ApiUseTags('user')
+@Controller('admin')
+@ApiUseTags('admin')
 @UseGuards(JwtAuthGuard)
-@Roles(RolesEnum.user)
+@Roles(RolesEnum.admin)
 @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
-export class UserController {
+export class AdminController {
 
   constructor(
     private readonly transactionsService: TransactionsService,
@@ -33,7 +34,6 @@ export class UserController {
   @Get('list')
   @HttpCode(HttpStatus.OK)
   public async getList(
-    @User() user: UserTokenInterface,
     @Query('orderBy') orderBy: string = 'created_at',
     @Query('direction') direction: string = 'asc',
     @Query('limit') limit: number = 3,
@@ -41,11 +41,6 @@ export class UserController {
     @Query('query') search: string,
     @Query('filters') filters: any = {},
   ): Promise<any> {
-    filters.user_uuid = {
-      condition: 'is',
-      value: user.id,
-    };
-
     return this.transactionsGridService.getList(filters, orderBy, direction, search, +page, +limit);
   }
 

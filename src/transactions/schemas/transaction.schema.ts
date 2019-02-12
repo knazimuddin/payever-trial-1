@@ -101,6 +101,7 @@ export const TransactionsSchema = new Schema({
   user_uuid: String,
 });
 
+TransactionsSchema.index('uuid');
 TransactionsSchema.index('santander_applications');
 TransactionsSchema.index('original_id');
 TransactionsSchema.index('reference');
