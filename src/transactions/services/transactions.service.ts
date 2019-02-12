@@ -108,18 +108,18 @@ export class TransactionsService {
   }
 
   private setSantanderApplication(transaction: any): void {
-    transaction.santander_application = [];
+    transaction.santander_applications = [];
 
     if (transaction.payment_details.finance_id) {
-      transaction.santander_application.push(transaction.payment_details.finance_id);
+      transaction.santander_applications.push(transaction.payment_details.finance_id);
     }
 
     if (transaction.payment_details.application_no) {
-      transaction.santander_application.push(transaction.payment_details.application_no);
+      transaction.santander_applications.push(transaction.payment_details.application_no);
     }
 
     if (transaction.payment_details.application_number) {
-      transaction.santander_application.push(transaction.payment_details.application_number);
+      transaction.santander_applications.push(transaction.payment_details.application_number);
     }
   }
 

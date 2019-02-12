@@ -84,7 +84,7 @@ export const TransactionsSchema = new Schema({
   payment_flow_id: String,
   place: String,
   reference: String,
-  santander_application: [String],
+  santander_applications: [String],
   shipping_address: {type: AddressSchema},
   shipping_category: String,
   shipping_method_name: String,
@@ -101,7 +101,7 @@ export const TransactionsSchema = new Schema({
   user_uuid: String,
 });
 
-TransactionsSchema.index('santander_application');
+TransactionsSchema.index('santander_applications');
 TransactionsSchema.index('original_id');
 TransactionsSchema.index('reference');
 TransactionsSchema.index('customer_name');

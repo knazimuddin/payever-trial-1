@@ -81,7 +81,7 @@ export class TransactionsGridService {
       { customer_email: regex },
       { reference: regex },
       { original_id: regex },
-      { santander_application: regex },
+      { santander_applications: regex },
     ];
   }
 

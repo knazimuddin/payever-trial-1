@@ -15,7 +15,7 @@ async function up(db) {
 
   const updates = [];
   for (const transaction of transactions) {
-    if (!transaction.santander_application) {
+    if (!transaction.santander_applications) {
       const santander_applications = [];
       const payment_details = transaction.payment_details;
 
