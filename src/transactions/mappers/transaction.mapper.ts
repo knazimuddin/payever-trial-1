@@ -42,5 +42,7 @@ export class TransactionMapper {
     }
 
     transaction.shipping_address = data.address;
+
+    return transaction;
   }
 }
