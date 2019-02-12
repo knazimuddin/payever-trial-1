@@ -47,6 +47,12 @@ export const TransactionRefundItemSchema = new Schema({
   count: Number,
 });
 
+export const TransactionUploadItemSchema = new Schema({
+  type: String,
+  name: String,
+});
+
+
 export const TransactionHistoryEntrySchema = new Schema({
   action: String,
   amount: Number,
@@ -55,6 +61,7 @@ export const TransactionHistoryEntrySchema = new Schema({
   params: String,
   payment_status: String,
   reason: String,
+  upload_items: [TransactionUploadItemSchema],
   refund_items: [TransactionRefundItemSchema],
 });
 

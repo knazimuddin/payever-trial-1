@@ -97,6 +97,7 @@ export class TransactionsService {
     const result: any = {
       ...data.data,
       action: historyType,
+      upload_items: data.saved_data,
       created_at: createdAt,
     };
 
