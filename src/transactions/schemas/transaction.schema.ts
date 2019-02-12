@@ -102,6 +102,10 @@ export const TransactionsSchema = new Schema({
 });
 
 TransactionsSchema.index('santander_application');
+TransactionsSchema.index('original_id');
+TransactionsSchema.index('reference');
+TransactionsSchema.index('customer_name');
+TransactionsSchema.index('customer_email');
 
 TransactionsSchema.virtual('amount_refunded').get(function() {
   let totalRefunded = 0;
