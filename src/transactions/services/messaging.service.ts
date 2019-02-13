@@ -113,7 +113,9 @@ export class MessagingService {
 
     const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
     updatedTransaction.payment_details = this.checkRPCResponsePropertyExists(rpcResult.payment_details)
-      ? rpcResult.payment_details : JSON.parse(transaction.payment_details);
+      ? rpcResult.payment_details :
+      typeof (transaction.payment_details === 'string') ?
+        JSON.parse(transaction.payment_details) : transaction.payment_details;
     updatedTransaction.items = rpcResult.payment_items && rpcResult.payment_items.length
       ? rpcResult.payment_items : transaction.items;
     updatedTransaction.place = rpcResult.place;
@@ -127,11 +129,12 @@ export class MessagingService {
   }
 
   private checkRPCResponsePropertyExists(prop: any): boolean {
-    if (prop) {
+    if (Array.isArray(prop)) {
       return !!prop.length;
     }
-
-    return false;
+    else {
+      return !!prop;
+    }
   }
 
   public async updateStatus(transaction, headers) {
