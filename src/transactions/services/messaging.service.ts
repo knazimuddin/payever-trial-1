@@ -291,6 +291,10 @@ export class MessagingService {
       fields.amount = fields.payment_change_amount.amount || fields.amount || 0;
     }
 
+    if (action === 'capture' && fields.capture_funds) {
+      fields.amount = fields.capture_funds.amount || fields.amount || 0;
+    }
+
     return fields;
   }
 
