@@ -128,6 +128,7 @@ export class TransactionsService {
     try {
       transaction.payment_details = transaction.payment_details ? JSON.parse(transaction.payment_details) : {};
     } catch (e) {
+      console.log(e);
       // just skipping payment_details
     }
 
