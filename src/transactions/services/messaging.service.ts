@@ -41,13 +41,13 @@ export class MessagingService {
     return this.flowService.findOne(flowId);
   }
 
-  public async getActions(transaction, headers) {
+  public async getActions(transaction) {
     return new Promise(async (resolve, reject) => {
       let payload: any;
       try {
         payload = {
           action: 'action.list',
-          data: await this.createPayloadData(transaction, headers),
+          data: await this.createPayloadData(transaction),
         };
       } catch (error) {
         console.error('Could not prepare payload for actions call:', error);
@@ -85,13 +85,17 @@ export class MessagingService {
     });
   }
 
-  public async runAction(transaction, action, actionPayload, headers) {
+  public async runAction(transaction, action, actionPayload) {
     let dto;
 
     try {
-      dto = await this.createPayloadData(transaction, headers);
+      dto = await this.createPayloadData(transaction);
     } catch (e) {
       throw new Error(`Cannot prepare dto for run action: ${e}`);
+    }
+
+    if (action === 'capture' && actionPayload.fields.capture_funds) {
+      dto.payment.amount = actionPayload.fields.capture_funds.amount;
     }
 
     dto.action = action;
@@ -135,11 +139,11 @@ export class MessagingService {
     }
   }
 
-  public async updateStatus(transaction, headers) {
+  public async updateStatus(transaction) {
     let dto;
 
     try {
-      dto = await this.createPayloadData(transaction, headers);
+      dto = await this.createPayloadData(transaction);
     } catch (e) {
       throw new Error(`Cannot prepare dto for update status: ${e}`);
     }
@@ -206,7 +210,7 @@ export class MessagingService {
     });
   }
 
-  private async createPayloadData(transaction: any, headers: any) {
+  private async createPayloadData(transaction: any) {
     transaction = Object.assign({}, transaction); // making clone before manipulations
 
     if (typeof (transaction.payment_details) === 'string') {
@@ -225,6 +229,8 @@ export class MessagingService {
 
     this.fixDates(transaction);
     this.fixId(transaction);
+
+
     transaction.address = transaction.billing_address;
     // @TODO this should be done on BE side
     transaction.reference = transaction.uuid;
@@ -289,10 +295,6 @@ export class MessagingService {
     }
     if (action === 'change_amount' && fields.payment_change_amount) {
       fields.amount = fields.payment_change_amount.amount || fields.amount || 0;
-    }
-
-    if (action === 'capture' && fields.capture_funds) {
-      fields.amount = fields.capture_funds.amount || fields.amount || 0;
     }
 
     return fields;

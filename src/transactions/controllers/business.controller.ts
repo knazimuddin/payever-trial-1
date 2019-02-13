@@ -93,7 +93,7 @@ export class BusinessController {
     }
 
     try {
-      actions = await this.messagingService.getActions(transaction, headers);
+      actions = await this.messagingService.getActions(transaction);
     } catch (e) {
       console.error(`Error occured while getting transaction actions: ${e}`);
       actions = [];
@@ -122,7 +122,7 @@ export class BusinessController {
     }
 
     try {
-      updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload, headers);
+      updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
     } catch (e) {
       console.log('Error occured during running action:\n', e);
       throw new BadRequestException(e);
@@ -136,7 +136,7 @@ export class BusinessController {
     }
 
     try {
-      await this.messagingService.getActions(updatedTransaction, headers);
+      await this.messagingService.getActions(updatedTransaction);
     } catch (e) {
       console.error(`Error occured while getting transaction actions: ${e}`);
     }
@@ -162,7 +162,7 @@ export class BusinessController {
     }
 
     try {
-      await this.messagingService.updateStatus(transaction, headers);
+      await this.messagingService.updateStatus(transaction);
     } catch (e) {
       console.error(`Error occured during status update: ${e}`);
       throw new BadRequestException(`Error occured during status update. Please try again later.`);
@@ -182,7 +182,7 @@ export class BusinessController {
     }
 
     try {
-      actions = await this.messagingService.getActions(transaction, headers);
+      actions = await this.messagingService.getActions(transaction);
     } catch (e) {
       console.error(`Error occured while getting transaction actions: ${e}`);
       actions = [];
