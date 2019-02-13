@@ -112,8 +112,8 @@ export class MessagingService {
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
 
     const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
-    updatedTransaction.payment_details = rpcResult.payment_details && rpcResult.payment_details.length
-      ? rpcResult.payment_details : transaction.payment_details;
+    updatedTransaction.payment_details = this.checkRPCResponsePropertyExists(rpcResult.payment_details)
+      ? rpcResult.payment_details : JSON.parse(transaction.payment_details);
     updatedTransaction.items = rpcResult.payment_items && rpcResult.payment_items.length
       ? rpcResult.payment_items : transaction.items;
     updatedTransaction.place = rpcResult.place;
@@ -124,6 +124,14 @@ export class MessagingService {
     await this.transactionsService.updateByUuid(updatedTransaction.uuid, updatedTransaction);
 
     return updatedTransaction;
+  }
+
+  private checkRPCResponsePropertyExists(prop: any): boolean {
+    if (prop) {
+      return !!prop.length;
+    }
+
+    return false;
   }
 
   public async updateStatus(transaction, headers) {
@@ -286,5 +294,13 @@ export class MessagingService {
 
   private transformTransactionForPhp(transaction) {
     transaction.id = transaction.original_id;
+    if (typeof (transaction.payment_details) === 'string') {
+      try {
+        transaction.payment_details = JSON.parse(transaction.payment_details);
+      } catch (e) {
+        transaction.payment_details = {};
+        // just skipping payment_details
+      }
+    }
   }
 }
