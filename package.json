@@ -22,7 +22,7 @@
     "@nestjs/testing": "^5.5.0",
     "@nestjs/typeorm": "^5.2.2",
     "@nestjs/websockets": "^5.4.0",
-    "@pe/nest-kit": "2.0.1",
+    "@pe/nest-kit": "2.1.4",
     "@types/mongoose": "^5.3.7",
     "@types/uuid": "^3.4.4",
     "class-transformer": "^0.1.10",
