@@ -109,7 +109,6 @@ export class BusinessController {
     @Param('uuid') uuid: string,
     @Param('action') action: string,
     @Body() actionPayload: ActionPayloadDto,
-    @Headers() headers: any,
   ): Promise<any> {
     let transaction: any;
     let updatedTransaction: any;
