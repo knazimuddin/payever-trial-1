@@ -120,7 +120,6 @@ export class MessagingService {
       ? rpcResult.payment_details : transaction.payment_details;
     updatedTransaction.items = rpcResult.payment_items && rpcResult.payment_items.length
       ? rpcResult.payment_items : transaction.items;
-    updatedTransaction.place = rpcResult.place;
     // We do not update history here.
     // History events coming separately, there is a chance to overwrite saved history here
     delete updatedTransaction.history;
@@ -160,6 +159,7 @@ export class MessagingService {
       {},
       transaction,
       {
+        place: rpcPayment.place,
         status: rpcPayment.status ? rpcPayment.status : transaction.status,
         specific_status: rpcPayment.specific_status ? rpcPayment.specific_status : transaction.specific_status,
         payment_details: rpcResult.payment_details ? rpcResult.payment_details : transaction.payment_details,
