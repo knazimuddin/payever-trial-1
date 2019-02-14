@@ -95,7 +95,7 @@ export class BusinessController {
     try {
       actions = await this.messagingService.getActions(transaction);
     } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e}`);
+      console.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
     }
 
@@ -124,20 +124,20 @@ export class BusinessController {
       updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
     } catch (e) {
       console.log('Error occured during running action:\n', e);
-      throw new BadRequestException(e);
+      throw new BadRequestException(e.message);
     }
 
     // Send update to php
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
-      throw new BadRequestException(`Error occured while sending transaction update: ${e}`);
+      throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
     }
 
     try {
       await this.messagingService.getActions(updatedTransaction);
     } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e}`);
+      console.error(`Error occured while getting transaction actions: ${e.message}`);
     }
 
     return updatedTransaction;
@@ -177,13 +177,13 @@ export class BusinessController {
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
-      throw new BadRequestException(`Error occured while sending transaction update: ${e}`);
+      throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
     }
 
     try {
       actions = await this.messagingService.getActions(transaction);
     } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e}`);
+      console.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
     }
 
