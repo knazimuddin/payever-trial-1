@@ -152,10 +152,10 @@ export class TransactionsGridService {
         mongoFilters[field] = { $not: new RegExp(`${filter.value}`) };
         break;
       case FilterConditionEnum.GreaterThan:
-        mongoFilters[field] = { $gte: filter.value };
+        mongoFilters[field] = { $gt: filter.value };
         break;
       case FilterConditionEnum.LessThan:
-        mongoFilters[field] = { $lte: filter.value };
+        mongoFilters[field] = { $lt: filter.value };
         break;
       case FilterConditionEnum.Between:
         mongoFilters[field] = {
