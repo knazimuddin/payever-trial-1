@@ -17,7 +17,7 @@ export class StatisticsService {
   }
 
   public async processAcceptedTransaction(id: string, updating: any) {
-    const existing = await this.transactionsModel.findOne({ uuid: id });
+    const existing = await this.transactionsModel.findOne({ uuid: id }).lean();
 
     if (!existing) {
       return;
@@ -50,6 +50,7 @@ export class StatisticsService {
   }
 
   public async processMigratedTransaction(transaction: any) {
+    transaction = transaction.lean();
     if (transaction.status === 'STATUS_ACCEPTED' || transaction.status === 'STATUS_PAID') {
       await this.rabbitClient
         .sendAsync(
@@ -109,7 +110,7 @@ export class StatisticsService {
   }
 
   public async processRefundedTransaction(id: string, refund: any) {
-    const existing = await this.transactionsModel.findOne({ uuid: id });
+    const existing = await this.transactionsModel.findOne({ uuid: id }).lean();
 
     if (!existing) {
       return;

@@ -41,13 +41,13 @@ export class MessagingService {
     return this.flowService.findOne(flowId);
   }
 
-  public async getActions(transaction, headers) {
+  public async getActions(transaction) {
     return new Promise(async (resolve, reject) => {
       let payload: any;
       try {
         payload = {
           action: 'action.list',
-          data: await this.createPayloadData(transaction, headers),
+          data: await this.createPayloadData(transaction),
         };
       } catch (error) {
         console.error('Could not prepare payload for actions call:', error);
@@ -85,13 +85,17 @@ export class MessagingService {
     });
   }
 
-  public async runAction(transaction, action, actionPayload, headers) {
+  public async runAction(transaction, action, actionPayload) {
     let dto;
 
     try {
-      dto = await this.createPayloadData(transaction, headers);
+      dto = await this.createPayloadData(transaction);
     } catch (e) {
       throw new Error(`Cannot prepare dto for run action: ${e}`);
+    }
+
+    if (action === 'capture' && actionPayload.fields.capture_funds) {
+      dto.payment.amount = actionPayload.fields.capture_funds.amount;
     }
 
     dto.action = action;
@@ -112,7 +116,7 @@ export class MessagingService {
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
 
     const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
-    updatedTransaction.payment_details = rpcResult.payment_details && rpcResult.payment_details.length
+    updatedTransaction.payment_details = this.checkRPCResponsePropertyExists(rpcResult.payment_details)
       ? rpcResult.payment_details : transaction.payment_details;
     updatedTransaction.items = rpcResult.payment_items && rpcResult.payment_items.length
       ? rpcResult.payment_items : transaction.items;
@@ -126,11 +130,20 @@ export class MessagingService {
     return updatedTransaction;
   }
 
-  public async updateStatus(transaction, headers) {
+  private checkRPCResponsePropertyExists(prop: any): boolean {
+    if (Array.isArray(prop)) {
+      return !!prop.length;
+    }
+    else {
+      return !!prop;
+    }
+  }
+
+  public async updateStatus(transaction) {
     let dto;
 
     try {
-      dto = await this.createPayloadData(transaction, headers);
+      dto = await this.createPayloadData(transaction);
     } catch (e) {
       throw new Error(`Cannot prepare dto for update status: ${e}`);
     }
@@ -197,13 +210,14 @@ export class MessagingService {
     });
   }
 
-  private async createPayloadData(transaction: any, headers: any) {
+  private async createPayloadData(transaction: any) {
     transaction = Object.assign({}, transaction); // making clone before manipulations
 
     if (typeof (transaction.payment_details) === 'string') {
       try {
         transaction.payment_details = JSON.parse(transaction.payment_details);
       } catch (e) {
+        console.log(e);
         transaction.payment_details = {};
         // just skipping payment_details
       }
@@ -215,6 +229,8 @@ export class MessagingService {
 
     this.fixDates(transaction);
     this.fixId(transaction);
+
+
     transaction.address = transaction.billing_address;
     // @TODO this should be done on BE side
     transaction.reference = transaction.uuid;
@@ -286,5 +302,14 @@ export class MessagingService {
 
   private transformTransactionForPhp(transaction) {
     transaction.id = transaction.original_id;
+    if (typeof (transaction.payment_details) === 'string') {
+      try {
+        transaction.payment_details = JSON.parse(transaction.payment_details);
+      } catch (e) {
+        console.log(e);
+        transaction.payment_details = {};
+        // just skipping payment_details
+      }
+    }
   }
 }

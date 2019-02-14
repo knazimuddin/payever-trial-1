@@ -67,7 +67,7 @@ export class TransactionsService {
 
     transaction.type = transaction.type || transaction.payment_type;
 
-    if (transaction.payment_details) {
+    if (typeof (transaction.payment_details) !== 'string' && transaction.payment_details) {
       this.setSantanderApplication(transaction);
       transaction.payment_details = JSON.stringify(transaction.payment_details);
     }
@@ -128,6 +128,7 @@ export class TransactionsService {
     try {
       transaction.payment_details = transaction.payment_details ? JSON.parse(transaction.payment_details) : {};
     } catch (e) {
+      console.log(e);
       // just skipping payment_details
     }
 
