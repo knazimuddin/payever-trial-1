@@ -104,7 +104,7 @@ export class TransactionsGridService {
 
   private addSearchFilters(filters: any, search: string) {
     search = search.replace(/^#/, ''); // cutting # symbol
-    const regex = new RegExp(search);
+    const regex = new RegExp(`${search}/i`);
     filters.$or = [
       { merchant_name: regex },
       { merchant_email: regex },
@@ -140,16 +140,16 @@ export class TransactionsGridService {
         mongoFilters[field] = { $nin: filter.value };
         break;
       case FilterConditionEnum.StartsWith:
-        mongoFilters[field] = { $regex: new RegExp(`^${filter.value}`) };
+        mongoFilters[field] = { $regex: new RegExp(`^${filter.value}/i`) };
         break;
       case FilterConditionEnum.EndsWith:
-        mongoFilters[field] = { $regex: new RegExp(`${filter.value}$`) };
+        mongoFilters[field] = { $regex: new RegExp(`${filter.value}$/i`) };
         break;
       case FilterConditionEnum.Contains:
-        mongoFilters[field] = { $regex: new RegExp(`${filter.value}`) };
+        mongoFilters[field] = { $regex: new RegExp(`${filter.value}/i`) };
         break;
       case FilterConditionEnum.DoesNotContain:
-        mongoFilters[field] = { $not: new RegExp(`${filter.value}`) };
+        mongoFilters[field] = { $not: new RegExp(`${filter.value}/i`) };
         break;
       case FilterConditionEnum.GreaterThan:
         mongoFilters[field] = { $gt: filter.value };
