@@ -72,6 +72,8 @@ export class BusinessController {
         this.transactionsGridService.findMany(filters, sort, search, +page, +limit),
         this.transactionsGridService.count(filters, search),
         this.transactionsGridService.total(filters, search),
+        this.transactionsGridService.distinctFieldValues('status', filters, search),
+        this.transactionsGridService.distinctFieldValues('specific_status', filters, search),
       ])
       .then((res) => {
         return {
@@ -82,7 +84,10 @@ export class BusinessController {
             current: page,
           },
           filters: {},
-          usage: {},
+          usage: {
+            statuses: res[3],
+            specific_statuses: res[4],
+          },
         };
       });
   }

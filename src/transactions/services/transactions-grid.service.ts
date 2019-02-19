@@ -73,6 +73,27 @@ export class TransactionsGridService {
     return res && res[0] ? res[0].total : null;
   }
 
+  public async distinctFieldValues(
+      field,
+      filters = {},
+      search = null,
+  ) {
+    const mongoFilters = {};
+    if (filters) {
+      this.addFilters(mongoFilters, filters);
+    }
+    if (search) {
+      this.addSearchFilters(mongoFilters, search);
+    }
+
+    return await this.transactionsModel
+        .aggregate([
+          { $match: mongoFilters },
+          { $group: { _id: `$${field}` }},
+        ])
+    ;
+  }
+
   private addSearchFilters(filters: any, search: string) {
     search = search.replace(/^#/, ''); // cutting # symbol
     const regex = new RegExp(search);
