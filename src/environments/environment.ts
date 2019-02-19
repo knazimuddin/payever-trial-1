@@ -160,4 +160,13 @@ export const environment: any = {
   rsa: {
     private: path.resolve(env.RABBITMQ_CERTIFICATE_PATH),
   },
+  apm: {
+    enable: env.APM_SERVICE_ENABLE === 'true',
+    options: {
+      active: env.ELASTIC_APM_ACTIVE,
+      serverUrl: env.ELASTIC_APM_SERVER_URL,
+      logLevel: env.ELASTIC_APM_LOG_LEVEL,
+      serviceName: env.ELASTIC_APM_SERVICE_NAME,
+    },
+  },
 };
