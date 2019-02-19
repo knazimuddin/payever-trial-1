@@ -1,3 +1,4 @@
+import * as APM from 'elastic-apm-node';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -10,6 +11,10 @@ import { environment } from './environments';
 
 async function bootstrap() {
   const app = await NestFactory.create(ApplicationModule);
+
+  if (APM.isStarted()) {
+    console.log('APM running');
+  }
 
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('/api');

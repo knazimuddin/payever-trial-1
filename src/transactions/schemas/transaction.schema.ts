@@ -13,8 +13,8 @@ export const AddressSchema = new Schema({
   phone: String,
   salutation: String,
   social_security_number: String,
-  street: String,
   type: String, // 'billing' | 'shipping'
+  street: String,
   zip_code: String,
 });
 
@@ -47,6 +47,12 @@ export const TransactionRefundItemSchema = new Schema({
   count: Number,
 });
 
+export const TransactionUploadItemSchema = new Schema({
+  type: String,
+  name: String,
+});
+
+
 export const TransactionHistoryEntrySchema = new Schema({
   action: String,
   amount: Number,
@@ -55,6 +61,7 @@ export const TransactionHistoryEntrySchema = new Schema({
   params: String,
   payment_status: String,
   reason: String,
+  upload_items: [TransactionUploadItemSchema],
   refund_items: [TransactionRefundItemSchema],
 });
 
@@ -84,6 +91,7 @@ export const TransactionsSchema = new Schema({
   payment_flow_id: String,
   place: String,
   reference: String,
+  santander_applications: [String],
   shipping_address: {type: AddressSchema},
   shipping_category: String,
   shipping_method_name: String,
@@ -99,6 +107,15 @@ export const TransactionsSchema = new Schema({
   uuid: {type: String, required: true},
   user_uuid: String,
 });
+
+TransactionsSchema.index('uuid');
+TransactionsSchema.index('santander_applications');
+TransactionsSchema.index('original_id');
+TransactionsSchema.index('reference');
+TransactionsSchema.index('customer_name');
+TransactionsSchema.index('customer_email');
+TransactionsSchema.index('merchant_name');
+TransactionsSchema.index('merchant_email');
 
 TransactionsSchema.virtual('amount_refunded').get(function() {
   let totalRefunded = 0;

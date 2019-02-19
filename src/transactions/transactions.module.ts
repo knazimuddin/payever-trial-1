@@ -6,7 +6,8 @@ import {
   DevController,
   MicroEventsController,
   MigrateEventsController,
-  UserController
+  UserController,
+  AdminController
 } from './controllers';
 import {
   BusinessPaymentOptionService,
@@ -15,6 +16,7 @@ import {
   StubService,
   TransactionsGridService,
   TransactionsService,
+  DtoValidationService,
 } from './services';
 import { TransactionsSchema, PaymentFlowSchema, BusinessPaymentOptionSchema } from './schemas';
 import { StatisticsService } from './services/statistics.service';
@@ -31,7 +33,8 @@ import { StatisticsService } from './services/statistics.service';
     DevController,
     MicroEventsController,
     MigrateEventsController,
-    UserController
+    UserController,
+    AdminController
   ],
   providers: [
     BusinessPaymentOptionService,
@@ -41,6 +44,7 @@ import { StatisticsService } from './services/statistics.service';
     TransactionsGridService,
     TransactionsService,
     StatisticsService,
+    DtoValidationService,
   ],
 })
 export class TransactionsModule {}
