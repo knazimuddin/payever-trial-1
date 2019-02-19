@@ -112,14 +112,14 @@ export class MessagingService {
       action: 'action.do',
       data: dto,
     };
-
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
-
     const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
+    console.log('RPC result: ', updatedTransaction);
     updatedTransaction.payment_details = this.checkRPCResponsePropertyExists(rpcResult.payment_details)
       ? rpcResult.payment_details : transaction.payment_details;
     updatedTransaction.items = rpcResult.payment_items && rpcResult.payment_items.length
       ? rpcResult.payment_items : transaction.items;
+    console.log('Updated transaction: ', updatedTransaction);
     // We do not update history here.
     // History events coming separately, there is a chance to overwrite saved history here
     delete updatedTransaction.history;
@@ -260,8 +260,9 @@ export class MessagingService {
     if (!paymentFlow) {
       throw new Error(`Payment flow cannot be null.`);
     }
-
     dto.credentials = businessPaymentOption.credentials;
+    console.log('dto credentials: ');
+    console.log(dto.credentials);
 
     if (transaction.payment_flow_id) {
       dto.payment_flow = paymentFlow;
