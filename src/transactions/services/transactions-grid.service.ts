@@ -87,11 +87,9 @@ export class TransactionsGridService {
     }
 
     return await this.transactionsModel
-        .aggregate([
-          { $match: mongoFilters },
-          { $group: { _id: `$${field}` }},
-        ])
-    ;
+        .find(mongoFilters)
+        .distinct(field)
+        .exec();
   }
 
   private addSearchFilters(filters: any, search: string) {
