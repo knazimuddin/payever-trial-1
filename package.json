@@ -47,9 +47,9 @@
   "devDependencies": {
     "@types/jest": "^20.0.8",
     "@types/node": "^7.10.2",
-    "jest": "^20.0.4",
+    "jest": "^24.1.0",
     "supertest": "^3.3.0",
-    "ts-jest": "^20.0.14",
+    "ts-jest": "^24.0.0",
     "ts-loader": "^4.5.0",
     "ts-node": "^6.0.0",
     "tsconfig-paths": "^3.5.0",
