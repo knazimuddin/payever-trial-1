@@ -18,8 +18,11 @@ import { TransactionsModule } from './transactions/transactions.module';
         useNewUrlParser: true,
       },
     ),
+    ApmModule.forRoot(
+      environment.apm.enable,
+      environment.apm.options,
+    ),
     StatusModule,
-    ApmModule.register(),
   ],
   providers: [
   ],
