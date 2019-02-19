@@ -19,7 +19,10 @@ import { TransactionsModule } from './transactions/transactions.module';
       },
     ),
     StatusModule,
-    ApmModule.register(),
+    ApmModule.forRoot(
+      environment.apm.enable,
+      environment.apm.options,
+    ),
   ],
   providers: [
   ],
