@@ -230,7 +230,6 @@ export class MessagingService {
     this.fixDates(transaction);
     this.fixId(transaction);
 
-
     transaction.address = transaction.billing_address;
     // @TODO this should be done on BE side
     transaction.reference = transaction.uuid;
@@ -286,7 +285,7 @@ export class MessagingService {
   }
 
   private prepareActionFields(transaction, action: string, fields: any) {
-    // @TODO ask FE to remove wrapper object
+    // @TODO ask FE to remove wrapper object!
     if ((action === 'refund' || action === 'return') && fields.payment_return) {
       fields.amount = fields.payment_return.amount || fields.amount || 0;
       fields.reason = fields.payment_return.reason || fields.reason || null;
@@ -296,6 +295,13 @@ export class MessagingService {
     }
     if (action === 'change_amount' && fields.payment_change_amount) {
       fields.amount = fields.payment_change_amount.amount || fields.amount || 0;
+    }
+    if (action === 'edit' && fields.payment_update) {
+      fields = {
+        ...fields,
+        reason: fields.payment_update.reason,
+        ...fields.payment_update.updateData,
+      };
     }
 
     return fields;
