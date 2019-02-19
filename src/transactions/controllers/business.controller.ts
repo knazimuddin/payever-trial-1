@@ -12,12 +12,9 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
 import { snakeCase } from 'lodash';
-import { environment } from '../../environments';
 
 import { ActionPayloadDto } from '../dto';
 
@@ -26,6 +23,7 @@ import {
   MessagingService,
   TransactionsGridService,
   TransactionsService,
+  DtoValidationService,
 } from '../services';
 
 @Controller('business/:businessId')
@@ -35,16 +33,12 @@ import {
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class BusinessController {
-
-  private rabbitClient: ClientProxy;
-
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly transactionsGridService: TransactionsGridService,
-    private readonly bpoService: BusinessPaymentOptionService,
+    private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
   ) {
-    this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
   }
 
   @Get('list')
@@ -63,28 +57,7 @@ export class BusinessController {
       condition: 'is',
       value: businessId,
     };
-
-    const sort = {};
-    sort[snakeCase(orderBy)] = direction.toLowerCase();
-
-    return Promise
-      .all([
-        this.transactionsGridService.findMany(filters, sort, search, +page, +limit),
-        this.transactionsGridService.count(filters, search),
-        this.transactionsGridService.total(filters, search),
-      ])
-      .then((res) => {
-        return {
-          collection: res[0],
-          pagination_data: {
-            totalCount: res[1],
-            total: res[2],
-            current: page,
-          },
-          filters: {},
-          usage: {},
-        };
-      });
+    return this.transactionsGridService.getList(filters, orderBy, direction, search, +page, +limit);
   }
 
   @Get('detail/reference/:reference')
@@ -120,9 +93,9 @@ export class BusinessController {
     }
 
     try {
-      actions = await this.messagingService.getActions(transaction, headers);
+      actions = await this.messagingService.getActions(transaction);
     } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e}`);
+      console.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
     }
 
@@ -136,12 +109,11 @@ export class BusinessController {
     @Param('uuid') uuid: string,
     @Param('action') action: string,
     @Body() actionPayload: ActionPayloadDto,
-    @Headers() headers: any,
   ): Promise<any> {
     let transaction: any;
     let updatedTransaction: any;
-    let actions: any;
 
+    this.dtoValidation.checkFileUploadDto(actionPayload);
     try {
       transaction = await this.transactionsService.findOne(uuid);
     } catch (e) {
@@ -149,7 +121,7 @@ export class BusinessController {
     }
 
     try {
-      updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload, headers);
+      updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
     } catch (e) {
       console.log('Error occured during running action:\n', e);
       throw new BadRequestException(e.message);
@@ -159,13 +131,13 @@ export class BusinessController {
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
-      throw new BadRequestException(`Error occured while sending transaction update: ${e}`);
+      throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
     }
 
     try {
-      await this.messagingService.getActions(updatedTransaction, headers);
+      await this.messagingService.getActions(updatedTransaction);
     } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e}`);
+      console.error(`Error occured while getting transaction actions: ${e.message}`);
     }
 
     return updatedTransaction;
@@ -189,7 +161,7 @@ export class BusinessController {
     }
 
     try {
-      await this.messagingService.updateStatus(transaction, headers);
+      await this.messagingService.updateStatus(transaction);
     } catch (e) {
       console.error(`Error occured during status update: ${e}`);
       throw new BadRequestException(`Error occured during status update. Please try again later.`);
@@ -205,13 +177,13 @@ export class BusinessController {
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
-      throw new BadRequestException(`Error occured while sending transaction update: ${e}`);
+      throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
     }
 
     try {
-      actions = await this.messagingService.getActions(transaction, headers);
+      actions = await this.messagingService.getActions(transaction);
     } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e}`);
+      console.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
     }
 

@@ -1,0 +1,8 @@
+{
+  "test": {
+    "driver": "sqlite3",
+    "filename": ":memory:"
+  },
+  "dev": {"ENV": "MONGODB_URL"},
+  "prod": {"ENV": "MONGODB_URL"}
+}

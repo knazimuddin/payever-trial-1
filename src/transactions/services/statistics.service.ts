@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
 import { Model } from 'mongoose';
@@ -9,7 +8,7 @@ import { environment } from '../../environments';
 @Injectable()
 export class StatisticsService {
 
-  private rabbitClient: ClientProxy;
+  private rabbitClient: RabbitmqClient;
 
   constructor(
     @InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>,
@@ -18,7 +17,7 @@ export class StatisticsService {
   }
 
   public async processAcceptedTransaction(id: string, updating: any) {
-    const existing = await this.transactionsModel.findOne({uuid: id});
+    const existing = await this.transactionsModel.findOne({ uuid: id }).lean();
 
     if (!existing) {
       return;
@@ -26,7 +25,7 @@ export class StatisticsService {
 
     if (existing.status !== updating.status && updating.status === 'STATUS_ACCEPTED') {
       await this.rabbitClient
-        .send(
+        .sendAsync(
           {
             channel: RabbitRoutingKeys.TransactionsPaymentAdd,
             exchange: 'async_events',
@@ -46,16 +45,15 @@ export class StatisticsService {
               },
             },
           },
-        )
-        .subscribe()
-      ;
+        );
     }
   }
 
   public async processMigratedTransaction(transaction: any) {
+    transaction = transaction.lean();
     if (transaction.status === 'STATUS_ACCEPTED' || transaction.status === 'STATUS_PAID') {
       await this.rabbitClient
-        .send(
+        .sendAsync(
           {
             channel: RabbitRoutingKeys.TransactionsPaymentAdd,
             exchange: 'async_events',
@@ -75,9 +73,7 @@ export class StatisticsService {
               },
             },
           },
-        )
-        .subscribe()
-      ;
+        );
     }
 
     if (transaction.status === 'STATUS_REFUNDED') {
@@ -89,7 +85,7 @@ export class StatisticsService {
       }
 
       await this.rabbitClient
-        .send(
+        .sendAsync(
           {
             channel: RabbitRoutingKeys.TransactionsPaymentAdd,
             exchange: 'async_events',
@@ -109,14 +105,12 @@ export class StatisticsService {
               },
             },
           },
-        )
-        .subscribe()
-      ;
+        );
     }
   }
 
   public async processRefundedTransaction(id: string, refund: any) {
-    const existing = await this.transactionsModel.findOne({uuid: id});
+    const existing = await this.transactionsModel.findOne({ uuid: id }).lean();
 
     if (!existing) {
       return;
@@ -124,7 +118,7 @@ export class StatisticsService {
 
     if (refund.action && refund.action === 'refund') {
       await this.rabbitClient
-        .send(
+        .sendAsync(
           {
             channel: RabbitRoutingKeys.TransactionsPaymentSubtract,
             exchange: 'async_events',
@@ -144,9 +138,7 @@ export class StatisticsService {
               },
             },
           },
-        )
-        .subscribe()
-      ;
+        );
     }
   }
 }

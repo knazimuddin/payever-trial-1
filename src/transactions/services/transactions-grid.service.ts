@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { snakeCase } from 'lodash';
+
 import { FilterConditionEnum } from '../enum';
+import { PagingResultDto } from '../dto';
 
 export interface Filter {
   condition: FilterConditionEnum;
@@ -12,6 +15,30 @@ export interface Filter {
 export class TransactionsGridService {
 
   constructor(@InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>) {
+  }
+
+  public async getList(filters = {}, orderBy: string, direction: string, search = null, page: number = null, limit = null): Promise<PagingResultDto> {
+    const sort = {};
+    sort[snakeCase(orderBy)] = direction.toLowerCase();
+
+    return Promise
+      .all([
+        this.findMany(filters, sort, search, +page, +limit),
+        this.count(filters, search),
+        this.total(filters, search),
+      ])
+      .then((res) => {
+        return {
+          collection: res[0],
+          pagination_data: {
+            totalCount: res[1],
+            total: res[2],
+            current: page,
+          },
+          filters: {},
+          usage: {},
+        };
+      });
   }
 
   public async findMany(filters = {}, sort = {}, search = null, page: number = null, limit = null) {
@@ -51,7 +78,7 @@ export class TransactionsGridService {
   public async total(
     filters = {},
     search = null,
-  ) {
+  ): Promise<number> {
     const mongoFilters = {};
     if (filters) {
       this.addFilters(mongoFilters, filters);
@@ -63,28 +90,33 @@ export class TransactionsGridService {
     const res = await this.transactionsModel
       .aggregate([
         { $match: mongoFilters },
-        { $group: {
+        {
+          $group: {
             _id: null,
             total: { $sum: '$total' },
-        }},
+          }
+        },
       ])
-    ;
+      ;
 
     return res && res[0] ? res[0].total : null;
   }
 
   private addSearchFilters(filters: any, search: string) {
     search = search.replace(/^#/, ''); // cutting # symbol
-    const regex = new RegExp(search);
+    const regex = new RegExp(search, 'i');
     filters.$or = [
-      { customer_name: regex},
+      { merchant_name: regex },
+      { merchant_email: regex },
+      { customer_name: regex },
       { customer_email: regex },
       { reference: regex },
       { original_id: regex },
+      { santander_applications: regex },
     ];
   }
 
-  private addFilters(mongoFilters: any, inputFilters: {[key: string]: Filter}) {
+  private addFilters(mongoFilters: any, inputFilters: { [key: string]: Filter }) {
     Object.keys(inputFilters).forEach((key) => this.addFilter(mongoFilters, key, inputFilters[key]));
   }
 
@@ -108,22 +140,22 @@ export class TransactionsGridService {
         mongoFilters[field] = { $nin: filter.value };
         break;
       case FilterConditionEnum.StartsWith:
-        mongoFilters[field] = { $regex: new RegExp(`^${filter.value}`) };
+        mongoFilters[field] = { $regex: new RegExp(`^${filter.value}`, 'i') };
         break;
       case FilterConditionEnum.EndsWith:
-        mongoFilters[field] = { $regex: new RegExp(`${filter.value}$`) };
+        mongoFilters[field] = { $regex: new RegExp(`${filter.value}$`, 'i') };
         break;
       case FilterConditionEnum.Contains:
-        mongoFilters[field] = { $regex: new RegExp(`${filter.value}`) };
+        mongoFilters[field] = { $regex: new RegExp(`${filter.value}`, 'i') };
         break;
       case FilterConditionEnum.DoesNotContain:
-        mongoFilters[field] = { $not: new RegExp(`${filter.value}`) };
+        mongoFilters[field] = { $not: new RegExp(`${filter.value}`, 'i') };
         break;
       case FilterConditionEnum.GreaterThan:
-        mongoFilters[field] = { $gte: filter.value };
+        mongoFilters[field] = { $gt: filter.value };
         break;
       case FilterConditionEnum.LessThan:
-        mongoFilters[field] = { $lte: filter.value };
+        mongoFilters[field] = { $lt: filter.value };
         break;
       case FilterConditionEnum.Between:
         mongoFilters[field] = {

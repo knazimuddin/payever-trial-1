@@ -15,13 +15,13 @@ import { TransactionsService } from './transactions.service';
 @Injectable()
 export class MessagingService {
 
-  private rabbitClient: ClientProxy;
+  private rabbitClient: RabbitmqClient;
 
   private messageBusService: MessageBusService = new MessageBusService({
     rsa: environment.rsa,
   });
 
-  private readonly rpcTimeout: number = 15000;
+  private readonly rpcTimeout: number = 30000;
 
   constructor(
     private readonly httpService: HttpService,
@@ -41,13 +41,13 @@ export class MessagingService {
     return this.flowService.findOne(flowId);
   }
 
-  public async getActions(transaction, headers) {
+  public async getActions(transaction) {
     return new Promise(async (resolve, reject) => {
       let payload: any;
       try {
         payload = {
           action: 'action.list',
-          data: await this.createPayloadData(transaction, headers),
+          data: await this.createPayloadData(transaction),
         };
       } catch (error) {
         console.error('Could not prepare payload for actions call:', error);
@@ -85,13 +85,17 @@ export class MessagingService {
     });
   }
 
-  public async runAction(transaction, action, actionPayload, headers) {
+  public async runAction(transaction, action, actionPayload) {
     let dto;
 
     try {
-      dto = await this.createPayloadData(transaction, headers);
+      dto = await this.createPayloadData(transaction);
     } catch (e) {
       throw new Error(`Cannot prepare dto for run action: ${e}`);
+    }
+
+    if (action === 'capture' && actionPayload.fields.capture_funds) {
+      dto.payment.amount = actionPayload.fields.capture_funds.amount;
     }
 
     dto.action = action;
@@ -108,15 +112,14 @@ export class MessagingService {
       action: 'action.do',
       data: dto,
     };
-
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
-
     const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
-    updatedTransaction.payment_details = rpcResult.payment_details && rpcResult.payment_details.length
+    console.log('RPC result: ', updatedTransaction);
+    updatedTransaction.payment_details = this.checkRPCResponsePropertyExists(rpcResult.payment_details)
       ? rpcResult.payment_details : transaction.payment_details;
     updatedTransaction.items = rpcResult.payment_items && rpcResult.payment_items.length
       ? rpcResult.payment_items : transaction.items;
-    updatedTransaction.place = rpcResult.workflow_state;
+    console.log('Updated transaction: ', updatedTransaction);
     // We do not update history here.
     // History events coming separately, there is a chance to overwrite saved history here
     delete updatedTransaction.history;
@@ -126,11 +129,20 @@ export class MessagingService {
     return updatedTransaction;
   }
 
-  public async updateStatus(transaction, headers) {
+  private checkRPCResponsePropertyExists(prop: any): boolean {
+    if (Array.isArray(prop)) {
+      return !!prop.length;
+    }
+    else {
+      return !!prop;
+    }
+  }
+
+  public async updateStatus(transaction) {
     let dto;
 
     try {
-      dto = await this.createPayloadData(transaction, headers);
+      dto = await this.createPayloadData(transaction);
     } catch (e) {
       throw new Error(`Cannot prepare dto for update status: ${e}`);
     }
@@ -143,17 +155,19 @@ export class MessagingService {
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'payment');
     const rpcPayment: any = rpcResult.payment;
 
-    transaction = Object.assign(
+    const updatedTransaction: any = Object.assign(
       {},
       transaction,
       {
+        place: rpcPayment.place,
         status: rpcPayment.status ? rpcPayment.status : transaction.status,
         specific_status: rpcPayment.specific_status ? rpcPayment.specific_status : transaction.specific_status,
+        payment_details: rpcResult.payment_details ? rpcResult.payment_details : transaction.payment_details,
       }
     );
 
-    this.transactionsService.prepareTransactionForInsert(transaction);
-    await this.transactionsService.updateByUuid(transaction.uuid, transaction);
+    this.transactionsService.prepareTransactionForInsert(updatedTransaction);
+    await this.transactionsService.updateByUuid(transaction.uuid, updatedTransaction);
 
     return transaction;
   }
@@ -163,13 +177,12 @@ export class MessagingService {
     const payload: any = { payment: transaction };
     console.log(`SEND 'transactions_app.payment.updated', payload:`, payload);
     const message = this.messageBusService.createMessage('transactions_app.payment.updated', payload);
-    this.rabbitClient
-      .send(
+
+    await this.rabbitClient
+      .sendAsync(
         { channel: 'transactions_app.payment.updated', exchange: 'async_events' },
         message,
-      )
-      .subscribe()
-      ;
+      );
   }
 
   private async runPaymentRpc(transaction, payload, messageIdentifier) {
@@ -197,13 +210,14 @@ export class MessagingService {
     });
   }
 
-  private async createPayloadData(transaction: any, headers: any) {
+  private async createPayloadData(transaction: any) {
     transaction = Object.assign({}, transaction); // making clone before manipulations
 
     if (typeof (transaction.payment_details) === 'string') {
       try {
         transaction.payment_details = JSON.parse(transaction.payment_details);
       } catch (e) {
+        console.log(e);
         transaction.payment_details = {};
         // just skipping payment_details
       }
@@ -215,6 +229,8 @@ export class MessagingService {
 
     this.fixDates(transaction);
     this.fixId(transaction);
+
+
     transaction.address = transaction.billing_address;
     // @TODO this should be done on BE side
     transaction.reference = transaction.uuid;
@@ -244,8 +260,9 @@ export class MessagingService {
     if (!paymentFlow) {
       throw new Error(`Payment flow cannot be null.`);
     }
-
     dto.credentials = businessPaymentOption.credentials;
+    console.log('dto credentials: ');
+    console.log(dto.credentials);
 
     if (transaction.payment_flow_id) {
       dto.payment_flow = paymentFlow;
@@ -286,5 +303,14 @@ export class MessagingService {
 
   private transformTransactionForPhp(transaction) {
     transaction.id = transaction.original_id;
+    if (typeof (transaction.payment_details) === 'string') {
+      try {
+        transaction.payment_details = JSON.parse(transaction.payment_details);
+      } catch (e) {
+        console.log(e);
+        transaction.payment_details = {};
+        // just skipping payment_details
+      }
+    }
   }
 }
