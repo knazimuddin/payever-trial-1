@@ -300,10 +300,10 @@ export class MessagingService {
       fields = {
         ...fields,
         reason: fields.payment_update.reason,
-        paymentItems: fields.payment_update.updateData
+        payment_items: fields.payment_update.updateData
             ? fields.payment_update.updateData.productLine
             : [],
-        deliveryFee: fields.payment_update.updateData
+        delivery_fee: fields.payment_update.updateData
             ? fields.payment_update.updateData.deliveryFee
             : null,
       };
