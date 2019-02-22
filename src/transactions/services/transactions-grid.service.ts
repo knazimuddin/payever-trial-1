@@ -26,6 +26,8 @@ export class TransactionsGridService {
         this.findMany(filters, sort, search, +page, +limit),
         this.count(filters, search),
         this.total(filters, search),
+        this.distinctFieldValues('status', filters, search),
+        this.distinctFieldValues('specific_status', filters, search),
       ])
       .then((res) => {
         return {
@@ -36,7 +38,10 @@ export class TransactionsGridService {
             current: page,
           },
           filters: {},
-          usage: {},
+          usage: {
+            statuses: res[3],
+            specific_statuses: res[4],
+          },
         };
       });
   }
@@ -100,6 +105,25 @@ export class TransactionsGridService {
       ;
 
     return res && res[0] ? res[0].total : null;
+  }
+
+  public async distinctFieldValues(
+      field,
+      filters = {},
+      search = null,
+  ) {
+    const mongoFilters = {};
+    if (filters) {
+      this.addFilters(mongoFilters, filters);
+    }
+    if (search) {
+      this.addSearchFilters(mongoFilters, search);
+    }
+
+    return await this.transactionsModel
+        .find(mongoFilters)
+        .distinct(field)
+        .exec();
   }
 
   private addSearchFilters(filters: any, search: string) {
