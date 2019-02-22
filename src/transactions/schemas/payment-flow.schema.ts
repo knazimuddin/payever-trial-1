@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose';
 
 export const PaymentFlowSchema = new Schema({
-  id: String,
+  id: { type: String, unique: true },
   amount: Number,
   shipping_fee: Number,
   shipping_method_code: String,
@@ -24,3 +24,7 @@ export const PaymentFlowSchema = new Schema({
   callback: String,
   x_frame_host: String,
 });
+
+PaymentFlowSchema.index({ channel_set_uuid: 1 });
+PaymentFlowSchema.index({ reference: 1 });
+PaymentFlowSchema.index({ state: 1 });
