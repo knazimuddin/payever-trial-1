@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
+
 import { Model } from 'mongoose';
 import { v4 as uuidFactory } from 'uuid';
 
@@ -8,13 +10,25 @@ export class TransactionsService {
 
   constructor(
     @InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>,
+    @InjectNotificationsEmitter() private notificationsEmitter: NotificationsEmitter,
   ) { }
 
   public async create(transaction: any) {
     if (!transaction.uuid) {
       transaction.uuid = uuidFactory();
     }
-
+    console.log(transaction);
+    this.notificationsEmitter.sendNotification(
+      {
+        kind: 'business',
+        entity: transaction.business_uuid,
+        app: 'transaction',
+      },
+      `notification.transactions.title.new_transaction`,
+      {
+        transactionId: transaction.uuid,
+      },
+    );
     return this.transactionsModel.create(transaction);
   }
 
