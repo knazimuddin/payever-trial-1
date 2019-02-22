@@ -22,7 +22,7 @@ export class TransactionsService {
       {
         kind: 'business',
         entity: transaction.business_uuid,
-        app: 'transaction',
+        app: 'transactions',
       },
       `notification.transactions.title.new_transaction`,
       {
