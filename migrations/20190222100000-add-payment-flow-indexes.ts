@@ -1,8 +1,8 @@
 async function up(db) {
-  db.collection('paymentflowschemas').createIndex({ id: 1 }, { unique: true });
-  db.collection('paymentflowschemas').createIndex({ channel_set_uuid: 1 });
-  db.collection('paymentflowschemas').createIndex({ reference: 1 });
-  db.collection('paymentflowschemas').createIndex({ state: 1 });
+  db.addIndex('paymentflowschemas', 'id_1', ['id'], true);
+  db.addIndex('paymentflowschemas', 'channel_set_uuid_1', ['channel_set_uuid']);
+  db.addIndex('paymentflowschemas', 'reference_1', ['reference']);
+  db.addIndex('paymentflowschemas', 'state_1', ['state']);
 
   return null;
 }
