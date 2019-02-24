@@ -80,6 +80,13 @@ export class MicroEventsController {
       transaction.original_id = data.payment.id;
     }
 
+    if (transaction.items.length) {
+      transaction.items = this.transactionsService.prepareTransactionCartForInsert(
+        transaction.items,
+        transaction.business_uuid,
+      );
+    }
+
     await this.transactionsService.create(transaction);
     console.log('TRANSACTION CREATE COMPLETED');
   }
@@ -95,6 +102,12 @@ export class MicroEventsController {
 
     const transaction: any = data.payment;
     this.transactionsService.prepareTransactionForInsert(transaction);
+    if (transaction.items.length) {
+      transaction.items = this.transactionsService.prepareTransactionCartForInsert(
+        transaction.items,
+        transaction.business_uuid,
+      );
+    }
     await this.statisticsService.processAcceptedTransaction(transaction.uuid, transaction);
     await this.transactionsService.updateByUuid(transaction.uuid, transaction);
     console.log('TRANSACTION UPDATE COMPLETED');
