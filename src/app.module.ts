@@ -1,7 +1,8 @@
-import { ApmModule } from '@pe/nest-kit/modules/apm';
 import { Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ApmModule } from '@pe/nest-kit/modules/apm';
 import { JwtAuthModule } from '@pe/nest-kit/modules/auth';
+import { CommandModule } from 'nestjs-command';
 
 import { environment } from './environments';
 import { StatusModule } from './status/status.module';
@@ -23,11 +24,12 @@ import { TransactionsModule } from './transactions/transactions.module';
       environment.apm.enable,
       environment.apm.options,
     ),
+    CommandModule,
   ],
   providers: [
   ],
 })
 export class ApplicationModule implements NestModule {
-  configure() {
+  public configure() {
   }
 }

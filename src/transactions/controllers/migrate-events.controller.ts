@@ -35,7 +35,7 @@ export class MigrateEventsController {
     }
 
     const created = await this.transactionsService.createOrUpdate(transaction);
-    await this.statisticsService.processMigratedTransaction(created);
+    await this.statisticsService.processMigratedTransaction(created.lean());
     console.log('TRANSACTION MIGRATE COMPLETED');
   }
 }
