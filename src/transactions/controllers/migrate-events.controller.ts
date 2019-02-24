@@ -34,8 +34,15 @@ export class MigrateEventsController {
       transaction.original_id = data.payment.id;
     }
 
+    if (transaction.items.length) {
+      transaction.items = this.transactionsService.prepareTransactionCartForInsert(
+        transaction.items,
+        transaction.business_uuid,
+      );
+    }
+
     const created = await this.transactionsService.createOrUpdate(transaction);
-    await this.statisticsService.processMigratedTransaction(created);
+    await this.statisticsService.processMigratedTransaction(created.lean());
     console.log('TRANSACTION MIGRATE COMPLETED');
   }
 }

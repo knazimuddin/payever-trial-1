@@ -4,6 +4,7 @@ import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notificati
 
 import { Model } from 'mongoose';
 import { v4 as uuidFactory } from 'uuid';
+import { ProductUuid } from '../tools/product-uuid';
 
 @Injectable()
 export class TransactionsService {
@@ -29,6 +30,7 @@ export class TransactionsService {
         transactionId: transaction.uuid,
       },
     );
+
     return this.transactionsModel.create(transaction);
   }
 
@@ -120,6 +122,23 @@ export class TransactionsService {
     }
 
     return result;
+  }
+
+  public prepareTransactionCartForInsert(cartItems, businessId) {
+    const newCart = [];
+
+    for (const cartItem of cartItems) {
+      if (cartItem.product_uuid) {
+        cartItem._id = cartItem.product_uuid;
+        cartItem.uuid = cartItem.product_uuid;
+      } else {
+        cartItem._id = ProductUuid.generate(businessId, `${cartItem.name}${cartItem.product_variant_uuid}`);
+        cartItem.uuid = null;
+      }
+      newCart.push(cartItem);
+    }
+
+    return newCart;
   }
 
   private setSantanderApplication(transaction: any): void {

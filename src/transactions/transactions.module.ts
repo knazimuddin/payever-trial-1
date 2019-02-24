@@ -1,27 +1,28 @@
-import { Module, HttpModule } from '@nestjs/common';
+import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
+import { environment } from '../environments';
+import { TransactionsExportCommand } from './command/transactions-export.command';
 
 import {
+  AdminController,
   BusinessController,
   DevController,
   MicroEventsController,
   MigrateEventsController,
   UserController,
-  AdminController
 } from './controllers';
+import { BusinessPaymentOptionSchema, PaymentFlowSchema, TransactionsSchema } from './schemas';
 import {
   BusinessPaymentOptionService,
+  DtoValidationService,
   MessagingService,
   PaymentFlowService,
   StubService,
   TransactionsGridService,
   TransactionsService,
-  DtoValidationService,
 } from './services';
-import { TransactionsSchema, PaymentFlowSchema, BusinessPaymentOptionSchema } from './schemas';
 import { StatisticsService } from './services/statistics.service';
-import {environment} from '../environments';
 
 @Module({
   imports: [
@@ -39,7 +40,7 @@ import {environment} from '../environments';
     MicroEventsController,
     MigrateEventsController,
     UserController,
-    AdminController
+    AdminController,
   ],
   providers: [
     BusinessPaymentOptionService,
@@ -50,6 +51,7 @@ import {environment} from '../environments';
     TransactionsService,
     StatisticsService,
     DtoValidationService,
+    TransactionsExportCommand,
   ],
 })
 export class TransactionsModule {}

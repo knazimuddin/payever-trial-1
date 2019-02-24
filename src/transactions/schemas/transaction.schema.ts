@@ -19,6 +19,8 @@ export const AddressSchema = new Schema({
 });
 
 export const TransactionItemSchema = new Schema({
+  _id: String,
+  uuid: String,
   created_at: Date,
   description: String,
   fixed_shipping_price: Number,
@@ -36,7 +38,6 @@ export const TransactionItemSchema = new Schema({
   thumbnail: String,
   updated_at: Date,
   url: String,
-  uuid: String,
   vat_rate: Number,
   weight: Number,
 });
@@ -51,7 +52,6 @@ export const TransactionUploadItemSchema = new Schema({
   type: String,
   name: String,
 });
-
 
 export const TransactionHistoryEntrySchema = new Schema({
   action: String,
@@ -126,6 +126,7 @@ TransactionsSchema.virtual('amount_refunded').get(function() {
       .forEach((entry) => totalRefunded += (entry.amount || 0))
     ;
   }
+
   return totalRefunded;
 });
 

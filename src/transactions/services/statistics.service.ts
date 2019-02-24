@@ -50,7 +50,6 @@ export class StatisticsService {
   }
 
   public async processMigratedTransaction(transaction: any) {
-    transaction = transaction.lean();
     if (transaction.status === 'STATUS_ACCEPTED' || transaction.status === 'STATUS_PAID') {
       await this.rabbitClient
         .sendAsync(
