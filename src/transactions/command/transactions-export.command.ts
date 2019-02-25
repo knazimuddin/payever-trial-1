@@ -13,7 +13,9 @@ export class TransactionsExportCommand {
 
   @Command({ command: 'transactions:export', describe: 'Export transactions for widgets' })
   public async businessExport() {
-    const count: number = await this.transactionsModel.countDocuments({});
+    const count: number = await this.transactionsModel.countDocuments({
+      status: { $in: ['STATUS_ACCEPTED', 'STATUS_PAID', 'STATUS_REFUNDED']},
+    });
     const limit: number = 1000;
     let start: number = 0;
     let transactions = [];
@@ -25,6 +27,8 @@ export class TransactionsExportCommand {
       for (const transaction of transactions) {
         await this.statisticsService.processMigratedTransaction(transaction);
       }
+
+      console.log(`Exported ${start} of ${count}`);
     }
   }
 
