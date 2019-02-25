@@ -39,7 +39,7 @@ export class TransactionsExportCommand {
       },
       null,
       {
-        sort: { createdAt: 1 },
+        sort: { _id: 1 },
         skip: start,
         limit: limit,
       },
