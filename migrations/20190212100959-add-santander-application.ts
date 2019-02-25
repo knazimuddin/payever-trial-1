@@ -1,4 +1,4 @@
-import { MongoClient, ObjectId } from 'mongodb';
+import { MongoClient } from 'mongodb';
 
 async function up(db) {
   const transactionsConnectionString = db.connectionString;
@@ -8,7 +8,7 @@ async function up(db) {
   const transactionsDb = await client.db();
 
   const now = Date.now();
-  const transactions = await transactionsDb.collection('transactionsschemas').find().toArray();
+  const transactions = await transactionsDb.collection('transactions').find().toArray();
   const count_total = transactions.length;
   let counter = 0;
   console.log(`Processing total ${count_total} entries...`)
@@ -19,20 +19,20 @@ async function up(db) {
       const santander_applications = [];
       const payment_details = transaction.payment_details;
 
-      var financeIdRegexp = /"finance_id":"(\w+)"/g;
-      var financeIdMatch = financeIdRegexp.exec(payment_details);
+      const financeIdRegexp = /"finance_id":"(\w+)"/g;
+      const financeIdMatch = financeIdRegexp.exec(payment_details);
       if (financeIdMatch && financeIdMatch.length) {
         santander_applications.push(financeIdMatch[1])
       }
 
-      var appNumRegexp = /"application_number":"(\w+)"/g;
-      var appNumMatch = appNumRegexp.exec(payment_details);
+      const appNumRegexp = /"application_number":"(\w+)"/g;
+      const appNumMatch = appNumRegexp.exec(payment_details);
       if (appNumMatch && appNumMatch.length) {
         santander_applications.push(appNumMatch[1])
       }
 
-      var appNoRegexp = /"application_no":"(\w+)"/g;
-      var appNoMatch = appNoRegexp.exec(payment_details);
+      const appNoRegexp = /"application_no":"(\w+)"/g;
+      const appNoMatch = appNoRegexp.exec(payment_details);
       if (appNoMatch && appNoMatch.length) {
         santander_applications.push(appNoMatch[1])
       }
@@ -43,18 +43,18 @@ async function up(db) {
           {
             filter: { _id: transaction._id },
             update: { $set: { santander_applications } }
-          }
-        }
-      )
+          },
+        },
+      );
     }
 
     counter++;
     if (counter % 1000 === 0) {
-      console.log(`Processed ${counter} of ${count_total}`)
+      console.log(`Processed ${counter} of ${count_total}`);
     }
   }
 
-  await transactionsDb.collection('transactionsschemas').bulkWrite(updates);
+  await transactionsDb.collection('transactions').bulkWrite(updates);
   await client.close();
   console.log(`Completed in ${Date.now() - now}ms`)
 

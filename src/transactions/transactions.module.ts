@@ -30,9 +30,9 @@ import { StatisticsService } from './services/statistics.service';
     NotificationsSdkModule.forRoot({
       rabbitMqOptions: environment.rabbitmq,
     }),
-    MongooseModule.forFeature([{ name: 'TransactionsSchema', schema: TransactionsSchema }]),
-    MongooseModule.forFeature([{ name: 'BusinessPaymentOptionSchema', schema: BusinessPaymentOptionSchema }]),
-    MongooseModule.forFeature([{ name: 'PaymentFlowSchema', schema: PaymentFlowSchema }]),
+    MongooseModule.forFeature([{ name: 'Transaction', schema: TransactionsSchema }]),
+    MongooseModule.forFeature([{ name: 'BusinessPaymentOption', schema: BusinessPaymentOptionSchema }]),
+    MongooseModule.forFeature([{ name: 'PaymentFlow', schema: PaymentFlowSchema }]),
   ],
   controllers: [
     BusinessController,
