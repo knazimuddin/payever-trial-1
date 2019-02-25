@@ -14,7 +14,7 @@ export class TransactionsExportCommand {
   @Command({ command: 'transactions:export', describe: 'Export transactions for widgets' })
   public async businessExport() {
     const count: number = await this.transactionsModel.countDocuments({});
-    const limit: number = 100;
+    const limit: number = 1000;
     let start: number = 0;
     let transactions = [];
 
@@ -35,7 +35,7 @@ export class TransactionsExportCommand {
       },
       null,
       {
-        sort: { _id: 1 },
+        sort: { createdAt: 1 },
         skip: start,
         limit: limit,
       },
