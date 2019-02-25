@@ -116,6 +116,7 @@ TransactionsSchema.index('customer_name');
 TransactionsSchema.index('customer_email');
 TransactionsSchema.index('merchant_name');
 TransactionsSchema.index('merchant_email');
+TransactionsSchema.index({ status: 1, _id: 1 });
 
 TransactionsSchema.virtual('amount_refunded').get(function() {
   let totalRefunded = 0;
