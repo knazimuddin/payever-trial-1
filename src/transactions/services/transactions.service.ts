@@ -10,7 +10,7 @@ import { ProductUuid } from '../tools/product-uuid';
 export class TransactionsService {
 
   constructor(
-    @InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>,
+    @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
     @InjectNotificationsEmitter() private notificationsEmitter: NotificationsEmitter,
   ) { }
 

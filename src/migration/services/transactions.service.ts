@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 @Injectable()
 export class TransactionsService {
 
-  constructor(@InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>) {
+  constructor(@InjectModel('Transaction') private readonly transactionsModel: Model<any>) {
   }
 
   public async createOrUpdate(transaction: any) {

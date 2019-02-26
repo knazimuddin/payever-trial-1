@@ -11,7 +11,7 @@ export class StatisticsService {
   private rabbitClient: RabbitmqClient;
 
   constructor(
-    @InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>,
+    @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
   ) {
     this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
   }

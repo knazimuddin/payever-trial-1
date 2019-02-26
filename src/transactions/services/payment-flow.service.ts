@@ -6,7 +6,7 @@ import { Model } from 'mongoose';
 export class PaymentFlowService {
 
   constructor(
-    @InjectModel('PaymentFlowSchema') private readonly model: Model<any>,
+    @InjectModel('PaymentFlow') private readonly model: Model<any>,
   ) {}
 
   public async createOrUpdate(flow: any) {

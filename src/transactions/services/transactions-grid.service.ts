@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { snakeCase } from 'lodash';
+import { Model } from 'mongoose';
+import { PagingResultDto } from '../dto';
 
 import { FilterConditionEnum } from '../enum';
-import { PagingResultDto } from '../dto';
 
 export interface Filter {
   condition: FilterConditionEnum;
@@ -14,10 +14,17 @@ export interface Filter {
 @Injectable()
 export class TransactionsGridService {
 
-  constructor(@InjectModel('TransactionsSchema') private readonly transactionsModel: Model<any>) {
+  constructor(@InjectModel('Transaction') private readonly transactionsModel: Model<any>) {
   }
 
-  public async getList(filters = {}, orderBy: string, direction: string, search = null, page: number = null, limit = null): Promise<PagingResultDto> {
+  public async getList(
+    filters = {},
+    orderBy: string,
+    direction: string,
+    search = null,
+    page: number = null,
+    limit = null,
+  ): Promise<PagingResultDto> {
     const sort = {};
     sort[snakeCase(orderBy)] = direction.toLowerCase();
 
@@ -99,7 +106,7 @@ export class TransactionsGridService {
           $group: {
             _id: null,
             total: { $sum: '$total' },
-          }
+          },
         },
       ])
       ;
@@ -120,7 +127,7 @@ export class TransactionsGridService {
       this.addSearchFilters(mongoFilters, search);
     }
 
-    return await this.transactionsModel
+    return this.transactionsModel
         .find(mongoFilters)
         .distinct(field)
         .exec();

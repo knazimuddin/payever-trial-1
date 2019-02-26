@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 @Injectable()
 export class BusinessPaymentOptionService {
 
-  constructor(@InjectModel('BusinessPaymentOptionSchema') private readonly model: Model<any>) {
+  constructor(@InjectModel('BusinessPaymentOption') private readonly model: Model<any>) {
   }
 
   public async count() {
