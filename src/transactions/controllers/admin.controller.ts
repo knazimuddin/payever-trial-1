@@ -54,7 +54,7 @@ export class AdminController {
     let actions = [];
 
     try {
-      transaction = await this.transactionsService.findOneByParams({ uuid, user_uuid: user.id });
+      transaction = await this.transactionsService.findOneByParams({ uuid });
     } catch (e) {
       throw new NotFoundException();
     }
