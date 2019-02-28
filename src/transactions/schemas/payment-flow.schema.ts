@@ -28,3 +28,4 @@ export const PaymentFlowSchema = new Schema({
 PaymentFlowSchema.index({ channel_set_uuid: 1 });
 PaymentFlowSchema.index({ reference: 1 });
 PaymentFlowSchema.index({ state: 1 });
+PaymentFlowSchema.index({ id: 1 });
