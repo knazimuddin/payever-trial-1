@@ -41,7 +41,7 @@ export class MessagingService {
     return this.flowService.findOne(flowId);
   }
 
-  public async getActions(transaction) {
+  public async getActions(transaction) : Promise<any[]> {
     return new Promise(async (resolve, reject) => {
       let payload: any;
       try {
