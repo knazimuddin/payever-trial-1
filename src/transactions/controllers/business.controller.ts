@@ -80,7 +80,7 @@ export class BusinessController {
     @Headers() headers: any,
   ): Promise<any> {
     let transaction;
-    let actions;
+    let actions: any[];
 
     try {
       transaction = await this.transactionsService.findOneByParams({ uuid });
@@ -97,6 +97,11 @@ export class BusinessController {
     } catch (e) {
       console.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
+    }
+
+    // TODO: Temp exclude edit action for santander_installment_dk until it's not done yet
+    if (transaction.type === 'santander_installment_dk') {
+      actions = actions.filter(x => x.action !== 'edit');
     }
 
     return { ...transaction, actions };
