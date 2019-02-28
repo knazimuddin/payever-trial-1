@@ -157,7 +157,7 @@ export class BusinessController {
   ): Promise<any> {
     let transaction: any;
     let updatedTransaction: any;
-    let actions: any;
+    let actions: any[];
 
     try {
       transaction = await this.transactionsService.findOne(uuid);
