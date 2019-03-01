@@ -3,7 +3,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   HttpCode,
   HttpStatus,
   NotFoundException,
@@ -11,6 +10,7 @@ import {
   Post,
   Query,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
@@ -18,7 +18,6 @@ import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { ActionPayloadDto } from '../dto';
 
 import {
-  BusinessPaymentOptionService,
   MessagingService,
   TransactionsGridService,
   TransactionsService,
@@ -62,10 +61,10 @@ export class BusinessController {
   @Get('detail/reference/:reference')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
-  public async getDetailByReference(@Param('reference') reference: string) {
+  public async getDetailByReference(@Param('reference') reference: string, @Param('businessId') businessId: string) {
     const transaction = await this.transactionsService.findOneByParams({ reference });
-    if (!transaction) {
-      throw new NotFoundException();
+    if (transaction.business_uuid !== businessId) {
+      throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
     }
 
     return { ...transaction };
@@ -76,11 +75,15 @@ export class BusinessController {
   @Roles(RolesEnum.merchant)
   public async getDetail(
     @Param('uuid') uuid: string,
+    @Param('businessId') businessId: string,
   ): Promise<any> {
     let transaction;
     let actions: any[];
 
     transaction = await this.transactionsService.findOneByParams({ uuid });
+    if (transaction.business_uuid !== businessId) {
+      throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
+    }
 
     try {
       actions = await this.messagingService.getActions(transaction);
@@ -98,6 +101,7 @@ export class BusinessController {
   public async runAction(
     @Param('uuid') uuid: string,
     @Param('action') action: string,
+    @Param('businessId') businessId: string,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<any> {
     let transaction: any;
@@ -106,6 +110,9 @@ export class BusinessController {
     this.dtoValidation.checkFileUploadDto(actionPayload);
     transaction = await this.transactionsService.findOne(uuid);
 
+    if (transaction.business_uuid !== businessId) {
+      throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
+    }
     try {
       updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
     } catch (e) {
@@ -134,12 +141,17 @@ export class BusinessController {
   @Roles(RolesEnum.merchant)
   public async updateStatus(
     @Param('uuid') uuid: string,
+    @Param('businessId') businessId: string,
   ): Promise<any> {
     let transaction: any;
     let updatedTransaction: any;
     let actions: any[];
 
     transaction = await this.transactionsService.findOne(uuid);
+    if (transaction.business_uuid !== businessId) {
+      throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
+    }
+
     try {
       await this.messagingService.updateStatus(transaction);
     } catch (e) {
