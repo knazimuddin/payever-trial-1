@@ -58,15 +58,7 @@ export class UserController {
     let transaction;
     let actions = [];
 
-    try {
-      transaction = await this.transactionsService.findOneByParams({ uuid, user_uuid: user.id });
-    } catch (e) {
-      throw new NotFoundException();
-    }
-
-    if (!transaction) {
-      throw new NotFoundException();
-    }
+    transaction = await this.transactionsService.findOneByParams({ uuid, user_uuid: user.id });
 
     return { ...transaction, actions };
   }

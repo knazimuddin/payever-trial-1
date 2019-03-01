@@ -41,7 +41,7 @@ export class MessagingService {
     return this.flowService.findOne(flowId);
   }
 
-  public async getActions(transaction) : Promise<any[]> {
+  public async getActions(transaction): Promise<any[]> {
     return new Promise(async (resolve, reject) => {
       let payload: any;
       try {
@@ -80,6 +80,10 @@ export class MessagingService {
           return of([]);
         }),
       ).subscribe((actions) => {
+        // TODO: Temp exclude edit action for santander_installment_dk until it's not done yet
+        if (transaction.type === 'santander_installment_dk') {
+          actions = actions.filter(x => x.action !== 'edit');
+        }
         resolve(actions);
       });
     });
@@ -301,11 +305,11 @@ export class MessagingService {
         ...fields,
         reason: fields.payment_update.reason,
         payment_items: fields.payment_update.updateData
-            ? fields.payment_update.updateData.productLine
-            : [],
+          ? fields.payment_update.updateData.productLine
+          : [],
         delivery_fee: fields.payment_update.updateData
-            ? fields.payment_update.updateData.deliveryFee
-            : null,
+          ? fields.payment_update.updateData.deliveryFee
+          : null,
       };
     }
 

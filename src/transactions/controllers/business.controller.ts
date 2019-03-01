@@ -3,7 +3,6 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   HttpCode,
   HttpStatus,
   NotFoundException,
@@ -11,15 +10,14 @@ import {
   Post,
   Query,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-import { snakeCase } from 'lodash';
 
 import { ActionPayloadDto } from '../dto';
 
 import {
-  BusinessPaymentOptionService,
   MessagingService,
   TransactionsGridService,
   TransactionsService,
@@ -63,10 +61,10 @@ export class BusinessController {
   @Get('detail/reference/:reference')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
-  public async getDetailByReference(@Param('reference') reference: string) {
+  public async getDetailByReference(@Param('reference') reference: string, @Param('businessId') businessId: string) {
     const transaction = await this.transactionsService.findOneByParams({ reference });
-    if (!transaction) {
-      throw new NotFoundException();
+    if (transaction.business_uuid !== businessId) {
+      throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
     }
 
     return { ...transaction };
@@ -77,19 +75,14 @@ export class BusinessController {
   @Roles(RolesEnum.merchant)
   public async getDetail(
     @Param('uuid') uuid: string,
-    @Headers() headers: any,
+    @Param('businessId') businessId: string,
   ): Promise<any> {
     let transaction;
     let actions: any[];
 
-    try {
-      transaction = await this.transactionsService.findOneByParams({ uuid });
-    } catch (e) {
-      throw new NotFoundException();
-    }
-
-    if (!transaction) {
-      throw new NotFoundException();
+    transaction = await this.transactionsService.findOneByParams({ uuid });
+    if (transaction.business_uuid !== businessId) {
+      throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
     }
 
     try {
@@ -97,11 +90,6 @@ export class BusinessController {
     } catch (e) {
       console.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
-    }
-
-    // TODO: Temp exclude edit action for santander_installment_dk until it's not done yet
-    if (transaction.type === 'santander_installment_dk') {
-      actions = actions.filter(x => x.action !== 'edit');
     }
 
     return { ...transaction, actions };
@@ -113,18 +101,18 @@ export class BusinessController {
   public async runAction(
     @Param('uuid') uuid: string,
     @Param('action') action: string,
+    @Param('businessId') businessId: string,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<any> {
     let transaction: any;
     let updatedTransaction: any;
 
     this.dtoValidation.checkFileUploadDto(actionPayload);
-    try {
-      transaction = await this.transactionsService.findOne(uuid);
-    } catch (e) {
-      throw new NotFoundException();
-    }
+    transaction = await this.transactionsService.findOne(uuid);
 
+    if (transaction.business_uuid !== businessId) {
+      throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
+    }
     try {
       updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
     } catch (e) {
@@ -153,16 +141,15 @@ export class BusinessController {
   @Roles(RolesEnum.merchant)
   public async updateStatus(
     @Param('uuid') uuid: string,
-    @Headers() headers: any,
+    @Param('businessId') businessId: string,
   ): Promise<any> {
     let transaction: any;
     let updatedTransaction: any;
     let actions: any[];
 
-    try {
-      transaction = await this.transactionsService.findOne(uuid);
-    } catch (e) {
-      throw new NotFoundException();
+    transaction = await this.transactionsService.findOne(uuid);
+    if (transaction.business_uuid !== businessId) {
+      throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
     }
 
     try {
