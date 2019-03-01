@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-import { snakeCase } from 'lodash';
 
 import { ActionPayloadDto } from '../dto';
 
@@ -77,31 +76,17 @@ export class BusinessController {
   @Roles(RolesEnum.merchant)
   public async getDetail(
     @Param('uuid') uuid: string,
-    @Headers() headers: any,
   ): Promise<any> {
     let transaction;
     let actions: any[];
 
-    try {
-      transaction = await this.transactionsService.findOneByParams({ uuid });
-    } catch (e) {
-      throw new NotFoundException();
-    }
-
-    if (!transaction) {
-      throw new NotFoundException();
-    }
+    transaction = await this.transactionsService.findOneByParams({ uuid });
 
     try {
       actions = await this.messagingService.getActions(transaction);
     } catch (e) {
       console.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
-    }
-
-    // TODO: Temp exclude edit action for santander_installment_dk until it's not done yet
-    if (transaction.type === 'santander_installment_dk') {
-      actions = actions.filter(x => x.action !== 'edit');
     }
 
     return { ...transaction, actions };
@@ -119,11 +104,7 @@ export class BusinessController {
     let updatedTransaction: any;
 
     this.dtoValidation.checkFileUploadDto(actionPayload);
-    try {
-      transaction = await this.transactionsService.findOne(uuid);
-    } catch (e) {
-      throw new NotFoundException();
-    }
+    transaction = await this.transactionsService.findOne(uuid);
 
     try {
       updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
@@ -153,18 +134,12 @@ export class BusinessController {
   @Roles(RolesEnum.merchant)
   public async updateStatus(
     @Param('uuid') uuid: string,
-    @Headers() headers: any,
   ): Promise<any> {
     let transaction: any;
     let updatedTransaction: any;
     let actions: any[];
 
-    try {
-      transaction = await this.transactionsService.findOne(uuid);
-    } catch (e) {
-      throw new NotFoundException();
-    }
-
+    transaction = await this.transactionsService.findOne(uuid);
     try {
       await this.messagingService.updateStatus(transaction);
     } catch (e) {

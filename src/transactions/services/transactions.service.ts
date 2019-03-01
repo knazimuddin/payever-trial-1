@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 
@@ -66,10 +66,11 @@ export class TransactionsService {
   public async findOneByParams(params) {
     const transaction = await this.transactionsModel.findOne(params);
 
-    return transaction
-      ? this.prepareTransactionForOutput(transaction.toObject({ virtuals: true }))
-      : null
-      ;
+    if (!transaction) {
+      throw new NotFoundException()
+    }
+
+    return this.prepareTransactionForOutput(transaction.toObject({ virtuals: true }));
   }
 
   public async removeByUuid(uuid: string) {
