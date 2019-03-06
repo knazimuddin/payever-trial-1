@@ -115,9 +115,9 @@ export class TransactionsGridService {
   }
 
   public async distinctFieldValues(
-      field,
-      filters = {},
-      search = null,
+    field,
+    filters = {},
+    search = null,
   ) {
     const mongoFilters = {};
     if (filters) {
@@ -128,9 +128,9 @@ export class TransactionsGridService {
     }
 
     return this.transactionsModel
-        .find(mongoFilters)
-        .distinct(field)
-        .exec();
+      .find(mongoFilters)
+      .distinct(field)
+      .exec();
   }
 
   private addSearchFilters(filters: any, search: string) {
@@ -229,16 +229,35 @@ export class TransactionsGridService {
 
   private getTargetDate(value: string) {
     const date = new Date(value);
-    date.setMinutes(0, 0, 0);
-
+    // Date can be in format 
+    // Sun Mar 03 2019 00:00:00 GMT 0300 (Moscow Standard Time)
+    // Converting it into date leads to 
+    // Sun Mar 03 2019 03:00:00 GMT 0300 (Moscow Standard Time)
+    if (!this.checkStringISODate(value)) {
+      date.setHours(0);
+    }
+    date.setMinutes(0);
+    date.setSeconds(0);
     return date;
   }
 
   private getTargetTomorrowDate(value: string) {
     const date = new Date(value);
     date.setDate(date.getDate() + 1);
-    date.setMinutes(0, 0, 0);
+    if (!this.checkStringISODate(value)) {
+      date.setHours(0);
+    }
+    date.setMinutes(0);
+    date.setSeconds(0);
 
     return date;
+  }
+
+  private checkStringISODate(str: string): boolean {
+    if (str === new Date(str).toISOString()) {
+      return true;
+    }
+
+    return false;
   }
 }
