@@ -229,18 +229,6 @@ export class TransactionsGridService {
 
   private getTargetDate(value: string) {
     const date = new Date(value);
-    // TODO: need to be fixed on FE side. Date can be in format 
-    // Sun Mar 03 2019 00:00:00 GMT 0300 (Moscow Standard Time)
-    // Converting it into date leads to 
-    // Sun Mar 03 2019 03:00:00 GMT 0300 (Moscow Standard Time)
-    if (!this.checkStringISODate(value)) {
-      const offset = date.getTimezoneOffset();
-
-      const hours = Math.floor(offset / 60);
-      const minutes = offset % 60;
-      date.setHours(date.getHours() + hours);
-      date.setMinutes(date.getMinutes() + minutes);
-    }
     date.setSeconds(0);
     return date;
   }
@@ -248,24 +236,8 @@ export class TransactionsGridService {
   private getTargetTomorrowDate(value: string) {
     const date = new Date(value);
     date.setDate(date.getDate() + 1);
-    if (!this.checkStringISODate(value)) {
-      const offset = date.getTimezoneOffset();
-
-      const hours = Math.floor(offset / 60);
-      const minutes = offset % 60;
-      date.setHours(date.getHours() + hours);
-      date.setMinutes(date.getMinutes() + minutes);
-    }
     date.setSeconds(0);
 
     return date;
-  }
-
-  private checkStringISODate(str: string): boolean {
-    if (str === new Date(str).toISOString()) {
-      return true;
-    }
-
-    return false;
   }
 }
