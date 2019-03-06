@@ -229,7 +229,7 @@ export class TransactionsGridService {
 
   private getTargetDate(value: string) {
     const date = new Date(value);
-    date.setHours(0, 0, 0, 0);
+    date.setMinutes(0, 0, 0);
 
     return date;
   }
@@ -237,7 +237,7 @@ export class TransactionsGridService {
   private getTargetTomorrowDate(value: string) {
     const date = new Date(value);
     date.setDate(date.getDate() + 1);
-    date.setHours(0, 0, 0, 0);
+    date.setMinutes(0, 0, 0);
 
     return date;
   }
