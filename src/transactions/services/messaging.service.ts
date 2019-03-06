@@ -251,17 +251,17 @@ export class MessagingService {
     try {
       businessPaymentOption = await this.getBusinessPaymentOption(transaction);
     } catch (e) {
-      throw new Error(`Cannot resolve business payment option: ${e}`);
+      throw new Error(`Transaction:${transaction.uuid} -> Cannot resolve business payment option: ${e}`);
     }
 
     try {
       paymentFlow = await this.getPaymentFlow(transaction.payment_flow_id);
     } catch (e) {
-      throw new Error(`Cannot resolve payment flow: ${e}`);
+      throw new Error(`Transaction:${transaction.uuid} -> Cannot resolve payment flow: ${e}`);
     }
 
     if (!paymentFlow) {
-      throw new Error(`Payment flow cannot be null.`);
+      throw new Error(`Transaction:${transaction.uuid} -> Payment flow cannot be null.`);
     }
     dto.credentials = businessPaymentOption.credentials;
     console.log('dto credentials: ');
