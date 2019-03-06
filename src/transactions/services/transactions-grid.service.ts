@@ -115,9 +115,9 @@ export class TransactionsGridService {
   }
 
   public async distinctFieldValues(
-      field,
-      filters = {},
-      search = null,
+    field,
+    filters = {},
+    search = null,
   ) {
     const mongoFilters = {};
     if (filters) {
@@ -128,9 +128,9 @@ export class TransactionsGridService {
     }
 
     return this.transactionsModel
-        .find(mongoFilters)
-        .distinct(field)
-        .exec();
+      .find(mongoFilters)
+      .distinct(field)
+      .exec();
   }
 
   private addSearchFilters(filters: any, search: string) {
@@ -229,19 +229,14 @@ export class TransactionsGridService {
 
   private getTargetDate(value: string) {
     const date = new Date(value);
-    date.setUTCHours(0);
-    date.setUTCMinutes(0);
-    date.setUTCSeconds(0);
-
+    date.setSeconds(0);
     return date;
   }
 
   private getTargetTomorrowDate(value: string) {
     const date = new Date(value);
     date.setDate(date.getDate() + 1);
-    date.setUTCHours(0);
-    date.setUTCMinutes(0);
-    date.setUTCSeconds(0);
+    date.setSeconds(0);
 
     return date;
   }
