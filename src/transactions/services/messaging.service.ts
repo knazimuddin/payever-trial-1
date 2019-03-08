@@ -1,7 +1,8 @@
 import { HttpService, Injectable } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { v4 as uuid } from 'uuid';
+import * as dateFormat from 'dateformat';
 
-import { MessageBusService } from '@pe/nest-kit/modules/message';
+import { MessageBusService, MessageInterface } from '@pe/nest-kit/modules/message';
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
 import { of } from 'rxjs';
 import { catchError, map, take, timeout } from 'rxjs/operators';
@@ -14,7 +15,7 @@ import { TransactionsService } from './transactions.service';
 
 @Injectable()
 export class MessagingService {
-
+  private readonly stubMessageName: string = 'payment_option.stub_proxy.sandbox';
   private rabbitClient: RabbitmqClient;
 
   private messageBusService: MessageBusService = new MessageBusService({
@@ -43,79 +44,67 @@ export class MessagingService {
 
   public async getActions(transaction): Promise<any[]> {
     return new Promise(async (resolve, reject) => {
-      let payload: any;
+      let payload: any = null;
       try {
-        payload = {
-          action: 'action.list',
-          data: await this.createPayloadData(transaction),
-        };
+        const data = await this.createPayloadData(transaction);
+        if (data) {
+          payload = {
+            action: 'action.list',
+            data,
+          };
+        }
       } catch (error) {
         console.error('Could not prepare payload for actions call:', error);
         resolve([]);
       }
 
-      const message = this.messageBusService.createPaymentMicroMessage(
-        transaction.type,
-        'action',
-        payload,
-        environment.stub,
-      );
+      const responseActions = await this.runPaymentRpc(transaction, payload, 'action');
+      if (!responseActions) {
+        return [];
+      }
 
-      this.rabbitClient.send(
-        { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
-        message,
-      ).pipe(
-        take(1),
-        timeout(this.rpcTimeout),
-        map((msg) => this.messageBusService.unwrapRpcMessage(msg)),
-        map((actions) => {
-          return Object.keys(actions).map((key) => ({
-            action: key,
-            enabled: actions[key],
-          }));
-        }),
-        catchError((e) => {
-          console.error(`Error while resolving actions by rpc call:`, e);
+      let actions = Object.keys(responseActions).map((key) => ({
+        action: key,
+        enabled: actions[key],
+      }));
 
-          return of([]);
-        }),
-      ).subscribe((actions) => {
-        // TODO: Temp exclude edit action for santander_installment_dk until it's not done yet
-        if (transaction.type === 'santander_installment_dk') {
-          actions = actions.filter(x => x.action !== 'edit');
-        }
-        resolve(actions);
-      });
+      if (transaction.type === 'santander_installment_dk') {
+        actions = actions.filter(x => x.action !== 'edit');
+      }
+
+      return actions;
     });
   }
 
   public async runAction(transaction, action, actionPayload) {
-    let dto;
+    let payload = null;
 
     try {
-      dto = await this.createPayloadData(transaction);
+      const dto = await this.createPayloadData(transaction);
+      if (dto) {
+        if (action === 'capture' && actionPayload.fields.capture_funds) {
+          dto.payment.amount = actionPayload.fields.capture_funds.amount;
+        }
+
+        dto.action = action;
+
+        if (actionPayload.fields) {
+          dto.fields = this.prepareActionFields(transaction, action, actionPayload.fields);
+        }
+
+        if (actionPayload.files) {
+          dto.files = actionPayload.files;
+        }
+
+        payload = {
+          action: 'action.do',
+          data: dto,
+        };
+      }
     } catch (e) {
       throw new Error(`Cannot prepare dto for run action: ${e}`);
     }
 
-    if (action === 'capture' && actionPayload.fields.capture_funds) {
-      dto.payment.amount = actionPayload.fields.capture_funds.amount;
-    }
-
-    dto.action = action;
-
-    if (actionPayload.fields) {
-      dto.fields = this.prepareActionFields(transaction, action, actionPayload.fields);
-    }
-
-    if (actionPayload.files) {
-      dto.files = actionPayload.files;
-    }
-
-    const payload = {
-      action: 'action.do',
-      data: dto,
-    };
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
     const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
     console.log('RPC result: ', updatedTransaction);
@@ -143,18 +132,19 @@ export class MessagingService {
   }
 
   public async updateStatus(transaction) {
-    let dto;
+    let payload = null;
 
     try {
-      dto = await this.createPayloadData(transaction);
+      const dto = await this.createPayloadData(transaction);
+      if (dto) {
+        payload = {
+          action: 'status',
+          data: dto,
+        };
+      }
     } catch (e) {
       throw new Error(`Cannot prepare dto for update status: ${e}`);
     }
-
-    const payload = {
-      action: 'status',
-      data: dto,
-    };
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'payment');
     const rpcPayment: any = rpcResult.payment;
@@ -193,7 +183,7 @@ export class MessagingService {
     return new Promise((resolve, reject) => {
       this.rabbitClient.send(
         { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
-        this.messageBusService.createPaymentMicroMessage(
+        this.createPaymentMicroMessage(
           transaction.type,
           messageIdentifier,
           payload,
@@ -212,6 +202,37 @@ export class MessagingService {
         resolve(reply);
       });
     });
+  }
+
+  private createPaymentMicroMessage(paymentType: string, messageIdentifier: string, messageData: any, stub: boolean = false): MessageInterface {
+    const messageName = `payment_option.${paymentType}.${messageIdentifier}`;
+    const message: any = {
+      name: messageName,
+      uuid: uuid(),
+      version: 0,
+      encryption: 'none',
+      createdAt: new Date().toISOString(),
+      metadata: { locale: 'en' },
+    };
+
+    if (messageData) {
+      message.payload = messageData;
+    }
+
+    if (stub && this.messageBusService.getMicroName(paymentType)) {
+      message.name = this.stubMessageName;
+      if (messageData) {
+        message.payload.microservice_data = {
+          microservice_name: this.messageBusService.getMicroName(paymentType),
+          payment_method: paymentType,
+          message_name: messageName,
+          message_identifier: messageIdentifier,
+          original_timeout: 15, // @TODO what magic is this 15?
+        };
+      }
+    }
+
+    return message;
   }
 
   private async createPayloadData(transaction: any) {
@@ -257,12 +278,15 @@ export class MessagingService {
     try {
       paymentFlow = await this.getPaymentFlow(transaction.payment_flow_id);
     } catch (e) {
-      throw new Error(`Transaction:${transaction.uuid} -> Cannot resolve payment flow: ${e}`);
+      console.error(`Transaction:${transaction.uuid} -> Cannot resolve payment flow: ${e}`);
+      return null;
     }
 
     if (!paymentFlow) {
-      throw new Error(`Transaction:${transaction.uuid} -> Payment flow cannot be null.`);
+      console.error(`Transaction:${transaction.uuid} -> Payment flow cannot be null.`);
+      return null;
     }
+
     dto.credentials = businessPaymentOption.credentials;
     console.log('dto credentials: ');
     console.log(dto.credentials);
