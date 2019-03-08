@@ -43,37 +43,35 @@ export class MessagingService {
   }
 
   public async getActions(transaction): Promise<any[]> {
-    return new Promise(async (resolve, reject) => {
-      let payload: any = null;
-      try {
-        const data = await this.createPayloadData(transaction);
-        if (data) {
-          payload = {
-            action: 'action.list',
-            data,
-          };
-        }
-      } catch (error) {
-        console.error('Could not prepare payload for actions call:', error);
-        resolve([]);
+    let payload: any = null;
+    try {
+      const data = await this.createPayloadData(transaction);
+      if (data) {
+        payload = {
+          action: 'action.list',
+          data,
+        };
       }
+    } catch (error) {
+      console.error('Could not prepare payload for actions call:', error);
+      return [];
+    }
 
-      const responseActions = await this.runPaymentRpc(transaction, payload, 'action');
-      if (!responseActions) {
-        return [];
-      }
+    const responseActions = await this.runPaymentRpc(transaction, payload, 'action');
+    if (!responseActions) {
+      return [];
+    }
 
-      let actions = Object.keys(responseActions).map((key) => ({
-        action: key,
-        enabled: actions[key],
-      }));
+    let actions = Object.keys(responseActions).map((key) => ({
+      action: key,
+      enabled: responseActions[key],
+    }));
 
-      if (transaction.type === 'santander_installment_dk') {
-        actions = actions.filter(x => x.action !== 'edit');
-      }
+    if (transaction.type === 'santander_installment_dk') {
+      actions = actions.filter(x => x.action !== 'edit');
+    }
 
-      return actions;
-    });
+    return actions;
   }
 
   public async runAction(transaction, action, actionPayload) {
