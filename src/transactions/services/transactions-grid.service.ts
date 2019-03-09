@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { PagingResultDto } from '../dto';
 
 import { FilterConditionEnum } from '../enum';
+import { CurrencyExchangeService } from './currency-exchange.service';
 
 export interface Filter {
   condition: FilterConditionEnum;
@@ -14,7 +15,10 @@ export interface Filter {
 @Injectable()
 export class TransactionsGridService {
 
-  constructor(@InjectModel('Transaction') private readonly transactionsModel: Model<any>) {
+  constructor(
+    @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
+    private readonly currencyExchangeService: CurrencyExchangeService,
+  ) {
   }
 
   public async getList(
@@ -24,6 +28,7 @@ export class TransactionsGridService {
     search = null,
     page: number = null,
     limit = null,
+    currency = null,
   ): Promise<PagingResultDto> {
     const sort = {};
     sort[snakeCase(orderBy)] = direction.toLowerCase();
@@ -32,7 +37,7 @@ export class TransactionsGridService {
       .all([
         this.findMany(filters, sort, search, +page, +limit),
         this.count(filters, search),
-        this.total(filters, search),
+        this.total(filters, search, currency),
         this.distinctFieldValues('status', filters, search),
         this.distinctFieldValues('specific_status', filters, search),
       ])
@@ -90,6 +95,7 @@ export class TransactionsGridService {
   public async total(
     filters = {},
     search = null,
+    currency = null,
   ): Promise<number> {
     const mongoFilters = {};
     if (filters) {
@@ -99,19 +105,48 @@ export class TransactionsGridService {
       this.addSearchFilters(mongoFilters, search);
     }
 
-    const res = await this.transactionsModel
-      .aggregate([
-        { $match: mongoFilters },
-        {
-          $group: {
-            _id: null,
-            total: { $sum: '$total' },
-          },
-        },
-      ])
-      ;
+    let res: any
 
-    return res && res[0] ? res[0].total : null;
+    if (!currency) {
+      res = await this.transactionsModel
+        .aggregate([
+          { $match: mongoFilters },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: '$total' },
+            },
+          },
+        ]);
+
+      res = res && res[0] ? res[0].total : null
+    }
+    else {
+      const rates = await this.currencyExchangeService.getCurrencyExchanges();
+      res = await this.transactionsModel
+        .aggregate([
+          { $match: mongoFilters },
+          {
+            $group: {
+              _id: "$currency",
+              total: { $sum: '$total' },
+            },
+          },
+        ]);
+
+      const totalPerCurrency: number = res.reduce((acc, currentVal) => {
+        const rate = rates.find(x => x.code === currentVal._id);
+        const addition = rate ? currentVal.total / rate.rate : currentVal.total;
+
+        return acc + addition;
+      }, 0);
+
+      const rate = rates.find(x => x.code === currency);
+
+      return totalPerCurrency * rate.rate;
+    }
+
+    return res;
   }
 
   public async distinctFieldValues(

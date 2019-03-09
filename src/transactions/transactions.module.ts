@@ -21,6 +21,7 @@ import {
   StubService,
   TransactionsGridService,
   TransactionsService,
+  CurrencyExchangeService,
 } from './services';
 import { StatisticsService } from './services/statistics.service';
 
@@ -52,6 +53,7 @@ import { StatisticsService } from './services/statistics.service';
     StatisticsService,
     DtoValidationService,
     TransactionsExportCommand,
+    CurrencyExchangeService,
   ],
 })
 export class TransactionsModule {}

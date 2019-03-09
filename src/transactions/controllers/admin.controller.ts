@@ -49,8 +49,10 @@ export class AdminController {
     @Query('page') page: number = 1,
     @Query('query') search: string,
     @Query('filters') filters: any = {},
+    @Query('currency') currency: string,
   ): Promise<any> {
-    return this.transactionsGridService.getList(filters, orderBy, direction, search, +page, +limit);
+    return this.transactionsGridService
+      .getList(filters, orderBy, direction, search, +page, +limit, currency);
   }
 
   @Get('detail/reference/:reference')
