@@ -13,7 +13,7 @@ export const environment: any = {
   production: env.PRODUCTION_MODE === 'true',
   port: env.APP_PORT,
   mongodb: env.MONGODB_URL,
-  checkoutMicroUrlBase: env.MICRO_URL_PHP_CHECKOUT,
+  connectMicroUrlBase: env.MICRO_URL_CONNECT,
 
   stub: env.STUB === 'true',
   refreshTokenExpiresIn: (isNumeric(env.JWT_REFRESH_TOKEN_EXPIRES_IN) ?

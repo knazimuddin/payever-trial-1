@@ -1,6 +1,5 @@
-import { HttpService, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { v4 as uuid } from 'uuid';
-import * as dateFormat from 'dateformat';
 
 import { MessageBusService, MessageInterface } from '@pe/nest-kit/modules/message';
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
@@ -25,7 +24,6 @@ export class MessagingService {
   private readonly rpcTimeout: number = 30000;
 
   constructor(
-    private readonly httpService: HttpService,
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly flowService: PaymentFlowService,
