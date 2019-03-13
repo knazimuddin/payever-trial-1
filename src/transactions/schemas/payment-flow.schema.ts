@@ -25,7 +25,7 @@ export const PaymentFlowSchema = new Schema({
   x_frame_host: String,
 });
 
+PaymentFlowSchema.index({ id: 1 });
 PaymentFlowSchema.index({ channel_set_uuid: 1 });
 PaymentFlowSchema.index({ reference: 1 });
 PaymentFlowSchema.index({ state: 1 });
-PaymentFlowSchema.index({ id: 1 });

@@ -1,0 +1,25 @@
+import { Schema } from 'mongoose';
+
+export const TransactionItemSchema = new Schema({
+  _id: String,
+  uuid: String,
+  created_at: Date,
+  description: String,
+  fixed_shipping_price: Number,
+  identifier: String,
+  item_type: String,
+  name: String,
+  price: Number,
+  price_net: Number,
+  product_variant_uuid: String,
+  quantity: Number,
+  shipping_price: Number,
+  shipping_settings_rate: Number,
+  shipping_settings_rate_type: String,
+  shipping_type: String,
+  thumbnail: String,
+  updated_at: Date,
+  url: String,
+  vat_rate: Number,
+  weight: Number,
+});
