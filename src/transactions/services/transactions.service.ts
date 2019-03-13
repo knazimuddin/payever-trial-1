@@ -15,10 +15,14 @@ export class TransactionsService {
   ) { }
 
   public async create(transaction: any) {
+    if (transaction.id) {
+      transaction.original_id = transaction.id;
+    }
+   
     if (!transaction.uuid) {
       transaction.uuid = uuidFactory();
     }
-    console.log(transaction);
+
     this.notificationsEmitter.sendNotification(
       {
         kind: 'business',
@@ -57,6 +61,12 @@ export class TransactionsService {
     }
 
     return this.create(transaction);
+  }
+
+  public async exists(uuid: string) : Promise<boolean> {
+    const transaction = await this.transactionsModel.findOne({ uuid });
+    
+    return !!transaction;
   }
 
   public async findOne(uuid: string) {
