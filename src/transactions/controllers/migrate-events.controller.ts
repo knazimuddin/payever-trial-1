@@ -30,10 +30,6 @@ export class MigrateEventsController {
     const transaction: any = data.payment;
     this.transactionsService.prepareTransactionForInsert(transaction);
 
-    if (data.payment.id) {
-      transaction.original_id = data.payment.id;
-    }
-
     if (transaction.items.length) {
       transaction.items = this.transactionsService.prepareTransactionCartForInsert(
         transaction.items,
