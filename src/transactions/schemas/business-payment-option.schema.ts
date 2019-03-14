@@ -1,20 +1,24 @@
 import { Schema } from 'mongoose';
-import { v4 as uuid } from 'uuid';
 
-export const BusinessPaymentOptionSchema = new Schema({
-  payment_option_id: Number,
-  _id: { type: String, default: uuid },
-  id: { type: Number, unique: true },
-  uuid: { type: String, unique: true },
-  accept_fee: Boolean,
-  status: String,
-  fixed_fee: Number,
-  variable_fee: Number,
-  credentials: Schema.Types.Mixed,
-  options: String, // json of options array
-  completed: Boolean,
-  shop_redirect_enabled: Boolean,
-});
+export const BusinessPaymentOptionSchema = new Schema(
+  {
+    _id: { type: String, unique: true },
+    id: { type: Number, unique: true },
+    uuid: { type: String, unique: true },
+    payment_option_id: Number,
+    accept_fee: Boolean,
+    status: String,
+    fixed_fee: Number,
+    variable_fee: Number,
+    credentials: Schema.Types.Mixed,
+    options: String, // json of options array
+    completed: Boolean,
+    shop_redirect_enabled: Boolean,
+  },
+  {
+    id: false,
+  },
+);
 
 // {
   // payment_option_id: 9,

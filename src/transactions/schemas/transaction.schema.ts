@@ -4,7 +4,7 @@ import { TransactionHistoryEntrySchema } from './transaction-history-entry.schem
 import { TransactionItemSchema } from './transaction-item.schema';
 
 export const TransactionsSchema = new Schema({
-  _id: String, // id from mysql db
+  _id: { type: String, unique: true }, // id from mysql db
   original_id: String, // id from mysql db
   uuid: { type: String, required: true },
   action_running: { type: Boolean, required: false, default: false },
@@ -88,7 +88,6 @@ TransactionsSchema.virtual('available_refund_items').get(function() {
           if (refundedLog && refundedLog.count) {
             availableCount -= refundedLog.count;
           }
-
         }
       });
     }
