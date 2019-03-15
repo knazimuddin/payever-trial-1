@@ -12,16 +12,16 @@ export class BusinessPaymentOptionService {
   ) {}
 
   public async createOrUpdate(
-    businessPaymentOption: BusinessPaymentOptionInterface,
+    businessPaymentOptionDto: BusinessPaymentOptionInterface,
   ): Promise<BusinessPaymentOptionModel> {
     const dto = {
       // _id: businessPaymentOption.uuid,
-      ...businessPaymentOption,
+      ...businessPaymentOptionDto,
     };
 
     await this.model.updateOne(
       {
-        uuid: businessPaymentOption.uuid,
+        uuid: businessPaymentOptionDto.uuid,
       },
       {
         $setOnInsert: {
@@ -35,7 +35,7 @@ export class BusinessPaymentOptionService {
       },
     );
 
-    return this.model.findOne({ uuid: businessPaymentOption.uuid });
+    return this.model.findOne({ uuid: businessPaymentOptionDto.uuid });
   }
 
   public async findOneById(id: number): Promise<BusinessPaymentOptionModel> {
