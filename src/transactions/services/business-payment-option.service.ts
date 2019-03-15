@@ -14,29 +14,28 @@ export class BusinessPaymentOptionService {
   public async createOrUpdate(
     businessPaymentOption: BusinessPaymentOptionInterface,
   ): Promise<BusinessPaymentOptionModel> {
-    if (businessPaymentOption.uuid) {
-      const dto = {
-        // _id: businessPaymentOption.uuid,
-        ...businessPaymentOption,
-      };
+    const dto = {
+      // _id: businessPaymentOption.uuid,
+      ...businessPaymentOption,
+    };
 
-      await this.model.updateOne(
-        {
-          uuid: businessPaymentOption.uuid,
+    await this.model.updateOne(
+      {
+        uuid: businessPaymentOption.uuid,
+      },
+      {
+        $setOnInsert: {
+          // _id: businessPaymentOption.uuid,
         },
-        {
-          $setOnInsert: {
-            // _id: businessPaymentOption.uuid,
-          },
-          $set: this.wrap(dto),
-        },
-        {
-          upsert: true,
-        },
-      );
+        $set: this.wrap(dto),
+      },
+      {
+        upsert: true,
+        new: true,
+      },
+    );
 
-      return this.model.findOne({ uuid: businessPaymentOption.uuid });
-    }
+    return this.model.findOne({ uuid: businessPaymentOption.uuid });
   }
 
   public async findOneById(id: number) {
