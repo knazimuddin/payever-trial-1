@@ -21,7 +21,7 @@ export class BusinessPaymentOptionService {
 
     await this.model.updateOne(
       {
-        uuid: businessPaymentOptionDto.uuid,
+        id: businessPaymentOptionDto.id,
       },
       {
         $setOnInsert: {
@@ -35,7 +35,7 @@ export class BusinessPaymentOptionService {
       },
     );
 
-    return this.model.findOne({ uuid: businessPaymentOptionDto.uuid });
+    return this.findOneById(businessPaymentOptionDto.id);
   }
 
   public async findOneById(id: number): Promise<BusinessPaymentOptionModel> {
