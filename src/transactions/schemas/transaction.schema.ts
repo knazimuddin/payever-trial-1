@@ -4,7 +4,7 @@ import { TransactionHistoryEntrySchema } from './transaction-history-entry.schem
 import { TransactionItemSchema } from './transaction-item.schema';
 
 export const TransactionsSchema = new Schema({
-  _id: { type: String, unique: true }, // id from mysql db
+  // _id: { type: String }, // id from mysql db
   original_id: String, // id from mysql db
   uuid: { type: String, required: true },
   action_running: { type: Boolean, required: false, default: false },
@@ -18,7 +18,7 @@ export const TransactionsSchema = new Schema({
   created_at: { type: Date, required: true },
   currency: { type: String, required: true },
   customer_email: { type: String },
-  customer_name: {type: String, required: true },
+  customer_name: { type: String, required: true },
   delivery_fee: Number,
   down_payment: Number,
   fee_accepted: Boolean,
@@ -47,14 +47,14 @@ export const TransactionsSchema = new Schema({
   user_uuid: String,
 });
 
-TransactionsSchema.index('uuid');
-TransactionsSchema.index('santander_applications');
-TransactionsSchema.index('original_id');
-TransactionsSchema.index('reference');
-TransactionsSchema.index('customer_name');
-TransactionsSchema.index('customer_email');
-TransactionsSchema.index('merchant_name');
-TransactionsSchema.index('merchant_email');
+TransactionsSchema.index({ uuid: 1});
+TransactionsSchema.index({ santander_applications: 1});
+TransactionsSchema.index({ original_id: 1});
+TransactionsSchema.index({ reference: 1});
+TransactionsSchema.index({ customer_name: 1});
+TransactionsSchema.index({ customer_email: 1});
+TransactionsSchema.index({ merchant_name: 1});
+TransactionsSchema.index({ merchant_email: 1});
 TransactionsSchema.index({ status: 1, _id: 1 });
 
 TransactionsSchema.virtual('amount_refunded').get(function() {

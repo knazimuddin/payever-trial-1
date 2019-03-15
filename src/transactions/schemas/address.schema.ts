@@ -16,7 +16,7 @@ export const AddressSchema = new Schema({
   phone: String,
   salutation: String,
   social_security_number: String,
-  type: { type: String, enum: AddressTypeEnum },
+  type: { type: String, enum: [AddressTypeEnum.Billing, AddressTypeEnum.Shipping] },
   street: String,
   zip_code: String,
 });
