@@ -2,7 +2,7 @@ import { Schema } from 'mongoose';
 
 export const BusinessPaymentOptionSchema = new Schema(
   {
-    _id: { type: String, unique: true },
+    // _id: { type: String },
     id: { type: Number, unique: true },
     uuid: { type: String, unique: true },
     payment_option_id: Number,
