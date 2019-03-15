@@ -38,7 +38,7 @@ export class BusinessPaymentOptionService {
     return this.model.findOne({ uuid: businessPaymentOption.uuid });
   }
 
-  public async findOneById(id: number) {
+  public async findOneById(id: number): Promise<BusinessPaymentOptionModel> {
     const bpo: BusinessPaymentOptionModel = await this.model.findOne({id});
 
     return bpo
@@ -47,7 +47,7 @@ export class BusinessPaymentOptionService {
     ;
   }
 
-  private unwrap(bpo) {
+  private unwrap(bpo: BusinessPaymentOptionModel): BusinessPaymentOptionModel {
     if (bpo.options) {
       try {
         bpo.options = JSON.parse(bpo.options);
@@ -59,7 +59,7 @@ export class BusinessPaymentOptionService {
     return bpo;
   }
 
-  private wrap(bpo) {
+  private wrap(bpo: BusinessPaymentOptionInterface): BusinessPaymentOptionInterface {
     if (Array.isArray(bpo.credentials)) {
       bpo.credentials = {};
     }
