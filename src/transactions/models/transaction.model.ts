@@ -5,8 +5,8 @@ import { TransactionHistoryEntryModel } from './transaction-history-entry.model'
 import { TransactionItemModel } from './transaction-item.model';
 
 export interface TransactionModel extends TransactionInterface, Document {
-  readonly billing_address: AddressModel;
-  readonly history: TransactionHistoryEntryModel[];
-  readonly items: TransactionItemModel[];
-  readonly shipping_address: AddressModel[];
+  billing_address: AddressModel;
+  history: TransactionHistoryEntryModel[];
+  items: TransactionItemModel[];
+  shipping_address: AddressModel[];
 }

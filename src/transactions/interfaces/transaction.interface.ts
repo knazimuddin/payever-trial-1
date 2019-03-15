@@ -3,44 +3,44 @@ import { TransactionHistoryEntryInterface } from './transaction-history-entry.in
 import { TransactionItemInterface } from './transaction-item.interface';
 
 export interface TransactionInterface {
-  readonly original_id: string; // id from mysql db
-  readonly uuid: string;
-  readonly action_running: boolean;
-  readonly amount: number;
-  readonly billing_address: AddressInterface;
-  readonly business_option_id: number;
-  readonly business_uuid: string;
-  readonly channel: string; // 'store', ...
-  readonly channel_uuid: string;
-  readonly channel_set_uuid: string;
-  readonly created_at: Date;
-  readonly currency: string;
-  readonly customer_email: string;
-  readonly customer_name: string;
-  readonly delivery_fee: number;
-  readonly down_payment: number;
-  readonly fee_accepted: boolean;
-  readonly history: TransactionHistoryEntryInterface[];
-  readonly items: TransactionItemInterface[];
-  readonly merchant_email: string;
-  readonly merchant_name: string;
-  readonly payment_details: string; // Serialized big object
-  readonly payment_fee: number;
-  readonly payment_flow_id: string;
-  readonly place: string;
-  readonly reference: string;
-  readonly santander_applications: string[];
-  readonly shipping_address: AddressInterface[];
-  readonly shipping_category: string;
-  readonly shipping_method_name: string;
-  readonly shipping_option_name: string;
-  readonly specific_status: string;
-  readonly status: string;
-  readonly status_color: string;
-  readonly store_id: string;
-  readonly store_name: string;
-  readonly total: number;
-  readonly type: string;
-  readonly updated_at: Date;
-  readonly user_uuid: string;
+  original_id: string; // id from mysql db
+  uuid: string;
+  action_running: boolean;
+  amount: number;
+  billing_address: AddressInterface;
+  business_option_id: number;
+  business_uuid: string;
+  channel: string; // 'store', ...
+  channel_uuid: string;
+  channel_set_uuid: string;
+  created_at: Date;
+  currency: string;
+  customer_email: string;
+  customer_name: string;
+  delivery_fee: number;
+  down_payment: number;
+  fee_accepted: boolean;
+  history: TransactionHistoryEntryInterface[];
+  items: TransactionItemInterface[];
+  merchant_email: string;
+  merchant_name: string;
+  payment_details: string; // Serialized big object
+  payment_fee: number;
+  payment_flow_id: string;
+  place: string;
+  reference: string;
+  santander_applications: string[];
+  shipping_address: AddressInterface[];
+  shipping_category: string;
+  shipping_method_name: string;
+  shipping_option_name: string;
+  specific_status: string;
+  status: string;
+  status_color: string;
+  store_id: string;
+  store_name: string;
+  total: number;
+  type: string;
+  updated_at: Date;
+  user_uuid: string;
 }

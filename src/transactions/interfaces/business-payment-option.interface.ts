@@ -1,13 +1,13 @@
 export interface BusinessPaymentOptionInterface {
-  readonly id: number;
-  readonly uuid: string;
-  readonly payment_option_id: number;
-  readonly accept_fee: boolean;
-  readonly status: string;
-  readonly fixed_fee: number;
-  readonly variable_fee: number;
-  readonly credentials: object;
-  readonly options: string;
-  readonly completed: boolean;
-  readonly shop_redirect_enabled: boolean;
+  id: number;
+  uuid: string;
+  payment_option_id: number;
+  accept_fee: boolean;
+  status: string;
+  fixed_fee: number;
+  variable_fee: number;
+  credentials: object;
+  options: string;
+  completed: boolean;
+  shop_redirect_enabled: boolean;
 }
