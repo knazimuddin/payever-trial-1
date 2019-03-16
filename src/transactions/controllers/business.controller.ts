@@ -12,7 +12,6 @@ import {
   UseGuards,
   ForbiddenException, Header,
 } from '@nestjs/common';
-import { ExportToCsv } from 'export-to-csv';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 
