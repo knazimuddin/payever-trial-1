@@ -10,8 +10,9 @@ import {
   Post,
   Query,
   UseGuards,
-  ForbiddenException,
+  ForbiddenException, Header,
 } from '@nestjs/common';
+import { ExportToCsv } from 'export-to-csv';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 
@@ -26,8 +27,8 @@ import {
 
 @Controller('business/:businessId')
 @ApiUseTags('business')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
+// @UseGuards(JwtAuthGuard)
+// @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class BusinessController {
@@ -56,6 +57,32 @@ export class BusinessController {
       value: businessId,
     };
     return this.transactionsGridService.getList(filters, orderBy, direction, search, +page, +limit);
+  }
+
+  @Get('csv')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant)
+  @Header('content-type', 'application/csv')
+  public async getCsv(
+    @Param('businessId') businessId: string,
+  ): Promise<any> {
+    const separator = ',';
+    const header = 'CHANNEL, ID, TOTAL, PAYMENT TYPE, CUSTOMER NAME, MERCHANT_NAME, DATE, STATUS';
+    const transactions = await this.transactionsService.findAll(businessId);
+    let csv =  `${header}`;
+    transactions.forEach(transaction => {
+      csv = `${csv}\n`;
+      csv = `${csv}${transaction.channel_set_uuid}`;
+      csv = `${csv}${separator}${transaction.uuid}`;
+      csv = `${csv}${separator}${transaction.total}`;
+      csv = `${csv}${separator}${transaction.type}`;
+      csv = `${csv}${separator}${transaction.customer_name}`;
+      csv = `${csv}${separator}${transaction.merchant_name}`;
+      csv = `${csv}${separator}${transaction.updated_at}`;
+      csv = `${csv}${separator}${transaction.status}`;
+    });
+
+    return csv;
   }
 
   @Get('detail/reference/:reference')

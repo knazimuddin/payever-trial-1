@@ -73,6 +73,10 @@ export class TransactionsService {
     return this.findOneByParams({ uuid });
   }
 
+  public async findAll(businessId) {
+    return this.transactionsModel.find({business_uuid: businessId});
+  }
+
   public async findOneByParams(params) {
     const transaction = await this.transactionsModel.findOne(params);
 
