@@ -62,6 +62,7 @@ export class BusinessController {
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
   @Header('content-type', 'application/csv')
+  @Header('Content-disposition', `attachment;filename="transactions-${new Date().toString()}.csv"`)
   public async getCsv(
     @Param('businessId') businessId: string,
   ): Promise<any> {
