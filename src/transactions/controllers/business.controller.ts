@@ -78,11 +78,11 @@ export class BusinessController {
     let csv =  `${header}`;
     transactions.forEach(transaction => {
       csv = `${csv}\n`;
-      csv = `${csv}${transaction.channel_set_uuid}`;
+      csv = `${csv}${transaction.channel}`;
       csv = `${csv}${separator}${transaction.uuid}`;
       csv = `${csv}${separator}${transaction.total}`;
       columns.forEach(column => {
-        csv = `${csv}${separator}${transaction[column.name]}`;
+        csv = `${csv}${separator}${transaction[column.name] || ''}`;
       });
     });
     res.set('Content-disposition', `attachment;filename="${query.businessName}-${moment().format('DD-MM-YYYY')}.csv"`);
