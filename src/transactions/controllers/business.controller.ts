@@ -10,10 +10,11 @@ import {
   Post,
   Query,
   UseGuards,
-  ForbiddenException, Header,
+  ForbiddenException, Header, Res,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
+import * as moment from 'moment'
 
 import { ActionPayloadDto } from '../dto';
 
@@ -62,27 +63,30 @@ export class BusinessController {
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
   @Header('content-type', 'application/csv')
-  @Header('Content-disposition', `attachment;filename="transactions-${new Date().toString()}.csv"`)
   public async getCsv(
     @Param('businessId') businessId: string,
+    @Query() query,
+    @Res() res: any,
   ): Promise<any> {
     const separator = ',';
-    const header = 'CHANNEL, ID, TOTAL, PAYMENT TYPE, CUSTOMER NAME, MERCHANT_NAME, DATE, STATUS';
     const transactions = await this.transactionsService.findAll(businessId);
+    const columns = JSON.parse(query.columns);
+    let header = 'CHANNEL,ID,TOTAL';
+    columns.forEach(elem => {
+      header = `${header}${separator}${elem.title}`;
+    });
     let csv =  `${header}`;
     transactions.forEach(transaction => {
       csv = `${csv}\n`;
       csv = `${csv}${transaction.channel_set_uuid}`;
       csv = `${csv}${separator}${transaction.uuid}`;
       csv = `${csv}${separator}${transaction.total}`;
-      csv = `${csv}${separator}${transaction.type}`;
-      csv = `${csv}${separator}${transaction.customer_name}`;
-      csv = `${csv}${separator}${transaction.merchant_name}`;
-      csv = `${csv}${separator}${transaction.updated_at}`;
-      csv = `${csv}${separator}${transaction.status}`;
+      columns.forEach(column => {
+        csv = `${csv}${separator}${transaction[column.name]}`;
+      });
     });
-
-    return csv;
+    res.set('Content-disposition', `attachment;filename="${query.businessName}-${moment().format('DD-MM-YYYY')}.csv"`);
+    res.send(csv);
   }
 
   @Get('detail/reference/:reference')
