@@ -184,7 +184,6 @@ export class TransactionsGridService {
 
   private addFilters(mongoFilters: any, inputFilters: any) {
     Object.keys(inputFilters).forEach((key) => this.addFilter(mongoFilters, key, inputFilters[key]));
-    console.log(JSON.stringify(mongoFilters));
   }
 
   /**
@@ -193,17 +192,19 @@ export class TransactionsGridService {
    * |betweenDates|greaterThan|lessThan|between|choice
    */
   private addFilter(mongoFilters, field: string, filter: any) {
-    const condition = {};
-    condition[field] = {};
     if (field === 'business_uuid') {
       mongoFilters[field] = filter.value;
-
       return;
     }
+    if (!mongoFilters.$or) {
+      mongoFilters.$or = [];
+    }
     filter.forEach(_filter => {
-      if (!mongoFilters.$or) {
-        mongoFilters.$or = [];
+      if (!_filter.value) {
+        return;
       }
+      const condition = {};
+      condition[field] = {};
       switch (_filter.condition) {
         case FilterConditionEnum.Is:
           condition[field] = {$eq: _filter.value};
@@ -289,6 +290,9 @@ export class TransactionsGridService {
           break;
       }
     });
+    if (!mongoFilters.$or.length) {
+      delete mongoFilters.$or;
+    }
   }
 
   private getTargetDate(value: string) {
