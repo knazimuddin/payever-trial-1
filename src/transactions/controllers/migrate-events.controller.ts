@@ -26,7 +26,7 @@ export class MigrateEventsController {
     origin: 'rabbitmq',
   })
   public async onActionMigrateEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
+    const data: any = this.messageBusService.unwrapMessage(msg.data);
     console.log('ACTION.MIGRATE!', data.payment);
     const checkoutTransaction: CheckoutTransactionInterface = data.payment;
     const transaction: TransactionInterface = this.transactionsService.prepareTransactionForInsert(checkoutTransaction);

@@ -15,6 +15,7 @@ import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { snakeCase } from 'lodash';
 import { ActionPayloadDto } from '../dto';
+import { TransactionModel } from '../models';
 
 import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
 
@@ -64,10 +65,8 @@ export class AdminController {
   public async getDetail(
     @Param('uuid') uuid: string,
   ): Promise<any> {
-    let transaction;
     let actions = [];
-
-    transaction = await this.transactionsService.findOneByParams({ uuid });
+    const transaction: TransactionModel = await this.transactionsService.findOneByParams({ uuid });
 
     try {
       actions = await this.messagingService.getActions(transaction);

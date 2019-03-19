@@ -48,7 +48,7 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onHistoryAddEvent(msg: any) {
-    const message = this.messageBusService.unwrapMessage(msg.data);
+    const message: any = this.messageBusService.unwrapMessage(msg.data);
     console.log('HISTORY.ADD', message);
     // @TODO use only uuid later, no original_id
     const searchParams = message.payment.uuid
@@ -75,7 +75,7 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onTransactionUpdateEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
+    const data: any = this.messageBusService.unwrapMessage(msg.data);
 
     const checkoutTransaction: CheckoutTransactionInterface = data.payment;
     const transaction: TransactionInterface = this.transactionsService.prepareTransactionForInsert(checkoutTransaction);
@@ -104,7 +104,7 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onTransactionRemoveEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
+    const data: any = this.messageBusService.unwrapMessage(msg.data);
     console.log('PAYMENT.REMOVE', data);
 
     await this.transactionsService.removeByUuid(data.payment.uuid);
@@ -116,7 +116,7 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onBpoCreatedEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
+    const data: any = this.messageBusService.unwrapMessage(msg.data);
     const businessPaymentOption: BusinessPaymentOptionInterface = data.business_payment_option;
     console.log('BPO.CREATE', data);
     await this.bpoService.createOrUpdate(businessPaymentOption);
@@ -128,7 +128,7 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onBpoUpdatedEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
+    const data: any = this.messageBusService.unwrapMessage(msg.data);
     console.log('BPO.UPDATE', data);
     const businessPaymentOption: BusinessPaymentOptionInterface = data.business_payment_option;
     await this.bpoService.createOrUpdate(businessPaymentOption);
@@ -141,7 +141,7 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onPaymentFlowCreatedEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
+    const data: any = this.messageBusService.unwrapMessage(msg.data);
     console.log('FLOW.CREATE', data);
     const flow: any = data.flow;
     await this.flowService.createOrUpdate(flow);
@@ -154,7 +154,7 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onPaymentFlowMigrateEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
+    const data: any = this.messageBusService.unwrapMessage(msg.data);
     console.log('FLOW.MIGRATE', data);
     const flow: any = data.flow;
     await this.flowService.createOrUpdate(flow);
@@ -167,7 +167,7 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onPaymentFlowUpdatedEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
+    const data: any = this.messageBusService.unwrapMessage(msg.data);
     console.log('FLOW.UPDATE', data);
     const flow: any = data.flow;
     await this.flowService.createOrUpdate(flow);
@@ -180,7 +180,7 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onPaymentFlowRemovedEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
+    const data: any = this.messageBusService.unwrapMessage(msg.data);
     console.log('FLOW.REMOVE', data);
     const flow: any = data.flow;
     await this.flowService.removeById(flow.id);
