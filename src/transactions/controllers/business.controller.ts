@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -10,19 +11,13 @@ import {
   Post,
   Query,
   UseGuards,
-  ForbiddenException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 
 import { ActionPayloadDto } from '../dto';
 
-import {
-  MessagingService,
-  TransactionsGridService,
-  TransactionsService,
-  DtoValidationService,
-} from '../services';
+import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
 
 @Controller('business/:businessId')
 @ApiUseTags('business')
@@ -55,6 +50,7 @@ export class BusinessController {
       condition: 'is',
       value: businessId,
     };
+
     return this.transactionsGridService.getList(filters, orderBy, direction, search, +page, +limit);
   }
 
@@ -108,7 +104,7 @@ export class BusinessController {
     let updatedTransaction: any;
 
     this.dtoValidation.checkFileUploadDto(actionPayload);
-    transaction = await this.transactionsService.findOne(uuid);
+    transaction = await this.transactionsService.findOneByUuid(uuid);
 
     if (transaction.business_uuid !== businessId) {
       throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
@@ -147,7 +143,7 @@ export class BusinessController {
     let updatedTransaction: any;
     let actions: any[];
 
-    transaction = await this.transactionsService.findOne(uuid);
+    transaction = await this.transactionsService.findOneByUuid(uuid);
     if (transaction.business_uuid !== businessId) {
       throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
     }

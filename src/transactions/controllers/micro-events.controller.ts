@@ -3,11 +3,12 @@ import { MessagePattern } from '@nestjs/microservices';
 
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { snakeCase } from 'lodash';
+
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
-
-import { BusinessPaymentOptionService, PaymentFlowService, TransactionsService } from '../services';
-import { StatisticsService } from '../services/statistics.service';
+import { BusinessPaymentOptionInterface, CheckoutTransactionInterface, TransactionInterface } from '../interfaces';
+import { TransactionModel } from '../models';
+import { BusinessPaymentOptionService, PaymentFlowService, StatisticsService, TransactionsService } from '../services';
 
 @Controller()
 export class MicroEventsController {
@@ -29,17 +30,16 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onActionCompletedEvent(msg: any) {
-    const data: any = this.messageBusService.unwrapMessage(msg.data);
-    console.log('ACTION.COMPLETED', data);
-    const searchParams = data.payment.uuid ? { uuid: data.payment.uuid } : { original_id: data.payment.id };
-    const transaction = await this.transactionsService.findOneByParams(searchParams);
-    // TODO use message bus message created time
-    const historyItem = this.transactionsService.prepareTransactionHistoryItemForInsert(data.action, Date.now(), data);
-    transaction.history = transaction.history || [];
-    transaction.history.push(historyItem);
-    await this.statisticsService.processRefundedTransaction(transaction.uuid, data);
+    const message: any = this.messageBusService.unwrapMessage(msg.data);
+    console.log('ACTION.COMPLETED', message);
+    const searchParams = message.payment.uuid
+      ? { uuid: message.payment.uuid }
+      : { original_id: message.payment.id }
+    ;
+    const transaction: TransactionModel = await this.transactionsService.findOneByParams(searchParams);
+    await this.statisticsService.processRefundedTransaction(transaction.uuid, message);
 
-    return this.transactionsService.updateByUuid(transaction.uuid, Object.assign({}, transaction, data.payment));
+    return this.transactionsService.updateHistoryByUuid(transaction.uuid, message.history_type, message.data);
   }
 
   @MessagePattern({
@@ -48,21 +48,16 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onHistoryAddEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
-    console.log('HISTORY.ADD', data);
+    const message = this.messageBusService.unwrapMessage(msg.data);
+    console.log('HISTORY.ADD', message);
     // @TODO use only uuid later, no original_id
-    const searchParams = data.payment.uuid ? { uuid: data.payment.uuid } : { original_id: data.payment.id };
+    const searchParams = message.payment.uuid
+      ? { uuid: message.payment.uuid }
+      : { original_id: message.payment.id }
+    ;
     const transaction = await this.transactionsService.findOneByParams(searchParams);
-    // TODO use message bus message created time
-    const historyItem = this.transactionsService.prepareTransactionHistoryItemForInsert(
-      data.history_type,
-      Date.now(),
-      data,
-    );
-    transaction.history = transaction.history || [];
-    transaction.history.push(historyItem);
 
-    return this.transactionsService.updateByUuid(transaction.uuid, transaction);
+    return this.transactionsService.updateHistoryByUuid(transaction.uuid, message.history_type, message.data);
   }
 
   @MessagePattern({
@@ -71,7 +66,7 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onTransactionCreateEvent(msg: any) {
-    // due to race conditions create event can income after update, so we react only on update event 
+    // due to race conditions create event can income after update, so we react only on update event
   }
 
   @MessagePattern({
@@ -82,22 +77,20 @@ export class MicroEventsController {
   public async onTransactionUpdateEvent(msg: any) {
     const data = this.messageBusService.unwrapMessage(msg.data);
 
-    const transaction: any = data.payment;
-    this.transactionsService.prepareTransactionForInsert(transaction);
+    const checkoutTransaction: CheckoutTransactionInterface = data.payment;
+    const transaction: TransactionInterface = this.transactionsService.prepareTransactionForInsert(checkoutTransaction);
 
-    if (transaction.items.length) {
+    if (checkoutTransaction.items.length) {
       transaction.items = this.transactionsService.prepareTransactionCartForInsert(
-        transaction.items,
+        checkoutTransaction.items,
         transaction.business_uuid,
       );
     }
 
-    const transactionExists = await this.transactionsService.exists(transaction.uuid);
-    if (!transactionExists) {
+    if (!await this.transactionsService.findOneByUuid(transaction.uuid)) {
       console.log('PAYMENT.CREATE', data);
       await this.transactionsService.create(transaction);
-    }
-    else {
+    } else {
       console.log('PAYMENT.UPDATE', data);
       await this.statisticsService.processAcceptedTransaction(transaction.uuid, transaction);
       await this.transactionsService.updateByUuid(transaction.uuid, transaction);
@@ -114,7 +107,7 @@ export class MicroEventsController {
     const data = this.messageBusService.unwrapMessage(msg.data);
     console.log('PAYMENT.REMOVE', data);
 
-    return this.transactionsService.removeByUuid(data.payment.uuid);
+    await this.transactionsService.removeByUuid(data.payment.uuid);
   }
 
   @MessagePattern({
@@ -124,13 +117,9 @@ export class MicroEventsController {
   })
   public async onBpoCreatedEvent(msg: any) {
     const data = this.messageBusService.unwrapMessage(msg.data);
-    const business_payment_option = data.business_payment_option;
+    const businessPaymentOption: BusinessPaymentOptionInterface = data.business_payment_option;
     console.log('BPO.CREATE', data);
-    const bpo: any = {
-      _id: data.business_payment_option.uuid,
-      ...business_payment_option,
-    };
-    await this.bpoService.createOrUpdate(bpo);
+    await this.bpoService.createOrUpdate(businessPaymentOption);
   }
 
   @MessagePattern({
@@ -141,8 +130,8 @@ export class MicroEventsController {
   public async onBpoUpdatedEvent(msg: any) {
     const data = this.messageBusService.unwrapMessage(msg.data);
     console.log('BPO.UPDATE', data);
-    const bpo: any = data.business_payment_option;
-    await this.bpoService.createOrUpdate(bpo);
+    const businessPaymentOption: BusinessPaymentOptionInterface = data.business_payment_option;
+    await this.bpoService.createOrUpdate(businessPaymentOption);
     console.log('BPO.UPDATE COMPLETED');
   }
 

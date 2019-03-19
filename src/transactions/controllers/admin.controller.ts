@@ -1,26 +1,22 @@
 import {
-  Controller,
-  Get, Headers,
-  HttpCode,
-  HttpStatus, NotFoundException,
-  Param,
-  Query,
-  UseGuards,
   BadRequestException,
   Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  NotFoundException,
+  Param,
   Post,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
-import { JwtAuthGuard, Roles, RolesEnum, User, UserTokenInterface } from '@pe/nest-kit/modules/auth';
+import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { snakeCase } from 'lodash';
-
-import {
-  TransactionsGridService,
-  TransactionsService,
-  MessagingService,
-  DtoValidationService,
-} from '../services';
 import { ActionPayloadDto } from '../dto';
+
+import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
 
 // TODO: unify with business controller
 @Controller('admin')
@@ -94,7 +90,7 @@ export class AdminController {
     let updatedTransaction: any;
 
     this.dtoValidation.checkFileUploadDto(actionPayload);
-    transaction = await this.transactionsService.findOne(uuid);
+    transaction = await this.transactionsService.findOneByUuid(uuid);
 
     try {
       updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
@@ -128,7 +124,7 @@ export class AdminController {
     let updatedTransaction: any;
     let actions: any[];
 
-    transaction = await this.transactionsService.findOne(uuid);
+    transaction = await this.transactionsService.findOneByUuid(uuid);
 
     try {
       await this.messagingService.updateStatus(transaction);

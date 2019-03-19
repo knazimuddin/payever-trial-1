@@ -1,176 +1,268 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
+import { plainToClass } from 'class-transformer';
 
 import { Model } from 'mongoose';
-import { v4 as uuidFactory } from 'uuid';
+import { v4 as uuid } from 'uuid';
+import { TransactionCartItemDto } from '../dto/transaction-cart-item.dto';
+import { TransactionDto } from '../dto/transaction.dto';
+import {
+  CheckoutTransactionCartItemInterface,
+  CheckoutTransactionHistoryItemInterface,
+  CheckoutTransactionInterface,
+  TransactionCartItemInterface,
+  TransactionHistoryEntryInterface,
+  TransactionInterface,
+  TransactionSantanderApplicationAwareInterface,
+} from '../interfaces';
+import { CheckoutPaymentDetailsAwareInterface } from '../interfaces/checkout-payment-details-aware.interface';
+import { TransactionModel } from '../models';
 import { ProductUuid } from '../tools/product-uuid';
 
 @Injectable()
 export class TransactionsService {
 
   constructor(
-    @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
+    @InjectModel('Transaction') private readonly transactionModel: Model<TransactionModel>,
     @InjectNotificationsEmitter() private notificationsEmitter: NotificationsEmitter,
   ) { }
 
-  public async create(transaction: any) {
-    if (transaction.id) {
-      transaction.original_id = transaction.id;
+  public async create(transactionDto: TransactionInterface): Promise<TransactionModel> {
+    if (transactionDto.id) {
+      transactionDto.original_id = transactionDto.id;
     }
-   
-    if (!transaction.uuid) {
-      transaction.uuid = uuidFactory();
+
+    if (!transactionDto.uuid) {
+      transactionDto.uuid = uuid();
     }
 
     this.notificationsEmitter.sendNotification(
       {
         kind: 'business',
-        entity: transaction.business_uuid,
+        entity: transactionDto.business_uuid,
         app: 'transactions',
       },
       `notification.transactions.title.new_transaction`,
       {
-        transactionId: transaction.uuid,
+        transactionId: transactionDto.uuid,
       },
     );
 
-    return this.transactionsModel.create(transaction);
+    return this.transactionModel.create(transactionDto);
   }
 
-  public async updateByUuid(uuid, data: any) {
+  public async updateByUuid(
+    transactionUuid: string,
+    transaction: TransactionInterface,
+  ): Promise<TransactionModel> {
     // a bit dirty, sorry
-    if (typeof (data.payment_details) !== 'string') {
-      this.setSantanderApplication(data);
-      data.payment_details = JSON.stringify(data.payment_details);
+    if (typeof (transaction.payment_details) !== 'string') {
+      transaction.payment_details = JSON.stringify(transaction.payment_details);
     }
 
-    return this.transactionsModel.findOneAndUpdate({ uuid }, data);
+    return this.transactionModel.findOneAndUpdate(
+      { uuid: transactionUuid },
+      transaction,
+      { new: true },
+    );
   }
 
-  public async deleteAll() {
-    return this.transactionsModel.collection.drop();
-  }
+  public async updateFromCheckoutTransactionByUuid(
+    transactionUuid: string,
+    checkoutTransaction: CheckoutTransactionInterface,
+  ): Promise<TransactionModel> {
+    const transaction: TransactionDto =
+      plainToClass<TransactionInterface, CheckoutTransactionInterface>(
+        TransactionDto,
+        checkoutTransaction,
+      );
 
-  public async createOrUpdate(transaction: any) {
-    if (transaction.uuid) {
-      const existing = await this.transactionsModel.findOne({ uuid: transaction.uuid });
-      if (existing) {
-        return this.transactionsModel.findOneAndUpdate({ uuid: transaction.uuid }, transaction);
-      }
+    // a bit dirty, sorry
+    if (typeof (checkoutTransaction.payment_details) !== 'string') {
+      this.setSantanderApplication(transaction, checkoutTransaction);
+      transaction.payment_details = JSON.stringify(transaction.payment_details);
     }
 
-    return this.create(transaction);
+    return this.transactionModel.findOneAndUpdate(
+      { uuid: transactionUuid },
+      transaction,
+      { new: true },
+    );
   }
 
-  public async exists(uuid: string) : Promise<boolean> {
-    const transaction = await this.transactionsModel.findOne({ uuid });
-    
-    return !!transaction;
+  public async updateHistoryByUuid(
+    transactionUuid: string,
+    historyType: string,
+    data: CheckoutTransactionHistoryItemInterface,
+  ): Promise<void> {
+    const historyItem: TransactionHistoryEntryInterface =
+      this.prepareTransactionHistoryItemForInsert(historyType, new Date(), data);
+
+    await this.transactionModel.updateOne(
+      { uuid: transactionUuid},
+      {
+        $push: {
+          history: historyItem,
+        },
+      },
+    );
   }
 
-  public async findOne(uuid: string) {
-    return this.findOneByParams({ uuid });
+  public async findOneByUuid(transactionUuid: string): Promise<TransactionModel> {
+    return this.findOneByParams({ uuid: transactionUuid });
   }
 
-  public async findOneByParams(params) {
-    const transaction = await this.transactionsModel.findOne(params);
+  public async findOneByParams(params): Promise<TransactionModel> {
+    const transaction: TransactionModel = await this.transactionModel.findOne(params);
 
     if (!transaction) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
 
     return this.prepareTransactionForOutput(transaction.toObject({ virtuals: true }));
   }
 
-  public async removeByUuid(uuid: string) {
-    return this.transactionsModel.findOneAndRemove({ uuid });
+  public async removeByUuid(transactionUuid: string): Promise<void> {
+    await this.transactionModel.findOneAndRemove({ uuid: transactionUuid });
   }
 
-  public prepareTransactionForInsert(transaction) {
-    if (transaction.address) {
-      transaction.billing_address = transaction.address;
+  public prepareTransactionForInsert(checkoutTransaction: CheckoutTransactionInterface): TransactionInterface {
+    const transaction: TransactionDto =
+      plainToClass<TransactionInterface, CheckoutTransactionInterface>(
+        TransactionDto,
+        checkoutTransaction,
+      );
+
+    if (checkoutTransaction.address) {
+      transaction.billing_address = checkoutTransaction.address;
     }
 
-    transaction.type = transaction.type || transaction.payment_type;
+    transaction.type = checkoutTransaction.type || checkoutTransaction.payment_type;
 
-    if (typeof (transaction.payment_details) !== 'string' && transaction.payment_details) {
-      this.setSantanderApplication(transaction);
+    if (checkoutTransaction.payment_details && typeof (checkoutTransaction.payment_details) !== 'string') {
+      this.setSantanderApplication(transaction, checkoutTransaction);
       transaction.payment_details = JSON.stringify(transaction.payment_details);
     }
 
-    if (transaction.business) {
-      transaction.business_uuid = transaction.business.uuid;
-      transaction.merchant_name = transaction.business.company_name;
-      transaction.merchant_email = transaction.business.company_email;
+    if (checkoutTransaction.business) {
+      transaction.business_uuid = checkoutTransaction.business.uuid;
+      transaction.merchant_name = checkoutTransaction.business.company_name;
+      transaction.merchant_email = checkoutTransaction.business.company_email;
     }
 
-    if (transaction.payment_flow) {
-      transaction.payment_flow_id = transaction.payment_flow.id;
+    if (checkoutTransaction.payment_flow) {
+      transaction.payment_flow_id = checkoutTransaction.payment_flow.id;
     }
 
-    if (transaction.channel_set) {
-      transaction.channel_set_uuid = transaction.channel_set.uuid;
+    if (checkoutTransaction.channel_set) {
+      transaction.channel_set_uuid = checkoutTransaction.channel_set.uuid;
     }
 
-    if (transaction.history && transaction.history.length) {
-      transaction.history.map((historyItem) => {
-        return this.prepareTransactionHistoryItemForInsert(historyItem.action, historyItem.created_at, historyItem);
-      });
+    if (checkoutTransaction.history && checkoutTransaction.history.length) {
+      for (const historyItem of checkoutTransaction.history) {
+        transaction.history.push(
+          this.prepareTransactionHistoryItemForInsert(
+            historyItem.action,
+            historyItem.created_at,
+            historyItem,
+          ),
+        );
+      }
     }
+
+    return transaction;
   }
 
-  public prepareTransactionHistoryItemForInsert(historyType, createdAt, data) {
-    const result: any = {
-      ...data.data,
+  public prepareTransactionHistoryItemForInsert(
+    historyType: string,
+    createdAt: Date,
+    data: CheckoutTransactionHistoryItemInterface,
+  ): TransactionHistoryEntryInterface {
+    return {
       action: historyType,
+      amount: data.data.amount,
+      params: data.data.params,
+      payment_status: data.data.payment_status,
+      reason: data.data.reason,
       upload_items: data.data && data.data.saved_data,
       created_at: createdAt,
+      is_restock_items: data.items_restocked
+        ? data.items_restocked
+        : null
+      ,
     };
-
-    if (data.items_restocked) {
-      result.is_restock_items = data.items_restocked;
-    }
-
-    return result;
   }
 
-  public prepareTransactionCartForInsert(cartItems, businessId) {
-    const newCart = [];
+  public prepareTransactionCartForInsert(
+    cartItems: CheckoutTransactionCartItemInterface[],
+    businessId: string,
+  ): TransactionCartItemInterface[] {
+    const newCart: TransactionCartItemInterface[] = [];
 
     for (const cartItem of cartItems) {
-      if (cartItem.product_uuid) {
-        cartItem._id = cartItem.product_uuid;
-        cartItem.uuid = cartItem.product_uuid;
-      } else {
-        cartItem._id = ProductUuid.generate(businessId, `${cartItem.name}${cartItem.product_variant_uuid}`);
-        cartItem.uuid = null;
-      }
-      newCart.push(cartItem);
+      const newCartItem: TransactionCartItemDto = {
+        _id: cartItem.product_uuid
+          ? cartItem.product_uuid
+          : ProductUuid.generate(businessId, `${cartItem.name}${cartItem.product_variant_uuid}`)
+        ,
+        uuid: cartItem.product_uuid
+          ? cartItem.product_uuid
+          : null
+        ,
+        description: cartItem.description,
+        fixed_shipping_price: cartItem.fixed_shipping_price,
+        identifier: cartItem.identifier,
+        item_type: cartItem.item_type,
+        name: cartItem.name,
+        price: cartItem.price,
+        price_net: cartItem.price_net,
+        product_variant_uuid: cartItem.product_variant_uuid,
+        quantity: cartItem.quantity,
+        shipping_price: cartItem.shipping_price,
+        shipping_settings_rate: cartItem.shipping_settings_rate,
+        shipping_settings_rate_type: cartItem.shipping_settings_rate_type,
+        shipping_type: cartItem.shipping_type,
+        thumbnail: cartItem.thumbnail,
+        updated_at: cartItem.updated_at,
+        url: cartItem.url,
+        vat_rate: cartItem.vat_rate,
+        weight: cartItem.weight,
+        created_at: cartItem.created_at,
+      };
+
+      newCart.push(newCartItem);
     }
 
     return newCart;
   }
 
-  private setSantanderApplication(transaction: any): void {
+  private setSantanderApplication(
+    transaction: TransactionSantanderApplicationAwareInterface,
+    checkoutTransaction: CheckoutPaymentDetailsAwareInterface,
+  ): void {
     transaction.santander_applications = [];
 
-    if (transaction.payment_details.finance_id) {
-      transaction.santander_applications.push(transaction.payment_details.finance_id);
+    if (checkoutTransaction.payment_details.finance_id) {
+      transaction.santander_applications.push(checkoutTransaction.payment_details.finance_id);
     }
 
-    if (transaction.payment_details.application_no) {
-      transaction.santander_applications.push(transaction.payment_details.application_no);
+    if (checkoutTransaction.payment_details.application_no) {
+      transaction.santander_applications.push(checkoutTransaction.payment_details.application_no);
     }
 
-    if (transaction.payment_details.application_number) {
-      transaction.santander_applications.push(transaction.payment_details.application_number);
+    if (checkoutTransaction.payment_details.application_number) {
+      transaction.santander_applications.push(checkoutTransaction.payment_details.application_number);
     }
   }
 
   private prepareTransactionForOutput(transaction) {
     try {
-      transaction.payment_details = transaction.payment_details ? JSON.parse(transaction.payment_details) : {};
+      transaction.payment_details =
+        transaction.payment_details
+          ? JSON.parse(transaction.payment_details)
+          : {}
+        ;
     } catch (e) {
       console.log(e);
       // just skipping payment_details

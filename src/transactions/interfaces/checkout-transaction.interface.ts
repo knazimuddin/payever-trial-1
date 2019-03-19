@@ -1,15 +1,22 @@
 import { AddressInterface } from './address.interface';
-import { TransactionCartItemInterface } from './transaction-cart-item.interface';
-import { TransactionHistoryEntryInterface } from './transaction-history-entry.interface';
-import { TransactionSantanderApplicationAwareInterface } from './transaction-santander-application-aware.interface';
+import { BusinessInterface } from './business.interface';
+import { ChannelSetInterface } from './channel-set.interface';
+import { CheckoutPaymentDetailsAwareInterface } from './checkout-payment-details-aware.interface';
+import { CheckoutTransactionCartItemInterface } from './checkout-transaction-cart-item.interface';
+import { CheckoutTransactionHistoryItemInterface } from './checkout-transaction-history-item.interface';
+import { PaymentFlowInterface } from './payment-flow.interface';
 
-export interface TransactionInterface extends TransactionSantanderApplicationAwareInterface {
+export interface CheckoutTransactionInterface extends CheckoutPaymentDetailsAwareInterface {
   id: string;
-  original_id: string; // id from mysql db
   uuid: string;
+
+  address: AddressInterface;
+  business: BusinessInterface;
+  channel_set: ChannelSetInterface;
+  payment_flow: PaymentFlowInterface;
+
   action_running: boolean;
   amount: number;
-  billing_address: AddressInterface;
   business_option_id: number;
   business_uuid: string;
   channel: string; // 'store', ...
@@ -22,15 +29,15 @@ export interface TransactionInterface extends TransactionSantanderApplicationAwa
   delivery_fee: number;
   down_payment: number;
   fee_accepted: boolean;
-  history: TransactionHistoryEntryInterface[];
-  items: TransactionCartItemInterface[];
+  history: CheckoutTransactionHistoryItemInterface[];
+  items: CheckoutTransactionCartItemInterface[];
   merchant_email: string;
   merchant_name: string;
-  payment_details: string; // Serialized big object
   payment_fee: number;
   payment_flow_id: string;
   place: string;
   reference: string;
+  santander_applications: string[];
   shipping_address: AddressInterface;
   shipping_category: string;
   shipping_method_name: string;
@@ -44,4 +51,5 @@ export interface TransactionInterface extends TransactionSantanderApplicationAwa
   type: string;
   updated_at: Date;
   user_uuid: string;
+  payment_type: string;
 }

@@ -1,4 +1,4 @@
-export interface TransactionItemInterface {
+export interface TransactionCartItemInterface {
   uuid: string;
   description: string;
   fixed_shipping_price: number;

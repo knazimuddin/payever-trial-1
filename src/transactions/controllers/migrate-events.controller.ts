@@ -4,8 +4,9 @@ import { MessagePattern } from '@nestjs/microservices';
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
-import { TransactionsService } from '../services';
-import { StatisticsService } from '../services/statistics.service';
+import { CheckoutTransactionInterface, TransactionInterface } from '../interfaces';
+import { TransactionModel } from '../models';
+import { StatisticsService, TransactionsService } from '../services';
 
 @Controller()
 export class MigrateEventsController {
@@ -27,18 +28,26 @@ export class MigrateEventsController {
   public async onActionMigrateEvent(msg: any) {
     const data = this.messageBusService.unwrapMessage(msg.data);
     console.log('ACTION.MIGRATE!', data.payment);
-    const transaction: any = data.payment;
-    this.transactionsService.prepareTransactionForInsert(transaction);
+    const checkoutTransaction: CheckoutTransactionInterface = data.payment;
+    const transaction: TransactionInterface = this.transactionsService.prepareTransactionForInsert(checkoutTransaction);
 
-    if (transaction.items.length) {
+    if (checkoutTransaction.items.length) {
       transaction.items = this.transactionsService.prepareTransactionCartForInsert(
-        transaction.items,
+        checkoutTransaction.items,
         transaction.business_uuid,
       );
     }
 
-    const created = await this.transactionsService.createOrUpdate(transaction);
-    await this.statisticsService.processMigratedTransaction(created.lean());
+    const created: TransactionModel = await this.createOrUpdate(transaction);
+    await this.statisticsService.processMigratedTransaction(created);
     console.log('TRANSACTION MIGRATE COMPLETED');
+  }
+
+  private async createOrUpdate(transaction: TransactionInterface) {
+    if (await this.transactionsService.findOneByUuid( transaction.uuid )) {
+      return this.transactionsService.updateByUuid(transaction.uuid, transaction);
+    }
+
+    return this.transactionsService.create(transaction);
   }
 }

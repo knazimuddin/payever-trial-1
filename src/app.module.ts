@@ -30,6 +30,5 @@ import { TransactionsModule } from './transactions/transactions.module';
   ],
 })
 export class ApplicationModule implements NestModule {
-  public configure() {
-  }
+  public configure() {}
 }

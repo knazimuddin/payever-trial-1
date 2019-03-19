@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { v4 as uuid } from 'uuid';
 
 import { MessageBusService, MessageInterface } from '@pe/nest-kit/modules/message';
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
 import { of } from 'rxjs';
 import { catchError, map, take, timeout } from 'rxjs/operators';
+import { v4 as uuid } from 'uuid';
 
 import { environment } from '../../environments';
+import { PaymentFlowModel } from '../models';
 import { BusinessPaymentOptionService } from './business-payment-option.service';
 import { PaymentFlowService } from './payment-flow.service';
 
@@ -36,8 +37,8 @@ export class MessagingService {
   }
 
   // Uncomment when payment flow will be retrieved from local projection
-  public getPaymentFlow(flowId: string) {
-    return this.flowService.findOne(flowId);
+  public getPaymentFlow(flowId: string): Promise<PaymentFlowModel> {
+    return this.flowService.findOneById(flowId);
   }
 
   public async getActions(transaction): Promise<any[]> {
@@ -52,6 +53,7 @@ export class MessagingService {
       }
     } catch (error) {
       console.error('Could not prepare payload for actions call:', error);
+
       return [];
     }
 
@@ -105,9 +107,13 @@ export class MessagingService {
     const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
     console.log('RPC result: ', updatedTransaction);
     updatedTransaction.payment_details = this.checkRPCResponsePropertyExists(rpcResult.payment_details)
-      ? rpcResult.payment_details : transaction.payment_details;
+      ? rpcResult.payment_details
+      : transaction.payment_details
+    ;
     updatedTransaction.items = rpcResult.payment_items && rpcResult.payment_items.length
-      ? rpcResult.payment_items : transaction.items;
+      ? rpcResult.payment_items
+      : transaction.items
+    ;
     console.log('Updated transaction: ', updatedTransaction);
     // We do not update history here.
     // History events coming separately, there is a chance to overwrite saved history here
@@ -116,15 +122,6 @@ export class MessagingService {
     await this.transactionsService.updateByUuid(updatedTransaction.uuid, updatedTransaction);
 
     return updatedTransaction;
-  }
-
-  private checkRPCResponsePropertyExists(prop: any): boolean {
-    if (Array.isArray(prop)) {
-      return !!prop.length;
-    }
-    else {
-      return !!prop;
-    }
   }
 
   public async updateStatus(transaction) {
@@ -150,10 +147,19 @@ export class MessagingService {
       transaction,
       {
         place: rpcPayment.place,
-        status: rpcPayment.status ? rpcPayment.status : transaction.status,
-        specific_status: rpcPayment.specific_status ? rpcPayment.specific_status : transaction.specific_status,
-        payment_details: rpcResult.payment_details ? rpcResult.payment_details : transaction.payment_details,
-      }
+        status: rpcPayment.status
+          ? rpcPayment.status
+          : transaction.status
+        ,
+        specific_status: rpcPayment.specific_status
+          ? rpcPayment.specific_status
+          : transaction.specific_status
+        ,
+        payment_details: rpcResult.payment_details
+          ? rpcResult.payment_details
+          : transaction.payment_details
+        ,
+      },
     );
 
     this.transactionsService.prepareTransactionForInsert(updatedTransaction);
@@ -173,6 +179,15 @@ export class MessagingService {
         { channel: 'transactions_app.payment.updated', exchange: 'async_events' },
         message,
       );
+  }
+
+  private checkRPCResponsePropertyExists(prop: any): boolean {
+    if (Array.isArray(prop)) {
+      return !!prop.length;
+    }
+    else {
+      return !!prop;
+    }
   }
 
   private async runPaymentRpc(transaction, payload, messageIdentifier) {
@@ -200,7 +215,9 @@ export class MessagingService {
     });
   }
 
-  private createPaymentMicroMessage(paymentType: string, messageIdentifier: string, messageData: any, stub: boolean = false): MessageInterface {
+  private createPaymentMicroMessage(
+    paymentType: string,
+    messageIdentifier: string, messageData: any, stub: boolean = false): MessageInterface {
     const messageName = `payment_option.${paymentType}.${messageIdentifier}`;
     const message: any = {
       name: messageName,
@@ -275,11 +292,13 @@ export class MessagingService {
       paymentFlow = await this.getPaymentFlow(transaction.payment_flow_id);
     } catch (e) {
       console.error(`Transaction:${transaction.uuid} -> Cannot resolve payment flow: ${e}`);
+
       return null;
     }
 
     if (!paymentFlow) {
       console.error(`Transaction:${transaction.uuid} -> Payment flow cannot be null.`);
+
       return null;
     }
 

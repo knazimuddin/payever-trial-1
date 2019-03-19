@@ -19,11 +19,11 @@ import {
   DtoValidationService,
   MessagingService,
   PaymentFlowService,
+  StatisticsService,
   StubService,
   TransactionsGridService,
   TransactionsService,
 } from './services';
-import { StatisticsService } from './services/statistics.service';
 
 @Module({
   imports: [
@@ -32,9 +32,9 @@ import { StatisticsService } from './services/statistics.service';
       rabbitMqOptions: environment.rabbitmq,
     }),
     MongooseModule.forFeature([
-      { name: 'Transaction', schema: TransactionsSchema },
       { name: 'BusinessPaymentOption', schema: BusinessPaymentOptionSchema },
       { name: 'PaymentFlow', schema: PaymentFlowSchema },
+      { name: 'Transaction', schema: TransactionsSchema },
     ]),
   ],
   controllers: [
