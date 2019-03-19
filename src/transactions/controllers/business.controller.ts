@@ -4,16 +4,19 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   NotFoundException,
   Param,
   Post,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
+import * as moment from 'moment';
 
 import { ActionPayloadDto } from '../dto';
 
@@ -52,6 +55,36 @@ export class BusinessController {
     };
 
     return this.transactionsGridService.getList(filters, orderBy, direction, search, +page, +limit);
+  }
+
+  @Get('csv')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant)
+  @Header('content-type', 'application/csv')
+  public async getCsv(
+    @Param('businessId') businessId: string,
+    @Query() query,
+    @Res() res: any,
+  ): Promise<any> {
+    const separator = ',';
+    const transactions = await this.transactionsService.findAll(businessId);
+    const columns = JSON.parse(query.columns);
+    let header = 'CHANNEL,ID,TOTAL';
+    columns.forEach(elem => {
+      header = `${header}${separator}${elem.title}`;
+    });
+    let csv =  `${header}`;
+    transactions.forEach(transaction => {
+      csv = `${csv}\n`;
+      csv = `${csv}${transaction.channel}`;
+      csv = `${csv}${separator}${transaction.uuid}`;
+      csv = `${csv}${separator}${transaction.total}`;
+      columns.forEach(column => {
+        csv = `${csv}${separator}${transaction[column.name] || ''}`;
+      });
+    });
+    res.set('Content-disposition', `attachment;filename="${query.businessName}-${moment().format('DD-MM-YYYY')}.csv"`);
+    res.send(csv);
   }
 
   @Get('detail/reference/:reference')

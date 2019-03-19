@@ -123,6 +123,10 @@ export class TransactionsService {
     return this.prepareTransactionForOutput(transaction.toObject({ virtuals: true }));
   }
 
+  public async findAll(businessId) {
+    return this.transactionModel.find({business_uuid: businessId});
+  }
+
   public async removeByUuid(transactionUuid: string): Promise<void> {
     await this.transactionModel.findOneAndRemove({ uuid: transactionUuid });
   }
