@@ -203,50 +203,103 @@ export class TransactionsGridService {
       if (!_filter.value) {
         return;
       }
-      const condition = {};
-      condition[field] = {};
+      let condition;
       switch (_filter.condition) {
         case FilterConditionEnum.Is:
+          condition = {};
+          condition[field] = {};
           condition[field] = {$eq: _filter.value};
           mongoFilters.$or.push(condition);
           break;
         case FilterConditionEnum.IsNot:
+          condition = {};
+          condition[field] = {};
           condition[field] = {$ne: _filter.value};
           mongoFilters.$or.push(condition);
           break;
         case FilterConditionEnum.IsIn:
+          condition = {};
+          condition[field] = {};
           condition[field] = {$in: _filter.value};
           mongoFilters.$or.push(condition);
           break;
         case FilterConditionEnum.IsNotIn:
+          condition = {};
+          condition[field] = {};
           condition[field] = {$nin: _filter.value};
           mongoFilters.$or.push(condition);
           break;
         case FilterConditionEnum.StartsWith:
-          condition[field] = {$regex: new RegExp(`^${_filter.value}`, 'i')};
-          mongoFilters.$or.push(condition);
+          if (_filter.value.length) {
+            _filter.value.forEach((elem: any) => {
+              condition = {};
+              condition[field] = {};
+              condition[field] = {$regex: new RegExp(`^${elem}`, 'i')};
+              mongoFilters.$or.push(condition);
+            });
+          } else {
+            condition = {};
+            condition[field] = {$regex: new RegExp(`^${_filter.value}`, 'i')};
+            mongoFilters.$or.push(condition);
+          }
           break;
         case FilterConditionEnum.EndsWith:
-          condition[field] = {$regex: new RegExp(`${_filter.value}$`, 'i')};
-          mongoFilters.$or.push(condition);
+          if (_filter.value.length) {
+            _filter.value.forEach((elem: any) => {
+              condition = {};
+              condition[field] = {};
+              condition[field] = {$regex: new RegExp(`${_filter.value}$`, 'i')};
+              mongoFilters.$or.push(condition);
+            });
+          } else {
+            condition = {};
+            condition[field] = {$regex: new RegExp(`${_filter.value}$`, 'i')};
+            mongoFilters.$or.push(condition);
+          }
           break;
         case FilterConditionEnum.Contains:
-          condition[field] = {$regex: new RegExp(`${_filter.value}`, 'i')};
-          mongoFilters.$or.push(condition);
+          if (_filter.value.length) {
+            _filter.value.forEach((elem: any) => {
+              condition = {};
+              condition[field] = {};
+              condition[field] = {$regex: new RegExp(`${elem}`, 'i')};
+              mongoFilters.$or.push(condition);
+            });
+          } else {
+            condition = {};
+            condition[field] = {$regex: new RegExp(`${_filter.value}`, 'i')};
+            mongoFilters.$or.push(condition);
+          }
           break;
         case FilterConditionEnum.DoesNotContain:
-          condition[field] = {$not: new RegExp(`${_filter.value}`, 'i')};
-          mongoFilters.$or.push(condition);
+          if (_filter.value.length) {
+            _filter.value.forEach((elem: any) => {
+              condition = {};
+              condition[field] = {};
+              condition[field] = {$not: new RegExp(`${elem}`, 'i')};
+              mongoFilters.$or.push(condition);
+            });
+          } else {
+            condition = {};
+            condition[field] = {$not: new RegExp(`${_filter.value}`, 'i')};
+            mongoFilters.$or.push(condition);
+          }
           break;
         case FilterConditionEnum.GreaterThan:
+          condition = {};
+          condition[field] = {};
           condition[field] = {$gt: _filter.value};
           mongoFilters.$or.push(condition);
           break;
         case FilterConditionEnum.LessThan:
+          condition = {};
+          condition[field] = {};
           condition[field] = {$lt: _filter.value};
           mongoFilters.$or.push(condition);
           break;
         case FilterConditionEnum.Between:
+          condition = {};
+          condition[field] = {};
           condition[field] = {
             $gte: _filter.value.from,
             $lte: _filter.value.to,
@@ -254,6 +307,8 @@ export class TransactionsGridService {
           mongoFilters.$or.push(condition);
           break;
         case FilterConditionEnum.IsDate:
+          condition = {};
+          condition[field] = {};
           condition[field] = {
             $gte: this.getTargetDate(_filter.value),
             $lt: this.getTargetTomorrowDate(_filter.value),
@@ -261,6 +316,8 @@ export class TransactionsGridService {
           mongoFilters.$or.push(condition);
           break;
         case FilterConditionEnum.IsNotDate:
+          condition = {};
+          condition[field] = {};
           condition[field] = {
             $not: {
               $gte: this.getTargetDate(_filter.value),
@@ -270,18 +327,24 @@ export class TransactionsGridService {
           mongoFilters.$or.push(condition);
           break;
         case FilterConditionEnum.AfterDate:
+          condition = {};
+          condition[field] = {};
           condition[field] = {
             $gte: this.getTargetTomorrowDate(_filter.value),
           };
           mongoFilters.$or.push(condition);
           break;
         case FilterConditionEnum.BeforeDate:
+          condition = {};
+          condition[field] = {};
           condition[field] = {
             $lt: this.getTargetDate(_filter.value),
           };
           mongoFilters.$or.push(condition);
           break;
         case FilterConditionEnum.BetweenDates:
+          condition = {};
+          condition[field] = {};
           condition[field] = {
             $gte: this.getTargetDate(_filter.value.dateFrom),
             $lt: this.getTargetTomorrowDate(_filter.value.dateTo),
