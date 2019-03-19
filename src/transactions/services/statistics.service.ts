@@ -1,20 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
+import { RabbitMqClient } from '@pe/nest-kit';
+import { InjectRabbiMqClient } from '@pe/nest-kit/modules/rabbitmq/decorators/injest-rabbit-mq-client.decorator';
 import { Model } from 'mongoose';
 import { RabbitRoutingKeys } from '../../enums';
-import { environment } from '../../environments';
 
 @Injectable()
 export class StatisticsService {
 
-  private rabbitClient: RabbitmqClient;
-
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
-  ) {
-    this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
-  }
+    @InjectRabbiMqClient() private readonly rabbitClient: RabbitMqClient,
+  ) {}
 
   public async processAcceptedTransaction(id: string, updating: any) {
     const existing = await this.transactionsModel.findOne({ uuid: id }).lean();

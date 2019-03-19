@@ -1,5 +1,6 @@
 import { Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { RabbitMqModule } from '@pe/nest-kit';
 import { ApmModule } from '@pe/nest-kit/modules/apm';
 import { JwtAuthModule } from '@pe/nest-kit/modules/auth';
 import { CommandModule } from 'nestjs-command';
@@ -25,6 +26,7 @@ import { TransactionsModule } from './transactions/transactions.module';
       environment.apm.options,
     ),
     CommandModule,
+    RabbitMqModule.forRoot(environment.rabbitmq),
   ],
   providers: [
   ],

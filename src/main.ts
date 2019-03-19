@@ -1,10 +1,10 @@
-import * as APM from 'elastic-apm-node';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-import { RabbitmqServer } from '@pe/nest-kit/modules/rabbitmq';
+import { RabbitMqServer } from '@pe/nest-kit/modules/rabbitmq';
 import * as cors from 'cors';
+import * as APM from 'elastic-apm-node';
 import { ApplicationModule } from './app.module';
 
 import { environment } from './environments';
@@ -32,11 +32,14 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
 
   app.connectMicroservice({
-    strategy: new RabbitmqServer(environment.rabbitmq),
+    strategy: app.get(RabbitMqServer),
   });
 
   await app.startAllMicroservicesAsync();
-  await app.listen(environment.port, () => console.log('Transactions app started at port', environment.port));
+  await app.listen(
+    environment.port,
+    () => Logger.log(`Transactions app started at port ${environment.port}`, 'NestApplication'),
+  );
 }
 
 bootstrap().then();

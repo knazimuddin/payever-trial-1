@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-
+import { RabbitMqClient } from '@pe/nest-kit';
 import { MessageBusService, MessageInterface } from '@pe/nest-kit/modules/message';
-import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
+import { InjectRabbiMqClient } from '@pe/nest-kit/modules/rabbitmq/decorators/injest-rabbit-mq-client.decorator';
 import { of } from 'rxjs';
 import { catchError, map, take, timeout } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
@@ -10,13 +10,11 @@ import { environment } from '../../environments';
 import { PaymentFlowModel } from '../models';
 import { BusinessPaymentOptionService } from './business-payment-option.service';
 import { PaymentFlowService } from './payment-flow.service';
-
 import { TransactionsService } from './transactions.service';
 
 @Injectable()
 export class MessagingService {
   private readonly stubMessageName: string = 'payment_option.stub_proxy.sandbox';
-  private rabbitClient: RabbitmqClient;
 
   private messageBusService: MessageBusService = new MessageBusService({
     rsa: environment.rsa,
@@ -28,9 +26,8 @@ export class MessagingService {
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly flowService: PaymentFlowService,
-  ) {
-    this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
-  }
+    @InjectRabbiMqClient() private readonly rabbitClient: RabbitMqClient,
+  ) {}
 
   public getBusinessPaymentOption(transaction: any) {
     return this.bpoService.findOneById(transaction.business_option_id);
