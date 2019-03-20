@@ -91,8 +91,7 @@ export const environment: any = {
         name: 'async_events_transactions_micro',
         options: {
           durable: true,
-          deadLetterExchange: 'async_events_callback',
-          deadLetterRoutingKey: 'async_events_transactions_micro',
+          deadLetterExchange: 'async_events_fallback',
         },
         bindings: [
           {
