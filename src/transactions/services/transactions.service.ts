@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 import { plainToClass } from 'class-transformer';
@@ -117,7 +117,7 @@ export class TransactionsService {
     const transaction: TransactionModel = await this.transactionModel.findOne(params);
 
     if (!transaction) {
-      throw new NotFoundException();
+      return;
     }
 
     return this.prepareTransactionForOutput(transaction.toObject({ virtuals: true }));

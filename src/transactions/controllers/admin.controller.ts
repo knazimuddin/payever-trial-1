@@ -54,8 +54,14 @@ export class AdminController {
 
   @Get('detail/reference/:reference')
   @HttpCode(HttpStatus.OK)
-  public async getDetailByReference(@Param('reference') reference: string) {
+  public async getDetailByReference(
+    @Param('reference') reference: string,
+  ) {
     const transaction = await this.transactionsService.findOneByParams({ reference });
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction not found.`);
+    }
 
     return { ...transaction };
   }
@@ -67,6 +73,10 @@ export class AdminController {
   ): Promise<any> {
     let actions = [];
     const transaction: TransactionModel = await this.transactionsService.findOneByParams({ uuid });
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction not found.`);
+    }
 
     try {
       actions = await this.messagingService.getActions(transaction);
@@ -132,10 +142,9 @@ export class AdminController {
       throw new BadRequestException(`Error occured during status update. Please try again later.`);
     }
 
-    try {
-      updatedTransaction = await this.transactionsService.findOneByParams({ uuid });
-    } catch (e) {
-      throw new NotFoundException();
+    updatedTransaction = await this.transactionsService.findOneByParams({ uuid });
+    if (!updatedTransaction) {
+      throw new NotFoundException(`Transaction not found.`);
     }
 
     // Send update to php

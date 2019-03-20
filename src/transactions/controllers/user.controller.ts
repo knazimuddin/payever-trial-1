@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, NotFoundException, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum, User, UserTokenInterface } from '@pe/nest-kit/modules/auth';
 import { TransactionModel } from '../models';
@@ -46,6 +46,9 @@ export class UserController {
   ): Promise<any> {
     const actions: string[] = [];
     const transaction: TransactionModel = await this.transactionsService.findOneByParams({ uuid, user_uuid: user.id });
+    if (!transaction) {
+      throw new NotFoundException(`Transaction not found.`);
+    }
 
     return { ...transaction, actions };
   }

@@ -90,10 +90,14 @@ export class BusinessController {
   @Get('detail/reference/:reference')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
-  public async getDetailByReference(@Param('reference') reference: string, @Param('businessId') businessId: string) {
+  public async getDetailByReference(
+    @Param('reference') reference: string,
+    @Param('businessId') businessId: string,
+  ) {
     const transaction = await this.transactionsService.findOneByParams({ reference });
-    if (transaction.business_uuid !== businessId) {
-      throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
+
+    if (!transaction || transaction.business_uuid !== businessId) {
+      throw new NotFoundException(`Transaction not found.`);
     }
 
     return { ...transaction };
@@ -110,8 +114,8 @@ export class BusinessController {
     let actions: any[];
 
     transaction = await this.transactionsService.findOneByParams({ uuid });
-    if (transaction.business_uuid !== businessId) {
-      throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
+    if (!transaction || transaction.business_uuid !== businessId) {
+      throw new NotFoundException(`Transaction not found.`);
     }
 
     try {
@@ -188,10 +192,9 @@ export class BusinessController {
       throw new BadRequestException(`Error occured during status update. Please try again later. ${e.message}`);
     }
 
-    try {
-      updatedTransaction = await this.transactionsService.findOneByParams({ uuid });
-    } catch (e) {
-      throw new NotFoundException();
+    updatedTransaction = await this.transactionsService.findOneByParams({ uuid });
+    if (!updatedTransaction) {
+      throw new NotFoundException(`Transaction not found.`);
     }
 
     // Send update to php
