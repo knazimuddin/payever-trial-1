@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
 import { Model } from 'mongoose';
@@ -12,8 +12,9 @@ export class StatisticsService {
 
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
+    private readonly logger: Logger,
   ) {
-    this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
+    this.rabbitClient = new RabbitmqClient(environment.rabbitmq, this.logger);
   }
 
   public async processAcceptedTransaction(id: string, updating: any) {

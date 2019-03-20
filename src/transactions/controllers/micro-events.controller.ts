@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 
 import { MessageBusService } from '@pe/nest-kit/modules/message';
@@ -14,13 +14,14 @@ export class MicroEventsController {
 
   private messageBusService: MessageBusService = new MessageBusService({
     rsa: environment.rsa,
-  });
+  }, this.logger);
 
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly flowService: PaymentFlowService,
     private readonly statisticsService: StatisticsService,
+    private readonly logger: Logger,
   ) { }
 
   @MessagePattern({
@@ -30,7 +31,7 @@ export class MicroEventsController {
   })
   public async onActionCompletedEvent(msg: any) {
     const data: any = this.messageBusService.unwrapMessage(msg.data);
-    console.log('ACTION.COMPLETED', data);
+    this.logger.log('ACTION.COMPLETED', data);
     const searchParams = data.payment.uuid ? { uuid: data.payment.uuid } : { original_id: data.payment.id };
     const transaction = await this.transactionsService.findOneByParams(searchParams);
     // TODO use message bus message created time
@@ -48,8 +49,8 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onHistoryAddEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
-    console.log('HISTORY.ADD', data);
+    const data = this.messageBusService.unwrapMessage<any>(msg.data);
+    this.logger.log({ text: 'HISTORY.ADD', data });
     // @TODO use only uuid later, no original_id
     const searchParams = data.payment.uuid ? { uuid: data.payment.uuid } : { original_id: data.payment.id };
     const transaction = await this.transactionsService.findOneByParams(searchParams);
@@ -80,7 +81,7 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onTransactionUpdateEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
+    const data = this.messageBusService.unwrapMessage<any>(msg.data);
 
     const transaction: any = data.payment;
     this.transactionsService.prepareTransactionForInsert(transaction);
@@ -94,14 +95,14 @@ export class MicroEventsController {
 
     const transactionExists = await this.transactionsService.exists(transaction.uuid);
     if (!transactionExists) {
-      console.log('PAYMENT.CREATE', data);
+      this.logger.log({ text: 'PAYMENT.CREATE', data });
       await this.transactionsService.create(transaction);
     }
     else {
-      console.log('PAYMENT.UPDATE', data);
+      this.logger.log({ text: 'PAYMENT.UPDATE', data });
       await this.statisticsService.processAcceptedTransaction(transaction.uuid, transaction);
       await this.transactionsService.updateByUuid(transaction.uuid, transaction);
-      console.log(`TRANSACTION ${transaction.uuid} UPDATE COMPLETED`);
+      this.logger.log(`TRANSACTION ${transaction.uuid} UPDATE COMPLETED`);
     }
   }
 
@@ -111,8 +112,8 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onTransactionRemoveEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
-    console.log('PAYMENT.REMOVE', data);
+    const data = this.messageBusService.unwrapMessage<any>(msg.data);
+    this.logger.log({ text: 'PAYMENT.REMOVE', data });
 
     return this.transactionsService.removeByUuid(data.payment.uuid);
   }
@@ -123,9 +124,9 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onBpoCreatedEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
+    const data = this.messageBusService.unwrapMessage<any>(msg.data);
     const business_payment_option = data.business_payment_option;
-    console.log('BPO.CREATE', data);
+    this.logger.log({ text: 'BPO.CREATE', data });
     const bpo: any = {
       _id: data.business_payment_option.uuid,
       ...business_payment_option,
@@ -139,11 +140,11 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onBpoUpdatedEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
-    console.log('BPO.UPDATE', data);
+    const data = this.messageBusService.unwrapMessage<any>(msg.data);
+    this.logger.log({ text: 'BPO.UPDATE', data });
     const bpo: any = data.business_payment_option;
     await this.bpoService.createOrUpdate(bpo);
-    console.log('BPO.UPDATE COMPLETED');
+    this.logger.log('BPO.UPDATE COMPLETED');
   }
 
   @MessagePattern({
@@ -152,11 +153,11 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onPaymentFlowCreatedEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
-    console.log('FLOW.CREATE', data);
+    const data = this.messageBusService.unwrapMessage<any>(msg.data);
+    this.logger.log({ text: 'FLOW.CREATE', data });
     const flow: any = data.flow;
     await this.flowService.createOrUpdate(flow);
-    console.log('FLOW.CREATE COMPLETED');
+    this.logger.log('FLOW.CREATE COMPLETED');
   }
 
   @MessagePattern({
@@ -165,11 +166,11 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onPaymentFlowMigrateEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
-    console.log('FLOW.MIGRATE', data);
+    const data = this.messageBusService.unwrapMessage<any>(msg.data);
+    this.logger.log({ text: 'FLOW.MIGRATE', data });
     const flow: any = data.flow;
     await this.flowService.createOrUpdate(flow);
-    console.log('FLOW.MIGRATE COMPLETED');
+    this.logger.log('FLOW.MIGRATE COMPLETED');
   }
 
   @MessagePattern({
@@ -178,11 +179,11 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onPaymentFlowUpdatedEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
-    console.log('FLOW.UPDATE', data);
+    const data = this.messageBusService.unwrapMessage<any>(msg.data);
+    this.logger.log({ text: 'FLOW.UPDATE', data });
     const flow: any = data.flow;
     await this.flowService.createOrUpdate(flow);
-    console.log('FLOW.UPDATE COMPLETED');
+    this.logger.log('FLOW.UPDATE COMPLETED');
   }
 
   @MessagePattern({
@@ -191,10 +192,10 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onPaymentFlowRemovedEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
-    console.log('FLOW.REMOVE', data);
+    const data = this.messageBusService.unwrapMessage<any>(msg.data);
+    this.logger.log({ text: 'FLOW.REMOVE', data });
     const flow: any = data.flow;
     await this.flowService.removeById(flow.id);
-    console.log('FLOW.REMOVE COMPLETED');
+    this.logger.log('FLOW.REMOVE COMPLETED');
   }
 }
