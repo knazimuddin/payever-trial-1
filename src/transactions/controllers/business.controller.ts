@@ -61,7 +61,7 @@ export class BusinessController {
 
   @Get('csv')
   @HttpCode(HttpStatus.OK)
-  @Roles(RolesEnum.merchant)
+  @Roles(RolesEnum.anonymous)
   @Header('content-type', 'application/csv')
   public async getCsv(
     @Param('businessId') businessId: string,
