@@ -346,8 +346,8 @@ export class TransactionsGridService {
           condition = {};
           condition[field] = {};
           condition[field] = {
-            $gte: this.getTargetDate(_filter.value.dateFrom),
-            $lt: this.getTargetTomorrowDate(_filter.value.dateTo),
+            $gte: this.getTargetDate(_filter.value[0].dateFrom),
+            $lt: this.getTargetTomorrowDate(_filter.value[0].dateTo),
           };
           mongoFilters.$or.push(condition);
           break;
