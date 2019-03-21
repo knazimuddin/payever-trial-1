@@ -2,7 +2,7 @@ import { Schema } from 'mongoose';
 
 export const PaymentFlowSchema = new Schema(
   {
-    _id: { type: String },
+    // _id: { type: String },
     id: { type: String, unique: true },
     amount: Number,
     shipping_fee: Number,
