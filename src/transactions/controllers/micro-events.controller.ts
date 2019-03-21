@@ -6,7 +6,7 @@ import { snakeCase } from 'lodash';
 
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
-import { BusinessPaymentOptionInterface, CheckoutTransactionInterface, TransactionInterface } from '../interfaces';
+import { CheckoutTransactionInterface, TransactionInterface } from '../interfaces';
 import { TransactionModel } from '../models';
 import { BusinessPaymentOptionService, PaymentFlowService, StatisticsService, TransactionsService } from '../services';
 
@@ -59,7 +59,10 @@ export class MicroEventsController {
       ? { uuid: message.payment.uuid }
       : { original_id: message.payment.id }
     ;
-    const transaction = await this.transactionsService.findOneByParams(searchParams);
+
+    this.logger.log({ text: 'searchParams', searchParams });
+    const transaction: TransactionModel = await this.transactionsService.findOneByParams(searchParams);
+    this.logger.log({ text: 'found transaction', transaction });
 
     return this.transactionsService.updateHistoryByUuid(transaction.uuid, message.history_type, message.data);
   }

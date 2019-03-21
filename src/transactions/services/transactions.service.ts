@@ -101,7 +101,7 @@ export class TransactionsService {
       this.prepareTransactionHistoryItemForInsert(historyType, new Date(), data);
 
     await this.transactionModel.updateOne(
-      { uuid: transactionUuid},
+      { uuid: transactionUuid },
       {
         $push: {
           history: historyItem,
