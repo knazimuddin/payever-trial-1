@@ -11,23 +11,15 @@ import { ApplicationModule } from './app.module';
 import { environment } from './environments';
 
 async function bootstrap() {
-  let app: INestApplication;
-  let logger: LoggerService;
-  if (environment.production) {
-    app = await NestFactory.create(
-      ApplicationModule,
-      {
-        logger: false,
-      },
-    );
+  const app = await NestFactory.create(
+    ApplicationModule,
+    {
+      logger: false,
+    },
+  );
 
-    logger = app.get(NestKitLogger);
-    app.useLogger(logger);
-  }
-  else {
-    app = await NestFactory.create(ApplicationModule);
-    logger = Logger;
-  }
+  const logger = app.get(NestKitLogger);
+  app.useLogger(logger);
 
   APM.isStarted() && logger.log('APM running');
 
