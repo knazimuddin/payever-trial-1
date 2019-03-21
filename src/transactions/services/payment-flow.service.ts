@@ -18,7 +18,13 @@ export class PaymentFlowService {
     };
 
     if (await this.model.findOne({ id: flowDto.id })) {
-      await this.model.findOneAndUpdate({ id: flowDto.id }, flowDto);
+      delete flowDto.id;
+      await this.model.findOneAndUpdate(
+        {
+          id: flowDto.id,
+        },
+        flowDto,
+      );
     } else {
       await this.model.create(dto);
     }
