@@ -84,8 +84,9 @@ export class BusinessController {
         csv = `${csv}${separator}${transaction[column.name] || ''}`;
       });
     });
-    res.set('Content-Type', `application/octet-stream`);
-    res.set('Content-disposition', `attachment;filename="${query.businessName}-${moment().format('DD-MM-YYYY')}.csv"`);
+    res.set('Content-Transfer-Encoding', `binary`);
+    res.set('Access-Control-Expose-Headers', `Content-Disposition,X-Suggested-Filename`);
+    res.set('Content-disposition', `attachment;filename=${query.businessName}-${moment().format('DD-MM-YYYY')}.csv`);
     res.send(csv);
   }
 
