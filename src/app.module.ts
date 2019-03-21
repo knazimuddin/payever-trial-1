@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ApmModule } from '@pe/nest-kit/modules/apm';
 import { JwtAuthModule } from '@pe/nest-kit/modules/auth';
 import { CommandModule } from 'nestjs-command';
+import { NestKitLoggingModule } from '@pe/nest-kit/modules/logging';
 
 import { environment } from './environments';
 import { StatusModule } from './status/status.module';
@@ -10,6 +11,10 @@ import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
   imports: [
+    NestKitLoggingModule.forRoot({
+      isProduction: environment.production,
+      applicationName: environment.applicationName,
+    }),
     JwtAuthModule.forRoot(environment.jwtOptions),
     TransactionsModule,
     MongooseModule.forRoot(

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 
@@ -12,6 +12,7 @@ export class TransactionsService {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
     @InjectNotificationsEmitter() private notificationsEmitter: NotificationsEmitter,
+    private readonly logger: Logger,
   ) { }
 
   public async create(transaction: any) {
@@ -176,7 +177,7 @@ export class TransactionsService {
     try {
       transaction.payment_details = transaction.payment_details ? JSON.parse(transaction.payment_details) : {};
     } catch (e) {
-      console.log(e);
+      this.logger.log(e);
       // just skipping payment_details
     }
 

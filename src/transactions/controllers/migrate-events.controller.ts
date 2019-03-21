@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 
 import { MessageBusService } from '@pe/nest-kit/modules/message';
@@ -12,11 +12,12 @@ export class MigrateEventsController {
 
   private messageBusService: MessageBusService = new MessageBusService({
     rsa: environment.rsa,
-  });
+  }, this.logger);
 
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly statisticsService: StatisticsService,
+    private readonly logger: Logger,
   ) {}
 
   @MessagePattern({
@@ -25,7 +26,7 @@ export class MigrateEventsController {
     origin: 'rabbitmq',
   })
   public async onActionMigrateEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage(msg.data);
+    const data = this.messageBusService.unwrapMessage<any>(msg.data);
     console.log('ACTION.MIGRATE!', data.payment);
     const transaction: any = data.payment;
     this.transactionsService.prepareTransactionForInsert(transaction);

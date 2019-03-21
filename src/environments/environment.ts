@@ -11,6 +11,7 @@ const isNumeric = (n) => {
 
 export const environment: any = {
   production: env.PRODUCTION_MODE === 'true',
+  applicationName: env.APP_NAME,
   port: env.APP_PORT,
   mongodb: env.MONGODB_URL,
   connectMicroUrlBase: env.MICRO_URL_CONNECT,
