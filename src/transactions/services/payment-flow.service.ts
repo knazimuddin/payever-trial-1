@@ -17,22 +17,13 @@ export class PaymentFlowService {
       ...flowDto,
     };
 
-    await this.model.updateOne(
-      {
-        id: flowDto.id,
-      },
-      {
-        $setOnInsert: {
-          // _id: flowDto.id,
-        },
-        $set: dto,
-      },
-      {
-        upsert: true,
-      },
-    );
+    if (await this.model.findOne({ id: flowDto.id })) {
+      await this.model.findOneAndUpdate({ id: flowDto.id }, flowDto);
+    } else {
+      await this.model.create(dto);
+    }
 
-    return this.findOneById(flowDto.id);
+    return this.model.findOne({ id: flowDto.id });
   }
 
   public async findOneById(id: string): Promise<PaymentFlowModel> {
