@@ -62,8 +62,7 @@ export class BusinessController {
 
   @Get('csv')
   @HttpCode(HttpStatus.OK)
-  @Roles(RolesEnum.anonymous)
-  @Header('content-type', 'application/csv')
+  @Roles(RolesEnum.merchant)
   public async getCsv(
     @Param('businessId') businessId: string,
     @Query() query,
@@ -86,7 +85,9 @@ export class BusinessController {
         csv = `${csv}${separator}${transaction[column.name] || ''}`;
       });
     });
-    res.set('Content-disposition', `attachment;filename="${query.businessName}-${moment().format('DD-MM-YYYY')}.csv"`);
+    res.set('Content-Transfer-Encoding', `binary`);
+    res.set('Access-Control-Expose-Headers', `Content-Disposition,X-Suggested-Filename`);
+    res.set('Content-disposition', `attachment;filename=${query.businessName}-${moment().format('DD-MM-YYYY')}.csv`);
     res.send(csv);
   }
 
