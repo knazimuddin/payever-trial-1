@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { RabbitMqClient } from '@pe/nest-kit';
 import { MessageBusService, MessageInterface } from '@pe/nest-kit/modules/message';
 import { InjectRabbiMqClient } from '@pe/nest-kit/modules/rabbitmq/decorators/injest-rabbit-mq-client.decorator';
@@ -16,9 +16,12 @@ import { TransactionsService } from './transactions.service';
 export class MessagingService {
   private readonly stubMessageName: string = 'payment_option.stub_proxy.sandbox';
 
-  private messageBusService: MessageBusService = new MessageBusService({
-    rsa: environment.rsa,
-  });
+  private messageBusService: MessageBusService = new MessageBusService(
+    {
+      rsa: environment.rsa,
+    },
+    this.logger,
+  );
 
   private readonly rpcTimeout: number = 30000;
 
@@ -26,6 +29,7 @@ export class MessagingService {
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly flowService: PaymentFlowService,
+    private readonly logger: Logger,
     @InjectRabbiMqClient() private readonly rabbitClient: RabbitMqClient,
   ) {}
 
@@ -49,7 +53,7 @@ export class MessagingService {
         };
       }
     } catch (error) {
-      console.error('Could not prepare payload for actions call:', error);
+      this.logger.error('Could not prepare payload for actions call:', error);
 
       return [];
     }
@@ -102,7 +106,7 @@ export class MessagingService {
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
     const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
-    console.log('RPC result: ', updatedTransaction);
+    this.logger.log('RPC result: ', updatedTransaction);
     updatedTransaction.payment_details = this.checkRPCResponsePropertyExists(rpcResult.payment_details)
       ? rpcResult.payment_details
       : transaction.payment_details
@@ -111,7 +115,7 @@ export class MessagingService {
       ? rpcResult.payment_items
       : transaction.items
     ;
-    console.log('Updated transaction: ', updatedTransaction);
+    this.logger.log('Updated transaction: ', updatedTransaction);
     // We do not update history here.
     // History events coming separately, there is a chance to overwrite saved history here
     delete updatedTransaction.history;
@@ -168,7 +172,7 @@ export class MessagingService {
   public async sendTransactionUpdate(transaction) {
     this.transformTransactionForPhp(transaction);
     const payload: any = { payment: transaction };
-    console.log(`SEND 'transactions_app.payment.updated', payload:`, payload);
+    this.logger.log(`SEND 'transactions_app.payment.updated', payload:`, payload);
     const message = this.messageBusService.createMessage('transactions_app.payment.updated', payload);
 
     await this.rabbitClient
@@ -252,7 +256,7 @@ export class MessagingService {
       try {
         transaction.payment_details = JSON.parse(transaction.payment_details);
       } catch (e) {
-        console.log(e);
+        this.logger.log(e);
         transaction.payment_details = {};
         // just skipping payment_details
       }
@@ -288,20 +292,19 @@ export class MessagingService {
     try {
       paymentFlow = await this.getPaymentFlow(transaction.payment_flow_id);
     } catch (e) {
-      console.error(`Transaction:${transaction.uuid} -> Cannot resolve payment flow: ${e}`);
+      this.logger.error(`Transaction:${transaction.uuid} -> Cannot resolve payment flow: ${e}`);
 
       return null;
     }
 
     if (!paymentFlow) {
-      console.error(`Transaction:${transaction.uuid} -> Payment flow cannot be null.`);
+      this.logger.error(`Transaction:${transaction.uuid} -> Payment flow cannot be null.`);
 
       return null;
     }
 
     dto.credentials = businessPaymentOption.credentials;
-    console.log('dto credentials: ');
-    console.log(dto.credentials);
+    this.logger.log('dto credentials: ' + JSON.stringify(dto.credentials));
 
     if (transaction.payment_flow_id) {
       dto.payment_flow = paymentFlow;
@@ -358,7 +361,7 @@ export class MessagingService {
       try {
         transaction.payment_details = JSON.parse(transaction.payment_details);
       } catch (e) {
-        console.log(e);
+        this.logger.log(e);
         transaction.payment_details = {};
         // just skipping payment_details
       }

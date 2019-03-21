@@ -4,9 +4,9 @@ import {
   Controller,
   ForbiddenException,
   Get,
-  Header,
   HttpCode,
   HttpStatus,
+  Logger,
   NotFoundException,
   Param,
   Post,
@@ -34,6 +34,7 @@ export class BusinessController {
     private readonly transactionsGridService: TransactionsGridService,
     private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
+    private readonly logger: Logger,
   ) {
   }
 
@@ -60,7 +61,6 @@ export class BusinessController {
   @Get('csv')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
-  @Header('content-type', 'application/csv')
   public async getCsv(
     @Param('businessId') businessId: string,
     @Query() query,
@@ -83,7 +83,9 @@ export class BusinessController {
         csv = `${csv}${separator}${transaction[column.name] || ''}`;
       });
     });
-    res.set('Content-disposition', `attachment;filename="${query.businessName}-${moment().format('DD-MM-YYYY')}.csv"`);
+    res.set('Content-Transfer-Encoding', `binary`);
+    res.set('Access-Control-Expose-Headers', `Content-Disposition,X-Suggested-Filename`);
+    res.set('Content-disposition', `attachment;filename=${query.businessName}-${moment().format('DD-MM-YYYY')}.csv`);
     res.send(csv);
   }
 
@@ -121,7 +123,7 @@ export class BusinessController {
     try {
       actions = await this.messagingService.getActions(transaction);
     } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e.message}`);
+      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
     }
 
@@ -149,7 +151,7 @@ export class BusinessController {
     try {
       updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
     } catch (e) {
-      console.log('Error occured during running action:\n', e);
+      this.logger.log('Error occured during running action:\n', e);
       throw new BadRequestException(e.message);
     }
 
@@ -163,7 +165,7 @@ export class BusinessController {
     try {
       await this.messagingService.getActions(updatedTransaction);
     } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e.message}`);
+      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
     }
 
     return updatedTransaction;
@@ -188,7 +190,7 @@ export class BusinessController {
     try {
       await this.messagingService.updateStatus(transaction);
     } catch (e) {
-      console.error(`Error occured during status update: ${e}`);
+      this.logger.error(`Error occured during status update: ${e}`);
       throw new BadRequestException(`Error occured during status update. Please try again later. ${e.message}`);
     }
 
@@ -207,7 +209,7 @@ export class BusinessController {
     try {
       actions = await this.messagingService.getActions(transaction);
     } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e.message}`);
+      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
     }
 

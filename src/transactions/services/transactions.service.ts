@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 import { plainToClass } from 'class-transformer';
-
 import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
+
 import { TransactionCartItemDto } from '../dto/transaction-cart-item.dto';
 import { TransactionDto } from '../dto/transaction.dto';
 import {
@@ -26,6 +26,7 @@ export class TransactionsService {
   constructor(
     @InjectModel('Transaction') private readonly transactionModel: Model<TransactionModel>,
     @InjectNotificationsEmitter() private notificationsEmitter: NotificationsEmitter,
+    private readonly logger: Logger,
   ) { }
 
   public async create(transactionDto: TransactionInterface): Promise<TransactionModel> {
@@ -268,7 +269,7 @@ export class TransactionsService {
           : {}
         ;
     } catch (e) {
-      console.log(e);
+      this.logger.log(e);
       // just skipping payment_details
     }
 

@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   NotFoundException,
   Param,
   Post,
@@ -34,6 +35,7 @@ export class AdminController {
     private readonly transactionsService: TransactionsService,
     private readonly transactionsGridService: TransactionsGridService,
     private readonly messagingService: MessagingService,
+    private readonly logger: Logger,
   ) {
   }
 
@@ -81,7 +83,7 @@ export class AdminController {
     try {
       actions = await this.messagingService.getActions(transaction);
     } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e.message}`);
+      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
     }
 
@@ -104,7 +106,7 @@ export class AdminController {
     try {
       updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
     } catch (e) {
-      console.log('Error occured during running action:\n', e);
+      this.logger.log('Error occured during running action:\n', e);
       throw new BadRequestException(e.message);
     }
 
@@ -118,7 +120,7 @@ export class AdminController {
     try {
       await this.messagingService.getActions(updatedTransaction);
     } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e.message}`);
+      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
     }
 
     return updatedTransaction;
@@ -138,7 +140,7 @@ export class AdminController {
     try {
       await this.messagingService.updateStatus(transaction);
     } catch (e) {
-      console.error(`Error occured during status update: ${e}`);
+      this.logger.error(`Error occured during status update: ${e}`);
       throw new BadRequestException(`Error occured during status update. Please try again later.`);
     }
 
@@ -157,7 +159,7 @@ export class AdminController {
     try {
       actions = await this.messagingService.getActions(transaction);
     } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e.message}`);
+      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
     }
 

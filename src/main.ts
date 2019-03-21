@@ -1,6 +1,7 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { INestApplication, Logger, LoggerService, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
 
 import { RabbitMqServer } from '@pe/nest-kit/modules/rabbitmq';
 import * as cors from 'cors';
@@ -10,11 +11,25 @@ import { ApplicationModule } from './app.module';
 import { environment } from './environments';
 
 async function bootstrap() {
-  const app = await NestFactory.create(ApplicationModule);
+  let app: INestApplication;
+  let logger: LoggerService;
+  if (environment.production) {
+    app = await NestFactory.create(
+      ApplicationModule,
+      {
+        logger: false,
+      },
+    );
 
-  if (APM.isStarted()) {
-    console.log('APM running');
+    logger = app.get(NestKitLogger);
+    app.useLogger(logger);
   }
+  else {
+    app = await NestFactory.create(ApplicationModule);
+    logger = Logger;
+  }
+
+  APM.isStarted() && logger.log('APM running');
 
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('/api');
