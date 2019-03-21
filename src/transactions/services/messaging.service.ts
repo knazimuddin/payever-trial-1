@@ -285,8 +285,7 @@ export class MessagingService {
     }
 
     dto.credentials = businessPaymentOption.credentials;
-    this.logger.log('dto credentials: ');
-    this.logger.log(dto.credentials);
+    this.logger.log('dto credentials: ' + JSON.stringify(dto.credentials));
 
     if (transaction.payment_flow_id) {
       dto.payment_flow = paymentFlow;
