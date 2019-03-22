@@ -2,7 +2,6 @@ import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 
 import { MessageBusService } from '@pe/nest-kit/modules/message';
-import { snakeCase } from 'lodash';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
 
@@ -11,10 +10,11 @@ import { StatisticsService } from '../services/statistics.service';
 
 @Controller()
 export class MicroEventsController {
-
-  private messageBusService: MessageBusService = new MessageBusService({
-    rsa: environment.rsa,
-  }, this.logger);
+  private messageBusService: MessageBusService = new MessageBusService(
+    {
+      rsa: environment.rsa,
+    },
+    this.logger);
 
   constructor(
     private readonly transactionsService: TransactionsService,
