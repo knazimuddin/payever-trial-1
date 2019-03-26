@@ -195,8 +195,15 @@ export class TransactionsGridService {
       mongoFilters[field] = filter.value;
       return;
     }
+    if (field === 'channel_set_uuid') {
+      mongoFilters[field] = filter.value;
+      return;
+    }
     if (!mongoFilters.$or) {
       mongoFilters.$or = [];
+    }
+    if (filter && !filter.length) {
+      filter = [filter];
     }
     filter.forEach(_filter => {
       if (!_filter.value) {
