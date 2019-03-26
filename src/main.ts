@@ -1,5 +1,4 @@
-import { INestApplication, Logger, LoggerService, ValidationPipe } from '@nestjs/common';
-import * as APM from 'elastic-apm-node';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
