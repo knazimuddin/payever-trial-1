@@ -1,4 +1,5 @@
 import { INestApplication, Logger, LoggerService, ValidationPipe } from '@nestjs/common';
+import * as APM from 'elastic-apm-node';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
@@ -11,23 +12,15 @@ import { ApplicationModule } from './app.module';
 import { environment } from './environments';
 
 async function bootstrap() {
-  let app: INestApplication;
-  let logger: LoggerService;
-  if (environment.production) {
-    app = await NestFactory.create(
-      ApplicationModule,
-      {
-        logger: false,
-      },
-    );
+  const app = await NestFactory.create(
+    ApplicationModule,
+    {
+      logger: false,
+    },
+  );
 
-    logger = app.get(NestKitLogger);
-    app.useLogger(logger);
-  }
-  else {
-    app = await NestFactory.create(ApplicationModule);
-    logger = Logger;
-  }
+  const logger = app.get(NestKitLogger);
+  app.useLogger(logger);
 
   APM.isStarted() && logger.log('APM running');
 
