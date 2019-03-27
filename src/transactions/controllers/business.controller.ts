@@ -79,7 +79,7 @@ export class BusinessController {
     transactions.forEach(transaction => {
       csv = `${csv}\n`;
       csv = `${csv}${transaction.channel}`;
-      csv = `${csv}${separator}${transaction.uuid}`;
+      csv = `${csv}${separator}${transaction.original_id}`;
       csv = `${csv}${separator}${transaction.total}`;
       columns.forEach(column => {
         csv = `${csv}${separator}${transaction[column.name] || ''}`;
