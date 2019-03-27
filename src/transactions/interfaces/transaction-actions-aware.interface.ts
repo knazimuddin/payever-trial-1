@@ -1,5 +1,5 @@
 import { TransactionInterface } from './transaction.interface';
 
-export interface TransactionStatusUpdateInterface extends TransactionInterface {
+export interface TransactionActionsAwareInterface extends TransactionInterface {
   actions: string[];
 }

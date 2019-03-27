@@ -6,9 +6,7 @@ import { plainToClass } from 'class-transformer';
 import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 
-import { RpcResultDto } from '../dto/rpc-result.dto';
-import { TransactionCartItemDto } from '../dto/transaction-cart-item.dto';
-import { TransactionDto } from '../dto/transaction.dto';
+import { RpcResultDto, TransactionCartItemDto, TransactionDto } from '../dto';
 import {
   CheckoutPaymentDetailsAwareInterface,
   CheckoutTransactionCartItemInterface,
@@ -17,6 +15,7 @@ import {
   TransactionCartItemInterface,
   TransactionHistoryEntryInterface,
   TransactionInterface,
+  TransactionRpcUpdateInterface,
   TransactionSantanderApplicationAwareInterface,
 } from '../interfaces';
 import { TransactionModel } from '../models';
@@ -134,33 +133,57 @@ export class TransactionsService {
     await this.transactionModel.findOneAndRemove({ uuid: transactionUuid });
   }
 
-  public async applyRpcResult(transaction: TransactionModel, result: RpcResultDto): Promise<void> {
-    const payment: CheckoutTransactionInterface = result.payment;
+  public async applyActionRpcResult(transaction: TransactionModel, result: RpcResultDto): Promise<void> {
+    await this.applyPaymentProperties(transaction, result);
+    await this.applyPaymentItems(transaction, result);
+  }
 
-    if (!payment.amount || payment.amount <= 0) {
-      throw new RpcException(`Can not apply empty or negative amount for transaction #${payment.id}`);
+  public async applyRpcResult(transaction: TransactionModel, result: RpcResultDto): Promise<void> {
+    await this.applyPaymentProperties(transaction, result);
+  }
+
+  public async applyPaymentProperties(
+    transaction: TransactionModel,
+    result: RpcResultDto,
+  ): Promise<void> {
+    const paymentResult: CheckoutTransactionInterface = result.payment;
+    const updating: TransactionRpcUpdateInterface = {};
+
+    if (!paymentResult.amount || paymentResult.amount <= 0) {
+      throw new RpcException(`Can not apply empty or negative amount for transaction #${transaction.id}`);
     }
 
-    const updating: any = {};
-    updating.amount = payment.amount;
-    updating.delivery_fee = payment.delivery_fee;
-    updating.status = payment.status;
-    updating.specific_status = payment.specific_status;
+    updating.amount = paymentResult.amount;
+    updating.delivery_fee = paymentResult.delivery_fee;
+    updating.status = paymentResult.status;
+    updating.specific_status = paymentResult.specific_status;
     updating.place = result.workflow_state;
 
-    if (payment.payment_details) {
+    if (paymentResult.payment_details) {
       this.setSantanderApplication(updating, result);
       updating.payment_details = JSON.stringify(result);
     }
 
-    updating.items = this.prepareTransactionCartForInsert(result.payment_items, transaction.business_uuid);
-
-    this.transactionModel.updateOne(
-      {
-        id: transaction.id,
-      },
+    await this.transactionModel.updateOne(
+      { uuid: transaction.uuid },
       {
         $set: updating,
+      },
+    );
+  }
+
+  public async applyPaymentItems(
+    transaction: TransactionModel,
+    result: RpcResultDto,
+  ): Promise<void> {
+    const items = this.prepareTransactionCartForInsert(result.payment_items, transaction.business_uuid);
+
+    await this.transactionModel.updateOne(
+      { uuid: transaction.uuid },
+      {
+        $set: {
+          items,
+        },
       },
     );
   }

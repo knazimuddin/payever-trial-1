@@ -19,7 +19,7 @@ import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import * as moment from 'moment';
 
 import { ActionPayloadDto } from '../dto';
-import { TransactionStatusUpdateInterface } from '../interfaces';
+import { TransactionActionsAwareInterface } from '../interfaces';
 import { TransactionModel } from '../models';
 
 import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
@@ -122,7 +122,7 @@ export class BusinessController {
     }
 
     try {
-      actions = await this.messagingService.getActions(transaction);
+      actions = await this.messagingService.getActionsList(transaction);
     } catch (e) {
       this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
@@ -139,7 +139,9 @@ export class BusinessController {
     @Param('action') action: string,
     @Param('businessId') businessId: string,
     @Body() actionPayload: ActionPayloadDto,
-  ): Promise<TransactionModel> {
+  ): Promise<TransactionActionsAwareInterface> {
+    let actions: string[];
+
     this.dtoValidation.checkFileUploadDto(actionPayload);
     const transaction = await this.transactionsService.findOneByUuid(uuid);
 
@@ -154,11 +156,7 @@ export class BusinessController {
     }
 
     const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
-    if (!updatedTransaction) {
-      throw new NotFoundException(`Transaction not found.`);
-    }
-
-    // Send update to php
+    // Send update to checkout-php
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
@@ -166,12 +164,13 @@ export class BusinessController {
     }
 
     try {
-      await this.messagingService.getActions(updatedTransaction);
+      actions = await this.messagingService.getActionsList(transaction);
     } catch (e) {
       this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
+      actions = [];
     }
 
-    return updatedTransaction;
+    return { ...updatedTransaction, actions };
   }
 
   @Get(':uuid/update-status')
@@ -180,10 +179,10 @@ export class BusinessController {
   public async updateStatus(
     @Param('uuid') uuid: string,
     @Param('businessId') businessId: string,
-  ): Promise<TransactionStatusUpdateInterface> {
+  ): Promise<TransactionActionsAwareInterface> {
     let actions: string[];
 
-    const transaction = await this.transactionsService.findOneByUuid(uuid);
+    const transaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
     if (transaction.business_uuid !== businessId) {
       throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
     }
@@ -196,11 +195,7 @@ export class BusinessController {
     }
 
     const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
-    if (!updatedTransaction) {
-      throw new NotFoundException(`Transaction not found.`);
-    }
-
-    // Send update to php
+    // Send update to checkout-php
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
@@ -208,7 +203,7 @@ export class BusinessController {
     }
 
     try {
-      actions = await this.messagingService.getActions(transaction);
+      actions = await this.messagingService.getActionsList(transaction);
     } catch (e) {
       this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];

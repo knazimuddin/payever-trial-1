@@ -33,7 +33,7 @@ export class TransactionDto implements TransactionInterface {
   public payment_flow_id: string;
   public place: string;
   public reference: string;
-  public santander_applications: string[];
+  public santander_applications?: string[];
   public shipping_address: AddressInterface;
   public shipping_category: string;
   public shipping_method_name: string;

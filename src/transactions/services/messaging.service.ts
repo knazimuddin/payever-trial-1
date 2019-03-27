@@ -42,7 +42,7 @@ export class MessagingService {
     return this.flowService.findOneById(flowId);
   }
 
-  public async getActions(transaction): Promise<any[]> {
+  public async getActionsList(transaction): Promise<any[]> {
     let payload: any = null;
     try {
       const data = await this.createPayloadData(transaction);
@@ -109,12 +109,18 @@ export class MessagingService {
     }
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
-    this.logger.log('RPC result: ', rpcResult.payment);
+    this.logger.log(
+      {
+        message: 'RPC action result: ',
+        context: rpcResult,
+      },
+      'MessagingService',
+    );
 
-    await this.transactionsService.applyRpcResult(transaction, rpcResult);
+    await this.transactionsService.applyActionRpcResult(transaction, rpcResult);
   }
 
-  public async updateStatus(transaction) {
+  public async updateStatus(transaction: TransactionModel): Promise<void> {
     let payload = null;
 
     try {
@@ -130,32 +136,14 @@ export class MessagingService {
     }
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'payment');
-    const rpcPayment: any = rpcResult.payment;
-
-    const updatedTransaction: any = Object.assign(
-      {},
-      transaction,
+    this.logger.log(
       {
-        place: rpcPayment.place,
-        status: rpcPayment.status
-          ? rpcPayment.status
-          : transaction.status
-        ,
-        specific_status: rpcPayment.specific_status
-          ? rpcPayment.specific_status
-          : transaction.specific_status
-        ,
-        payment_details: rpcResult.payment_details
-          ? rpcResult.payment_details
-          : transaction.payment_details
-        ,
+        message: 'RPC status update result: ',
+        context: rpcResult,
       },
+      'MessagingService',
     );
-
-    this.transactionsService.prepareTransactionForInsert(updatedTransaction);
-    await this.transactionsService.updateByUuid(transaction.uuid, updatedTransaction);
-
-    return transaction;
+    await this.transactionsService.applyRpcResult(transaction, rpcResult);
   }
 
   public async sendTransactionUpdate(transaction: TransactionModel): Promise<void> {
@@ -261,33 +249,31 @@ export class MessagingService {
     return message;
   }
 
-  private async createPayloadData(transaction: any) {
-    transaction = Object.assign({}, transaction); // making clone before manipulations
+  private async createPayloadData(transaction: TransactionModel) {
+    const payload: any = Object.assign({}, transaction); // making clone before manipulations
 
-    if (typeof (transaction.payment_details) === 'string') {
-      try {
-        transaction.payment_details = JSON.parse(transaction.payment_details);
-      } catch (e) {
-        this.logger.log(e);
-        transaction.payment_details = {};
-        // just skipping payment_details
-      }
+    try {
+      payload.payment_details = JSON.parse(transaction.payment_details);
+    } catch (e) {
+      this.logger.log(e);
+      payload.payment_details = {};
+      // just skipping payment_details
     }
 
     let dto: any = {};
     let businessPaymentOption;
     let paymentFlow;
 
-    this.fixDates(transaction);
-    this.fixId(transaction);
+    this.fixDates(payload);
+    this.fixId(payload);
 
-    transaction.address = transaction.billing_address;
+    payload.address = transaction.billing_address;
     // @TODO this should be done on BE side
-    transaction.reference = transaction.uuid;
+    payload.reference = transaction.uuid;
 
     dto = {
       ...dto,
-      payment: transaction,
+      payment: payload,
       payment_details: transaction.payment_details,
       business: {
         // dummy id - php guys say it does not affect anything... but can we trust it?)

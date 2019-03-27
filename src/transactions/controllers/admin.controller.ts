@@ -16,6 +16,7 @@ import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { snakeCase } from 'lodash';
 import { ActionPayloadDto } from '../dto';
+import { TransactionActionsAwareInterface } from '../interfaces';
 import { TransactionModel } from '../models';
 
 import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
@@ -81,7 +82,7 @@ export class AdminController {
     }
 
     try {
-      actions = await this.messagingService.getActions(transaction);
+      actions = await this.messagingService.getActionsList(transaction);
     } catch (e) {
       this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
@@ -96,21 +97,21 @@ export class AdminController {
     @Param('uuid') uuid: string,
     @Param('action') action: string,
     @Body() actionPayload: ActionPayloadDto,
-  ): Promise<any> {
-    let transaction: any;
-    let updatedTransaction: any;
+  ): Promise<TransactionActionsAwareInterface> {
+    let actions: string[];
 
     this.dtoValidation.checkFileUploadDto(actionPayload);
-    transaction = await this.transactionsService.findOneByUuid(uuid);
+    const transaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
 
     try {
-      updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
+      await this.messagingService.runAction(transaction, action, actionPayload);
     } catch (e) {
       this.logger.log('Error occured during running action:\n', e);
       throw new BadRequestException(e.message);
     }
 
-    // Send update to php
+    const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
+    // Send update to checkout-php
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
@@ -118,24 +119,23 @@ export class AdminController {
     }
 
     try {
-      await this.messagingService.getActions(updatedTransaction);
+      actions = await this.messagingService.getActionsList(transaction);
     } catch (e) {
       this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
+      actions = [];
     }
 
-    return updatedTransaction;
+    return { ...updatedTransaction, actions };
   }
 
   @Get(':uuid/update-status')
   @HttpCode(HttpStatus.OK)
   public async updateStatus(
     @Param('uuid') uuid: string,
-  ): Promise<any> {
-    let transaction: any;
-    let updatedTransaction: any;
+  ): Promise<TransactionActionsAwareInterface> {
     let actions: any[];
 
-    transaction = await this.transactionsService.findOneByUuid(uuid);
+    const transaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
 
     try {
       await this.messagingService.updateStatus(transaction);
@@ -144,12 +144,8 @@ export class AdminController {
       throw new BadRequestException(`Error occured during status update. Please try again later.`);
     }
 
-    updatedTransaction = await this.transactionsService.findOneByParams({ uuid });
-    if (!updatedTransaction) {
-      throw new NotFoundException(`Transaction not found.`);
-    }
-
-    // Send update to php
+    const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
+    // Send update to checkout-php
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
@@ -157,7 +153,7 @@ export class AdminController {
     }
 
     try {
-      actions = await this.messagingService.getActions(transaction);
+      actions = await this.messagingService.getActionsList(transaction);
     } catch (e) {
       this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
