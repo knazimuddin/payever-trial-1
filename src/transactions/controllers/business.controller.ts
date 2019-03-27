@@ -19,6 +19,8 @@ import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import * as moment from 'moment';
 
 import { ActionPayloadDto } from '../dto';
+import { TransactionStatusUpdateInterface } from '../interfaces';
+import { TransactionModel } from '../models';
 
 import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
 
@@ -112,10 +114,9 @@ export class BusinessController {
     @Param('uuid') uuid: string,
     @Param('businessId') businessId: string,
   ): Promise<any> {
-    let transaction;
     let actions: any[];
 
-    transaction = await this.transactionsService.findOneByParams({ uuid });
+    const transaction = await this.transactionsService.findOneByUuid(uuid);
     if (!transaction || transaction.business_uuid !== businessId) {
       throw new NotFoundException(`Transaction not found.`);
     }
@@ -138,21 +139,23 @@ export class BusinessController {
     @Param('action') action: string,
     @Param('businessId') businessId: string,
     @Body() actionPayload: ActionPayloadDto,
-  ): Promise<any> {
-    let transaction: any;
-    let updatedTransaction: any;
-
+  ): Promise<TransactionModel> {
     this.dtoValidation.checkFileUploadDto(actionPayload);
-    transaction = await this.transactionsService.findOneByUuid(uuid);
+    const transaction = await this.transactionsService.findOneByUuid(uuid);
 
     if (transaction.business_uuid !== businessId) {
       throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
     }
     try {
-      updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload);
+      await this.messagingService.runAction(transaction, action, actionPayload);
     } catch (e) {
       this.logger.log('Error occured during running action:\n', e);
       throw new BadRequestException(e.message);
+    }
+
+    const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
+    if (!updatedTransaction) {
+      throw new NotFoundException(`Transaction not found.`);
     }
 
     // Send update to php
@@ -177,12 +180,10 @@ export class BusinessController {
   public async updateStatus(
     @Param('uuid') uuid: string,
     @Param('businessId') businessId: string,
-  ): Promise<any> {
-    let transaction: any;
-    let updatedTransaction: any;
-    let actions: any[];
+  ): Promise<TransactionStatusUpdateInterface> {
+    let actions: string[];
 
-    transaction = await this.transactionsService.findOneByUuid(uuid);
+    const transaction = await this.transactionsService.findOneByUuid(uuid);
     if (transaction.business_uuid !== businessId) {
       throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
     }
@@ -194,7 +195,7 @@ export class BusinessController {
       throw new BadRequestException(`Error occured during status update. Please try again later. ${e.message}`);
     }
 
-    updatedTransaction = await this.transactionsService.findOneByParams({ uuid });
+    const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
     if (!updatedTransaction) {
       throw new NotFoundException(`Transaction not found.`);
     }

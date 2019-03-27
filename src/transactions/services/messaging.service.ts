@@ -7,7 +7,7 @@ import { catchError, map, take, timeout } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
 import { environment } from '../../environments';
-import { PaymentFlowModel } from '../models';
+import { PaymentFlowModel, TransactionModel } from '../models';
 import { BusinessPaymentOptionService } from './business-payment-option.service';
 import { PaymentFlowService } from './payment-flow.service';
 import { TransactionsService } from './transactions.service';
@@ -75,7 +75,11 @@ export class MessagingService {
     return actions;
   }
 
-  public async runAction(transaction, action, actionPayload) {
+  public async runAction(
+    transaction: TransactionModel,
+    action: string,
+    actionPayload,
+  ): Promise<void> {
     let payload = null;
 
     try {
@@ -105,24 +109,9 @@ export class MessagingService {
     }
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
-    const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
-    this.logger.log('RPC result: ', updatedTransaction);
-    updatedTransaction.payment_details = this.checkRPCResponsePropertyExists(rpcResult.payment_details)
-      ? rpcResult.payment_details
-      : transaction.payment_details
-    ;
-    updatedTransaction.items = rpcResult.payment_items && rpcResult.payment_items.length
-      ? rpcResult.payment_items
-      : transaction.items
-    ;
-    this.logger.log('Updated transaction: ', updatedTransaction);
-    // We do not update history here.
-    // History events coming separately, there is a chance to overwrite saved history here
-    delete updatedTransaction.history;
-    this.transactionsService.prepareTransactionForInsert(updatedTransaction);
-    await this.transactionsService.updateByUuid(updatedTransaction.uuid, updatedTransaction);
+    this.logger.log('RPC result: ', rpcResult.payment);
 
-    return updatedTransaction;
+    await this.transactionsService.applyRpcResult(transaction, rpcResult);
   }
 
   public async updateStatus(transaction) {
@@ -169,7 +158,7 @@ export class MessagingService {
     return transaction;
   }
 
-  public async sendTransactionUpdate(transaction) {
+  public async sendTransactionUpdate(transaction: TransactionModel): Promise<void> {
     this.transformTransactionForPhp(transaction);
     const payload: any = { payment: transaction };
     this.logger.log(`SEND 'transactions_app.payment.updated', payload:`, payload);
@@ -182,16 +171,36 @@ export class MessagingService {
       );
   }
 
-  private checkRPCResponsePropertyExists(prop: any): boolean {
-    if (Array.isArray(prop)) {
-      return !!prop.length;
-    }
-    else {
-      return !!prop;
-    }
-  }
+  // public prepareUpdatedTransaction(
+  //   transaction: TransactionModel,
+  //   rpcResult: RpcResultDto,
+  // ): CheckoutTransactionInterface {
+  //   const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
+  //   updatedTransaction.payment_details = this.checkRPCResponsePropertyExists(rpcResult.payment_details)
+  //     ? rpcResult.payment_details
+  //     : transaction.payment_details
+  //   ;
+  //   updatedTransaction.items = rpcResult.payment_items && rpcResult.payment_items.length
+  //     ? rpcResult.payment_items
+  //     : transaction.items
+  //   ;
+  //
+  //   this.logger.log('Updated transaction: ', updatedTransaction);
+  //   delete updatedTransaction.history;
+  //
+  //   return updatedTransaction;
+  // }
 
-  private async runPaymentRpc(transaction, payload, messageIdentifier) {
+  // private checkRPCResponsePropertyExists(prop: any): boolean {
+  //   if (Array.isArray(prop)) {
+  //     return !!prop.length;
+  //   }
+  //   else {
+  //     return !!prop;
+  //   }
+  // }
+
+  private async runPaymentRpc(transaction: TransactionModel, payload, messageIdentifier) {
     return new Promise((resolve, reject) => {
       this.rabbitClient.send(
         { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
@@ -218,7 +227,10 @@ export class MessagingService {
 
   private createPaymentMicroMessage(
     paymentType: string,
-    messageIdentifier: string, messageData: any, stub: boolean = false): MessageInterface {
+    messageIdentifier: string,
+    messageData: any,
+    stub: boolean = false,
+  ): MessageInterface {
     const messageName = `payment_option.${paymentType}.${messageIdentifier}`;
     const message: any = {
       name: messageName,

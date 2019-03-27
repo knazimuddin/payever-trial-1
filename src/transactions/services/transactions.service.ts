@@ -1,13 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 import { plainToClass } from 'class-transformer';
 import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 
+import { RpcResultDto } from '../dto/rpc-result.dto';
 import { TransactionCartItemDto } from '../dto/transaction-cart-item.dto';
 import { TransactionDto } from '../dto/transaction.dto';
 import {
+  CheckoutPaymentDetailsAwareInterface,
   CheckoutTransactionCartItemInterface,
   CheckoutTransactionHistoryItemInterface,
   CheckoutTransactionInterface,
@@ -16,7 +19,6 @@ import {
   TransactionInterface,
   TransactionSantanderApplicationAwareInterface,
 } from '../interfaces';
-import { CheckoutPaymentDetailsAwareInterface } from '../interfaces/checkout-payment-details-aware.interface';
 import { TransactionModel } from '../models';
 import { ProductUuid } from '../tools/product-uuid';
 
@@ -58,9 +60,9 @@ export class TransactionsService {
     transaction: TransactionInterface,
   ): Promise<TransactionModel> {
     // a bit dirty, sorry
-    if (typeof (transaction.payment_details) !== 'string') {
-      transaction.payment_details = JSON.stringify(transaction.payment_details);
-    }
+    // if (typeof (transaction.payment_details) !== 'string') {
+    //   transaction.payment_details = JSON.stringify(transaction.payment_details);
+    // }
 
     return this.transactionModel.findOneAndUpdate(
       { uuid: transactionUuid },
@@ -69,28 +71,28 @@ export class TransactionsService {
     );
   }
 
-  public async updateFromCheckoutTransactionByUuid(
-    transactionUuid: string,
-    checkoutTransaction: CheckoutTransactionInterface,
-  ): Promise<TransactionModel> {
-    const transaction: TransactionDto =
-      plainToClass<TransactionInterface, CheckoutTransactionInterface>(
-        TransactionDto,
-        checkoutTransaction,
-      );
-
-    // a bit dirty, sorry
-    if (typeof (checkoutTransaction.payment_details) !== 'string') {
-      this.setSantanderApplication(transaction, checkoutTransaction);
-      transaction.payment_details = JSON.stringify(transaction.payment_details);
-    }
-
-    return this.transactionModel.findOneAndUpdate(
-      { uuid: transactionUuid },
-      transaction,
-      { new: true },
-    );
-  }
+  // public async updateFromCheckoutTransactionByUuid(
+  //   transactionUuid: string,
+  //   checkoutTransaction: CheckoutTransactionInterface,
+  // ): Promise<TransactionModel> {
+  //   const transaction: TransactionDto =
+  //     plainToClass<TransactionInterface, CheckoutTransactionInterface>(
+  //       TransactionDto,
+  //       checkoutTransaction,
+  //     );
+  //
+  //   // a bit dirty, sorry
+  //   // if (typeof (checkoutTransaction.payment_details) !== 'string') {
+  //   this.setSantanderApplication(transaction, checkoutTransaction);
+  //   transaction.payment_details = JSON.stringify(transaction.payment_details);
+  //   // }
+  //
+  //   return this.transactionModel.findOneAndUpdate(
+  //     { uuid: transactionUuid },
+  //     transaction,
+  //     { new: true },
+  //   );
+  // }
 
   public async updateHistoryByUuid(
     transactionUuid: string,
@@ -132,6 +134,37 @@ export class TransactionsService {
     await this.transactionModel.findOneAndRemove({ uuid: transactionUuid });
   }
 
+  public async applyRpcResult(transaction: TransactionModel, result: RpcResultDto): Promise<void> {
+    const payment: CheckoutTransactionInterface = result.payment;
+
+    if (!payment.amount || payment.amount <= 0) {
+      throw new RpcException(`Can not apply empty or negative amount for transaction #${payment.id}`);
+    }
+
+    const updating: any = {};
+    updating.amount = payment.amount;
+    updating.delivery_fee = payment.delivery_fee;
+    updating.status = payment.status;
+    updating.specific_status = payment.specific_status;
+    updating.place = result.workflow_state;
+
+    if (payment.payment_details) {
+      this.setSantanderApplication(updating, result);
+      updating.payment_details = JSON.stringify(result);
+    }
+
+    updating.items = this.prepareTransactionCartForInsert(result.payment_items, transaction.business_uuid);
+
+    this.transactionModel.updateOne(
+      {
+        id: transaction.id,
+      },
+      {
+        $set: updating,
+      },
+    );
+  }
+
   public prepareTransactionForInsert(checkoutTransaction: CheckoutTransactionInterface): TransactionInterface {
     const transaction: TransactionDto =
       plainToClass<TransactionInterface, CheckoutTransactionInterface>(
@@ -145,7 +178,7 @@ export class TransactionsService {
 
     transaction.type = checkoutTransaction.type || checkoutTransaction.payment_type;
 
-    if (checkoutTransaction.payment_details && typeof (checkoutTransaction.payment_details) !== 'string') {
+    if (checkoutTransaction.payment_details) {
       this.setSantanderApplication(transaction, checkoutTransaction);
       transaction.payment_details = JSON.stringify(transaction.payment_details);
     }
