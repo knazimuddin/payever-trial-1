@@ -7,6 +7,7 @@ import { catchError, map, take, timeout } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
 
 import { environment } from '../../environments';
+import { ActionPayloadDto } from '../dto/action-payload';
 import { PaymentFlowModel, TransactionModel } from '../models';
 import { BusinessPaymentOptionService } from './business-payment-option.service';
 import { PaymentFlowService } from './payment-flow.service';
@@ -78,7 +79,7 @@ export class MessagingService {
   public async runAction(
     transaction: TransactionModel,
     action: string,
-    actionPayload,
+    actionPayload: ActionPayloadDto,
   ): Promise<void> {
     let payload = null;
 

@@ -1,4 +1,5 @@
-export * from './action-payload.dto';
+export * from './action-payload';
+export * from './paging-data.dto';
 export * from './paging-result.dto';
 export * from './rpc-result.dto';
 export * from './transaction.dto';
