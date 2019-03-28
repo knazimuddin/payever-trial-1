@@ -298,8 +298,8 @@ export class TransactionsGridService {
           condition = {};
           condition[field] = {
             $not: {
-              $gte: this.getTargetDate(filter.value),
-              $lt: this.getTargetTomorrowDate(filter.value),
+              $gte: this.getTargetDate(_filter.value),
+              $lt: this.getTargetTomorrowDate(_filter.value),
             },
           };
           mongoFilters.$and.push(condition);
