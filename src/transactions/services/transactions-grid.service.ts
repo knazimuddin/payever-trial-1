@@ -215,14 +215,12 @@ export class TransactionsGridService {
       switch (_filter.condition) {
         case FilterConditionEnum.Is:
           condition = {};
-          condition[field] = {};
-          condition[field] = {$in: _filter.value};
+          condition[field] = {$eq: _filter.value};
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.IsNot:
           condition = {};
-          condition[field] = {};
-          condition[field] = {$nin: _filter.value};
+          condition[field] = {$ne: _filter.value};
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.StartsWith:
@@ -232,7 +230,6 @@ export class TransactionsGridService {
               regex.push(new RegExp(`^${elem}`, 'i'));
             });
             condition = {};
-            condition[field] = {};
             condition[field] = {$in: regex};
             mongoFilters.$and.push(condition);
           }
@@ -244,7 +241,6 @@ export class TransactionsGridService {
               regex.push(new RegExp(`${elem}$`, 'i'));
             });
             condition = {};
-            condition[field] = {};
             condition[field] = {$in: regex};
             mongoFilters.$and.push(condition);
           }
@@ -256,7 +252,6 @@ export class TransactionsGridService {
               regex.push(new RegExp(`${elem}`, 'i'));
             });
             condition = {};
-            condition[field] = {};
             condition[field] = {$in: regex};
             mongoFilters.$and.push(condition);
           }
@@ -268,7 +263,6 @@ export class TransactionsGridService {
               regex.push(new RegExp(`${elem}`, 'i'));
             });
             condition = {};
-            condition[field] = {};
             condition[field] = {$in: regex};
             mongoFilters.$and.push(condition);
           }
@@ -281,13 +275,11 @@ export class TransactionsGridService {
           break;
         case FilterConditionEnum.LessThan:
           condition = {};
-          condition[field] = {};
           condition[field] = {$lt: Math.min(_filter.value)};
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.Between:
           condition = {};
-          condition[field] = {};
           condition[field] = {
             $gte: Math.max(_filter.value.from),
             $lte: Math.min(_filter.value.to),
@@ -296,20 +288,17 @@ export class TransactionsGridService {
           break;
         case FilterConditionEnum.IsDate:
           condition = {};
-          condition[field] = {};
-          condition[field] = {$in: _filter.value};
+          condition[field] = {$eq: _filter.value};
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.IsNotDate:
           condition = {};
-          condition[field] = {};
-          condition[field] = {$nin: _filter.value};
+          condition[field] = {$ne: _filter.value};
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.AfterDate:
           timeStamps = _filter.value.map(elem => new Date(elem).getTime());
           condition = {};
-          condition[field] = {};
           condition[field] = {
             $gte: Math.max(timeStamps),
           };
@@ -318,7 +307,6 @@ export class TransactionsGridService {
         case FilterConditionEnum.BeforeDate:
           timeStamps = _filter.value.map(elem => new Date(elem).getTime());
           condition = {};
-          condition[field] = {};
           condition[field] = {
             $lt: Math.min(timeStamps),
           };
@@ -327,7 +315,6 @@ export class TransactionsGridService {
         case FilterConditionEnum.BetweenDates:
           timeStamps = _filter.value.map(elem => new Date(elem).getTime());
           condition = {};
-          condition[field] = {};
           condition[field] = {
             $gte: Math.max(timeStamps),
             $lt: Math.min(timeStamps),
