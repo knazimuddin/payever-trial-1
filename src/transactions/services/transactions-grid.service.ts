@@ -1,12 +1,11 @@
 import {Injectable} from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
 import {snakeCase} from 'lodash';
-import {Model} from 'mongoose';
+import {Model, mongo} from 'mongoose';
 import {PagingResultDto} from '../dto';
-
+import {client} from "../es-temp/transactions-search";
 import {FilterConditionEnum} from '../enum';
 import {CurrencyExchangeService} from './currency-exchange.service';
-import {In} from "typeorm";
 
 export interface Filter {
   condition: FilterConditionEnum;
@@ -59,21 +58,35 @@ export class TransactionsGridService {
       });
   }
 
+  public async search(search, business_uuid) {
+    let body = {
+      size: 4,
+      from: 0,
+      query: {
+        multi_match: {
+          query: `${search} ${business_uuid}`,
+        }
+      }
+    };
+    return await client.search({index: 'transactions', body: body}).then((results: any) => {
+      return results.hits.hits.map(elem => elem._source);
+    });
+  };
+
   public async findMany(filters = {}, sort = {}, search = null, page: number = null, limit = null) {
-    const mongoFilters = {};
+    const mongoFilters: any = {};
     if (filters) {
       this.addFilters(mongoFilters, filters);
     }
-    if (search) {
-      this.addSearchFilters(mongoFilters, search);
-    }
-
-    return this.transactionsModel
+    const mongoResults = await this.transactionsModel
       .find(mongoFilters)
       .limit(limit)
       .skip(limit * (page - 1))
       .sort(sort)
       .exec();
+    const esResults = await this.search(search, mongoFilters.business_uuid);
+    console.log(esResults);
+    return [...mongoResults, esResults];
   }
 
   public async count(
@@ -356,3 +369,5 @@ export class TransactionsGridService {
     return date;
   }
 }
+
+
