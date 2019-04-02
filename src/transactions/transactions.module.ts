@@ -24,6 +24,7 @@ import {
   CurrencyExchangeService,
 } from './services';
 import { StatisticsService } from './services/statistics.service';
+import {TransactionsEsExportCommand} from "./command/transactions-export-to-es.command";
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { StatisticsService } from './services/statistics.service';
     StatisticsService,
     DtoValidationService,
     TransactionsExportCommand,
+    TransactionsEsExportCommand,
     CurrencyExchangeService,
   ],
 })

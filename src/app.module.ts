@@ -8,6 +8,7 @@ import { NestKitLoggingModule } from '@pe/nest-kit/modules/logging';
 import { environment } from './environments';
 import { StatusModule } from './status/status.module';
 import { TransactionsModule } from './transactions/transactions.module';
+import {TransactionsEsSearch} from "./esTransactions/esTransactions.module";
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { TransactionsModule } from './transactions/transactions.module';
       },
     ),
     StatusModule,
+    TransactionsEsSearch,
     ApmModule.forRoot(
       environment.apm.enable,
       environment.apm.options,
