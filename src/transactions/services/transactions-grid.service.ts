@@ -64,8 +64,10 @@ export class TransactionsGridService {
       "query" : {
         "bool": {
           "must": {
-            'multi_match': {
-              query: `"${search}"`,
+            'query_string': {
+              query: `*${search}*`,
+              fields: ['original_id^1', 'customer_name^1', 'merchant_name^1', 'reference^1', 'payment_details.finance_id^1',
+                'payment_details.application_no^1', 'customer_email^1']
             },
           },
           "filter": {
