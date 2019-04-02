@@ -69,7 +69,11 @@ export class TransactionsGridService {
       }
     };
     return await client.search({index: 'transactions', body: body}).then((results: any) => {
-      return results.hits.hits.map(elem => elem._source);
+      return results.hits.hits.map(elem => {
+        elem._source._id = elem._source.mongoId;
+        delete elem._source.mongoId;
+        return elem._source
+      });
     });
   };
 
@@ -78,15 +82,15 @@ export class TransactionsGridService {
     if (filters) {
       this.addFilters(mongoFilters, filters);
     }
-    const mongoResults = await this.transactionsModel
-      .find(mongoFilters)
-      .limit(limit)
-      .skip(limit * (page - 1))
-      .sort(sort)
-      .exec();
-    const esResults = await this.search(search, mongoFilters.business_uuid);
-    console.log(esResults);
-    return [...mongoResults, esResults];
+    if (!search) {
+      return await this.transactionsModel
+        .find(mongoFilters)
+        .limit(limit)
+        .skip(limit * (page - 1))
+        .sort(sort)
+        .exec();
+    }
+    return await this.search(search, mongoFilters.business_uuid);
   }
 
   public async count(

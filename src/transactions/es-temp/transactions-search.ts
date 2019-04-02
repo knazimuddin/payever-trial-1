@@ -3,6 +3,6 @@
 
 import * as elasticsearch from 'elasticsearch'
 export const client = new elasticsearch.Client({
-  host: '127.0.0.1:9200',
+  host: '10.0.0.28:9200',
   log: 'error'
 });

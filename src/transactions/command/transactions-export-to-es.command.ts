@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Command } from 'nestjs-command';
-import { StatisticsService } from '../services/statistics.service';
 import {client} from "../es-temp/transactions-search";
 
 
@@ -29,7 +28,6 @@ const bulkIndex = async function bulkIndex(index, type, data) {
     .then(response => {
       let errorCount = 0;
       response.items.forEach(item => {
-        console.log(item);
         if (item.index && item.index.error) {
           console.log(++errorCount, item.index.error);
         }
@@ -51,13 +49,13 @@ export class TransactionsEsExportCommand {
   @Command({ command: 'transactions:export:es', describe: 'Export transactions for widgets' })
   public async transactionsEsExport() {
     const count: number = await this.transactionsModel.countDocuments();
-    const limit: number = 1000;
+    const limit: number = 200;
     let start: number = 0;
 
     while (start < count) {
       let transactions = await this.getWithLimit(start, limit);
       start += limit;
-      console.log(`${transactions.length} items parsed from data file`);
+      console.log(`${transactions.length} items parsed`);
       await bulkIndex('transactions', 'transaction', transactions);
 
       console.log(`Exported ${start} of ${count}`);
@@ -67,7 +65,6 @@ export class TransactionsEsExportCommand {
   private async getWithLimit(start: number, limit: number): Promise<any[]> {
     return this.transactionsModel.find(
       {
-        status: { $in: ['STATUS_ACCEPTED', 'STATUS_PAID', 'STATUS_REFUNDED']},
       },
       null,
       {
