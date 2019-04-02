@@ -42,6 +42,10 @@ export const TransactionItemSchema = new Schema({
   weight: Number,
 });
 
+TransactionItemSchema.post('init', function () {
+  this.uuid = this.uuid || this._id;
+});
+
 export const TransactionRefundItemSchema = new Schema({
   // uuid: String,
   item_uuid: String,
