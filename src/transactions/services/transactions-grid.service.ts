@@ -60,7 +60,6 @@ export class TransactionsGridService {
 
   public async search(search, business_uuid) {
     let body = {
-      size: 4,
       from: 0,
       query: {
         multi_match: {
