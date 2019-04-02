@@ -4,6 +4,7 @@ import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notificati
 
 import { Model } from 'mongoose';
 import { v4 as uuidFactory } from 'uuid';
+import { client } from '../es-temp/transactions-search';
 import { ProductUuid } from '../tools/product-uuid';
 
 @Injectable()
@@ -13,13 +14,14 @@ export class TransactionsService {
     @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
     @InjectNotificationsEmitter() private notificationsEmitter: NotificationsEmitter,
     private readonly logger: Logger,
-  ) { }
+  ) {
+  }
 
   public async create(transaction: any) {
     if (transaction.id) {
       transaction.original_id = transaction.id;
     }
-   
+
     if (!transaction.uuid) {
       transaction.uuid = uuidFactory();
     }
@@ -39,14 +41,43 @@ export class TransactionsService {
     return this.transactionsModel.create(transaction);
   }
 
+  public async bulkIndex(index, type, item) {
+    let bulkBody = [];
+    item = item.toObject();
+    item.mongoId = item._id;
+    delete item._id;
+    bulkBody.push({
+      index: {
+        _index: index,
+        _type: type,
+        _id: item.mongoId,
+      }
+    });
+
+    bulkBody.push(item);
+
+    await client.bulk({body: bulkBody})
+      .then(response => {
+        let errorCount = 0;
+        response.items.forEach(item => {
+          if (item.index && item.index.error) {
+            console.log(++errorCount, item.index.error);
+          }
+        });
+      })
+      .catch(console.log);
+  };
+
   public async updateByUuid(uuid, data: any) {
     // a bit dirty, sorry
     if (typeof (data.payment_details) !== 'string') {
       this.setSantanderApplication(data);
       data.payment_details = JSON.stringify(data.payment_details);
     }
-
-    return this.transactionsModel.findOneAndUpdate({ uuid }, data);
+    const transaction = data;
+    data.uuid = uuid;
+    await this.bulkIndex('transactions', 'transaction', transaction);
+    return this.transactionsModel.findOneAndUpdate({uuid}, data);
   }
 
   public async deleteAll() {
@@ -55,23 +86,25 @@ export class TransactionsService {
 
   public async createOrUpdate(transaction: any) {
     if (transaction.uuid) {
-      const existing = await this.transactionsModel.findOne({ uuid: transaction.uuid });
+      const existing = await this.transactionsModel.findOne({uuid: transaction.uuid});
       if (existing) {
-        return this.transactionsModel.findOneAndUpdate({ uuid: transaction.uuid }, transaction);
+        await this.bulkIndex('transactions', 'transaction', transaction);
+
+        return this.transactionsModel.findOneAndUpdate({uuid: transaction.uuid}, transaction);
       }
     }
 
     return this.create(transaction);
   }
 
-  public async exists(uuid: string) : Promise<boolean> {
-    const transaction = await this.transactionsModel.findOne({ uuid });
-    
+  public async exists(uuid: string): Promise<boolean> {
+    const transaction = await this.transactionsModel.findOne({uuid});
+
     return !!transaction;
   }
 
   public async findOne(uuid: string) {
-    return this.findOneByParams({ uuid });
+    return this.findOneByParams({uuid});
   }
 
   public async findAll(businessId) {
@@ -82,14 +115,14 @@ export class TransactionsService {
     const transaction = await this.transactionsModel.findOne(params);
 
     if (!transaction) {
-      throw new NotFoundException()
+      throw new NotFoundException();
     }
 
-    return this.prepareTransactionForOutput(transaction.toObject({ virtuals: true }));
+    return this.prepareTransactionForOutput(transaction.toObject({virtuals: true}));
   }
 
   public async removeByUuid(uuid: string) {
-    return this.transactionsModel.findOneAndRemove({ uuid });
+    return this.transactionsModel.findOneAndRemove({uuid});
   }
 
   public prepareTransactionForInsert(transaction) {
@@ -148,7 +181,7 @@ export class TransactionsService {
         cartItem._id = cartItem.product_uuid;
         cartItem.uuid = cartItem.product_uuid;
       } else {
-        cartItem._id = ProductUuid.generate(businessId, `${cartItem.name}${cartItem.product_variant_uuid}`);
+        cartItem._id = ProductUuid.generate(businessId, `${ cartItem.name }${ cartItem.product_variant_uuid }`);
         cartItem.uuid = null;
       }
       newCart.push(cartItem);
