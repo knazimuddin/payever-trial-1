@@ -61,9 +61,18 @@ export class TransactionsGridService {
   public async search(search, business_uuid) {
     let body = {
       from: 0,
-      query: {
-        multi_match: {
-          query: `${search} ${business_uuid}`,
+      "query" : {
+        "bool": {
+          "must": {
+            'multi_match': {
+              query: `"${search}"`,
+            },
+          },
+          "filter": {
+            "match": {
+              "business_uuid": business_uuid
+            }
+          }
         }
       }
     };
