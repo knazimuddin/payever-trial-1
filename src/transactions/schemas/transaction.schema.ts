@@ -42,6 +42,10 @@ export const TransactionItemSchema = new Schema({
   weight: Number,
 });
 
+TransactionItemSchema.post('init', function () {
+  this.uuid = this.uuid || this._id;
+});
+
 export const TransactionRefundItemSchema = new Schema({
   // uuid: String,
   item_uuid: String,
@@ -138,12 +142,8 @@ TransactionsSchema.virtual('amount_rest').get(function() {
 TransactionsSchema.virtual('available_refund_items').get(function() {
   const refundItems = [];
 
-  this.items.forEach((item, index) => {
+  this.items.forEach((item) => {
     let availableCount = item.quantity;
-
-    if (!item.uuid) {
-      item.uuid = index;
-    }
 
     if (this.history) {
       this.history.forEach((historyEntry) => {
