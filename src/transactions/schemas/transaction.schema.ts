@@ -138,8 +138,12 @@ TransactionsSchema.virtual('amount_rest').get(function() {
 TransactionsSchema.virtual('available_refund_items').get(function() {
   const refundItems = [];
 
-  this.items.forEach((item) => {
+  this.items.forEach((item, index) => {
     let availableCount = item.quantity;
+
+    if (!item.uuid) {
+      item.uuid = index;
+    }
 
     if (this.history) {
       this.history.forEach((historyEntry) => {
