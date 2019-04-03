@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Command } from 'nestjs-command';
+import { Command } from '@pe/nest-kit/modules/command';
 import { StatisticsService } from '../services/statistics.service';
 
 @Injectable()

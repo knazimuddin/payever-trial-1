@@ -15,6 +15,7 @@ export const environment: any = {
   port: env.APP_PORT,
   mongodb: env.MONGODB_URL,
   connectMicroUrlBase: env.MICRO_URL_CONNECT,
+  statusPort: env.STATUS_APP_PORT,
 
   stub: env.STUB === 'true',
   es: env.ELASTICSEARCH,
