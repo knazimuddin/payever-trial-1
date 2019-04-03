@@ -24,6 +24,7 @@ import {
   TransactionsGridService,
   TransactionsService,
 } from './services';
+import { TransactionsEsExportCommand } from "./command/transactions-export-to-es.command";
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import {
     StatisticsService,
     DtoValidationService,
     TransactionsExportCommand,
+    TransactionsEsExportCommand,
     CurrencyExchangeService,
   ],
 })
