@@ -50,6 +50,10 @@ export class StatisticsService {
     }
   }
 
+  public async test() {
+    return Promise.resolve('Yeeeeee');
+  }
+
   public async processMigratedTransaction(transaction: any) {
     if (transaction.status === 'STATUS_ACCEPTED' || transaction.status === 'STATUS_PAID') {
       await this.rabbitClient
