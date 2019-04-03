@@ -17,7 +17,7 @@ export const environment: any = {
   connectMicroUrlBase: env.MICRO_URL_CONNECT,
 
   stub: env.STUB === 'true',
-  elasticSearch: env.ELASTICSEARCH,
+  elasticSearch: env.ELASTIC_HOST,
   refreshTokenExpiresIn: (isNumeric(env.JWT_REFRESH_TOKEN_EXPIRES_IN) ?
     parseInt(env.JWT_REFRESH_TOKEN_EXPIRES_IN, 10) :
     env.JWT_REFRESH_TOKEN_EXPIRES_IN),
