@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { snakeCase } from 'lodash';
+import * as moment from 'moment';
 import { Model } from 'mongoose';
 import { PagingResultDto } from '../dto';
 import { FilterConditionEnum } from '../enum';
@@ -69,7 +70,6 @@ export class TransactionsGridService {
         },
       },
     };
-    console.log(business_uuid);
     if (business_uuid) {
       body.query.bool.filter = {
           match: {
@@ -77,8 +77,6 @@ export class TransactionsGridService {
           },
       };
     }
-
-    console.log(JSON.stringify(body));
 
     return client.search({index: 'transactions', body: body}).then((results: any) => {
       return results.hits.hits.map(elem => {
@@ -331,15 +329,27 @@ export class TransactionsGridService {
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.IsDate:
-          condition = {};
-          condition[field] = {};
-          condition[field] = {$in: _filter.value};
+          condition = {$or : []};
+          _filter.value.forEach(elem => {
+            condition.$or.push({ [field]: {
+              $gte: moment(new Date(elem)).startOf('day').toString(),
+              $lte: moment(new Date(elem)).endOf('day').toString(),
+            }});
+
+            return condition;
+          });
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.IsNotDate:
-          condition = {};
-          condition[field] = {};
-          condition[field] = {$nin: _filter.value};
+          condition = {$nor : []};
+          _filter.value.forEach(elem => {
+            condition.$nor.push({ [field]: {
+                $gte: moment(new Date(elem)).startOf('day').toString(),
+                $lte: moment(new Date(elem)).endOf('day').toString(),
+              }});
+
+            return condition;
+          });
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.AfterDate:
@@ -376,20 +386,6 @@ export class TransactionsGridService {
     if (!mongoFilters.$and.length) {
       delete mongoFilters.$and;
     }
-  }
-
-  private getTargetDate(value: string) {
-    const date = new Date(value);
-    date.setSeconds(0);
-    return date;
-  }
-
-  private getTargetTomorrowDate(value: string) {
-    const date = new Date(value);
-    date.setDate(date.getDate() + 1);
-    date.setSeconds(0);
-
-    return date;
   }
 }
 
