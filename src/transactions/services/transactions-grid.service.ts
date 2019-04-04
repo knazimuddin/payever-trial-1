@@ -243,6 +243,9 @@ export class TransactionsGridService {
       if (!_filter.value) {
         return;
       }
+      if (!Array.isArray(_filter.value)) {
+        _filter.value = [_filter.value];
+      }
       let condition;
       let timeStamps;
       switch (_filter.condition) {
