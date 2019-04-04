@@ -332,8 +332,8 @@ export class TransactionsGridService {
           condition = {$or : []};
           _filter.value.forEach(elem => {
             condition.$or.push({ [field]: {
-              $gte: moment(new Date(elem).toISOString()).startOf('day').add(1, 'ms'),
-              $lte: moment(new Date(elem).toISOString()).endOf('day').subtract(1, 'ms'),
+              $gte: this.getTargetDate(elem),
+              $lt: this.getTargetTomorrowDate(elem),
             }});
 
             return condition;
@@ -344,8 +344,8 @@ export class TransactionsGridService {
           condition = {$nor : []};
           _filter.value.forEach(elem => {
             condition.$nor.push({ [field]: {
-                $gte: moment(new Date(elem).toISOString()).startOf('day').add(1, 'ms'),
-                $lte: moment(new Date(elem).toISOString()).endOf('day').subtract(1, 'ms'),
+              $gte: this.getTargetDate(elem),
+              $lt: this.getTargetTomorrowDate(elem),
               }});
 
             return condition;
@@ -386,5 +386,19 @@ export class TransactionsGridService {
     if (!mongoFilters.$and.length) {
       delete mongoFilters.$and;
     }
+  }
+
+  private getTargetDate(value: string) {
+    const date = new Date(value);
+    date.setSeconds(0);
+    return date;
+  }
+
+  private getTargetTomorrowDate(value: string) {
+    const date = new Date(value);
+    date.setDate(date.getDate() + 1);
+    date.setSeconds(0);
+
+    return date;
   }
 }
