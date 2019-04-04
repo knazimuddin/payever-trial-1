@@ -43,7 +43,6 @@ export class TransactionsService {
 
   public async bulkIndex(index, type, item) {
     let bulkBody = [];
-    item = item.toObject();
     item.mongoId = item._id;
     delete item._id;
     bulkBody.push({
