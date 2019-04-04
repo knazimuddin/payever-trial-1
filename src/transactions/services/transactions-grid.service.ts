@@ -341,11 +341,11 @@ export class TransactionsGridService {
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.IsNotDate:
-          condition = {$nor : []};
+          condition = {$or : []};
           _filter.value.forEach(elem => {
-            condition.$nor.push({ [field]: {
-              $gte: this.getTargetDate(elem),
-              $lt: this.getTargetTomorrowDate(elem),
+            condition.$or.push({ [field]: {
+              $lt: this.getTargetDate(elem),
+              $gte: this.getTargetTomorrowDate(elem),
               }});
 
             return condition;
