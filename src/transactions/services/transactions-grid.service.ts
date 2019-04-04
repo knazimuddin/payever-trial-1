@@ -332,8 +332,8 @@ export class TransactionsGridService {
           condition = {$or : []};
           _filter.value.forEach(elem => {
             condition.$or.push({ [field]: {
-              $gte: moment(new Date(elem)).startOf('day').add(1, 'ms').toISOString(),
-              $lte: moment(new Date(elem)).endOf('day').subtract(1, 'ms').toISOString(),
+              $gte: moment(new Date(elem).toISOString()).startOf('day').add(1, 'ms'),
+              $lte: moment(new Date(elem).toISOString()).endOf('day').subtract(1, 'ms'),
             }});
 
             return condition;
@@ -344,8 +344,8 @@ export class TransactionsGridService {
           condition = {$nor : []};
           _filter.value.forEach(elem => {
             condition.$nor.push({ [field]: {
-                $gte: moment(new Date(elem)).startOf('day').add(1, 'ms').toISOString(),
-                $lte: moment(new Date(elem)).endOf('day').subtract(1, 'ms').toISOString(),
+                $gte: moment(new Date(elem).toISOString()).startOf('day').add(1, 'ms'),
+                $lte: moment(new Date(elem).toISOString()).endOf('day').subtract(1, 'ms'),
               }});
 
             return condition;
