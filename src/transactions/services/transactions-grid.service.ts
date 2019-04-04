@@ -61,7 +61,7 @@ export class TransactionsGridService {
         bool: {
           must: {
             query_string: {
-              query: `*${ search }*`,
+              query: `*${search}*`,
               fields: ['original_id^1', 'customer_name^1', 'merchant_name^1',
                 'reference^1', 'payment_details.finance_id^1',
                 'payment_details.application_no^1', 'customer_email^1'],
@@ -72,13 +72,13 @@ export class TransactionsGridService {
     };
     if (business_uuid) {
       body.query.bool.filter = {
-          match: {
-            business_uuid: business_uuid,
-          },
+        match: {
+          business_uuid: business_uuid,
+        },
       };
     }
 
-    return client.search({index: 'transactions', body: body}).then((results: any) => {
+    return client.search({ index: 'transactions', body: body }).then((results: any) => {
       return results.hits.hits.map(elem => {
         elem._source._id = elem._source.mongoId;
         delete elem._source.mongoId;
@@ -140,11 +140,11 @@ export class TransactionsGridService {
     if (!currency) {
       res = await this.transactionsModel
         .aggregate([
-          {$match: mongoFilters},
+          { $match: mongoFilters },
           {
             $group: {
               _id: null,
-              total: {$sum: '$total'},
+              total: { $sum: '$total' },
             },
           },
         ]);
@@ -154,11 +154,11 @@ export class TransactionsGridService {
       const rates = await this.currencyExchangeService.getCurrencyExchanges();
       res = await this.transactionsModel
         .aggregate([
-          {$match: mongoFilters},
+          { $match: mongoFilters },
           {
             $group: {
               _id: '$currency',
-              total: {$sum: '$total'},
+              total: { $sum: '$total' },
             },
           },
         ]);
@@ -201,13 +201,13 @@ export class TransactionsGridService {
     search = search.replace(/^#/, ''); // cutting # symbol
     const regex = new RegExp(search, 'i');
     filters.$or = [
-      {merchant_name: regex},
-      {merchant_email: regex},
-      {customer_name: regex},
-      {customer_email: regex},
-      {reference: regex},
-      {original_id: regex},
-      {santander_applications: regex},
+      { merchant_name: regex },
+      { merchant_email: regex },
+      { customer_name: regex },
+      { customer_email: regex },
+      { reference: regex },
+      { original_id: regex },
+      { santander_applications: regex },
     ];
   }
 
@@ -250,24 +250,24 @@ export class TransactionsGridService {
         case FilterConditionEnum.Is:
           condition = {};
           condition[field] = {};
-          condition[field] = {$in: _filter.value};
+          condition[field] = { $in: _filter.value };
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.IsNot:
           condition = {};
           condition[field] = {};
-          condition[field] = {$nin: _filter.value};
+          condition[field] = { $nin: _filter.value };
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.StartsWith:
           if (_filter.value.length) {
             const regex = [];
             _filter.value.forEach(elem => {
-              regex.push(new RegExp(`^${ elem }`, 'i'));
+              regex.push(new RegExp(`^${elem}`, 'i'));
             });
             condition = {};
             condition[field] = {};
-            condition[field] = {$in: regex};
+            condition[field] = { $in: regex };
             mongoFilters.$and.push(condition);
           }
           break;
@@ -275,11 +275,11 @@ export class TransactionsGridService {
           if (_filter.value.length) {
             const regex = [];
             _filter.value.forEach(elem => {
-              regex.push(new RegExp(`${ elem }$`, 'i'));
+              regex.push(new RegExp(`${elem}$`, 'i'));
             });
             condition = {};
             condition[field] = {};
-            condition[field] = {$in: regex};
+            condition[field] = { $in: regex };
             mongoFilters.$and.push(condition);
           }
           break;
@@ -287,11 +287,11 @@ export class TransactionsGridService {
           if (_filter.value.length) {
             const regex = [];
             _filter.value.forEach(elem => {
-              regex.push(new RegExp(`${ elem }`, 'i'));
+              regex.push(new RegExp(`${elem}`, 'i'));
             });
             condition = {};
             condition[field] = {};
-            condition[field] = {$in: regex};
+            condition[field] = { $in: regex };
             mongoFilters.$and.push(condition);
           }
           break;
@@ -299,54 +299,60 @@ export class TransactionsGridService {
           if (_filter.value.length) {
             const regex = [];
             _filter.value.forEach(elem => {
-              regex.push(new RegExp(`${ elem }`, 'i'));
+              regex.push(new RegExp(`${elem}`, 'i'));
             });
             condition = {};
             condition[field] = {};
-            condition[field] = {$in: regex};
+            condition[field] = { $in: regex };
             mongoFilters.$and.push(condition);
           }
           break;
         case FilterConditionEnum.GreaterThan:
           condition = {};
           condition[field] = {};
-          condition[field] = {$gt: Math.max(_filter.value)};
+          condition[field] = { $gt: Math.max(_filter.value) };
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.LessThan:
           condition = {};
           condition[field] = {};
-          condition[field] = {$lt: Math.min(_filter.value)};
+          condition[field] = { $lt: Math.min(_filter.value) };
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.Between:
           condition = {};
           condition[field] = {};
           condition[field] = {
-            $gte: Math.max(_filter.value.from),
-            $lte: Math.min(_filter.value.to),
+            $gte: _filter.value.from,
+            $lte: _filter.value.to,
           };
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.IsDate:
-          condition = {$or : []};
+          condition = { $and: [] };
           _filter.value.forEach(elem => {
-            condition.$or.push({ [field]: {
-              $gte: this.getTargetDate(elem),
-              $lt: this.getTargetTomorrowDate(elem),
-            }});
+            condition.$and.push({
+              [field]: {
+                $gte: this.getTargetDate(elem),
+                $lt: this.getTargetTomorrowDate(elem),
+              }
+            });
 
             return condition;
           });
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.IsNotDate:
-          condition = {$or : []};
+          condition = { $and: [] };
           _filter.value.forEach(elem => {
-            condition.$or.push({ [field]: {
-              $lt: this.getTargetDate(elem),
-              $gte: this.getTargetTomorrowDate(elem),
-              }});
+            condition.$and.push({
+              [field]: {
+                $not: {
+                  $gte: this.getTargetDate(elem),
+                  $lt: this.getTargetTomorrowDate(elem),
+                },
+              }
+            });
 
             return condition;
           });
