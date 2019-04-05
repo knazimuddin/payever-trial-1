@@ -368,7 +368,7 @@ export class TransactionsGridService {
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.BeforeDate:
-          timeStamps = _filter.value.map(elem => this.getTargetDate(elem).getTime());
+          timeStamps = _filter.value.map(elem => this.getTargetTomorrowDate(elem).getTime());
           condition = {};
           condition[field] = {};
           condition[field] = {
