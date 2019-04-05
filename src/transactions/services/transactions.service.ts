@@ -115,7 +115,7 @@ export class TransactionsService {
     const transaction = await this.transactionsModel.findOne(params);
 
     if (!transaction) {
-      throw new NotFoundException();
+      throw new NotFoundException(`Transaction not found by the following params: ${JSON.stringify(params)}`);
     }
 
     return this.prepareTransactionForOutput(transaction.toObject({virtuals: true}));
