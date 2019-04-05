@@ -37,13 +37,13 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api-docs', app, document);
-
   app.connectMicroservice({
     strategy: new RabbitmqServer(environment.rabbitmq, logger),
   });
-
+  
   await app.startAllMicroservicesAsync();
-  await app.listen(environment.port, () => logger.log('Transactions app started at port', environment.port));
+  app.enableShutdownHooks();
+  await app.listen(environment.port, () => logger.log(`Transactions app started at port ${environment.port}`));
 }
 
-bootstrap().then();
+bootstrap();

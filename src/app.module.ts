@@ -2,13 +2,13 @@ import { Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ApmModule } from '@pe/nest-kit/modules/apm';
 import { JwtAuthModule } from '@pe/nest-kit/modules/auth';
-import { CommandModule } from 'nestjs-command';
+import { CommandModule } from '@pe/nest-kit/modules/command';
 import { NestKitLoggingModule } from '@pe/nest-kit/modules/logging';
+import { StatusModule } from '@pe/nest-kit/modules/status';
 
 import { environment } from './environments';
-import { StatusModule } from './status/status.module';
 import { TransactionsModule } from './transactions/transactions.module';
-import {TransactionsEsSearch} from "./esTransactions/esTransactions.module";
+import { TransactionsEsSearch } from "./esTransactions/esTransactions.module";
 
 @Module({
   imports: [
@@ -25,7 +25,9 @@ import {TransactionsEsSearch} from "./esTransactions/esTransactions.module";
         useNewUrlParser: true,
       },
     ),
-    StatusModule,
+    StatusModule.forRoot({
+      sideAppPort: environment.statusPort,
+    }),
     TransactionsEsSearch,
     ApmModule.forRoot(
       environment.apm.enable,
