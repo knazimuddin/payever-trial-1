@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Command } from 'nestjs-command';
-import {client} from '../es-temp/transactions-search';
+import { Command } from '@pe/nest-kit/modules/command';
+import {client} from "../es-temp/transactions-search";
 
 const bulkIndex =  async (index, type, data) => {
   const bulkBody = [];
