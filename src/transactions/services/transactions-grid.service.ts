@@ -359,7 +359,7 @@ export class TransactionsGridService {
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.AfterDate:
-          timeStamps = _filter.value.map(elem => new Date(elem).getTime());
+          timeStamps = _filter.value.map(elem => this.getTargetDate(elem).getTime());
           condition = {};
           condition[field] = {};
           condition[field] = {
@@ -368,7 +368,7 @@ export class TransactionsGridService {
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.BeforeDate:
-          timeStamps = _filter.value.map(elem => new Date(elem).getTime());
+          timeStamps = _filter.value.map(elem => this.getTargetDate(elem).getTime());
           condition = {};
           condition[field] = {};
           condition[field] = {
@@ -377,12 +377,13 @@ export class TransactionsGridService {
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.BetweenDates:
-          timeStamps = _filter.value.map(elem => new Date(elem).getTime());
+          const from = _filter.value.map(elem => this.getTargetDate(elem.dateFrom).getTime());
+          const to = _filter.value.map(elem => this.getTargetTomorrowDate(elem.dateTo).getTime());
           condition = {};
           condition[field] = {};
           condition[field] = {
-            $gte: Math.max(timeStamps),
-            $lt: Math.min(timeStamps),
+            $gte: Math.max(from),
+            $lt: Math.min(to),
           };
           mongoFilters.$and.push(condition);
           break;
@@ -397,6 +398,7 @@ export class TransactionsGridService {
   private getTargetDate(value: string) {
     const date = new Date(value);
     date.setSeconds(0);
+
     return date;
   }
 
