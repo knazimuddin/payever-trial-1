@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { RabbitMqClient } from '@pe/nest-kit';
+import { InjectRabbiMqClient, RabbitMqClient } from '@pe/nest-kit';
 import { MessageBusService, MessageInterface } from '@pe/nest-kit/modules/message';
-import { InjectRabbiMqClient } from '@pe/nest-kit/modules/rabbitmq/decorators/injest-rabbit-mq-client.decorator';
 import { of } from 'rxjs';
 import { catchError, map, take, timeout } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';

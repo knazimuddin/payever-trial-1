@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { RabbitMqClient } from '@pe/nest-kit';
-import { InjectRabbiMqClient } from '@pe/nest-kit/modules/rabbitmq/decorators/injest-rabbit-mq-client.decorator';
+import { InjectRabbiMqClient, RabbitMqClient } from '@pe/nest-kit';
 import { Model } from 'mongoose';
 
 import { RabbitRoutingKeys } from '../../enums';

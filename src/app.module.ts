@@ -1,15 +1,14 @@
 import { Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { RabbitMqModule } from '@pe/nest-kit';
+import { CommandModule, RabbitMqModule } from '@pe/nest-kit';
 import { ApmModule } from '@pe/nest-kit/modules/apm';
 import { JwtAuthModule } from '@pe/nest-kit/modules/auth';
 import { NestKitLoggingModule } from '@pe/nest-kit/modules/logging';
-import { CommandModule } from 'nestjs-command';
 
 import { environment } from './environments';
+import { TransactionsEsSearch } from './esTransactions/esTransactions.module';
 import { StatusModule } from './status/status.module';
 import { TransactionsModule } from './transactions/transactions.module';
-import {TransactionsEsSearch} from "./esTransactions/esTransactions.module";
 
 @Module({
   imports: [
@@ -38,6 +37,6 @@ import {TransactionsEsSearch} from "./esTransactions/esTransactions.module";
   providers: [
   ],
 })
-export class ApplicationModule implements NestModule {
+export class AppModule implements NestModule {
   public configure() {}
 }

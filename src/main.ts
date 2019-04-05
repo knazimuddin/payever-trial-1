@@ -1,18 +1,17 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { RabbitMqServer } from '@pe/nest-kit';
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
-
-import { RabbitMqServer } from '@pe/nest-kit/modules/rabbitmq';
 import * as cors from 'cors';
 import * as APM from 'elastic-apm-node';
-import { ApplicationModule } from './app.module';
 
+import { AppModule } from './app.module';
 import { environment } from './environments';
 
 async function bootstrap() {
   const app = await NestFactory.create(
-    ApplicationModule,
+    AppModule,
     {
       logger: false,
     },

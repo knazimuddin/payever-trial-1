@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Command } from '@pe/nest-kit';
 import { Model } from 'mongoose';
-import { Command } from 'nestjs-command';
-import { StatisticsService } from '../services/statistics.service';
+import { StatisticsService } from '../services';
 
 @Injectable()
 export class TransactionsExportCommand {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
     private readonly statisticsService: StatisticsService,
-  ) { }
+  ) {}
 
   @Command({ command: 'transactions:export', describe: 'Export transactions for widgets' })
   public async businessExport() {

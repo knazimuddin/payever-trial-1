@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Command } from '@pe/nest-kit';
 import { Model } from 'mongoose';
-import { Command } from 'nestjs-command';
-import {client} from "../es-temp/transactions-search";
-
+import { client } from '../es-temp/transactions-search';
 
 const bulkIndex = async function bulkIndex(index, type, data) {
   let bulkBody = [];
@@ -44,7 +43,7 @@ const bulkIndex = async function bulkIndex(index, type, data) {
 export class TransactionsEsExportCommand {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
-  ) { }
+  ) {}
 
   @Command({ command: 'transactions:export:es', describe: 'Export transactions for widgets' })
   public async transactionsEsExport() {

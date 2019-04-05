@@ -94,10 +94,7 @@
             }
         ],
         "align": [
-            true,
-            "arguments",
-            "parameters",
-            "statements"
+            false
         ],
         "class-name": true,
         "encoding": true,
