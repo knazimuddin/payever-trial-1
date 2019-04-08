@@ -1,11 +1,9 @@
-import { BusinessPaymentOptionModel } from '../../../../src/transactions/models';
-import { BusinessPaymentOptionService } from '../../../../src/transactions/services';
-import { BaseFixture } from '../../base.fixture';
+import { BaseFixture } from '../../../e-test-module';
+import { BusinessPaymentOptionModel } from '../../../src/transactions/models';
+import { BusinessPaymentOptionService } from '../../../src/transactions/services';
 
 class ExampleFixture extends BaseFixture {
   public async apply(): Promise<void> {
-    console.log('NorwayFixture run.');
-
     const service: BusinessPaymentOptionService = this.application.get(BusinessPaymentOptionService);
 
     await service.createOrUpdate({
@@ -23,9 +21,6 @@ class ExampleFixture extends BaseFixture {
     });
 
     const bpo: BusinessPaymentOptionModel = await service.findOneById(50);
-
-    console.log(bpo);
-
   }
 }
 
