@@ -41,12 +41,12 @@ export class TransactionsService {
     return this.transactionsModel.create(transaction);
   }
 
-  public async bulkIndex(index, type, item) {
+  public async bulkIndex(index, type, item, operation = 'index') {
     let bulkBody = [];
     item.mongoId = item._id;
     delete item._id;
     bulkBody.push({
-      index: {
+      [operation]: {
         _index: index,
         _type: type,
         _id: item.mongoId,
@@ -75,7 +75,8 @@ export class TransactionsService {
     }
     const transaction = data;
     data.uuid = uuid;
-    await this.bulkIndex('transactions', 'transaction', transaction);
+    await this.bulkIndex('transactions', 'transaction', transaction, 'update');
+
     return this.transactionsModel.findOneAndUpdate({uuid}, data);
   }
 
@@ -87,13 +88,15 @@ export class TransactionsService {
     if (transaction.uuid) {
       const existing = await this.transactionsModel.findOne({uuid: transaction.uuid});
       if (existing) {
-        await this.bulkIndex('transactions', 'transaction', transaction);
+        await this.bulkIndex('transactions', 'transaction', transaction, 'update');
 
         return this.transactionsModel.findOneAndUpdate({uuid: transaction.uuid}, transaction);
       }
     }
 
-    return this.create(transaction);
+    transaction = this.create(transaction);
+    await this.bulkIndex('transactions', 'transaction', transaction);
+    return transaction;
   }
 
   public async exists(uuid: string): Promise<boolean> {
