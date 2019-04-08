@@ -93,16 +93,18 @@ export class TransactionsGridService {
     if (filters) {
       this.addFilters(mongoFilters, filters);
     }
-    if (!search) {
-      return this.transactionsModel
-        .find(mongoFilters)
-        .limit(limit)
-        .skip(limit * (page - 1))
-        .sort(sort)
-        .exec();
+    if (search) {
+      this.addSearchFilters(mongoFilters, search);
     }
 
-    return this.search(search, mongoFilters.business_uuid);
+    return this.transactionsModel
+      .find(mongoFilters)
+      .limit(limit)
+      .skip(limit * (page - 1))
+      .sort(sort)
+      .exec();
+
+    // return this.search(search, mongoFilters.business_uuid);
   }
 
   public async count(
