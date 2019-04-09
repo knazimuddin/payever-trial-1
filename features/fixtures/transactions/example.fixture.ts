@@ -1,4 +1,4 @@
-import { BaseFixture } from '../../../e-test-module';
+import { BaseFixture } from '@pe/cucumber-sdk';
 import { BusinessPaymentOptionModel } from '../../../src/transactions/models';
 import { BusinessPaymentOptionService } from '../../../src/transactions/services';
 

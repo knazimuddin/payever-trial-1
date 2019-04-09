@@ -1,4 +1,4 @@
-import { ContextsResolver } from '../../e-test-module';
+import { ContextsResolver } from '@pe/cucumber-sdk';
 import { options } from './options';
 
 ContextsResolver.resolve(options.contexts);

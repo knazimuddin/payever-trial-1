@@ -1,5 +1,5 @@
+import { AbstractWorld } from '@pe/cucumber-sdk';
 import { setWorldConstructor } from 'cucumber';
-import { AbstractWorld } from '../../e-test-module';
 import { AppModule } from '../../src/app.module';
 import { options } from './options';
 

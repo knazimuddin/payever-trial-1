@@ -7,7 +7,6 @@ import { NestKitLoggingModule } from '@pe/nest-kit/modules/logging';
 
 import { environment } from './environments';
 import { TransactionsEsSearch } from './esTransactions/esTransactions.module';
-import { StatusModule } from './status/status.module';
 import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({

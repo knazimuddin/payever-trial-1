@@ -1,7 +1,13 @@
+import {
+  CucumberOptionsInterface,
+  DatabaseContext,
+  HttpContext,
+  InMemoryProvider,
+  WorldContext,
+} from '@pe/cucumber-sdk';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import { CucumberOptionsInterface, DatabaseContext, HttpContext, WorldContext } from '../../e-test-module';
-import { InMemoryProvider } from '../../e-test-module/database';
+import { AppConfigurator } from './app.configurator';
 
 dotenv.config();
 const env = process.env;
@@ -13,6 +19,7 @@ export const options: CucumberOptionsInterface = {
     HttpContext,
   ],
   fixtures: path.resolve('./features/fixtures'),
+  appConfigurator: AppConfigurator,
   databaseProvider: InMemoryProvider,
   mongodb: env.MONGODB_URL,
 };
