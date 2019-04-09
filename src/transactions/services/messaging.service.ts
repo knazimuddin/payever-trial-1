@@ -83,6 +83,8 @@ export class MessagingService {
           dto.payment.amount = actionPayload.fields.capture_funds.amount;
         }
 
+        dto.payment_items = transaction.items;
+
         dto.action = action;
 
         if (actionPayload.fields) {
