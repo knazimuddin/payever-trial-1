@@ -1,9 +1,8 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 
 import { Model } from 'mongoose';
-import { v4 as uuidFactory } from 'uuid';
 import { client } from '../es-temp/transactions-search';
 import { ProductUuid } from '../tools/product-uuid';
 
@@ -22,10 +21,7 @@ export class TransactionsService {
       transaction.original_id = transaction.id;
     }
 
-    if (!transaction.uuid) {
-      transaction.uuid = uuidFactory();
-    }
-
+    const created = await this.transactionsModel.create(transaction);
     this.notificationsEmitter.sendNotification(
       {
         kind: 'business',
@@ -38,7 +34,7 @@ export class TransactionsService {
       },
     );
 
-    return this.transactionsModel.create(transaction);
+    return created;
   }
 
   public async bulkIndex(index, type, item, operation = 'index') {
@@ -55,7 +51,7 @@ export class TransactionsService {
 
     bulkBody.push(item);
 
-    await client.bulk({body: bulkBody})
+    await client.bulk({ body: bulkBody })
       .then(response => {
         let errorCount = 0;
         response.items.forEach(item => {
@@ -77,7 +73,7 @@ export class TransactionsService {
     data.uuid = uuid;
     await this.bulkIndex('transactions', 'transaction', transaction, 'update');
 
-    return this.transactionsModel.findOneAndUpdate({uuid}, data);
+    return this.transactionsModel.findOneAndUpdate({ uuid }, data);
   }
 
   public async deleteAll() {
@@ -86,11 +82,11 @@ export class TransactionsService {
 
   public async createOrUpdate(transaction: any) {
     if (transaction.uuid) {
-      const existing = await this.transactionsModel.findOne({uuid: transaction.uuid});
+      const existing = await this.transactionsModel.findOne({ uuid: transaction.uuid });
       if (existing) {
         await this.bulkIndex('transactions', 'transaction', transaction, 'update');
 
-        return this.transactionsModel.findOneAndUpdate({uuid: transaction.uuid}, transaction);
+        return this.transactionsModel.findOneAndUpdate({ uuid: transaction.uuid }, transaction);
       }
     }
 
@@ -100,17 +96,17 @@ export class TransactionsService {
   }
 
   public async exists(uuid: string): Promise<boolean> {
-    const transaction = await this.transactionsModel.findOne({uuid});
+    const transaction = await this.transactionsModel.findOne({ uuid });
 
     return !!transaction;
   }
 
   public async findOne(uuid: string) {
-    return this.findOneByParams({uuid});
+    return this.findOneByParams({ uuid });
   }
 
   public async findAll(businessId) {
-    return this.transactionsModel.find({business_uuid: businessId});
+    return this.transactionsModel.find({ business_uuid: businessId });
   }
 
   public async findOneByParams(params) {
@@ -120,11 +116,11 @@ export class TransactionsService {
       throw new NotFoundException(`Transaction not found by the following params: ${JSON.stringify(params)}`);
     }
 
-    return this.prepareTransactionForOutput(transaction.toObject({virtuals: true}));
+    return this.prepareTransactionForOutput(transaction.toObject({ virtuals: true }));
   }
 
   public async removeByUuid(uuid: string) {
-    return this.transactionsModel.findOneAndRemove({uuid});
+    return this.transactionsModel.findOneAndRemove({ uuid });
   }
 
   public prepareTransactionForInsert(transaction) {
@@ -183,7 +179,7 @@ export class TransactionsService {
         cartItem._id = cartItem.product_uuid;
         cartItem.uuid = cartItem.product_uuid;
       } else {
-        cartItem._id = ProductUuid.generate(businessId, `${ cartItem.name }${ cartItem.product_variant_uuid }`);
+        cartItem._id = ProductUuid.generate(businessId, `${cartItem.name}${cartItem.product_variant_uuid}`);
         cartItem.uuid = null;
       }
       newCart.push(cartItem);
