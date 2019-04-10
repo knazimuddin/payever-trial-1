@@ -4,6 +4,7 @@ import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
 import { TransactionsExportCommand } from './command/transactions-export.command';
 
+import {TransactionsEsExportCommand} from './command/transactions-export-to-es.command';
 import {
   AdminController,
   BusinessController,
@@ -15,16 +16,16 @@ import {
 import { BusinessPaymentOptionSchema, PaymentFlowSchema, TransactionsSchema } from './schemas';
 import {
   BusinessPaymentOptionService,
+  CurrencyExchangeService,
   DtoValidationService,
   MessagingService,
   PaymentFlowService,
+  PaymentsMicroService,
   StubService,
   TransactionsGridService,
   TransactionsService,
-  CurrencyExchangeService,
 } from './services';
 import { StatisticsService } from './services/statistics.service';
-import {TransactionsEsExportCommand} from "./command/transactions-export-to-es.command";
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import {TransactionsEsExportCommand} from "./command/transactions-export-to-es.c
     TransactionsExportCommand,
     TransactionsEsExportCommand,
     CurrencyExchangeService,
+    PaymentsMicroService,
   ],
 })
 export class TransactionsModule {}

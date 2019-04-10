@@ -6,3 +6,4 @@ export * from './transactions-grid.service';
 export * from './transactions.service';
 export * from './dto-validation.service';
 export * from './currency-exchange.service';
+export * from './payments-micro.service';
