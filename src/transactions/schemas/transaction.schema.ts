@@ -90,7 +90,7 @@ export const TransactionsSchema = new Schema({
   items: [TransactionItemSchema],
   merchant_email: String,
   merchant_name: String,
-  original_id: String, // id from mysql db
+  original_id: {type: String, unique: true}, // id from mysql db
   payment_details: String, // Serialized big object
   payment_fee: Number,
   payment_flow_id: String,
@@ -115,7 +115,7 @@ export const TransactionsSchema = new Schema({
 
 TransactionsSchema.index('uuid', {unique: true});
 TransactionsSchema.index('santander_applications');
-TransactionsSchema.index('original_id');
+TransactionsSchema.index('original_id', {unique: true});
 TransactionsSchema.index('reference');
 TransactionsSchema.index('customer_name');
 TransactionsSchema.index('customer_email');
