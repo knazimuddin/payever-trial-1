@@ -10,6 +10,7 @@ import { ActionPayloadDto } from '../dto/action-payload';
 import { PaymentFlowModel, TransactionModel } from '../models';
 import { BusinessPaymentOptionService } from './business-payment-option.service';
 import { PaymentFlowService } from './payment-flow.service';
+import { PaymentsMicroService } from './payments-micro.service';
 import { TransactionsService } from './transactions.service';
 
 @Injectable()
@@ -30,6 +31,7 @@ export class MessagingService {
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly flowService: PaymentFlowService,
     private readonly logger: Logger,
+    private readonly paymentMicroService: PaymentsMicroService,
     @InjectRabbiMqClient() private readonly rabbitClient: RabbitMqClient,
   ) {}
 
@@ -88,6 +90,8 @@ export class MessagingService {
         if (action === 'capture' && actionPayload.fields.capture_funds) {
           dto.payment.amount = actionPayload.fields.capture_funds.amount;
         }
+
+        dto.payment_items = transaction.items;
 
         dto.action = action;
 
@@ -191,8 +195,8 @@ export class MessagingService {
   private async runPaymentRpc(transaction: TransactionModel, payload, messageIdentifier) {
     return new Promise((resolve, reject) => {
       this.rabbitClient.send(
-        { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
-        this.createPaymentMicroMessage(
+        { channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub) },
+        this.paymentMicroService.createPaymentMicroMessage(
           transaction.type,
           messageIdentifier,
           payload,

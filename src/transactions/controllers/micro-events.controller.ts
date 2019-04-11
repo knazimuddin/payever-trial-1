@@ -10,7 +10,6 @@ import { BusinessPaymentOptionService, PaymentFlowService, StatisticsService, Tr
 
 @Controller()
 export class MicroEventsController {
-
   private messageBusService: MessageBusService = new MessageBusService(
     {
       rsa: environment.rsa,

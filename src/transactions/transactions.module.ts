@@ -2,6 +2,7 @@ import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
+import { TransactionsEsExportCommand } from './command/transactions-export-to-es.command';
 import { TransactionsExportCommand } from './command/transactions-export.command';
 
 import {
@@ -19,12 +20,12 @@ import {
   DtoValidationService,
   MessagingService,
   PaymentFlowService,
+  PaymentsMicroService,
   StatisticsService,
   StubService,
   TransactionsGridService,
   TransactionsService,
 } from './services';
-import { TransactionsEsExportCommand } from "./command/transactions-export-to-es.command";
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { TransactionsEsExportCommand } from "./command/transactions-export-to-es
     TransactionsExportCommand,
     TransactionsEsExportCommand,
     CurrencyExchangeService,
+    PaymentsMicroService,
   ],
 })
 export class TransactionsModule {}

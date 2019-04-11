@@ -40,6 +40,7 @@ export class TransactionsService {
       transactionDto.uuid = uuid();
     }
 
+    const created = await this.transactionModel.create(transactionDto);
     this.notificationsEmitter.sendNotification(
       {
         kind: 'business',
@@ -52,7 +53,7 @@ export class TransactionsService {
       },
     );
 
-    return this.transactionModel.create(transactionDto);
+    return created;
   }
 
   public async bulkIndex(index, type, item, operation = 'index') {
@@ -69,7 +70,7 @@ export class TransactionsService {
 
     bulkBody.push(item);
 
-    await client.bulk({body: bulkBody})
+    await client.bulk({ body: bulkBody })
       .then(response => {
         let errorCount = 0;
         response.items.forEach(responseItem => {
