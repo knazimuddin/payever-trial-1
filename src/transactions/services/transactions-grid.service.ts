@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { snakeCase } from 'lodash';
-import * as moment from 'moment';
 import { Model } from 'mongoose';
 import { PagingResultDto } from '../dto';
 import { FilterConditionEnum } from '../enum';

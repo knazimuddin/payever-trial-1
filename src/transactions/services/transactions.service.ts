@@ -7,6 +7,7 @@ import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 
 import { RpcResultDto, TransactionCartItemDto, TransactionDto } from '../dto';
+import { client } from '../es-temp/transactions-search';
 import {
   CheckoutPaymentDetailsAwareInterface,
   CheckoutTransactionCartItemInterface,
@@ -18,8 +19,6 @@ import {
   TransactionRpcUpdateInterface,
   TransactionSantanderApplicationAwareInterface,
 } from '../interfaces';
-import { client } from '../es-temp/transactions-search';
-
 import { TransactionModel } from '../models';
 import { ProductUuid } from '../tools/product-uuid';
 
@@ -57,7 +56,7 @@ export class TransactionsService {
   }
 
   public async bulkIndex(index, type, item, operation = 'index') {
-    let bulkBody = [];
+    const bulkBody = [];
     item.mongoId = item._id;
     delete item._id;
     bulkBody.push({
@@ -65,7 +64,7 @@ export class TransactionsService {
         _index: index,
         _type: type,
         _id: item.mongoId,
-      }
+      },
     });
 
     bulkBody.push(item);
@@ -73,14 +72,14 @@ export class TransactionsService {
     await client.bulk({body: bulkBody})
       .then(response => {
         let errorCount = 0;
-        response.items.forEach(item => {
-          if (item.index && item.index.error) {
-            console.log(++errorCount, item.index.error);
+        response.items.forEach(responseItem => {
+          if (responseItem.index && responseItem.index.error) {
+            console.log(++errorCount, responseItem.index.error);
           }
         });
       })
       .catch(console.log);
-  };
+  }
 
   public async updateByUuid(
     transactionUuid: string,
@@ -180,20 +179,6 @@ export class TransactionsService {
 
   public async findAll(businessId) {
     return this.transactionModel.find({business_uuid: businessId});
-  }
-
-  public async findOneByParams(params) {
-    const transaction = await this.transactionsModel.findOne(params);
-
-    if (!transaction) {
-      throw new NotFoundException()
-    }
-
-    return this.prepareTransactionForOutput(transaction.toObject({ virtuals: true }));
-  }
-
-  public async removeByUuid(uuid: string) {
-    return this.transactionsModel.findOneAndRemove({ uuid });
   }
 
   public async removeByUuid(transactionUuid: string): Promise<void> {
