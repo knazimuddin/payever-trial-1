@@ -1,7 +1,7 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { RabbitMqServer } from '@pe/nest-kit';
+import { RABBITMQ_SERVER } from '@pe/nest-kit';
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
 import * as cors from 'cors';
 import * as APM from 'elastic-apm-node';
@@ -25,6 +25,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('/api');
   app.use(cors());
+  app.enableShutdownHooks();
 
   const options = new DocumentBuilder()
     .setTitle('Transactions')
@@ -38,11 +39,10 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
 
   app.connectMicroservice({
-    strategy: app.get(RabbitMqServer),
+    strategy: app.get(RABBITMQ_SERVER),
   });
 
   await app.startAllMicroservicesAsync();
-  app.enableShutdownHooks();
   await app.listen(
     environment.port,
     () => logger.log(`Transactions app started at port ${environment.port}`, 'NestApplication'),
