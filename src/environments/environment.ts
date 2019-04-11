@@ -15,9 +15,10 @@ export const environment: any = {
   port: env.APP_PORT,
   mongodb: env.MONGODB_URL,
   connectMicroUrlBase: env.MICRO_URL_CONNECT,
+  statusPort: env.STATUS_APP_PORT,
 
   stub: env.STUB === 'true',
-  es: env.ELASTICSEARCH,
+  elasticSearch: env.ELASTIC_HOST,
   refreshTokenExpiresIn: (isNumeric(env.JWT_REFRESH_TOKEN_EXPIRES_IN) ?
     parseInt(env.JWT_REFRESH_TOKEN_EXPIRES_IN, 10) :
     env.JWT_REFRESH_TOKEN_EXPIRES_IN),

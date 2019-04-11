@@ -2,11 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Command } from '@pe/nest-kit';
 import { Model } from 'mongoose';
-import { client } from '../es-temp/transactions-search';
+import { client } from "../es-temp/transactions-search";
 
-const bulkIndex = async function bulkIndex(index, type, data) {
-  let bulkBody = [];
-  // console.log('megagon', data);
+const bulkIndex =  async (index, type, data) => {
+  const bulkBody = [];
   data.forEach(item => {
     item = item.toObject();
     item.mongoId = item._id;
@@ -16,13 +15,15 @@ const bulkIndex = async function bulkIndex(index, type, data) {
         _index: index,
         _type: type,
         _id: item.mongoId,
-      }
+      },
     });
 
     bulkBody.push(item);
   });
 
-  if (!bulkBody.length) return;
+  if (!bulkBody.length) {
+    return;
+  }
   await client.bulk({body: bulkBody})
     .then(response => {
       let errorCount = 0;
@@ -33,7 +34,7 @@ const bulkIndex = async function bulkIndex(index, type, data) {
       });
       console.log(
         `Successfully indexed ${data.length - errorCount}
-         out of ${data.length} items`
+         out of ${data.length} items`,
       );
     })
     .catch(console.log);
@@ -52,7 +53,7 @@ export class TransactionsEsExportCommand {
     let start: number = 0;
 
     while (start < count) {
-      let transactions = await this.getWithLimit(start, limit);
+      const transactions = await this.getWithLimit(start, limit);
       start += limit;
       console.log(`${transactions.length} items parsed`);
       await bulkIndex('transactions', 'transaction', transactions);

@@ -9,6 +9,7 @@ image:
 service:
   externalPort: 80
   containerPort: 3000
+  statusPort: 8081
 
 resources:
   requests:

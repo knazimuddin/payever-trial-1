@@ -18,6 +18,8 @@ import {
   TransactionRpcUpdateInterface,
   TransactionSantanderApplicationAwareInterface,
 } from '../interfaces';
+import { client } from '../es-temp/transactions-search';
+
 import { TransactionModel } from '../models';
 import { ProductUuid } from '../tools/product-uuid';
 
@@ -28,7 +30,7 @@ export class TransactionsService {
     @InjectModel('Transaction') private readonly transactionModel: Model<TransactionModel>,
     @InjectNotificationsEmitter() private notificationsEmitter: NotificationsEmitter,
     private readonly logger: Logger,
-  ) { }
+  ) {}
 
   public async create(transactionDto: TransactionInterface): Promise<TransactionModel> {
     if (transactionDto.id) {
@@ -54,18 +56,48 @@ export class TransactionsService {
     return this.transactionModel.create(transactionDto);
   }
 
+  public async bulkIndex(index, type, item, operation = 'index') {
+    let bulkBody = [];
+    item.mongoId = item._id;
+    delete item._id;
+    bulkBody.push({
+      [operation]: {
+        _index: index,
+        _type: type,
+        _id: item.mongoId,
+      }
+    });
+
+    bulkBody.push(item);
+
+    await client.bulk({body: bulkBody})
+      .then(response => {
+        let errorCount = 0;
+        response.items.forEach(item => {
+          if (item.index && item.index.error) {
+            console.log(++errorCount, item.index.error);
+          }
+        });
+      })
+      .catch(console.log);
+  };
+
   public async updateByUuid(
     transactionUuid: string,
-    transaction: TransactionInterface,
+    transactionDto: TransactionInterface,
   ): Promise<TransactionModel> {
     // a bit dirty, sorry
     // if (typeof (transaction.payment_details) !== 'string') {
     //   transaction.payment_details = JSON.stringify(transaction.payment_details);
     // }
 
+    const transaction = transactionDto;
+    transaction.uuid = transactionUuid;
+    await this.bulkIndex('transactions', 'transaction', transaction, 'update');
+
     return this.transactionModel.findOneAndUpdate(
       { uuid: transactionUuid },
-      transaction,
+      transactionDto,
       { new: true },
     );
   }
@@ -111,6 +143,27 @@ export class TransactionsService {
     );
   }
 
+  // public async createOrUpdate(transaction: any) {
+  //   if (transaction.uuid) {
+  //     const existing = await this.transactionsModel.findOne({uuid: transaction.uuid});
+  //     if (existing) {
+  //       await this.bulkIndex('transactions', 'transaction', transaction, 'update');
+  //
+  //       return this.transactionsModel.findOneAndUpdate({uuid: transaction.uuid}, transaction);
+  //     }
+  //   }
+  //
+  //   transaction = this.create(transaction);
+  //   await this.bulkIndex('transactions', 'transaction', transaction);
+  //   return transaction;
+  // }
+  //
+  // public async exists(uuid: string): Promise<boolean> {
+  //   const transaction = await this.transactionsModel.findOne({uuid});
+  //
+  //   return !!transaction;
+  // }
+
   public async findOneByUuid(transactionUuid: string): Promise<TransactionModel> {
     return this.findOneByParams({ uuid: transactionUuid });
   }
@@ -127,6 +180,20 @@ export class TransactionsService {
 
   public async findAll(businessId) {
     return this.transactionModel.find({business_uuid: businessId});
+  }
+
+  public async findOneByParams(params) {
+    const transaction = await this.transactionsModel.findOne(params);
+
+    if (!transaction) {
+      throw new NotFoundException()
+    }
+
+    return this.prepareTransactionForOutput(transaction.toObject({ virtuals: true }));
+  }
+
+  public async removeByUuid(uuid: string) {
+    return this.transactionsModel.findOneAndRemove({ uuid });
   }
 
   public async removeByUuid(transactionUuid: string): Promise<void> {

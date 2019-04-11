@@ -64,18 +64,19 @@ spec:
           ports:
             - containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
+              name: http
 
           livenessProbe:
             httpGet:
               path: /api/status
-              port: {{ .Values.service.containerPort }}
+              port: {{ .Values.service.statusPort }}
             initialDelaySeconds: 90
             periodSeconds: 5
 
           readinessProbe:
             httpGet:
               path: /api/status
-              port: {{ .Values.service.containerPort }}
+              port: {{ .Values.service.statusPort }}
             initialDelaySeconds: 15
             periodSeconds: 5
             failureThreshold: 15

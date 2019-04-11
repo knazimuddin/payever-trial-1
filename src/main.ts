@@ -42,9 +42,10 @@ async function bootstrap() {
   });
 
   await app.startAllMicroservicesAsync();
+  app.enableShutdownHooks();
   await app.listen(
     environment.port,
-    () => Logger.log(`Transactions app started at port ${environment.port}`, 'NestApplication'),
+    () => logger.log(`Transactions app started at port ${environment.port}`, 'NestApplication'),
   );
 }
 

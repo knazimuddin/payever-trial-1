@@ -2,8 +2,8 @@
 // needs to be investigated / replacing with custom.
 import { environment } from '../../environments';
 
-import * as elasticsearch from 'elasticsearch'
+import * as elasticsearch from 'elasticsearch';
 export const client = new elasticsearch.Client({
-  host: environment.es,
-  log: 'error'
+  host: environment.elasticSearch,
+  log: 'error',
 });

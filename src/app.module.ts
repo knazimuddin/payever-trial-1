@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CommandModule, RabbitMqModule } from '@pe/nest-kit';
 import { ApmModule } from '@pe/nest-kit/modules/apm';
 import { JwtAuthModule } from '@pe/nest-kit/modules/auth';
+import { CommandModule } from '@pe/nest-kit/modules/command';
 import { NestKitLoggingModule } from '@pe/nest-kit/modules/logging';
 import { StatusModule } from '@pe/nest-kit/modules/status';
 
@@ -25,7 +26,9 @@ import { TransactionsModule } from './transactions/transactions.module';
         useNewUrlParser: true,
       },
     ),
-    StatusModule,
+    StatusModule.forRoot({
+      sideAppPort: environment.statusPort,
+    }),
     TransactionsEsSearch,
     ApmModule.forRoot(
       environment.apm.enable,
