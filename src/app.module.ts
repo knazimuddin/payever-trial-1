@@ -4,6 +4,7 @@ import { CommandModule, RabbitMqModule } from '@pe/nest-kit';
 import { ApmModule } from '@pe/nest-kit/modules/apm';
 import { JwtAuthModule } from '@pe/nest-kit/modules/auth';
 import { NestKitLoggingModule } from '@pe/nest-kit/modules/logging';
+import { StatusModule } from '@pe/nest-kit/modules/status';
 
 import { environment } from './environments';
 import { TransactionsEsSearch } from './esTransactions/esTransactions.module';
