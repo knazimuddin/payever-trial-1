@@ -1,9 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRabbiMqClient, RabbitMqClient } from '@pe/nest-kit';
-import { MessageBusService, MessageInterface } from '@pe/nest-kit/modules/message';
+import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { of } from 'rxjs';
 import { catchError, map, take, timeout } from 'rxjs/operators';
-import { v4 as uuid } from 'uuid';
 
 import { environment } from '../../environments';
 import { ActionPayloadDto } from '../dto/action-payload';
@@ -15,7 +14,6 @@ import { TransactionsService } from './transactions.service';
 
 @Injectable()
 export class MessagingService {
-  private readonly stubMessageName: string = 'payment_option.stub_proxy.sandbox';
 
   private messageBusService: MessageBusService = new MessageBusService(
     {
@@ -215,42 +213,6 @@ export class MessagingService {
         resolve(reply);
       });
     });
-  }
-
-  private createPaymentMicroMessage(
-    paymentType: string,
-    messageIdentifier: string,
-    messageData: any,
-    stub: boolean = false,
-  ): MessageInterface {
-    const messageName = `payment_option.${paymentType}.${messageIdentifier}`;
-    const message: any = {
-      name: messageName,
-      uuid: uuid(),
-      version: 0,
-      encryption: 'none',
-      createdAt: new Date().toISOString(),
-      metadata: { locale: 'en' },
-    };
-
-    if (messageData) {
-      message.payload = messageData;
-    }
-
-    if (stub && this.messageBusService.getMicroName(paymentType)) {
-      message.name = this.stubMessageName;
-      if (messageData) {
-        message.payload.microservice_data = {
-          microservice_name: this.messageBusService.getMicroName(paymentType),
-          payment_method: paymentType,
-          message_name: messageName,
-          message_identifier: messageIdentifier,
-          original_timeout: 15, // @TODO what magic is this 15?
-        };
-      }
-    }
-
-    return message;
   }
 
   private async createPayloadData(transaction: TransactionModel) {
