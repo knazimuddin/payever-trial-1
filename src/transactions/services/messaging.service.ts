@@ -10,6 +10,7 @@ import { environment } from '../../environments';
 import { BusinessPaymentOptionService } from './business-payment-option.service';
 import { PaymentFlowService } from './payment-flow.service';
 
+import { PaymentsMicroService } from './payments-micro.service';
 import { TransactionsService } from './transactions.service';
 
 @Injectable()
@@ -17,17 +18,20 @@ export class MessagingService {
   private readonly stubMessageName: string = 'payment_option.stub_proxy.sandbox';
   private rabbitClient: RabbitmqClient;
 
-  private messageBusService: MessageBusService = new MessageBusService({
-    rsa: environment.rsa,
-  }, this.logger);
+  private messageBusService: MessageBusService = new MessageBusService(
+    {
+      rsa: environment.rsa,
+    },
+    this.logger);
 
   private readonly rpcTimeout: number = 30000;
 
   constructor(
+    private readonly logger: Logger,
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly flowService: PaymentFlowService,
-    private readonly logger: Logger,
+    private readonly paymentMicroService: PaymentsMicroService,
   ) {
     this.rabbitClient = new RabbitmqClient(environment.rabbitmq, this.logger);
   }
@@ -53,6 +57,7 @@ export class MessagingService {
       }
     } catch (error) {
       this.logger.error('Could not prepare payload for actions call:', error);
+
       return [];
     }
 
@@ -82,6 +87,8 @@ export class MessagingService {
         if (action === 'capture' && actionPayload.fields.capture_funds) {
           dto.payment.amount = actionPayload.fields.capture_funds.amount;
         }
+
+        dto.payment_items = transaction.items;
 
         dto.action = action;
 
@@ -119,15 +126,6 @@ export class MessagingService {
     return updatedTransaction;
   }
 
-  private checkRPCResponsePropertyExists(prop: any): boolean {
-    if (Array.isArray(prop)) {
-      return !!prop.length;
-    }
-    else {
-      return !!prop;
-    }
-  }
-
   public async updateStatus(transaction) {
     let payload = null;
 
@@ -154,7 +152,7 @@ export class MessagingService {
         status: rpcPayment.status ? rpcPayment.status : transaction.status,
         specific_status: rpcPayment.specific_status ? rpcPayment.specific_status : transaction.specific_status,
         payment_details: rpcResult.payment_details ? rpcResult.payment_details : transaction.payment_details,
-      }
+      },
     );
 
     this.transactionsService.prepareTransactionForInsert(updatedTransaction);
@@ -179,8 +177,8 @@ export class MessagingService {
   private async runPaymentRpc(transaction, payload, messageIdentifier) {
     return new Promise((resolve, reject) => {
       this.rabbitClient.send(
-        { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
-        this.createPaymentMicroMessage(
+        { channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub) },
+        this.paymentMicroService.createPaymentMicroMessage(
           transaction.type,
           messageIdentifier,
           payload,
@@ -199,37 +197,6 @@ export class MessagingService {
         resolve(reply);
       });
     });
-  }
-
-  private createPaymentMicroMessage(paymentType: string, messageIdentifier: string, messageData: any, stub: boolean = false): MessageInterface {
-    const messageName = `payment_option.${paymentType}.${messageIdentifier}`;
-    const message: any = {
-      name: messageName,
-      uuid: uuid(),
-      version: 0,
-      encryption: 'none',
-      createdAt: new Date().toISOString(),
-      metadata: { locale: 'en' },
-    };
-
-    if (messageData) {
-      message.payload = messageData;
-    }
-
-    if (stub && this.messageBusService.getMicroName(paymentType)) {
-      message.name = this.stubMessageName;
-      if (messageData) {
-        message.payload.microservice_data = {
-          microservice_name: this.messageBusService.getMicroName(paymentType),
-          payment_method: paymentType,
-          message_name: messageName,
-          message_identifier: messageIdentifier,
-          original_timeout: 15, // @TODO what magic is this 15?
-        };
-      }
-    }
-
-    return message;
   }
 
   private async createPayloadData(transaction: any) {
@@ -276,11 +243,13 @@ export class MessagingService {
       paymentFlow = await this.getPaymentFlow(transaction.payment_flow_id);
     } catch (e) {
       this.logger.error(`Transaction:${transaction.uuid} -> Cannot resolve payment flow: ${e}`);
+
       return null;
     }
 
     if (!paymentFlow) {
       this.logger.error(`Transaction:${transaction.uuid} -> Payment flow cannot be null.`);
+
       return null;
     }
 
@@ -346,6 +315,15 @@ export class MessagingService {
         transaction.payment_details = {};
         // just skipping payment_details
       }
+    }
+  }
+
+  private checkRPCResponsePropertyExists(prop: any): boolean {
+    if (Array.isArray(prop)) {
+      return !!prop.length;
+    }
+    else {
+      return !!prop;
     }
   }
 }

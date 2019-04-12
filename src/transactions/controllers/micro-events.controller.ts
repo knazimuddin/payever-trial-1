@@ -72,7 +72,7 @@ export class MicroEventsController {
     origin: 'rabbitmq',
   })
   public async onTransactionCreateEvent(msg: any) {
-    // due to race conditions create event can income after update, so we react only on update event 
+    // due to race conditions create event can income after update, so we react only on update event
   }
 
   @MessagePattern({
@@ -95,14 +95,13 @@ export class MicroEventsController {
 
     const transactionExists = await this.transactionsService.exists(transaction.uuid);
     if (!transactionExists) {
-      this.logger.log({ text: 'PAYMENT.CREATE', data });
       await this.transactionsService.create(transaction);
+      this.logger.log({ text: 'PAYMENT.CREATE', data });
     }
     else {
-      this.logger.log({ text: 'PAYMENT.UPDATE', data });
       await this.statisticsService.processAcceptedTransaction(transaction.uuid, transaction);
       await this.transactionsService.updateByUuid(transaction.uuid, transaction);
-      this.logger.log(`TRANSACTION ${transaction.uuid} UPDATE COMPLETED`);
+      this.logger.log({ text: 'PAYMENT.UPDATE', data });
     }
   }
 

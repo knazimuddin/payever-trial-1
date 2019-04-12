@@ -1,4 +1,5 @@
 import { Schema } from 'mongoose';
+import { v4 as uuid } from 'uuid';
 
 export const AddressSchema = new Schema({
   city: String,
@@ -42,7 +43,7 @@ export const TransactionItemSchema = new Schema({
   weight: Number,
 });
 
-TransactionItemSchema.post('init', function () {
+TransactionItemSchema.post('init', function() {
   this.uuid = this.uuid || this._id;
 });
 
@@ -89,7 +90,7 @@ export const TransactionsSchema = new Schema({
   items: [TransactionItemSchema],
   merchant_email: String,
   merchant_name: String,
-  original_id: String, // id from mysql db
+  original_id: {type: String, unique: true}, // id from mysql db
   payment_details: String, // Serialized big object
   payment_fee: Number,
   payment_flow_id: String,
@@ -108,13 +109,13 @@ export const TransactionsSchema = new Schema({
   total: {type: Number, required: true},
   type: {type: String, required: true},
   updated_at: Date,
-  uuid: {type: String, required: true},
+  uuid: {type: String, required: true, default: uuid, unique: true},
   user_uuid: String,
 });
 
-TransactionsSchema.index('uuid');
+TransactionsSchema.index('uuid', {unique: true});
 TransactionsSchema.index('santander_applications');
-TransactionsSchema.index('original_id');
+TransactionsSchema.index('original_id', {unique: true});
 TransactionsSchema.index('reference');
 TransactionsSchema.index('customer_name');
 TransactionsSchema.index('customer_email');
