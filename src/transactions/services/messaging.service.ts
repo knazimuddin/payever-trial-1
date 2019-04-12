@@ -194,7 +194,7 @@ export class MessagingService {
   //   }
   // }
 
-  private async runPaymentRpc(transaction: TransactionModel | any, payload, messageIdentifier) {
+  private async runPaymentRpc(transaction: TransactionModel, payload, messageIdentifier) {
     return new Promise((resolve, reject) => {
       this.rabbitClient.send(
         { channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub) },
