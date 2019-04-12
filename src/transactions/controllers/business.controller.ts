@@ -116,7 +116,7 @@ export class BusinessController {
   ): Promise<any> {
     let actions: any[];
 
-    const transaction = await this.transactionsService.findOneByUuid(uuid);
+    const transaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
     if (!transaction || transaction.business_uuid !== businessId) {
       throw new NotFoundException(`Transaction not found.`);
     }
