@@ -68,7 +68,12 @@ export class TransactionsService {
       },
     });
 
-    bulkBody.push(item);
+    if (operation === 'update') {
+      bulkBody.push({doc: item});
+    }
+    else {
+      bulkBody.push(item);
+    }
 
     await client.bulk({ body: bulkBody })
       .then(response => {
