@@ -68,6 +68,10 @@ export class MessagingService {
       enabled: responseActions[key],
     }));
 
+    /**
+     * This hack is only for FE improvement. FE for "Edit action" is not implemented in DK.
+     * Thus we disable it here to prevent inconveniences.
+     */
     if (transaction.type === 'santander_installment_dk') {
       actions = actions.filter(x => x.action !== 'edit');
     }
@@ -190,7 +194,7 @@ export class MessagingService {
   //   }
   // }
 
-  private async runPaymentRpc(transaction: TransactionModel, payload, messageIdentifier) {
+  private async runPaymentRpc(transaction: TransactionModel | any, payload, messageIdentifier) {
     return new Promise((resolve, reject) => {
       this.rabbitClient.send(
         { channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub) },
