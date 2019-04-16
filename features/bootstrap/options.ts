@@ -2,7 +2,7 @@ import {
   CucumberOptionsInterface,
   DatabaseContext,
   HttpContext,
-  InMemoryProvider,
+  PersistentProvider,
   RabbitMqContext,
   StorageContext,
   WorldContext,
@@ -24,6 +24,6 @@ export const options: CucumberOptionsInterface = {
   ],
   fixtures: path.resolve('./features/fixtures'),
   appConfigurator: AppConfigurator,
-  databaseProvider: InMemoryProvider,
+  databaseProvider: PersistentProvider,
   mongodb: env.MONGODB_URL,
 };
