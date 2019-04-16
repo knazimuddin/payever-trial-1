@@ -30,17 +30,25 @@ export class MicroEventsController {
     name: RabbitRoutingKeys.PaymentActionCompleted,
     origin: 'rabbitmq',
   })
-  public async onActionCompletedEvent(msg: any) {
+  public async onActionCompletedEvent(msg: any): Promise<void> {
     const message: any = this.messageBusService.unwrapMessage<any>(msg.data);
     this.logger.log({ text: 'ACTION.COMPLETED', message });
     const searchParams = message.payment.uuid
       ? { uuid: message.payment.uuid }
       : { original_id: message.payment.id }
     ;
-    const transaction: TransactionModel = await this.transactionsService.findOneByParams(searchParams);
-    await this.statisticsService.processRefundedTransaction(transaction.uuid, message);
 
-    return this.transactionsService.updateHistoryByUuid(transaction.uuid, message.history_type, message.data);
+    this.logger.log({ text: 'ACTION.COMPLETED Search Params', searchParams });
+    const transaction: TransactionModel = await this.transactionsService.findOneByParams(searchParams);
+    if (!transaction) {
+      this.logger.warn({ text: 'ACTION.COMPLETED: Transaction is not found', data: message.payment });
+
+      return;
+    }
+
+    this.logger.log({ text: 'ACTION.COMPLETED: Transaction found', transaction });
+    await this.statisticsService.processRefundedTransaction(transaction.uuid, message);
+    await this.transactionsService.updateHistoryByUuid(transaction.uuid, message.history_type, message.data);
   }
 
   @MessagePattern({
@@ -48,7 +56,7 @@ export class MicroEventsController {
     name: RabbitRoutingKeys.PaymentHistoryAdd,
     origin: 'rabbitmq',
   })
-  public async onHistoryAddEvent(msg: any) {
+  public async onHistoryAddEvent(msg: any): Promise<void> {
     const message: any = this.messageBusService.unwrapMessage<any>(msg.data);
     this.logger.log({ text: 'HISTORY.ADD', message });
     // @TODO use only uuid later, no original_id
@@ -57,11 +65,16 @@ export class MicroEventsController {
       : { original_id: message.payment.id }
     ;
 
-    this.logger.log({ text: 'searchParams', searchParams });
+    this.logger.log({ text: 'HISTORY.ADD Search Params', searchParams });
     const transaction: TransactionModel = await this.transactionsService.findOneByParams(searchParams);
-    this.logger.log({ text: 'found transaction', transaction });
+    if (!transaction) {
+      this.logger.warn({ text: 'HISTORY.ADD: Transaction is not found', data: message.payment });
 
-    return this.transactionsService.updateHistoryByUuid(transaction.uuid, message.history_type, message.data);
+      return;
+    }
+
+    this.logger.log({ text: 'HISTORY.ADD: Transaction found', transaction });
+    await this.transactionsService.updateHistoryByUuid(transaction.uuid, message.history_type, message.data);
   }
 
   @MessagePattern({
@@ -69,17 +82,9 @@ export class MicroEventsController {
     name: RabbitRoutingKeys.PaymentCreated,
     origin: 'rabbitmq',
   })
-  public async onTransactionCreateEvent(msg: any) {
-    // due to race conditions create event can income after update, so we react only on update event
-  }
-
-  @MessagePattern({
-    channel: RabbitChannels.Transactions,
-    name: RabbitRoutingKeys.PaymentUpdated,
-    origin: 'rabbitmq',
-  })
-  public async onTransactionUpdateEvent(msg: any) {
+  public async onTransactionCreateEvent(msg: any): Promise<void> {
     const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
+    this.logger.log({ text: 'PAYMENT.CREATE', data });
 
     const checkoutTransaction: CheckoutTransactionInterface = data.payment;
     const transaction: TransactionInterface = this.transactionsService.prepareTransactionForInsert(checkoutTransaction);
@@ -91,15 +96,35 @@ export class MicroEventsController {
       );
     }
 
-    if (!await this.transactionsService.findOneByUuid(transaction.uuid)) {
-      this.logger.log({ text: 'PAYMENT.CREATE', data });
-      await this.transactionsService.create(transaction);
-    } else {
-      this.logger.log({ text: 'PAYMENT.UPDATE', data });
-      await this.statisticsService.processAcceptedTransaction(transaction.uuid, transaction);
-      await this.transactionsService.updateByUuid(transaction.uuid, transaction);
-      this.logger.log(`TRANSACTION ${transaction.uuid} UPDATE COMPLETED`);
+    this.logger.log({ text: 'PAYMENT.CREATE: Prepared transaction', transaction });
+    const created: TransactionModel = await this.transactionsService.create(transaction);
+    this.logger.log({ text: 'PAYMENT.CREATE: Created transaction', transaction: created.toObject() });
+  }
+
+  @MessagePattern({
+    channel: RabbitChannels.Transactions,
+    name: RabbitRoutingKeys.PaymentUpdated,
+    origin: 'rabbitmq',
+  })
+  public async onTransactionUpdateEvent(msg: any): Promise<void> {
+    const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
+    this.logger.log({ text: 'PAYMENT.UPDATE', data });
+
+    const checkoutTransaction: CheckoutTransactionInterface = data.payment;
+    const transaction: TransactionInterface = this.transactionsService.prepareTransactionForInsert(checkoutTransaction);
+
+    if (checkoutTransaction.items.length) {
+      transaction.items = this.transactionsService.prepareTransactionCartForInsert(
+        checkoutTransaction.items,
+        transaction.business_uuid,
+      );
     }
+
+    this.logger.log({ text: 'PAYMENT.UPDATE: Prepared transaction', transaction });
+    const updated: TransactionModel = await this.transactionsService.updateByUuid(transaction.uuid, transaction);
+    this.logger.log({ text: 'PAYMENT.UPDATE: Updated transaction', transaction: updated.toObject() });
+
+    await this.statisticsService.processAcceptedTransaction(transaction.uuid, updated.toObject());
   }
 
   @MessagePattern({
@@ -107,7 +132,7 @@ export class MicroEventsController {
     name: RabbitRoutingKeys.PaymentRemoved,
     origin: 'rabbitmq',
   })
-  public async onTransactionRemoveEvent(msg: any) {
+  public async onTransactionRemoveEvent(msg: any): Promise<void> {
     const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
     console.log('PAYMENT.REMOVE', data);
 
@@ -119,7 +144,7 @@ export class MicroEventsController {
     name: RabbitRoutingKeys.BpoCreated,
     origin: 'rabbitmq',
   })
-  public async onBpoCreatedEvent(msg: any) {
+  public async onBpoCreatedEvent(msg: any): Promise<void> {
     const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
     const business_payment_option = data.business_payment_option;
     this.logger.log({ text: 'BPO.CREATE', data });
@@ -135,7 +160,7 @@ export class MicroEventsController {
     name: RabbitRoutingKeys.BpoUpdated,
     origin: 'rabbitmq',
   })
-  public async onBpoUpdatedEvent(msg: any) {
+  public async onBpoUpdatedEvent(msg: any): Promise<void> {
     const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
     this.logger.log({ text: 'BPO.UPDATE', data });
     const bpo: any = data.business_payment_option;
@@ -148,7 +173,7 @@ export class MicroEventsController {
     name: RabbitRoutingKeys.PaymentFlowCreated,
     origin: 'rabbitmq',
   })
-  public async onPaymentFlowCreatedEvent(msg: any) {
+  public async onPaymentFlowCreatedEvent(msg: any): Promise<void> {
     const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
     this.logger.log({ text: 'FLOW.CREATE', data });
     const flow: any = data.flow;
@@ -161,7 +186,7 @@ export class MicroEventsController {
     name: RabbitRoutingKeys.PaymentFlowMigrate,
     origin: 'rabbitmq',
   })
-  public async onPaymentFlowMigrateEvent(msg: any) {
+  public async onPaymentFlowMigrateEvent(msg: any): Promise<void> {
     const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
     this.logger.log({ text: 'FLOW.MIGRATE', data });
     const flow: any = data.flow;
@@ -174,7 +199,7 @@ export class MicroEventsController {
     name: RabbitRoutingKeys.PaymentFlowUpdated,
     origin: 'rabbitmq',
   })
-  public async onPaymentFlowUpdatedEvent(msg: any) {
+  public async onPaymentFlowUpdatedEvent(msg: any): Promise<void> {
     const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
     this.logger.log({ text: 'FLOW.UPDATE', data });
     const flow: any = data.flow;
@@ -187,7 +212,7 @@ export class MicroEventsController {
     name: RabbitRoutingKeys.PaymentFlowRemoved,
     origin: 'rabbitmq',
   })
-  public async onPaymentFlowRemovedEvent(msg: any) {
+  public async onPaymentFlowRemovedEvent(msg: any): Promise<void> {
     const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
     this.logger.log({ text: 'FLOW.REMOVE', data });
     const flow: any = data.flow;

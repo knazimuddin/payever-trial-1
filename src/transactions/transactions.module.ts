@@ -1,7 +1,6 @@
 import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
-import { environment } from '../environments';
 import { TransactionsEsExportCommand } from './command/transactions-export-to-es.command';
 import { TransactionsExportCommand } from './command/transactions-export.command';
 
@@ -30,14 +29,12 @@ import {
 @Module({
   imports: [
     HttpModule,
-    NotificationsSdkModule.forRoot({
-      rabbitMqOptions: environment.rabbitmq,
-    }),
     MongooseModule.forFeature([
       { name: 'BusinessPaymentOption', schema: BusinessPaymentOptionSchema },
       { name: 'PaymentFlow', schema: PaymentFlowSchema },
       { name: 'Transaction', schema: TransactionsSchema },
     ]),
+    NotificationsSdkModule,
   ],
   controllers: [
     BusinessController,

@@ -40,20 +40,30 @@ export class TransactionsService {
       transactionDto.uuid = uuid();
     }
 
-    const created = await this.transactionModel.create(transactionDto);
-    this.notificationsEmitter.sendNotification(
-      {
-        kind: 'business',
-        entity: transactionDto.business_uuid,
-        app: 'transactions',
-      },
-      `notification.transactions.title.new_transaction`,
-      {
-        transactionId: transactionDto.uuid,
-      },
-    );
+    try {
+      const created: TransactionModel = await this.transactionModel.create(transactionDto);
+      await this.bulkIndex('transactions', 'transaction', created.toObject());
 
-    return created;
+      await this.notificationsEmitter.sendNotification(
+        {
+          kind: 'business',
+          entity: transactionDto.business_uuid,
+          app: 'transactions',
+        },
+        `notification.transactions.title.new_transaction`,
+        {
+          transactionId: transactionDto.uuid,
+        },
+      );
+
+      return created;
+    } catch (err) {
+      if (err.name === 'MongoError' && err.code === 11000) {
+        this.logger.warn({ text: `Attempting to create existing Transaction with uuid '${transactionDto.uuid}'`});
+      } else {
+        throw err;
+      }
+    }
   }
 
   public async bulkIndex(index, type, item, operation = 'index') {
@@ -78,11 +88,11 @@ export class TransactionsService {
     await client.bulk({ body: bulkBody })
       .then(response => {
         let errorCount = 0;
-        response.items.forEach(responseItem => {
+        for (const responseItem of response.items) {
           if (responseItem.index && responseItem.index.error) {
             console.log(++errorCount, responseItem.index.error);
           }
-        });
+        }
       })
       .catch(console.log);
   }
@@ -96,15 +106,20 @@ export class TransactionsService {
     //   transaction.payment_details = JSON.stringify(transaction.payment_details);
     // }
 
-    const transaction = transactionDto;
-    transaction.uuid = transactionUuid;
-    await this.bulkIndex('transactions', 'transaction', transaction, 'update');
+    transactionDto.uuid = transactionUuid;
 
-    return this.transactionModel.findOneAndUpdate(
+    const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
       { uuid: transactionUuid },
       transactionDto,
-      { new: true },
+      {
+        new: true,
+        upsert: true,
+      },
     );
+
+    await this.bulkIndex('transactions', 'transaction', updated.toObject(), 'update');
+
+    return updated;
   }
 
   // public async updateFromCheckoutTransactionByUuid(
@@ -300,10 +315,10 @@ export class TransactionsService {
   ): TransactionHistoryEntryInterface {
     return {
       action: historyType,
-      amount: data.data.amount,
-      params: data.data.params,
-      payment_status: data.data.payment_status,
-      reason: data.data.reason,
+      amount: data.data && data.data.amount,
+      params: data.data && data.data.params,
+      payment_status: data.data && data.data.payment_status,
+      reason: data.data && data.data.reason,
       upload_items: data.data && data.data.saved_data,
       created_at: createdAt,
       is_restock_items: data.items_restocked

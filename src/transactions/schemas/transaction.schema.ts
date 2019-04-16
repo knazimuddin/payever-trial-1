@@ -5,8 +5,8 @@ import { TransactionItemSchema } from './transaction-item.schema';
 
 export const TransactionsSchema = new Schema({
   // _id: { type: String }, // id from mysql db
-  original_id: String, // id from mysql db
-  uuid: { type: String, required: true },
+  original_id: { type: String, unique: true }, // id from mysql db
+  uuid: { type: String, required: true, unique: true },
   action_running: { type: Boolean, required: false, default: false },
   amount: Number,
   billing_address: AddressSchema,
