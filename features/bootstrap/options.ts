@@ -3,6 +3,8 @@ import {
   DatabaseContext,
   HttpContext,
   InMemoryProvider,
+  RabbitMqContext,
+  StorageContext,
   WorldContext,
 } from '@pe/cucumber-sdk';
 import * as dotenv from 'dotenv';
@@ -17,6 +19,8 @@ export const options: CucumberOptionsInterface = {
     DatabaseContext,
     WorldContext,
     HttpContext,
+    StorageContext,
+    RabbitMqContext,
   ],
   fixtures: path.resolve('./features/fixtures'),
   appConfigurator: AppConfigurator,
