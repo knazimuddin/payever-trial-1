@@ -56,7 +56,7 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^6.0.5",
-    "@pe/cucumber-sdk": "^0.1.4",
+    "@pe/cucumber-sdk": "^0.1.6",
     "@types/chai": "^4.1.7",
     "@types/chai-as-promised": "^7.1.0",
     "@types/chai-subset": "^1.3.2",
@@ -67,6 +67,7 @@
     "@types/sinon": "^7.0.8",
     "@types/sinon-chai": "^3.2.2",
     "@types/superagent": "^4.1.1",
+    "axios-mock-adapter": "^1.16.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "chai-subset": "^1.6.0",
