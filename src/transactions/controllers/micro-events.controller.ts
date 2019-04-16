@@ -121,10 +121,9 @@ export class MicroEventsController {
     }
 
     this.logger.log({ text: 'PAYMENT.UPDATE: Prepared transaction', transaction });
+    await this.statisticsService.processAcceptedTransaction(transaction.uuid, transaction);
     const updated: TransactionModel = await this.transactionsService.updateByUuid(transaction.uuid, transaction);
     this.logger.log({ text: 'PAYMENT.UPDATE: Updated transaction', transaction: updated.toObject() });
-
-    await this.statisticsService.processAcceptedTransaction(transaction.uuid, updated.toObject());
   }
 
   @MessagePattern({

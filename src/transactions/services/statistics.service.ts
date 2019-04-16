@@ -1,20 +1,24 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { InjectRabbiMqClient, RabbitMqClient } from '@pe/nest-kit';
+import { InjectRabbitMqClient, RabbitMqClient } from '@pe/nest-kit';
 import { Model } from 'mongoose';
 
 import { RabbitRoutingKeys } from '../../enums';
+import { TransactionInterface } from '../interfaces';
 
 @Injectable()
 export class StatisticsService {
 
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
-    @InjectRabbiMqClient() private readonly rabbitClient: RabbitMqClient,
-    private readonly logger: Logger,
+    @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
   ) {}
 
-  public async processAcceptedTransaction(id: string, updating: any) {
+  /**
+   * This method should be called right before updating transaction
+   * Thus it can handle transaction status changing.
+   */
+  public async processAcceptedTransaction(id: string, updating: TransactionInterface) {
     const existing = await this.transactionsModel.findOne({ uuid: id }).lean();
 
     if (!existing) {
