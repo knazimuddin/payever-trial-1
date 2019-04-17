@@ -1,20 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
+import { InjectRabbitMqClient, RabbitMqClient } from '@pe/nest-kit';
 import { Model } from 'mongoose';
 import { RabbitRoutingKeys } from '../../enums';
-import { environment } from '../../environments';
 
 @Injectable()
 export class StatisticsService {
-
-  private rabbitClient: RabbitmqClient;
-
   constructor(
+    @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
     @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
     private readonly logger: Logger,
   ) {
-    this.rabbitClient = new RabbitmqClient(environment.rabbitmq, this.logger);
   }
 
   public async processAcceptedTransaction(id: string, updating: any) {
@@ -48,10 +44,6 @@ export class StatisticsService {
           },
         );
     }
-  }
-
-  public async test() {
-    return Promise.resolve('Yeeeeee');
   }
 
   public async processMigratedTransaction(transaction: any) {

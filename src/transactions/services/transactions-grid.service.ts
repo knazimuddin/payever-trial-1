@@ -120,7 +120,7 @@ export class TransactionsGridService {
     }
 
     return this.transactionsModel
-      .count(mongoFilters)
+      .countDocuments(mongoFilters)
       .exec();
   }
 
