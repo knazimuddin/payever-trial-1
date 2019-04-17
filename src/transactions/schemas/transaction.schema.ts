@@ -111,6 +111,7 @@ export const TransactionsSchema = new Schema({
   updated_at: Date,
   uuid: {type: String, required: true, default: uuid, unique: true},
   user_uuid: String,
+  invoice_id: String,
 });
 
 TransactionsSchema.index('uuid', {unique: true});

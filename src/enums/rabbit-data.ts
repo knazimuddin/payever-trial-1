@@ -20,4 +20,5 @@ export enum RabbitRoutingKeys {
 
   TransactionsPaymentAdd = 'transactions.event.payment.add',
   TransactionsPaymentSubtract = 'transactions.event.payment.subtract',
+  CodeUpdated = 'device_payments.code.updated',
 }

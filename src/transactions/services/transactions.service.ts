@@ -38,7 +38,7 @@ export class TransactionsService {
   }
 
   public async bulkIndex(index, type, item, operation = 'index') {
-    let bulkBody = [];
+    const bulkBody = [];
     item.mongoId = item._id;
     delete item._id;
     bulkBody.push({
@@ -66,7 +66,7 @@ export class TransactionsService {
         });
       })
       .catch(console.log);
-  };
+  }
 
   public async updateByUuid(uuid, data: any) {
     // a bit dirty, sorry
@@ -97,7 +97,12 @@ export class TransactionsService {
 
     transaction = this.create(transaction);
     await this.bulkIndex('transactions', 'transaction', transaction);
+
     return transaction;
+  }
+
+  public async findOneAndUpdate(conditions: any, update: any) {
+    return this.transactionsModel.findOneAndUpdate(conditions, update);
   }
 
   public async exists(uuid: string): Promise<boolean> {
