@@ -26,6 +26,7 @@ export class DevController {
   @HttpCode(HttpStatus.OK)
   public async removeTestTransactions(
   ) {
+    // if you left payever at the outs, use this endpoint
     return this.transactionsService.deleteAll();
   }
 }
