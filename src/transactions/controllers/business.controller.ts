@@ -17,8 +17,7 @@ import {
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import * as moment from 'moment';
-
-import { ActionPayloadDto } from '../dto';
+import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionActionsAwareInterface } from '../interfaces';
 import { TransactionModel } from '../models';
 
@@ -124,7 +123,13 @@ export class BusinessController {
     try {
       actions = await this.messagingService.getActionsList(transaction);
     } catch (e) {
-      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
+      this.logger.error(
+        {
+          message: `Error occured while getting transaction actions`,
+          error: e.message,
+          context: 'BusinessController',
+        },
+      );
       actions = [];
     }
 
@@ -151,7 +156,14 @@ export class BusinessController {
     try {
       await this.messagingService.runAction(transaction, action, actionPayload);
     } catch (e) {
-      this.logger.log('Error occured during running action:\n', e);
+      this.logger.log(
+        {
+          message: `Error occured during running action`,
+          error: e.message,
+          context: 'BusinessController',
+        },
+      );
+
       throw new BadRequestException(e.message);
     }
 
@@ -166,7 +178,13 @@ export class BusinessController {
     try {
       actions = await this.messagingService.getActionsList(transaction);
     } catch (e) {
-      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
+      this.logger.error(
+        {
+          message: `Error occurred while getting transaction actions`,
+          error: e.message,
+          context: 'BusinessController',
+        },
+      );
       actions = [];
     }
 
@@ -190,7 +208,13 @@ export class BusinessController {
     try {
       await this.messagingService.updateStatus(transaction);
     } catch (e) {
-      this.logger.error(`Error occured during status update: ${e}`);
+      this.logger.error(
+        {
+          message: `Error occurred during status update`,
+          error: e.message,
+          context: 'BusinessController',
+        },
+      );
       throw new BadRequestException(`Error occured during status update. Please try again later. ${e.message}`);
     }
 
@@ -205,7 +229,13 @@ export class BusinessController {
     try {
       actions = await this.messagingService.getActionsList(transaction);
     } catch (e) {
-      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
+      this.logger.error(
+        {
+          message: `Error occurred while getting transaction actions`,
+          error: e.message,
+          context: 'BusinessController',
+        },
+      );
       actions = [];
     }
 

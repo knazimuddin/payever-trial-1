@@ -52,8 +52,15 @@ export class MessagingService {
           data,
         };
       }
-    } catch (error) {
-      this.logger.error('Could not prepare payload for actions call:', error);
+    } catch (e) {
+      this.logger.error(
+        {
+          message: `Could not prepare payload for actions call`,
+          transaction: transaction,
+          error: e.message,
+          context: 'MessagingService',
+        },
+      );
 
       return [];
     }
@@ -115,13 +122,14 @@ export class MessagingService {
     }
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
-    this.logger.log(
-      {
-        message: 'RPC action result: ',
-        context: rpcResult,
-      },
-      'MessagingService',
-    );
+    this.logger.log({
+      message: 'RPC action result',
+      transaction: transaction,
+      action: action,
+      actionPayload: actionPayload,
+      rpcResult: rpcResult,
+      context: 'MessagingService',
+    });
 
     await this.transactionsService.applyActionRpcResult(transaction, rpcResult);
   }
@@ -142,20 +150,23 @@ export class MessagingService {
     }
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'payment');
-    this.logger.log(
-      {
-        message: 'RPC status update result: ',
-        context: rpcResult,
-      },
-      'MessagingService',
-    );
+    this.logger.log({
+      message: 'RPC status update result',
+      transaction: transaction,
+      rpcResult: rpcResult,
+      context: 'MessagingService',
+    });
     await this.transactionsService.applyRpcResult(transaction, rpcResult);
   }
 
   public async sendTransactionUpdate(transaction: TransactionModel): Promise<void> {
     this.transformTransactionForPhp(transaction);
     const payload: any = { payment: transaction };
-    this.logger.log(`SEND 'transactions_app.payment.updated', payload:`, payload);
+    this.logger.log({
+      message: 'SENDING "transactions_app.payment.updated" event',
+      payload: payload,
+      context: 'MessagingService',
+    });
     const message = this.messageBusService.createMessage('transactions_app.payment.updated', payload);
 
     await this.rabbitClient
@@ -225,7 +236,12 @@ export class MessagingService {
     try {
       payload.payment_details = JSON.parse(transaction.payment_details);
     } catch (e) {
-      this.logger.log(e);
+      this.logger.log({
+        message: 'Error during creation of payload data',
+        transaction: transaction,
+        error: e.message,
+        context: 'MessagingService',
+      });
       payload.payment_details = {};
       // just skipping payment_details
     }
@@ -260,19 +276,39 @@ export class MessagingService {
     try {
       paymentFlow = await this.getPaymentFlow(transaction.payment_flow_id);
     } catch (e) {
-      this.logger.error(`Transaction:${transaction.uuid} -> Cannot resolve payment flow: ${e}`);
+      this.logger.error(
+        {
+          message: `Transaction ${transaction.uuid} -> Cannot resolve payment flow`,
+          transaction: transaction,
+          error: e,
+          context: 'MessagingService',
+        },
+      );
 
       return null;
     }
 
     if (!paymentFlow) {
-      this.logger.error(`Transaction:${transaction.uuid} -> Payment flow cannot be null.`);
+      this.logger.error(
+        {
+          message: `Transaction ${transaction.uuid} -> Payment flow cannot be null`,
+          transaction: transaction,
+          context: 'MessagingService',
+        },
+      );
 
       return null;
     }
 
     dto.credentials = businessPaymentOption.credentials;
-    this.logger.log('dto credentials: ' + JSON.stringify(dto.credentials));
+    this.logger.log(
+      {
+        message: `Transaction ${transaction.uuid} dto credentials`,
+        transaction: transaction,
+        credentials: dto.credentials,
+        context: 'MessagingService',
+      },
+    );
 
     if (transaction.payment_flow_id) {
       dto.payment_flow = paymentFlow;
@@ -329,7 +365,14 @@ export class MessagingService {
       try {
         transaction.payment_details = JSON.parse(transaction.payment_details);
       } catch (e) {
-        this.logger.log(e);
+        this.logger.log(
+          {
+            message: `Transform Transaction ${transaction.uuid} for php`,
+            transaction: transaction,
+            error: e.message,
+            context: 'MessagingService',
+          },
+        );
         transaction.payment_details = {};
         // just skipping payment_details
       }
