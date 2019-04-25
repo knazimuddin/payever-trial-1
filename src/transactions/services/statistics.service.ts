@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 
 import { RabbitRoutingKeys } from '../../enums';
 import { TransactionInterface } from '../interfaces';
+import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 
 @Injectable()
 export class StatisticsService {
@@ -110,7 +111,7 @@ export class StatisticsService {
     }
   }
 
-  public async processRefundedTransaction(id: string, refund: any) {
+  public async processRefundedTransaction(id: string, refund: HistoryEventActionCompletedInterface) {
     const existing = await this.transactionsModel.findOne({ uuid: id }).lean();
 
     if (!existing) {

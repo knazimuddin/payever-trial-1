@@ -6,5 +6,6 @@ export * from './payment-flow.service';
 export * from './payments-micro.service';
 export * from './statistics.service';
 export * from './stub.service';
+export * from './transaction-history.service';
 export * from './transactions-grid.service';
 export * from './transactions.service';

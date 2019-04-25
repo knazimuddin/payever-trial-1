@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose';
 import { AddressSchema } from './address.schema';
+import { TransactionCartItemSchema } from './transaction-cart-item-schema';
 import { TransactionHistoryEntrySchema } from './transaction-history-entry.schema';
-import { TransactionItemSchema } from './transaction-item.schema';
 
 export const TransactionsSchema = new Schema({
   // _id: { type: String }, // id from mysql db
@@ -23,7 +23,7 @@ export const TransactionsSchema = new Schema({
   down_payment: Number,
   fee_accepted: Boolean,
   history: [TransactionHistoryEntrySchema],
-  items: [TransactionItemSchema],
+  items: [TransactionCartItemSchema],
   merchant_email: String,
   merchant_name: String,
   payment_details: String, // Serialized big object

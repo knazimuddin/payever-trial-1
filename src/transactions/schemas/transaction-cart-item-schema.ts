@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 
-export const TransactionItemSchema = new Schema({
+export const TransactionCartItemSchema = new Schema({
   _id: { type: String, default: uuid },
   uuid: String,
   created_at: Date,

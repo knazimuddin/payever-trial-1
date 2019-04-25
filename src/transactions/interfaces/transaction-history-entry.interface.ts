@@ -4,10 +4,10 @@ import { TransactionUploadItemInterface } from './transaction-upload-item.interf
 export interface TransactionHistoryEntryInterface {
   action: string;
   amount: number;
-  params: string;
   payment_status: string;
-  reason: string;
   created_at: Date;
+  params?: string;
+  reason?: string;
   is_restock_items?: boolean;
   upload_items?: TransactionUploadItemInterface[];
   refund_items?: TransactionRefundItemInterface[];

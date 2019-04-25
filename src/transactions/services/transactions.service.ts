@@ -2,32 +2,26 @@ import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
-import { plainToClass } from 'class-transformer';
 import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
+import { TransactionCartConverter, TransactionSantanderApplicationConverter } from '../converter';
 
-import { RpcResultDto, TransactionCartItemDto, TransactionDto } from '../dto';
+import { RpcResultDto } from '../dto';
 import { client } from '../es-temp/transactions-search';
 import {
-  CheckoutPaymentDetailsAwareInterface,
-  CheckoutTransactionCartItemInterface,
-  CheckoutTransactionHistoryItemInterface,
   CheckoutTransactionInterface,
   TransactionCartItemInterface,
-  TransactionHistoryEntryInterface,
   TransactionInterface,
   TransactionRpcUpdateInterface,
-  TransactionSantanderApplicationAwareInterface,
 } from '../interfaces';
 import { TransactionModel } from '../models';
-import { ProductUuid } from '../tools/product-uuid';
 
 @Injectable()
 export class TransactionsService {
 
   constructor(
     @InjectModel('Transaction') private readonly transactionModel: Model<TransactionModel>,
-    @InjectNotificationsEmitter() private notificationsEmitter: NotificationsEmitter,
+    @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
     private readonly logger: Logger,
   ) {}
 
@@ -122,68 +116,6 @@ export class TransactionsService {
     return updated;
   }
 
-  // public async updateFromCheckoutTransactionByUuid(
-  //   transactionUuid: string,
-  //   checkoutTransaction: CheckoutTransactionInterface,
-  // ): Promise<TransactionModel> {
-  //   const transaction: TransactionDto =
-  //     plainToClass<TransactionInterface, CheckoutTransactionInterface>(
-  //       TransactionDto,
-  //       checkoutTransaction,
-  //     );
-  //
-  //   // a bit dirty, sorry
-  //   // if (typeof (checkoutTransaction.payment_details) !== 'string') {
-  //   this.setSantanderApplication(transaction, checkoutTransaction);
-  //   transaction.payment_details = JSON.stringify(transaction.payment_details);
-  //   // }
-  //
-  //   return this.transactionModel.findOneAndUpdate(
-  //     { uuid: transactionUuid },
-  //     transaction,
-  //     { new: true },
-  //   );
-  // }
-
-  public async updateHistoryByUuid(
-    transactionUuid: string,
-    historyType: string,
-    data: CheckoutTransactionHistoryItemInterface,
-  ): Promise<void> {
-    const historyItem: TransactionHistoryEntryInterface =
-      this.prepareTransactionHistoryItemForInsert(historyType, new Date(), data);
-
-    await this.transactionModel.updateOne(
-      { uuid: transactionUuid },
-      {
-        $push: {
-          history: historyItem,
-        },
-      },
-    );
-  }
-
-  // public async createOrUpdate(transaction: any) {
-  //   if (transaction.uuid) {
-  //     const existing = await this.transactionsModel.findOne({uuid: transaction.uuid});
-  //     if (existing) {
-  //       await this.bulkIndex('transactions', 'transaction', transaction, 'update');
-  //
-  //       return this.transactionsModel.findOneAndUpdate({uuid: transaction.uuid}, transaction);
-  //     }
-  //   }
-  //
-  //   transaction = this.create(transaction);
-  //   await this.bulkIndex('transactions', 'transaction', transaction);
-  //   return transaction;
-  // }
-  //
-  // public async exists(uuid: string): Promise<boolean> {
-  //   const transaction = await this.transactionsModel.findOne({uuid});
-  //
-  //   return !!transaction;
-  // }
-
   public async findOneByUuid(transactionUuid: string): Promise<TransactionModel> {
     return this.findOneByParams({ uuid: transactionUuid });
   }
@@ -233,7 +165,7 @@ export class TransactionsService {
     updating.place = result.workflow_state;
 
     if (paymentResult.payment_details) {
-      this.setSantanderApplication(updating, result);
+      TransactionSantanderApplicationConverter.setSantanderApplication(updating, result);
       updating.payment_details = JSON.stringify(result);
     }
 
@@ -249,7 +181,8 @@ export class TransactionsService {
     transaction: TransactionModel,
     result: RpcResultDto,
   ): Promise<void> {
-    const items = this.prepareTransactionCartForInsert(result.payment_items, transaction.business_uuid);
+    const items: TransactionCartItemInterface[] =
+      TransactionCartConverter.fromCheckoutTransactionCart(result.payment_items, transaction.business_uuid);
 
     await this.transactionModel.updateOne(
       { uuid: transaction.uuid },
@@ -259,135 +192,6 @@ export class TransactionsService {
         },
       },
     );
-  }
-
-  public prepareTransactionForInsert(checkoutTransaction: CheckoutTransactionInterface): TransactionInterface {
-    const transaction: TransactionDto =
-      plainToClass<TransactionInterface, CheckoutTransactionInterface>(
-        TransactionDto,
-        checkoutTransaction,
-      );
-
-    if (checkoutTransaction.address) {
-      transaction.billing_address = checkoutTransaction.address;
-    }
-
-    transaction.type = checkoutTransaction.type || checkoutTransaction.payment_type;
-
-    if (checkoutTransaction.payment_details) {
-      this.setSantanderApplication(transaction, checkoutTransaction);
-      transaction.payment_details = JSON.stringify(transaction.payment_details);
-    }
-
-    if (checkoutTransaction.business) {
-      transaction.business_uuid = checkoutTransaction.business.uuid;
-      transaction.merchant_name = checkoutTransaction.business.company_name;
-      transaction.merchant_email = checkoutTransaction.business.company_email;
-    }
-
-    if (checkoutTransaction.payment_flow) {
-      transaction.payment_flow_id = checkoutTransaction.payment_flow.id;
-    }
-
-    if (checkoutTransaction.channel_set) {
-      transaction.channel_set_uuid = checkoutTransaction.channel_set.uuid;
-    }
-
-    if (checkoutTransaction.history && checkoutTransaction.history.length) {
-      for (const historyItem of checkoutTransaction.history) {
-        transaction.history.push(
-          this.prepareTransactionHistoryItemForInsert(
-            historyItem.action,
-            historyItem.created_at,
-            historyItem,
-          ),
-        );
-      }
-    }
-
-    return transaction;
-  }
-
-  public prepareTransactionHistoryItemForInsert(
-    historyType: string,
-    createdAt: Date,
-    data: CheckoutTransactionHistoryItemInterface,
-  ): TransactionHistoryEntryInterface {
-    return {
-      action: historyType,
-      amount: data.data && data.data.amount,
-      params: data.data && data.data.params,
-      payment_status: data.data && data.data.payment_status,
-      reason: data.data && data.data.reason,
-      upload_items: data.data && data.data.saved_data,
-      created_at: createdAt,
-      is_restock_items: data.items_restocked
-        ? data.items_restocked
-        : null
-      ,
-    };
-  }
-
-  public prepareTransactionCartForInsert(
-    cartItems: CheckoutTransactionCartItemInterface[],
-    businessId: string,
-  ): TransactionCartItemInterface[] {
-    const newCart: TransactionCartItemInterface[] = [];
-
-    for (const cartItem of cartItems) {
-      const newCartItem: TransactionCartItemDto = {
-        _id: cartItem.product_uuid
-          ? cartItem.product_uuid
-          : ProductUuid.generate(businessId, `${cartItem.name}${cartItem.product_variant_uuid}`)
-        ,
-        uuid: cartItem.product_uuid
-          ? cartItem.product_uuid
-          : null
-        ,
-        description: cartItem.description,
-        fixed_shipping_price: cartItem.fixed_shipping_price,
-        identifier: cartItem.identifier,
-        item_type: cartItem.item_type,
-        name: cartItem.name,
-        price: cartItem.price,
-        price_net: cartItem.price_net,
-        product_variant_uuid: cartItem.product_variant_uuid,
-        quantity: cartItem.quantity,
-        shipping_price: cartItem.shipping_price,
-        shipping_settings_rate: cartItem.shipping_settings_rate,
-        shipping_settings_rate_type: cartItem.shipping_settings_rate_type,
-        shipping_type: cartItem.shipping_type,
-        thumbnail: cartItem.thumbnail,
-        updated_at: cartItem.updated_at,
-        url: cartItem.url,
-        vat_rate: cartItem.vat_rate,
-        weight: cartItem.weight,
-        created_at: cartItem.created_at,
-      };
-
-      newCart.push(newCartItem);
-    }
-
-    return newCart;
-  }
-
-  private setSantanderApplication(
-    transaction: TransactionSantanderApplicationAwareInterface,
-    checkoutTransaction: CheckoutPaymentDetailsAwareInterface,
-  ): void {
-    transaction.santander_applications = [];
-
-    if (checkoutTransaction.payment_details.finance_id) {
-      transaction.santander_applications.push(checkoutTransaction.payment_details.finance_id);
-    }
-
-    if (checkoutTransaction.payment_details.application_no) {
-      transaction.santander_applications.push(checkoutTransaction.payment_details.application_no);
-    }
-
-    if (checkoutTransaction.payment_details.application_number) {
-      transaction.santander_applications.push(checkoutTransaction.payment_details.application_number);
-    }
   }
 
   private prepareTransactionForOutput(transaction) {

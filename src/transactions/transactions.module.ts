@@ -6,10 +6,13 @@ import { TransactionsExportCommand } from './command/transactions-export.command
 
 import {
   AdminController,
+  BpoEventsController,
   BusinessController,
   DevController,
-  MicroEventsController,
+  FlowEventsController,
+  HistoryEventsController,
   MigrateEventsController,
+  TransactionEventsController,
   UserController,
 } from './controllers';
 import { BusinessPaymentOptionSchema, PaymentFlowSchema, TransactionsSchema } from './schemas';
@@ -22,6 +25,7 @@ import {
   PaymentsMicroService,
   StatisticsService,
   StubService,
+  TransactionHistoryService,
   TransactionsGridService,
   TransactionsService,
 } from './services';
@@ -37,26 +41,30 @@ import {
     NotificationsSdkModule,
   ],
   controllers: [
+    AdminController,
+    BpoEventsController,
     BusinessController,
     DevController,
-    MicroEventsController,
+    FlowEventsController,
+    HistoryEventsController,
     MigrateEventsController,
+    TransactionEventsController,
     UserController,
-    AdminController,
   ],
   providers: [
     BusinessPaymentOptionService,
+    CurrencyExchangeService,
+    DtoValidationService,
     MessagingService,
     PaymentFlowService,
+    PaymentsMicroService,
+    StatisticsService,
     StubService,
+    TransactionHistoryService,
+    TransactionsEsExportCommand,
+    TransactionsExportCommand,
     TransactionsGridService,
     TransactionsService,
-    StatisticsService,
-    DtoValidationService,
-    TransactionsExportCommand,
-    TransactionsEsExportCommand,
-    CurrencyExchangeService,
-    PaymentsMicroService,
   ],
 })
 export class TransactionsModule {}
