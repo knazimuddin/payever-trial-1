@@ -1,5 +1,7 @@
 import { Schema } from 'mongoose';
 
+export const PaymentFlowSchemaName = 'PaymentFlow';
+
 export const PaymentFlowSchema = new Schema(
   {
     // _id: { type: String },

@@ -1,17 +1,16 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Transaction } from './entities/transaction.entity';
-
-import { MigrationController } from './controllers';
-import { MigrationService, TransactionsService } from './services';
+import { TransactionSchema, TransactionSchemaName } from '../transactions/schemas';
 import { TransactionsModule } from '../transactions/transactions.module';
-import { TransactionsSchema } from '../transactions/schemas/transaction.schema';
+import { MigrationController } from './controllers';
+import { Transaction } from './entities';
+import { MigrationService, TransactionsService } from './services';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Transaction]),
-    MongooseModule.forFeature([{ name: 'TransactionsSchema', schema: TransactionsSchema }]),
+    MongooseModule.forFeature([{ name: TransactionSchemaName, schema: TransactionSchema }]),
     TransactionsModule,
   ],
   controllers: [MigrationController],

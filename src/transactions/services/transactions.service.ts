@@ -194,7 +194,7 @@ export class TransactionsService {
     );
   }
 
-  private prepareTransactionForOutput(transaction) {
+  public prepareTransactionForOutput(transaction) {
     try {
       transaction.payment_details =
         transaction.payment_details

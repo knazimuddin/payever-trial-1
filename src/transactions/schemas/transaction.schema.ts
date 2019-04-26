@@ -3,7 +3,9 @@ import { AddressSchema } from './address.schema';
 import { TransactionCartItemSchema } from './transaction-cart-item-schema';
 import { TransactionHistoryEntrySchema } from './transaction-history-entry.schema';
 
-export const TransactionsSchema = new Schema({
+export const TransactionSchemaName = 'Transaction';
+
+export const TransactionSchema = new Schema({
   // _id: { type: String }, // id from mysql db
   original_id: { type: String, unique: true }, // id from mysql db
   uuid: { type: String, required: true, unique: true },
@@ -47,17 +49,17 @@ export const TransactionsSchema = new Schema({
   user_uuid: String,
 });
 
-TransactionsSchema.index({ uuid: 1});
-TransactionsSchema.index({ santander_applications: 1});
-TransactionsSchema.index({ original_id: 1});
-TransactionsSchema.index({ reference: 1});
-TransactionsSchema.index({ customer_name: 1});
-TransactionsSchema.index({ customer_email: 1});
-TransactionsSchema.index({ merchant_name: 1});
-TransactionsSchema.index({ merchant_email: 1});
-TransactionsSchema.index({ status: 1, _id: 1 });
+TransactionSchema.index({ uuid: 1});
+TransactionSchema.index({ santander_applications: 1});
+TransactionSchema.index({ original_id: 1});
+TransactionSchema.index({ reference: 1});
+TransactionSchema.index({ customer_name: 1});
+TransactionSchema.index({ customer_email: 1});
+TransactionSchema.index({ merchant_name: 1});
+TransactionSchema.index({ merchant_email: 1});
+TransactionSchema.index({ status: 1, _id: 1 });
 
-TransactionsSchema.virtual('amount_refunded').get(function() {
+TransactionSchema.virtual('amount_refunded').get(function() {
   let totalRefunded = 0;
 
   if (this.history) {
@@ -70,11 +72,11 @@ TransactionsSchema.virtual('amount_refunded').get(function() {
   return totalRefunded;
 });
 
-TransactionsSchema.virtual('amount_rest').get(function() {
+TransactionSchema.virtual('amount_rest').get(function() {
   return this.amount - this.amount_refunded;
 });
 
-TransactionsSchema.virtual('available_refund_items').get(function() {
+TransactionSchema.virtual('available_refund_items').get(function() {
   const refundItems = [];
 
   this.items.forEach((item) => {

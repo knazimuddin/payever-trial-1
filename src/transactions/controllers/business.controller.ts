@@ -2,12 +2,10 @@ import {
   BadRequestException,
   Body,
   Controller,
-  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
   Logger,
-  NotFoundException,
   Param,
   Post,
   Query,
@@ -15,11 +13,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
+import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import * as moment from 'moment';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionActionsAwareInterface } from '../interfaces';
 import { TransactionModel } from '../models';
+import { TransactionSchemaName } from '../schemas';
 
 import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
 
@@ -94,34 +94,32 @@ export class BusinessController {
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
   public async getDetailByReference(
-    @Param('reference') reference: string,
-    @Param('businessId') businessId: string,
+    @ParamModel(
+      { reference: ':reference', business_uuid: ':businessId'},
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
   ) {
-    const transaction = await this.transactionsService.findOneByParams({ reference });
+    const outputTransaction = this.transactionsService.prepareTransactionForOutput(
+      transaction.toObject({ virtuals: true }),
+    );
 
-    if (!transaction || transaction.business_uuid !== businessId) {
-      throw new NotFoundException(`Transaction not found.`);
-    }
-
-    return { ...transaction };
+    return { ...outputTransaction };
   }
 
   @Get('detail/:uuid')
   @HttpCode(HttpStatus.OK)
-  @Roles(RolesEnum.merchant)
+  @Roles(RolesEnum.merchant, RolesEnum.anonymous)
   public async getDetail(
-    @Param('uuid') uuid: string,
-    @Param('businessId') businessId: string,
+    @ParamModel({ uuid: ':uuid', business_uuid: ':businessId'}, TransactionSchemaName) transaction: TransactionModel,
   ): Promise<any> {
     let actions: any[];
 
-    const transaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
-    if (!transaction || transaction.business_uuid !== businessId) {
-      throw new NotFoundException(`Transaction not found.`);
-    }
+    const outputTransaction = this.transactionsService.prepareTransactionForOutput(
+      transaction.toObject({ virtuals: true }),
+    );
 
     try {
-      actions = await this.messagingService.getActionsList(transaction);
+      actions = await this.messagingService.getActionsList(outputTransaction);
     } catch (e) {
       this.logger.error(
         {
@@ -133,28 +131,27 @@ export class BusinessController {
       actions = [];
     }
 
-    return { ...transaction, actions };
+    return { ...outputTransaction, actions };
   }
 
   @Post(':uuid/action/:action')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
   public async runAction(
-    @Param('uuid') uuid: string,
     @Param('action') action: string,
-    @Param('businessId') businessId: string,
+    @ParamModel({ uuid: ':uuid', business_uuid: ':businessId'}, TransactionSchemaName) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionActionsAwareInterface> {
     let actions: string[];
 
     this.dtoValidation.checkFileUploadDto(actionPayload);
-    const transaction = await this.transactionsService.findOneByUuid(uuid);
 
-    if (transaction.business_uuid !== businessId) {
-      throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
-    }
+    const outputTransaction = this.transactionsService.prepareTransactionForOutput(
+      transaction.toObject({ virtuals: true }),
+    );
+
     try {
-      await this.messagingService.runAction(transaction, action, actionPayload);
+      await this.messagingService.runAction(outputTransaction, action, actionPayload);
     } catch (e) {
       this.logger.log(
         {
@@ -167,7 +164,7 @@ export class BusinessController {
       throw new BadRequestException(e.message);
     }
 
-    const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
+    const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(transaction.uuid);
     // Send update to checkout-php
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
@@ -176,7 +173,7 @@ export class BusinessController {
     }
 
     try {
-      actions = await this.messagingService.getActionsList(transaction);
+      actions = await this.messagingService.getActionsList(outputTransaction);
     } catch (e) {
       this.logger.error(
         {
@@ -195,15 +192,13 @@ export class BusinessController {
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
   public async updateStatus(
-    @Param('uuid') uuid: string,
-    @Param('businessId') businessId: string,
+    @ParamModel({ uuid: ':uuid', business_uuid: ':businessId'}, TransactionSchemaName) transaction: TransactionModel,
   ): Promise<TransactionActionsAwareInterface> {
     let actions: string[];
 
-    const transaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
-    if (transaction.business_uuid !== businessId) {
-      throw new ForbiddenException(`Company ${businessId} doesn't have rights on this transaction`);
-    }
+    const outputTransaction = this.transactionsService.prepareTransactionForOutput(
+      transaction.toObject({ virtuals: true }),
+    );
 
     try {
       await this.messagingService.updateStatus(transaction);
@@ -218,7 +213,7 @@ export class BusinessController {
       throw new BadRequestException(`Error occured during status update. Please try again later. ${e.message}`);
     }
 
-    const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
+    const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(transaction.uuid);
     // Send update to checkout-php
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
@@ -227,7 +222,7 @@ export class BusinessController {
     }
 
     try {
-      actions = await this.messagingService.getActionsList(transaction);
+      actions = await this.messagingService.getActionsList(outputTransaction);
     } catch (e) {
       this.logger.error(
         {
@@ -245,9 +240,7 @@ export class BusinessController {
   @Get('settings')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
-  public async getSettings(
-    @Param('businessId') businessId: string,
-  ): Promise<any> {
+  public async getSettings(): Promise<any> {
     return {
       columns_to_show: [
         'created_at',

@@ -1,5 +1,7 @@
 import { Schema } from 'mongoose';
 
+export const BusinessPaymentOptionSchemaName = 'BusinessPaymentOption';
+
 export const BusinessPaymentOptionSchema = new Schema(
   {
     // _id: { type: String },
