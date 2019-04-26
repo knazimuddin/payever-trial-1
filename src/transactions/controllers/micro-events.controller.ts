@@ -206,6 +206,6 @@ export class MicroEventsController {
   })
   public async onPaymentCodeUpdatedEvent(msg: { data: {} }): Promise<void> {
     const data = this.messageBusService.unwrapMessage<CodeUpdatedDto>(msg.data);
-    await this.transactionsService.findOneAndUpdate({_id: data.paymentId}, {invoice_id: data.invoiceId});
+    await this.transactionsService.findOneAndUpdate({original_id: data.payment_id}, {invoice_id: data.invoice_id});
   }
 }
