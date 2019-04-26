@@ -5,6 +5,7 @@ import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
 
+import { CodeUpdatedDto } from '../dto';
 import { BusinessPaymentOptionService, PaymentFlowService, TransactionsService } from '../services';
 import { StatisticsService } from '../services/statistics.service';
 
@@ -190,11 +191,21 @@ export class MicroEventsController {
     name: RabbitRoutingKeys.PaymentFlowRemoved,
     origin: 'rabbitmq',
   })
-  public async onPaymentFlowRemovedEvent(msg: any) {
+  public async onPaymentFlowRemovedEvent(msg: { data: {} }) {
     const data = this.messageBusService.unwrapMessage<any>(msg.data);
     this.logger.log({ text: 'FLOW.REMOVE', data });
     const flow: any = data.flow;
     await this.flowService.removeById(flow.id);
     this.logger.log('FLOW.REMOVE COMPLETED');
+  }
+
+  @MessagePattern({
+    channel: RabbitChannels.Transactions,
+    name: RabbitRoutingKeys.CodeUpdated,
+    origin: 'rabbitmq',
+  })
+  public async onPaymentCodeUpdatedEvent(msg: { data: {} }): Promise<void> {
+    const data = this.messageBusService.unwrapMessage<CodeUpdatedDto>(msg.data);
+    await this.transactionsService.findOneAndUpdate({original_id: data.payment_id}, {invoice_id: data.invoice_id});
   }
 }

@@ -1,14 +1,12 @@
 import { Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ApmModule } from '@pe/nest-kit/modules/apm';
-import { JwtAuthModule } from '@pe/nest-kit/modules/auth';
-import { CommandModule } from '@pe/nest-kit/modules/command';
+import { ApmModule, CommandModule, JwtAuthModule, RabbitMqModule } from '@pe/nest-kit';
 import { NestKitLoggingModule } from '@pe/nest-kit/modules/logging';
 import { StatusModule } from '@pe/nest-kit/modules/status';
 
 import { environment } from './environments';
+import { TransactionsEsSearch } from './esTransactions/esTransactions.module';
 import { TransactionsModule } from './transactions/transactions.module';
-import { TransactionsEsSearch } from "./esTransactions/esTransactions.module";
 
 @Module({
   imports: [
@@ -34,6 +32,7 @@ import { TransactionsEsSearch } from "./esTransactions/esTransactions.module";
       environment.apm.options,
     ),
     CommandModule,
+    RabbitMqModule.forRoot(environment.rabbitmq),
   ],
   providers: [
   ],

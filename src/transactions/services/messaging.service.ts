@@ -12,12 +12,10 @@ import { PaymentFlowService } from './payment-flow.service';
 
 import { PaymentsMicroService } from './payments-micro.service';
 import { TransactionsService } from './transactions.service';
+import { InjectRabbitMqClient, RabbitMqClient } from '@pe/nest-kit';
 
 @Injectable()
 export class MessagingService {
-  private readonly stubMessageName: string = 'payment_option.stub_proxy.sandbox';
-  private rabbitClient: RabbitmqClient;
-
   private messageBusService: MessageBusService = new MessageBusService(
     {
       rsa: environment.rsa,
@@ -32,8 +30,8 @@ export class MessagingService {
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly flowService: PaymentFlowService,
     private readonly paymentMicroService: PaymentsMicroService,
+    @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
   ) {
-    this.rabbitClient = new RabbitmqClient(environment.rabbitmq, this.logger);
   }
 
   public getBusinessPaymentOption(transaction: any) {
