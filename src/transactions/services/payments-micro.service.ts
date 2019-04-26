@@ -60,6 +60,7 @@ export class PaymentsMicroService {
       case 'santander_invoice_de':
         return 'payment_santander_invoice_de';
       case 'santander_factoring_de':
+      case 'santander_pos_factoring_de':
         return 'payment_santander_factoring_de';
       case 'santander_installment_no':
       case 'santander_pos_installment_no':
