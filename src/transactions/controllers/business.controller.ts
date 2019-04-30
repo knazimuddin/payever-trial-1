@@ -2,15 +2,16 @@ import {
   BadRequestException,
   Body,
   Controller,
+  ForbiddenException,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
+  Logger,
   NotFoundException,
   Param,
-  Post,
-  Query,
-  UseGuards,
-  ForbiddenException, Header, Res, Logger,
+  Patch,
+  Post, Query, Res, UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
@@ -24,6 +25,8 @@ import {
   TransactionsService,
   DtoValidationService,
 } from '../services';
+import { TransactionUpdateDto } from '../dto/transaction-update.dto';
+import { classToPlain } from 'class-transformer';
 
 @Controller('business/:businessId')
 @ApiUseTags('business')
@@ -213,6 +216,15 @@ export class BusinessController {
     }
 
     return { ...updatedTransaction, actions };
+  }
+
+  @Patch('/:uuid')
+  @Roles(RolesEnum.anonymous)
+  public async patch(
+    @Param('uuid') uuid: string,
+    @Body() transactionUpdateDto: TransactionUpdateDto,
+  ) {
+    return this.transactionsService.update(uuid, transactionUpdateDto);
   }
 
   @Get('settings')

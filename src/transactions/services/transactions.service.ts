@@ -5,6 +5,8 @@ import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notificati
 import { Model } from 'mongoose';
 import { client } from '../es-temp/transactions-search';
 import { ProductUuid } from '../tools/product-uuid';
+import { TransactionUpdateDto } from '../dto/transaction-update.dto';
+import { classToPlain } from 'class-transformer';
 
 @Injectable()
 export class TransactionsService {
@@ -67,6 +69,10 @@ export class TransactionsService {
       })
       .catch(console.log);
   };
+
+  public async update(uuid, data: TransactionUpdateDto) {
+    return this.transactionsModel.findOneAndUpdate({uuid}, classToPlain(data), {new: true});
+  }
 
   public async updateByUuid(uuid, data: any) {
     // a bit dirty, sorry
@@ -194,6 +200,10 @@ export class TransactionsService {
   }
 
   private setSantanderApplication(transaction: any): void {
+    if (!transaction.payment_details) {
+      return;
+    }
+
     transaction.santander_applications = [];
 
     if (transaction.payment_details.finance_id) {
