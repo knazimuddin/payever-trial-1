@@ -6,6 +6,7 @@ import { StatusModule } from '@pe/nest-kit/modules/status';
 
 import { environment } from './environments';
 import { TransactionsEsSearch } from './esTransactions/esTransactions.module';
+import { IntegrationModule } from './integration';
 import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
@@ -31,6 +32,7 @@ import { TransactionsModule } from './transactions/transactions.module';
     StatusModule.forRoot({
       sideAppPort: environment.statusPort,
     }),
+    IntegrationModule,
     TransactionsModule,
     TransactionsEsSearch,
   ],
