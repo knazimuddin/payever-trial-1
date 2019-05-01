@@ -146,6 +146,10 @@ export const environment: any = {
             source: 'async_events',
             routingKey: RabbitRoutingKeys.PaymentFlowMigrate,
           },
+          {
+            source: 'async_events',
+            routingKey: RabbitRoutingKeys.CodeUpdated,
+          },
         ],
       },
     ],

@@ -11,19 +11,22 @@ import {
   NotFoundException,
   Param,
   Patch,
-  Post, Query, Res, UseGuards,
+  Post,
+  Query,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-import * as moment from 'moment'
+import * as moment from 'moment';
 
 import { ActionPayloadDto } from '../dto';
 
 import {
+  DtoValidationService,
   MessagingService,
   TransactionsGridService,
   TransactionsService,
-  DtoValidationService,
 } from '../services';
 import { TransactionUpdateDto } from '../dto/transaction-update.dto';
 import { classToPlain } from 'class-transformer';
@@ -60,6 +63,7 @@ export class BusinessController {
       condition: 'is',
       value: businessId,
     };
+
     return this.transactionsGridService.getList(filters, orderBy, direction, search, +page, +limit);
   }
 
