@@ -10,7 +10,11 @@ import {
   Logger,
   NotFoundException,
   Param,
-  Post, Query, Res, UseGuards,
+  Patch,
+  Post,
+  Query,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
@@ -24,6 +28,8 @@ import {
   TransactionsGridService,
   TransactionsService,
 } from '../services';
+import { TransactionUpdateDto } from '../dto/transaction-update.dto';
+import { classToPlain } from 'class-transformer';
 
 @Controller('business/:businessId')
 @ApiUseTags('business')
@@ -214,6 +220,15 @@ export class BusinessController {
     }
 
     return { ...updatedTransaction, actions };
+  }
+
+  @Patch('/:uuid')
+  @Roles(RolesEnum.anonymous)
+  public async patch(
+    @Param('uuid') uuid: string,
+    @Body() transactionUpdateDto: TransactionUpdateDto,
+  ) {
+    return this.transactionsService.update(uuid, transactionUpdateDto);
   }
 
   @Get('settings')
