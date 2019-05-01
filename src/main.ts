@@ -25,7 +25,8 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('/api');
-  app.use(cors());
+  // app.use(cors());
+  app.enableCors({ maxAge: 600 });
 
   const options = new DocumentBuilder()
     .setTitle('Transactions')
