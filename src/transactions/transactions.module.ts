@@ -2,9 +2,9 @@ import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
-import { TransactionsExportCommand } from './command/transactions-export.command';
 
-import {TransactionsEsExportCommand} from './command/transactions-export-to-es.command';
+import { TransactionsEsExportCommand } from './command/transactions-export-to-es.command';
+import { TransactionsExportCommand } from './command/transactions-export.command';
 import {
   AdminController,
   BusinessController,
