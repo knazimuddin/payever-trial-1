@@ -88,7 +88,7 @@ export class TransactionsGridService {
     });
   }
 
-  public async findMany(filters = {}, sort = {}, search = null, page: number = null, limit = null) {
+  public async findMany(filters:any = {}, sort = {}, search = null, page: number = null, limit = null) {
     const mongoFilters: any = {};
     if (filters) {
       this.addFilters(mongoFilters, filters);
@@ -248,6 +248,8 @@ export class TransactionsGridService {
       }
       let condition;
       let timeStamps;
+      let from;
+      let to;
       switch (_filter.condition) {
         case FilterConditionEnum.Is:
           condition = {};
@@ -324,9 +326,11 @@ export class TransactionsGridService {
         case FilterConditionEnum.Between:
           condition = {};
           condition[field] = {};
+          from = _filter.value.map(elem => parseInt(elem.from, 10));
+          to = _filter.value.map(elem => parseInt(elem.to, 10));
           condition[field] = {
-            $gte: _filter.value.from,
-            $lte: _filter.value.to,
+            $lte: Math.max(...from),
+            $gte: Math.min(...to),
           };
           mongoFilters.$and.push(condition);
           break;
@@ -379,8 +383,8 @@ export class TransactionsGridService {
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.BetweenDates:
-          const from = _filter.value.map(elem => this.getTargetDate(elem.dateFrom).getTime());
-          const to = _filter.value.map(elem => this.getTargetTomorrowDate(elem.dateTo).getTime());
+          from = _filter.value.map(elem => this.getTargetDate(elem.dateFrom).getTime());
+          to = _filter.value.map(elem => this.getTargetTomorrowDate(elem.dateTo).getTime());
           condition = {};
           condition[field] = {};
           condition[field] = {
