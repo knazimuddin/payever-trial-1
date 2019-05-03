@@ -329,8 +329,8 @@ export class TransactionsGridService {
           from = _filter.value.map(elem => parseInt(elem.from, 10));
           to = _filter.value.map(elem => parseInt(elem.to, 10));
           condition[field] = {
-            $lte: Math.max(...from),
-            $gte: Math.min(...to),
+            $gte: Math.max(...from),
+            $lte: Math.min(...to),
           };
           mongoFilters.$and.push(condition);
           break;
@@ -389,7 +389,7 @@ export class TransactionsGridService {
           condition[field] = {};
           condition[field] = {
             $gte: Math.max(from),
-            $lt: Math.min(to),
+            $lte: Math.min(to),
           };
           mongoFilters.$and.push(condition);
           break;
