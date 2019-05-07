@@ -226,8 +226,7 @@ export class MessagingService {
       payment: transaction,
       payment_details: transaction.payment_details,
       business: {
-        // dummy id - php guys say it does not affect anything... but can we trust it?)
-        id: 1,
+        id: transaction.business_uuid,
       },
     };
 
