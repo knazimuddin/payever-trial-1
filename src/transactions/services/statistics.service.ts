@@ -13,37 +13,29 @@ export class StatisticsService {
   ) {
   }
 
-  public async processAcceptedTransaction(id: string, updating: any) {
-    const existing = await this.transactionsModel.findOne({ uuid: id }).lean();
-
-    if (!existing) {
-      return;
-    }
-
-    if (existing.status !== updating.status && updating.status === 'STATUS_ACCEPTED') {
-      await this.rabbitClient
-        .sendAsync(
-          {
-            channel: RabbitRoutingKeys.TransactionsPaymentAdd,
-            exchange: 'async_events',
+  public async processAcceptedTransaction(transaction: any) {
+    await this.rabbitClient
+    .sendAsync(
+      {
+        channel: RabbitRoutingKeys.TransactionsPaymentAdd,
+        exchange: 'async_events',
+      },
+      {
+        name: RabbitRoutingKeys.TransactionsPaymentAdd,
+        payload: {
+          id: transaction.uuid,
+          amount: transaction.amount,
+          date: transaction.updated_at,
+          items: transaction.items,
+          channel_set: {
+            id: transaction.channel_set_uuid,
           },
-          {
-            name: RabbitRoutingKeys.TransactionsPaymentAdd,
-            payload: {
-              id: existing.uuid,
-              amount: updating.amount,
-              date: updating.updated_at,
-              items: existing.items,
-              channel_set: {
-                id: existing.channel_set_uuid,
-              },
-              business: {
-                id: existing.business_uuid,
-              },
-            },
+          business: {
+            id: transaction.business_uuid,
           },
-        );
-    }
+        },
+      },
+    );
   }
 
   public async processMigratedTransaction(transaction: any) {
