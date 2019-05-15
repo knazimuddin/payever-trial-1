@@ -94,13 +94,23 @@ export class MicroEventsController {
       );
     }
 
-    const transactionExists = await this.transactionsService.exists(transaction.uuid);
+    const transactionExists = await this.transactionsService.findOneByUuid(transaction.uuid);
     if (!transactionExists) {
+      if (transaction.status === 'STATUS_ACCEPTED') {
+        await this.statisticsService.processAcceptedTransaction(transaction);
+      }
       await this.transactionsService.create(transaction);
       this.logger.log({ text: 'PAYMENT.CREATE', data });
     }
     else {
-      await this.statisticsService.processAcceptedTransaction(transaction.uuid, transaction);
+      if (transactionExists.status !== transaction.status && transaction.status === 'STATUS_ACCEPTED') {
+        await this.statisticsService.processAcceptedTransaction({
+          ...transaction,
+          items: transactionExists.items,
+          channel_set_uuid: transactionExists.channel_set_uuid,
+          business_uuid: transactionExists.business_uuid,
+        });
+      }
       await this.transactionsService.updateByUuid(transaction.uuid, transaction);
       this.logger.log({ text: 'PAYMENT.UPDATE', data });
     }
@@ -209,3 +219,6 @@ export class MicroEventsController {
     await this.transactionsService.findOneAndUpdate({original_id: data.payment_id}, {invoice_id: data.invoice_id});
   }
 }
+
+// {"severity":"INFO","applicationId":"nodejs-backend-transactions","timestamp":"2019-05-14T14:12:43.129Z","channel":"device_payments.code.updated","message":"{\"fields\":{\"consumerTag\":\"amq.ctag-S9uhBa1xfwsYUC2WGTqsvw\",\"deliveryTag\":23096,\"redelivered\":false,\"exchange\":\"async_events\",\"routingKey\":\"device_payments.code.updated\"},\"properties\":{\"headers\":{}},\"content\":{\"name\":\"device_payments.code.updated\",\"payload\":null}}","context":"RabbitMQServer"}
+// {"severity":"ERROR","applicationId":"nodejs-backend-transactions","timestamp":"2019-05-14T14:12:43.130Z","message":"Incoming rabbit message should have a payload. Original message: [object Object]","context":"RpcExceptionsHandler","trace":"Error: Incoming rabbit message should have a payload. Original message: [object Object]\n    at MessageBusService.unwrapMessage (/payever/node_modules/@pe/nest-kit/src/message/message-bus.service.ts:94:13)\n    at MicroEventsController.<anonymous> (/payever/src/transactions/controllers/micro-events.controller.ts:208:41)\n    at Generator.next (<anonymous>)\n    at /payever/src/transactions/controllers/micro-events.controller.ts:16:71\n    at new Promise (<anonymous>)\n    at __awaiter (/payever/src/transactions/controllers/micro-events.controller.ts:12:12)\n    at MicroEventsController.onPaymentCodeUpdatedEvent (/payever/src/transactions/controllers/micro-events.controller.ts:149:16)\n    at /payever/node_modules/@nestjs/microservices/context/rpc-context-creator.js:27:29\n    at process._tickCallback (internal/process/next_tick.js:68:7)"}

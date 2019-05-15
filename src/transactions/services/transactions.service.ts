@@ -111,10 +111,8 @@ export class TransactionsService {
     return this.transactionsModel.findOneAndUpdate(conditions, update);
   }
 
-  public async exists(uuid: string): Promise<boolean> {
-    const transaction = await this.transactionsModel.findOne({ uuid });
-
-    return !!transaction;
+  public async findOneByUuid(uuid: string) {
+    return await this.transactionsModel.findOne({ uuid });
   }
 
   public async findOne(uuid: string) {
