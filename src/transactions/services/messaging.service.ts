@@ -1,18 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { v4 as uuid } from 'uuid';
+import { InjectRabbitMqClient, RabbitMqClient } from '@pe/nest-kit';
 
-import { MessageBusService, MessageInterface } from '@pe/nest-kit/modules/message';
-import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
+import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { of } from 'rxjs';
 import { catchError, map, take, timeout } from 'rxjs/operators';
+import { v4 as uuid } from 'uuid';
 
 import { environment } from '../../environments';
+import { NextActionDto } from '../dto/next-action.dto';
 import { BusinessPaymentOptionService } from './business-payment-option.service';
 import { PaymentFlowService } from './payment-flow.service';
 
 import { PaymentsMicroService } from './payments-micro.service';
 import { TransactionsService } from './transactions.service';
-import { InjectRabbitMqClient, RabbitMqClient } from '@pe/nest-kit';
 
 @Injectable()
 export class MessagingService {
@@ -121,7 +121,22 @@ export class MessagingService {
     this.transactionsService.prepareTransactionForInsert(updatedTransaction);
     await this.transactionsService.updateByUuid(updatedTransaction.uuid, updatedTransaction);
 
+    if (rpcResult && rpcResult.next_action) {
+      await this.runNextAction(updatedTransaction, rpcResult.next_action);
+    }
+
     return updatedTransaction;
+  }
+
+  public async runNextAction(transaction, nextAction: NextActionDto) {
+    switch (nextAction.type) {
+      case 'action':
+        // stub for action behaviour
+        break;
+      case 'external_capture':
+        await this.externalCapture(nextAction.payment_method, nextAction.payload);
+        break;
+    }
   }
 
   public async updateStatus(transaction) {
@@ -157,6 +172,20 @@ export class MessagingService {
     await this.transactionsService.updateByUuid(transaction.uuid, updatedTransaction);
 
     return transaction;
+  }
+
+  public async externalCapture(paymentMethod, payload) {
+    return this.rabbitClient.callAsync(
+      {
+        channel: this.paymentMicroService.getChannelByPaymentType(paymentMethod, environment.stub),
+      },
+      this.paymentMicroService.createPaymentMicroMessage(
+        paymentMethod,
+        'external_capture',
+        payload,
+        environment.stub,
+      ),
+    );
   }
 
   public async sendTransactionUpdate(transaction) {
