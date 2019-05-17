@@ -61,6 +61,7 @@ export const TransactionUploadItemSchema = new Schema({
 export const TransactionHistoryEntrySchema = new Schema({
   action: String,
   amount: Number,
+  reference: String,
   created_at: Date,
   is_restock_items: Boolean,
   params: String,
