@@ -247,8 +247,6 @@ export class MessagingService {
     this.fixId(transaction);
 
     transaction.address = transaction.billing_address;
-    // @TODO this should be done on BE side
-    transaction.reference = transaction.uuid;
 
     dto = {
       ...dto,
