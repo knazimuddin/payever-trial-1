@@ -83,6 +83,8 @@ export class PaymentsMicroService {
       case 'payex_creditcard':
       case 'payex_faktura':
         return 'payment_payex';
+      case 'cash':
+        return 'payment_wiretransfer';
       default:
         return null;
     }
