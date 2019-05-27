@@ -2,16 +2,11 @@ import {
   BadRequestException,
   Body,
   Controller,
-  ForbiddenException,
   Get,
-  Header,
   HttpCode,
   HttpStatus,
   Logger,
-  Logger,
-  NotFoundException,
   Param,
-  Patch,
   Post,
   Query,
   Res,
@@ -25,15 +20,7 @@ import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionActionsAwareInterface } from '../interfaces';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
-import * as moment from 'moment';
-import {
-  DtoValidationService,
-  MessagingService,
-  TransactionsGridService,
-  TransactionsService,
-} from '../services';
-import { TransactionUpdateDto } from '../dto/transaction-update.dto';
-import { classToPlain } from 'class-transformer';
+import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
 
 @Controller('business/:businessId')
 @ApiUseTags('business')
@@ -247,15 +234,6 @@ export class BusinessController {
     }
 
     return { ...updatedTransaction, actions };
-  }
-
-  @Patch('/:uuid')
-  @Roles(RolesEnum.anonymous)
-  public async patch(
-    @Param('uuid') uuid: string,
-    @Body() transactionUpdateDto: TransactionUpdateDto,
-  ) {
-    return this.transactionsService.update(uuid, transactionUpdateDto);
   }
 
   @Get('settings')

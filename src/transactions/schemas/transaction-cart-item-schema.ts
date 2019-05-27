@@ -2,7 +2,7 @@ import { Schema } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 
 export const TransactionCartItemSchema = new Schema({
-  _id: { type: String, default: uuid },
+  _id: String,
   uuid: String,
   created_at: Date,
   description: String,
@@ -23,4 +23,8 @@ export const TransactionCartItemSchema = new Schema({
   url: String,
   vat_rate: Number,
   weight: Number,
+});
+
+TransactionCartItemSchema.post('init', function() {
+  this.uuid = this.uuid || this._id;
 });

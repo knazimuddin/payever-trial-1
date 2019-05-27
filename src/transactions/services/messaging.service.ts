@@ -4,11 +4,10 @@ import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { of } from 'rxjs';
 import { catchError, map, take, timeout } from 'rxjs/operators';
 import { v4 as uuid } from 'uuid';
-
 import { environment } from '../../environments';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { PaymentFlowModel, TransactionModel } from '../models';
 import { NextActionDto } from '../dto/next-action.dto';
+import { PaymentFlowModel, TransactionModel } from '../models';
 import { BusinessPaymentOptionService } from './business-payment-option.service';
 import { PaymentFlowService } from './payment-flow.service';
 import { PaymentsMicroService } from './payments-micro.service';
@@ -136,6 +135,7 @@ export class MessagingService {
     await this.transactionsService.applyActionRpcResult(transaction, rpcResult);
 
     if (rpcResult && rpcResult.next_action) {
+      const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(transaction.uuid);
       await this.runNextAction(updatedTransaction, rpcResult.next_action);
     }
   }

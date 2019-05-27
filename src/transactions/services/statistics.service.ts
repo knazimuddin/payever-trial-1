@@ -6,14 +6,14 @@ import { Model } from 'mongoose';
 import { RabbitRoutingKeys } from '../../enums';
 import { TransactionInterface } from '../interfaces';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
+import { TransactionModel } from '../models';
 
 @Injectable()
 export class StatisticsService {
 
   constructor(
-    @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
+    @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
-    private readonly logger: Logger,
   ) {
   }
 

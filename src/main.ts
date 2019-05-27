@@ -3,12 +3,6 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { RABBITMQ_SERVER } from '@pe/nest-kit';
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
-import * as APM from 'elastic-apm-node';
-
-import { RABBITMQ_SERVER } from '@pe/nest-kit';
-import * as cors from 'cors';
 import * as APM from 'elastic-apm-node';
 
 import { AppModule } from './app.module';

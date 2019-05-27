@@ -6,6 +6,7 @@ export const TransactionHistoryEntrySchema = new Schema({
   // _id: { type: String, default: uuid },
   action: String,
   amount: Number,
+  reference: String,
   created_at: Date,
   is_restock_items: Boolean,
   params: String,

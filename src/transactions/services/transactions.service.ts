@@ -5,7 +5,6 @@ import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notificati
 import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 import { TransactionCartConverter, TransactionSantanderApplicationConverter } from '../converter';
-
 import { RpcResultDto } from '../dto';
 import { client } from '../es-temp/transactions-search';
 import {
