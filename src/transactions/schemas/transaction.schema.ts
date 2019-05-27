@@ -47,6 +47,7 @@ export const TransactionSchema = new Schema({
   type: { type: String, required: true },
   updated_at: Date,
   user_uuid: String,
+  invoice_id: String,
 });
 
 TransactionSchema.index({ uuid: 1});

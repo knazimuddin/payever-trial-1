@@ -16,20 +16,23 @@ export const environment: any = {
   mongodb: env.MONGODB_URL,
   connectMicroUrlBase: env.MICRO_URL_CONNECT,
   statusPort: env.STATUS_APP_PORT,
-
   stub: env.STUB === 'true',
   elasticSearch: env.ELASTIC_HOST,
-  refreshTokenExpiresIn: (isNumeric(env.JWT_REFRESH_TOKEN_EXPIRES_IN) ?
-    parseInt(env.JWT_REFRESH_TOKEN_EXPIRES_IN, 10) :
-    env.JWT_REFRESH_TOKEN_EXPIRES_IN),
+  refreshTokenExpiresIn: (
+    isNumeric(env.JWT_REFRESH_TOKEN_EXPIRES_IN)
+      ? parseInt(env.JWT_REFRESH_TOKEN_EXPIRES_IN, 10)
+      : env.JWT_REFRESH_TOKEN_EXPIRES_IN
+  ),
   jwtOptions: {
     // this should be set to PEM encoded private key for RSA/ECDSA for production
     // @see https://github.com/auth0/node-jsonwebtoken#jwtsignpayload-secretorprivatekey-options-callback
     secretOrPrivateKey: env.JWT_SECRET_TOKEN,
     signOptions: {
-      expiresIn: (isNumeric(env.JWT_EXPIRES_IN) ?
-        parseInt(env.JWT_EXPIRES_IN, 10) :
-        env.JWT_EXPIRES_IN),
+      expiresIn: (
+        isNumeric(env.JWT_EXPIRES_IN)
+          ? parseInt(env.JWT_EXPIRES_IN, 10)
+          : env.JWT_EXPIRES_IN
+      ),
     },
   },
   rabbitmq: {

@@ -15,11 +15,16 @@ import {
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { snakeCase } from 'lodash';
+
 import { ActionPayloadDto } from '../dto';
 import { TransactionActionsAwareInterface } from '../interfaces';
 import { TransactionModel } from '../models';
-
-import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
+import {
+  DtoValidationService,
+  MessagingService,
+  TransactionsGridService,
+  TransactionsService,
+} from '../services';
 
 // TODO: unify with business controller
 @Controller('admin')

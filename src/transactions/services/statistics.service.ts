@@ -13,7 +13,9 @@ export class StatisticsService {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
     @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
-  ) {}
+    private readonly logger: Logger,
+  ) {
+  }
 
   /**
    * This method should be called right before updating transaction

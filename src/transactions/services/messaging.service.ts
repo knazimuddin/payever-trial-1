@@ -3,10 +3,12 @@ import { InjectRabbitMqClient, RabbitMqClient } from '@pe/nest-kit';
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { of } from 'rxjs';
 import { catchError, map, take, timeout } from 'rxjs/operators';
+import { v4 as uuid } from 'uuid';
 
 import { environment } from '../../environments';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { PaymentFlowModel, TransactionModel } from '../models';
+import { NextActionDto } from '../dto/next-action.dto';
 import { BusinessPaymentOptionService } from './business-payment-option.service';
 import { PaymentFlowService } from './payment-flow.service';
 import { PaymentsMicroService } from './payments-micro.service';
@@ -132,6 +134,21 @@ export class MessagingService {
     });
 
     await this.transactionsService.applyActionRpcResult(transaction, rpcResult);
+
+    if (rpcResult && rpcResult.next_action) {
+      await this.runNextAction(updatedTransaction, rpcResult.next_action);
+    }
+  }
+
+  public async runNextAction(transaction, nextAction: NextActionDto) {
+    switch (nextAction.type) {
+      case 'action':
+        // stub for action behaviour
+        break;
+      case 'external_capture':
+        await this.externalCapture(nextAction.payment_method, nextAction.payload);
+        break;
+    }
   }
 
   public async updateStatus(transaction: TransactionModel): Promise<void> {
@@ -157,6 +174,20 @@ export class MessagingService {
       context: 'MessagingService',
     });
     await this.transactionsService.applyRpcResult(transaction, rpcResult);
+  }
+
+  public async externalCapture(paymentMethod, payload) {
+    return this.rabbitClient.callAsync(
+      {
+        channel: this.paymentMicroService.getChannelByPaymentType(paymentMethod, environment.stub),
+      },
+      this.paymentMicroService.createPaymentMicroMessage(
+        paymentMethod,
+        'external_capture',
+        payload,
+        environment.stub,
+      ),
+    );
   }
 
   public async sendTransactionUpdate(transaction: TransactionModel): Promise<void> {
@@ -262,8 +293,7 @@ export class MessagingService {
       payment: payload,
       payment_details: transaction.payment_details,
       business: {
-        // dummy id - php guys say it does not affect anything... but can we trust it?)
-        id: 1,
+        id: transaction.business_uuid,
       },
     };
 
