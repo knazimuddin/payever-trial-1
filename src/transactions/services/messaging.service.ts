@@ -262,14 +262,14 @@ export class MessagingService {
   }
 
   private async createPayloadData(transaction: TransactionModel) {
-    const payload: any = Object.assign({}, transaction); // making clone before manipulations
+    const payload: any = transaction.toObject({ virtuals: true }); // making clone before manipulations
 
     try {
       payload.payment_details = JSON.parse(transaction.payment_details);
     } catch (e) {
       this.logger.log({
         message: 'Error during creation of payload data',
-        transaction: transaction,
+        transaction: payload,
         error: e.message,
         context: 'MessagingService',
       });
@@ -291,7 +291,7 @@ export class MessagingService {
     dto = {
       ...dto,
       payment: payload,
-      payment_details: transaction.payment_details,
+      payment_details: payload.payment_details,
       business: {
         id: transaction.business_uuid,
       },
@@ -309,7 +309,7 @@ export class MessagingService {
       this.logger.error(
         {
           message: `Transaction ${transaction.uuid} -> Cannot resolve payment flow`,
-          transaction: transaction,
+          transaction: payload,
           error: e,
           context: 'MessagingService',
         },
@@ -322,7 +322,7 @@ export class MessagingService {
       this.logger.error(
         {
           message: `Transaction ${transaction.uuid} -> Payment flow cannot be null`,
-          transaction: transaction,
+          transaction: payload,
           context: 'MessagingService',
         },
       );
@@ -334,13 +334,13 @@ export class MessagingService {
     this.logger.log(
       {
         message: `Transaction ${transaction.uuid} dto credentials`,
-        transaction: transaction,
+        transaction: payload,
         credentials: dto.credentials,
         context: 'MessagingService',
       },
     );
 
-    if (transaction.payment_flow_id) {
+    if (payload.payment_flow_id) {
       dto.payment_flow = paymentFlow;
       dto.payment_flow.business_payment_option = businessPaymentOption;
     }

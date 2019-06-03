@@ -189,7 +189,8 @@ export class BusinessController {
 
   @Get(':uuid/update-status')
   @HttpCode(HttpStatus.OK)
-  @Roles(RolesEnum.merchant)
+  // @Roles(RolesEnum.merchant)
+  @Roles(RolesEnum.anonymous)
   public async updateStatus(
     @ParamModel({ uuid: ':uuid', business_uuid: ':businessId'}, TransactionSchemaName) transaction: TransactionModel,
   ): Promise<TransactionActionsAwareInterface> {
@@ -198,6 +199,9 @@ export class BusinessController {
     const outputTransaction = this.transactionsService.prepareTransactionForOutput(
       transaction.toObject({ virtuals: true }),
     );
+
+    console.log('outputTransaction');
+    console.log(outputTransaction);
 
     try {
       await this.messagingService.updateStatus(transaction);
@@ -211,6 +215,8 @@ export class BusinessController {
       );
       throw new BadRequestException(`Error occured during status update. Please try again later. ${e.message}`);
     }
+
+    console.log('############# After updateStatus');
 
     const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(transaction.uuid);
     // Send update to checkout-php
