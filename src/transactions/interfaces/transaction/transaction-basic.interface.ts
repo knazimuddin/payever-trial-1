@@ -2,6 +2,7 @@ import { AddressInterface } from '../address.interface';
 import { SantanderApplicationAwareInterface } from '../awareness';
 import { TransactionCartItemInterface } from './transaction-cart-item.interface';
 import { TransactionHistoryEntryInterface } from './transaction-history-entry.interface';
+import { TransactionRefundItemInterface } from './transaction-refund-item.interface';
 
 export interface TransactionBasicInterface extends SantanderApplicationAwareInterface {
   id: string;
@@ -11,6 +12,7 @@ export interface TransactionBasicInterface extends SantanderApplicationAwareInte
   amount: number;
   amount_refunded?: number;
   amount_rest?: number;
+  available_refund_items?: TransactionRefundItemInterface[];
   billing_address: AddressInterface;
   business_option_id: number;
   business_uuid: string;

@@ -12,6 +12,7 @@ export class TransactionPaymentDetailsConverter {
       original_id: transaction.original_id,
       uuid: transaction.uuid,
       action_running: transaction.action_running,
+      available_refund_items: transaction.available_refund_items,
       amount: transaction.amount,
       amount_refunded: transaction.amount_refunded,
       amount_rest: transaction.amount_rest,
@@ -32,10 +33,12 @@ export class TransactionPaymentDetailsConverter {
       items: transaction.items,
       merchant_email: transaction.merchant_email,
       merchant_name: transaction.merchant_name,
+      payment_details: {},
       payment_fee: transaction.payment_fee,
       payment_flow_id: transaction.payment_flow_id,
       place: transaction.place,
       reference: transaction.reference,
+      santander_applications: transaction.santander_applications,
       shipping_address: transaction.shipping_address,
       shipping_category: transaction.shipping_category,
       shipping_method_name: transaction.shipping_method_name,
@@ -49,7 +52,6 @@ export class TransactionPaymentDetailsConverter {
       type: transaction.type,
       updated_at: transaction.updated_at,
       user_uuid: transaction.user_uuid,
-      payment_details: {},
     };
 
     try {
