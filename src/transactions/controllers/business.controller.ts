@@ -103,11 +103,9 @@ export class BusinessController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
   ) {
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+    return TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
-
-    return { ...unpackedTransaction };
   }
 
   @Get('detail/:uuid')

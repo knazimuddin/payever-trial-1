@@ -6,17 +6,20 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
-  NotFoundException,
   Param,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
+import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
+import { TransactionPaymentDetailsConverter } from '../converter/transaction-payment-details.converter';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { ActionsAwareInterface } from '../interfaces/awareness';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import { TransactionModel } from '../models';
+import { TransactionSchemaName } from '../schemas';
 import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
 
 // TODO: unify with business controller
@@ -56,32 +59,35 @@ export class AdminController {
   @Get('detail/reference/:reference')
   @HttpCode(HttpStatus.OK)
   public async getDetailByReference(
-    @Param('reference') reference: string,
+    @ParamModel(
+      {
+        reference: ':reference',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
   ) {
-    const transaction = await this.transactionsService.findUnpackedByParams({ reference });
-
-    if (!transaction) {
-      throw new NotFoundException(`Transaction not found.`);
-    }
-
-    return { ...transaction };
+    return TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
   }
 
   @Get('detail/:uuid')
   @HttpCode(HttpStatus.OK)
   public async getDetail(
-    @Param('uuid') uuid: string,
+    @ParamModel(
+      {
+        uuid: ':uuid',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
   ): Promise<any> {
     let actions = [];
-    const transaction: TransactionUnpackedDetailsInterface =
-      await this.transactionsService.findUnpackedByParams({ uuid });
-
-    if (!transaction) {
-      throw new NotFoundException(`Transaction not found.`);
-    }
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
 
     try {
-      actions = await this.messagingService.getActionsList(transaction);
+      actions = await this.messagingService.getActionsList(unpackedTransaction);
     } catch (e) {
       this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
@@ -93,24 +99,31 @@ export class AdminController {
   @Post(':uuid/action/:action')
   @HttpCode(HttpStatus.OK)
   public async runAction(
-    @Param('uuid') uuid: string,
     @Param('action') action: string,
+    @ParamModel(
+      {
+        uuid: ':uuid',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<ActionsAwareInterface> {
     let actions: string[];
 
     this.dtoValidation.checkFileUploadDto(actionPayload);
-    const transaction: TransactionUnpackedDetailsInterface = await this.transactionsService.findUnpackedByUuid(uuid);
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
 
     try {
-      await this.messagingService.runAction(transaction, action, actionPayload);
+      await this.messagingService.runAction(unpackedTransaction, action, actionPayload);
     } catch (e) {
       this.logger.log('Error occured during running action:\n', e);
       throw new BadRequestException(e.message);
     }
 
     const updatedTransaction: TransactionUnpackedDetailsInterface =
-      await this.transactionsService.findUnpackedByUuid(uuid);
+      await this.transactionsService.findUnpackedByUuid(transaction.uuid);
     // Send update to checkout-php
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
@@ -119,7 +132,7 @@ export class AdminController {
     }
 
     try {
-      actions = await this.messagingService.getActionsList(transaction);
+      actions = await this.messagingService.getActionsList(updatedTransaction);
     } catch (e) {
       this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
@@ -131,21 +144,28 @@ export class AdminController {
   @Get(':uuid/update-status')
   @HttpCode(HttpStatus.OK)
   public async updateStatus(
-    @Param('uuid') uuid: string,
+    @ParamModel(
+      {
+        uuid: ':uuid',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
   ): Promise<ActionsAwareInterface> {
     let actions: any[];
 
-    const transaction: TransactionUnpackedDetailsInterface = await this.transactionsService.findUnpackedByUuid(uuid);
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
 
     try {
-      await this.messagingService.updateStatus(transaction);
+      await this.messagingService.updateStatus(unpackedTransaction);
     } catch (e) {
       this.logger.error(`Error occured during status update: ${e}`);
       throw new BadRequestException(`Error occured during status update. Please try again later.`);
     }
 
     const updatedTransaction: TransactionUnpackedDetailsInterface =
-      await this.transactionsService.findUnpackedByUuid(uuid);
+      await this.transactionsService.findUnpackedByUuid(transaction.uuid);
     // Send update to checkout-php
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
@@ -154,7 +174,7 @@ export class AdminController {
     }
 
     try {
-      actions = await this.messagingService.getActionsList(transaction);
+      actions = await this.messagingService.getActionsList(updatedTransaction);
     } catch (e) {
       this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
       actions = [];
