@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { CheckoutPaymentDetailsAwareInterface, TransactionSantanderApplicationAwareInterface } from '../interfaces';
+import { SantanderApplicationAwareInterface, UnpackedDetailsAwareInterface } from '../interfaces/awareness';
 
 @Injectable()
 export class TransactionSantanderApplicationConverter {
 
   public static setSantanderApplication(
-    transaction: TransactionSantanderApplicationAwareInterface,
-    checkoutTransaction: CheckoutPaymentDetailsAwareInterface,
+    transaction: SantanderApplicationAwareInterface,
+    checkoutTransaction: UnpackedDetailsAwareInterface,
   ): void {
     transaction.santander_applications = [];
 

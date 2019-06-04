@@ -1,19 +1,19 @@
-import { AddressInterface } from './address.interface';
-import { BusinessInterface } from './business.interface';
-import { ChannelSetInterface } from './channel-set.interface';
-import { CheckoutPaymentDetailsAwareInterface } from './checkout-payment-details-aware.interface';
+import { AddressInterface } from '../address.interface';
+import { UnpackedDetailsAwareInterface } from '../awareness';
+import { BusinessInterface } from '../business.interface';
+import { ChannelSetInterface } from '../channel-set.interface';
+import { PaymentFlowInterface } from '../payment-flow.interface';
 import { CheckoutTransactionCartItemInterface } from './checkout-transaction-cart-item.interface';
 import { CheckoutTransactionHistoryItemInterface } from './checkout-transaction-history-item.interface';
-import { PaymentFlowInterface } from './payment-flow.interface';
 
-export interface CheckoutTransactionInterface extends CheckoutPaymentDetailsAwareInterface {
+export interface CheckoutTransactionInterface extends UnpackedDetailsAwareInterface {
   id: string;
   uuid: string;
 
-  address: AddressInterface;
-  business: BusinessInterface;
-  channel_set: ChannelSetInterface;
-  payment_flow: PaymentFlowInterface;
+  address?: AddressInterface;
+  business?: BusinessInterface;
+  channel_set?: ChannelSetInterface;
+  payment_flow?: PaymentFlowInterface;
 
   action_running: boolean;
   amount: number;
@@ -37,7 +37,7 @@ export interface CheckoutTransactionInterface extends CheckoutPaymentDetailsAwar
   payment_flow_id: string;
   place: string;
   reference: string;
-  santander_applications: string[];
+  santander_applications?: string[];
   shipping_address: AddressInterface;
   shipping_category: string;
   shipping_method_name: string;
@@ -51,5 +51,5 @@ export interface CheckoutTransactionInterface extends CheckoutPaymentDetailsAwar
   type: string;
   updated_at: Date;
   user_uuid: string;
-  payment_type: string;
+  payment_type?: string;
 }

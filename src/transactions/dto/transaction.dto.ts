@@ -1,11 +1,11 @@
+import { AddressInterface } from '../interfaces';
 import {
-  AddressInterface,
   TransactionCartItemInterface,
   TransactionHistoryEntryInterface,
-  TransactionInterface,
-} from '../interfaces';
+  TransactionPackedDetailsInterface,
+} from '../interfaces/transaction';
 
-export class TransactionDto implements TransactionInterface {
+export class TransactionDto implements TransactionPackedDetailsInterface {
   public id: string;
   public original_id: string; // id from mysql db
   public uuid: string;

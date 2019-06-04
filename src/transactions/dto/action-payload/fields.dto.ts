@@ -1,4 +1,5 @@
 import { IsOptional, ValidateNested } from 'class-validator';
+import { FieldsInterface, UnwrappedFieldsInterface } from '../../interfaces/action-payload';
 import { AuthorizeDataDto } from './authorize-data.dto';
 import { CancelDataDto } from './cancel-data.dto';
 import { CaptureDataDto } from './capture-data.dto';
@@ -10,7 +11,7 @@ import { UpdateDataDto } from './update-data.dto';
 import { UploadDataDto } from './upload-data.dto';
 import { VoidDataDto } from './void-data.dto';
 
-export class FieldsDto {
+export class FieldsDto implements FieldsInterface, UnwrappedFieldsInterface {
   /* Remove this layer of wrapping */
   @IsOptional()
   @ValidateNested()
@@ -55,4 +56,22 @@ export class FieldsDto {
   @IsOptional()
   @ValidateNested()
   public payment_reminder: ReminderDataDto;
+
+  @IsOptional()
+  public amount?: number;
+
+  @IsOptional()
+  public reason?: string | boolean;
+
+  @IsOptional()
+  public refunded_amount?: number;
+
+  @IsOptional()
+  public refundedAmount?: number;
+
+  @IsOptional()
+  public payment_items?: any[];
+
+  @IsOptional()
+  public delivery_fee?: number;
 }

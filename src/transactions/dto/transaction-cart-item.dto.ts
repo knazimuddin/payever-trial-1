@@ -1,4 +1,4 @@
-import { TransactionCartItemInterface } from '../interfaces';
+import { TransactionCartItemInterface } from '../interfaces/transaction';
 
 export class TransactionCartItemDto implements TransactionCartItemInterface {
   public _id: string;

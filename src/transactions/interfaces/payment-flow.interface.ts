@@ -1,3 +1,5 @@
+import { BusinessPaymentOptionInterface } from './business-payment-option.interface';
+
 export interface PaymentFlowInterface {
   id: string;
   amount: number;
@@ -21,4 +23,5 @@ export interface PaymentFlowInterface {
   express: boolean;
   callback: string;
   x_frame_host: string;
+  business_payment_option?: BusinessPaymentOptionInterface;
 }

@@ -4,8 +4,8 @@ import { InjectRabbitMqClient, RabbitMqClient } from '@pe/nest-kit';
 import { Model } from 'mongoose';
 
 import { RabbitRoutingKeys } from '../../enums';
-import { TransactionInterface } from '../interfaces';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
+import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class StatisticsService {
    * This method should be called right before updating transaction
    * Thus it can handle transaction status changing.
    */
-  public async processAcceptedTransaction(id: string, updating: TransactionInterface) {
+  public async processAcceptedTransaction(id: string, updating: TransactionPackedDetailsInterface) {
     const existing = await this.transactionsModel.findOne({ uuid: id }).lean();
 
     if (!existing) {

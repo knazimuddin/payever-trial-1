@@ -3,11 +3,12 @@ import { InjectRabbitMqClient, RabbitMqClient } from '@pe/nest-kit';
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { of } from 'rxjs';
 import { catchError, map, take, timeout } from 'rxjs/operators';
-import { v4 as uuid } from 'uuid';
 import { environment } from '../../environments';
-import { ActionPayloadDto } from '../dto/action-payload';
 import { NextActionDto } from '../dto/next-action.dto';
-import { PaymentFlowModel, TransactionModel } from '../models';
+import { ActionPayloadInterface, FieldsInterface, UnwrappedFieldsInterface } from '../interfaces/action-payload';
+import { CheckoutTransactionInterface, CheckoutTransactionRpcActionInterface } from '../interfaces/checkout';
+import { TransactionBasicInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import { BusinessPaymentOptionModel, PaymentFlowModel } from '../models';
 import { BusinessPaymentOptionService } from './business-payment-option.service';
 import { PaymentFlowService } from './payment-flow.service';
 import { PaymentsMicroService } from './payments-micro.service';
@@ -34,16 +35,15 @@ export class MessagingService {
     @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
   ) {}
 
-  public getBusinessPaymentOption(transaction: any) {
+  public getBusinessPaymentOption(transaction: TransactionBasicInterface): Promise<BusinessPaymentOptionModel> {
     return this.bpoService.findOneById(transaction.business_option_id);
   }
 
-  // Uncomment when payment flow will be retrieved from local projection
   public getPaymentFlow(flowId: string): Promise<PaymentFlowModel> {
     return this.flowService.findOneById(flowId);
   }
 
-  public async getActionsList(transaction): Promise<any[]> {
+  public async getActionsList(transaction: TransactionUnpackedDetailsInterface): Promise<any[]> {
     let payload: any = null;
     try {
       const data = await this.createPayloadData(transaction);
@@ -88,17 +88,17 @@ export class MessagingService {
   }
 
   public async runAction(
-    transaction: TransactionModel,
+    transaction: TransactionUnpackedDetailsInterface,
     action: string,
-    actionPayload: ActionPayloadDto,
+    actionPayload: ActionPayloadInterface,
   ): Promise<void> {
     let payload = null;
 
     try {
-      const dto = await this.createPayloadData(transaction);
+      const dto: CheckoutTransactionRpcActionInterface = await this.createPayloadData(transaction);
       if (dto) {
         if (action === 'capture' && actionPayload.fields.capture_funds) {
-          dto.payment.amount = actionPayload.fields.capture_funds.amount;
+          dto.payment.amount = parseFloat(actionPayload.fields.capture_funds.amount);
         }
 
         dto.payment_items = transaction.items;
@@ -135,12 +135,16 @@ export class MessagingService {
     await this.transactionsService.applyActionRpcResult(transaction, rpcResult);
 
     if (rpcResult && rpcResult.next_action) {
-      const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(transaction.uuid);
+      const updatedTransaction: TransactionUnpackedDetailsInterface =
+        await this.transactionsService.findUnpackedByUuid(transaction.uuid);
       await this.runNextAction(updatedTransaction, rpcResult.next_action);
     }
   }
 
-  public async runNextAction(transaction, nextAction: NextActionDto) {
+  public async runNextAction(
+    transaction: TransactionUnpackedDetailsInterface,
+    nextAction: NextActionDto,
+  ): Promise<void> {
     switch (nextAction.type) {
       case 'action':
         // stub for action behaviour
@@ -151,7 +155,7 @@ export class MessagingService {
     }
   }
 
-  public async updateStatus(transaction: TransactionModel): Promise<void> {
+  public async updateStatus(transaction: TransactionUnpackedDetailsInterface): Promise<void> {
     let payload = null;
 
     try {
@@ -176,7 +180,10 @@ export class MessagingService {
     await this.transactionsService.applyRpcResult(transaction, rpcResult);
   }
 
-  public async externalCapture(paymentMethod, payload) {
+  public async externalCapture(
+    paymentMethod: string,
+    payload: any,
+  ): Promise<any> {
     return this.rabbitClient.callAsync(
       {
         channel: this.paymentMicroService.getChannelByPaymentType(paymentMethod, environment.stub),
@@ -190,9 +197,9 @@ export class MessagingService {
     );
   }
 
-  public async sendTransactionUpdate(transaction: TransactionModel): Promise<void> {
-    this.transformTransactionForPhp(transaction);
-    const payload: any = { payment: transaction };
+  public async sendTransactionUpdate(transaction: TransactionUnpackedDetailsInterface): Promise<void> {
+    const converted: CheckoutTransactionInterface = this.transformTransactionForPhp(transaction);
+    const payload: any = { payment: converted };
     this.logger.log({
       message: 'SENDING "transactions_app.payment.updated" event',
       payload: payload,
@@ -236,7 +243,11 @@ export class MessagingService {
   //   }
   // }
 
-  private async runPaymentRpc(transaction: TransactionModel, payload, messageIdentifier) {
+  private async runPaymentRpc(
+    transaction: TransactionUnpackedDetailsInterface,
+    payload,
+    messageIdentifier,
+  ): Promise<any> {
     return new Promise((resolve, reject) => {
       this.rabbitClient.send(
         { channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub) },
@@ -261,25 +272,10 @@ export class MessagingService {
     });
   }
 
-  private async createPayloadData(transaction: TransactionModel) {
-    const payload: any = transaction.toObject({ virtuals: true }); // making clone before manipulations
-
-    try {
-      payload.payment_details = JSON.parse(transaction.payment_details);
-    } catch (e) {
-      this.logger.log({
-        message: 'Error during creation of payload data',
-        transaction: payload,
-        error: e.message,
-        context: 'MessagingService',
-      });
-      payload.payment_details = {};
-      // just skipping payment_details
-    }
-
-    let dto: any = {};
-    let businessPaymentOption;
-    let paymentFlow;
+  private async createPayloadData(
+    transaction: TransactionUnpackedDetailsInterface,
+  ): Promise<CheckoutTransactionRpcActionInterface> {
+    const payload: CheckoutTransactionInterface = Object.assign({}, transaction);
 
     this.fixDates(payload);
     this.fixId(payload);
@@ -288,24 +284,51 @@ export class MessagingService {
     // @TODO this should be done on BE side
     payload.reference = transaction.uuid;
 
-    dto = {
-      ...dto,
+    const dto: CheckoutTransactionRpcActionInterface = {
       payment: payload,
-      payment_details: payload.payment_details,
+      payment_details: transaction.payment_details,
       business: {
         id: transaction.business_uuid,
       },
     };
 
     try {
-      businessPaymentOption = await this.getBusinessPaymentOption(transaction);
+      const businessPaymentOption: BusinessPaymentOptionModel = await this.getBusinessPaymentOption(transaction);
+      dto.credentials = businessPaymentOption.credentials;
+
+      this.logger.log(
+        {
+          message: `Transaction ${transaction.uuid} dto credentials`,
+          transaction: payload,
+          credentials: dto.credentials,
+          context: 'MessagingService',
+        },
+      );
     } catch (e) {
       throw new Error(`Transaction:${transaction.uuid} -> Cannot resolve business payment option: ${e}`);
     }
 
     try {
-      paymentFlow = await this.getPaymentFlow(transaction.payment_flow_id);
+      const paymentFlow: PaymentFlowModel = await this.getPaymentFlow(transaction.payment_flow_id);
+      if (!paymentFlow) {
+        this.logger.error(
+          {
+            message: `Transaction ${transaction.uuid} -> Payment flow cannot be null`,
+            transaction: payload,
+            context: 'MessagingService',
+          },
+        );
+
+        return null;
+      }
+
+      if (payload.payment_flow_id) {
+        dto.payment_flow = paymentFlow.toObject();
+        dto.payment_flow.business_payment_option = await this.getBusinessPaymentOption(transaction);
+      }
     } catch (e) {
+      console.log(e);
+
       this.logger.error(
         {
           message: `Transaction ${transaction.uuid} -> Cannot resolve payment flow`,
@@ -316,33 +339,6 @@ export class MessagingService {
       );
 
       return null;
-    }
-
-    if (!paymentFlow) {
-      this.logger.error(
-        {
-          message: `Transaction ${transaction.uuid} -> Payment flow cannot be null`,
-          transaction: payload,
-          context: 'MessagingService',
-        },
-      );
-
-      return null;
-    }
-
-    dto.credentials = businessPaymentOption.credentials;
-    this.logger.log(
-      {
-        message: `Transaction ${transaction.uuid} dto credentials`,
-        transaction: payload,
-        credentials: dto.credentials,
-        context: 'MessagingService',
-      },
-    );
-
-    if (payload.payment_flow_id) {
-      dto.payment_flow = paymentFlow;
-      dto.payment_flow.business_payment_option = businessPaymentOption;
     }
 
     return dto;
@@ -361,10 +357,14 @@ export class MessagingService {
     transaction.id = transaction.original_id;
   }
 
-  private prepareActionFields(transaction, action: string, fields: any) {
+  private prepareActionFields(
+    transaction: TransactionBasicInterface,
+    action: string,
+    fields: FieldsInterface & UnwrappedFieldsInterface,
+  ) {
     // @TODO ask FE to remove wrapper object!
     if ((action === 'refund' || action === 'return') && fields.payment_return) {
-      fields.amount = fields.payment_return.amount || fields.amount || 0;
+      fields.amount = fields.payment_return.amount || fields.amount || 0.0;
       fields.reason = fields.payment_return.reason || fields.reason || null;
       fields.refunded_amount = transaction.amount_refunded;
       // php BE asked for camel case version of this field too
@@ -379,33 +379,24 @@ export class MessagingService {
         reason: fields.payment_update.reason,
         payment_items: fields.payment_update.updateData
           ? fields.payment_update.updateData.productLine
-          : [],
+          : []
+        ,
         delivery_fee: fields.payment_update.updateData
-          ? fields.payment_update.updateData.deliveryFee
-          : null,
+          ? parseFloat(fields.payment_update.updateData.deliveryFee)
+          : null
+        ,
       };
     }
 
     return fields;
   }
 
-  private transformTransactionForPhp(transaction) {
-    transaction.id = transaction.original_id;
-    if (typeof (transaction.payment_details) === 'string') {
-      try {
-        transaction.payment_details = JSON.parse(transaction.payment_details);
-      } catch (e) {
-        this.logger.log(
-          {
-            message: `Transform Transaction ${transaction.uuid} for php`,
-            transaction: transaction,
-            error: e.message,
-            context: 'MessagingService',
-          },
-        );
-        transaction.payment_details = {};
-        // just skipping payment_details
-      }
-    }
+  private transformTransactionForPhp(
+    transaction: TransactionUnpackedDetailsInterface,
+  ): CheckoutTransactionInterface {
+    const payload: CheckoutTransactionInterface = Object.assign({}, transaction);
+    payload.id = transaction.original_id;
+
+    return payload;
   }
 }

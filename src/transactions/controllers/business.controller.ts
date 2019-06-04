@@ -16,8 +16,10 @@ import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import * as moment from 'moment';
+import { TransactionPaymentDetailsConverter } from '../converter/transaction-payment-details.converter';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { TransactionActionsAwareInterface } from '../interfaces';
+import { ActionsAwareInterface } from '../interfaces/awareness';
+import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
@@ -94,31 +96,40 @@ export class BusinessController {
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
   public async getDetailByReference(
     @ParamModel(
-      { reference: ':reference', business_uuid: ':businessId'},
+      {
+        reference: ':reference',
+        business_uuid: ':businessId',
+      },
       TransactionSchemaName,
     ) transaction: TransactionModel,
   ) {
-    const outputTransaction = this.transactionsService.prepareTransactionForOutput(
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
 
-    return { ...outputTransaction };
+    return { ...unpackedTransaction };
   }
 
   @Get('detail/:uuid')
   @HttpCode(HttpStatus.OK)
-  @Roles(RolesEnum.merchant, RolesEnum.anonymous)
+  @Roles(RolesEnum.merchant)
   public async getDetail(
-    @ParamModel({ uuid: ':uuid', business_uuid: ':businessId'}, TransactionSchemaName) transaction: TransactionModel,
+    @ParamModel(
+      {
+        uuid: ':uuid',
+        business_uuid: ':businessId',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
   ): Promise<any> {
     let actions: any[];
 
-    const outputTransaction = this.transactionsService.prepareTransactionForOutput(
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
 
     try {
-      actions = await this.messagingService.getActionsList(outputTransaction);
+      actions = await this.messagingService.getActionsList(unpackedTransaction);
     } catch (e) {
       this.logger.error(
         {
@@ -130,7 +141,7 @@ export class BusinessController {
       actions = [];
     }
 
-    return { ...outputTransaction, actions };
+    return { ...unpackedTransaction, actions };
   }
 
   @Post(':uuid/action/:action')
@@ -138,19 +149,25 @@ export class BusinessController {
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
   public async runAction(
     @Param('action') action: string,
-    @ParamModel({ uuid: ':uuid', business_uuid: ':businessId'}, TransactionSchemaName) transaction: TransactionModel,
+    @ParamModel(
+      {
+        uuid: ':uuid',
+        business_uuid: ':businessId',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
-  ): Promise<TransactionActionsAwareInterface> {
+  ): Promise<ActionsAwareInterface> {
     let actions: string[];
 
     this.dtoValidation.checkFileUploadDto(actionPayload);
 
-    const outputTransaction = this.transactionsService.prepareTransactionForOutput(
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
 
     try {
-      await this.messagingService.runAction(outputTransaction, action, actionPayload);
+      await this.messagingService.runAction(unpackedTransaction, action, actionPayload);
     } catch (e) {
       this.logger.log(
         {
@@ -163,7 +180,8 @@ export class BusinessController {
       throw new BadRequestException(e.message);
     }
 
-    const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(transaction.uuid);
+    const updatedTransaction: TransactionUnpackedDetailsInterface =
+      await this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
     // Send update to checkout-php
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
@@ -172,7 +190,7 @@ export class BusinessController {
     }
 
     try {
-      actions = await this.messagingService.getActionsList(outputTransaction);
+      actions = await this.messagingService.getActionsList(unpackedTransaction);
     } catch (e) {
       this.logger.error(
         {
@@ -189,22 +207,18 @@ export class BusinessController {
 
   @Get(':uuid/update-status')
   @HttpCode(HttpStatus.OK)
-  // @Roles(RolesEnum.merchant)
-  @Roles(RolesEnum.anonymous)
+  @Roles(RolesEnum.merchant)
   public async updateStatus(
     @ParamModel({ uuid: ':uuid', business_uuid: ':businessId'}, TransactionSchemaName) transaction: TransactionModel,
-  ): Promise<TransactionActionsAwareInterface> {
+  ): Promise<ActionsAwareInterface> {
     let actions: string[];
 
-    const outputTransaction = this.transactionsService.prepareTransactionForOutput(
+    const outputTransaction: TransactionUnpackedDetailsInterface  = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
 
-    console.log('outputTransaction');
-    console.log(outputTransaction);
-
     try {
-      await this.messagingService.updateStatus(transaction);
+      await this.messagingService.updateStatus(outputTransaction);
     } catch (e) {
       this.logger.error(
         {
@@ -216,12 +230,11 @@ export class BusinessController {
       throw new BadRequestException(`Error occured during status update. Please try again later. ${e.message}`);
     }
 
-    console.log('############# After updateStatus');
-
-    const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(transaction.uuid);
+    const updated: TransactionUnpackedDetailsInterface =
+      await this.transactionsService.findUnpackedByUuid(transaction.uuid);
     // Send update to checkout-php
     try {
-      await this.messagingService.sendTransactionUpdate(updatedTransaction);
+      await this.messagingService.sendTransactionUpdate(updated);
     } catch (e) {
       throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
     }
@@ -239,7 +252,7 @@ export class BusinessController {
       actions = [];
     }
 
-    return { ...updatedTransaction, actions };
+    return { ...updated, actions };
   }
 
   @Get('settings')

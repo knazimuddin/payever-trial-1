@@ -1,10 +1,7 @@
-import {
-  CheckoutPaymentDetailsAwareInterface,
-  CheckoutTransactionCartItemInterface,
-  CheckoutTransactionInterface,
-} from '../interfaces';
+import { UnpackedDetailsAwareInterface } from '../interfaces/awareness';
+import { CheckoutTransactionCartItemInterface, CheckoutTransactionInterface } from '../interfaces/checkout';
 
-export class RpcResultDto implements CheckoutPaymentDetailsAwareInterface {
+export class RpcResultDto implements UnpackedDetailsAwareInterface {
   public payment: CheckoutTransactionInterface;
   public payment_items: CheckoutTransactionCartItemInterface[];
   public payment_details: {

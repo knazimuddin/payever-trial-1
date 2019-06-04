@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { TransactionCartItemDto } from '../dto';
-import { CheckoutTransactionCartItemInterface, TransactionCartItemInterface } from '../interfaces';
+import { CheckoutTransactionCartItemInterface } from '../interfaces/checkout';
+import { TransactionCartItemInterface } from '../interfaces/transaction';
 import { ProductUuid } from '../tools/product-uuid';
 
 @Injectable()

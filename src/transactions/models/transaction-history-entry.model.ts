@@ -1,5 +1,5 @@
 import { Document } from 'mongoose';
-import { TransactionHistoryEntryInterface } from '../interfaces';
+import { TransactionHistoryEntryInterface } from '../interfaces/transaction';
 import { TransactionRefundItemModel } from './transaction-refund-item.model';
 import { TransactionUploadItemModel } from './transaction-upload-item.model';
 

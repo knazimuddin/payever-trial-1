@@ -1,11 +1,11 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
 import { TransactionConverter, TransactionHistoryEntryConverter } from '../converter';
-import { CheckoutTransactionInterface, TransactionInterface } from '../interfaces';
+import { CheckoutTransactionInterface } from '../interfaces/checkout';
+import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { StatisticsService, TransactionsService } from '../services';
 
@@ -34,7 +34,8 @@ export class MigrateEventsController {
     const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
     console.log('ACTION.MIGRATE!', data.payment);
     const checkoutTransaction: CheckoutTransactionInterface = data.payment;
-    const transaction: TransactionInterface = TransactionConverter.fromCheckoutTransaction(checkoutTransaction);
+    const transaction: TransactionPackedDetailsInterface =
+      TransactionConverter.fromCheckoutTransaction(checkoutTransaction);
 
     if (checkoutTransaction.history && checkoutTransaction.history.length) {
       for (const historyItem of checkoutTransaction.history) {
@@ -53,8 +54,8 @@ export class MigrateEventsController {
     console.log('TRANSACTION MIGRATE COMPLETED');
   }
 
-  private async createOrUpdate(transaction: TransactionInterface) {
-    if (await this.transactionsService.findOneByUuid( transaction.uuid )) {
+  private async createOrUpdate(transaction: TransactionPackedDetailsInterface) {
+    if (await this.transactionsService.findUnpackedByUuid( transaction.uuid )) {
       return this.transactionsService.updateByUuid(transaction.uuid, transaction);
     }
 

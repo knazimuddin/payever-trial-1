@@ -1,11 +1,11 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
 import { TransactionConverter } from '../converter';
-import { CheckoutTransactionInterface, TransactionInterface } from '../interfaces';
+import { CheckoutTransactionInterface } from '../interfaces/checkout';
+import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { StatisticsService, TransactionsService } from '../services';
 
@@ -34,7 +34,8 @@ export class TransactionEventsController {
     this.logger.log({ text: 'PAYMENT.CREATE', data });
 
     const checkoutTransaction: CheckoutTransactionInterface = data.payment;
-    const transaction: TransactionInterface = TransactionConverter.fromCheckoutTransaction(checkoutTransaction);
+    const transaction: TransactionPackedDetailsInterface =
+      TransactionConverter.fromCheckoutTransaction(checkoutTransaction);
 
     this.logger.log({ text: 'PAYMENT.CREATE: Prepared transaction', transaction });
     const created: TransactionModel = await this.transactionsService.create(transaction);
@@ -51,7 +52,8 @@ export class TransactionEventsController {
     this.logger.log({ text: 'PAYMENT.UPDATE', data });
 
     const checkoutTransaction: CheckoutTransactionInterface = data.payment;
-    const transaction: TransactionInterface = TransactionConverter.fromCheckoutTransaction(checkoutTransaction);
+    const transaction: TransactionPackedDetailsInterface =
+      TransactionConverter.fromCheckoutTransaction(checkoutTransaction);
 
     this.logger.log({ text: 'PAYMENT.UPDATE: Prepared transaction', transaction });
     await this.statisticsService.processAcceptedTransaction(transaction.uuid, transaction);

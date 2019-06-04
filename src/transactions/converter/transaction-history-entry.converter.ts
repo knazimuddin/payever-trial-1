@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import {
-  CheckoutTransactionHistoryItemInterface,
-  TransactionHistoryEntryInterface,
-  TransactionRefundItemInterface,
-} from '../interfaces';
+import { CheckoutTransactionHistoryItemInterface } from '../interfaces/checkout';
 import { HistoryEventDataInterface, HistoryEventRefundItemInterface } from '../interfaces/history-event-message';
+import { TransactionHistoryEntryInterface, TransactionRefundItemInterface } from '../interfaces/transaction';
 import { TransactionCartItemModel, TransactionModel } from '../models';
 
 @Injectable()

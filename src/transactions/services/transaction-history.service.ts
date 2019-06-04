@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TransactionHistoryEntryConverter } from '../converter';
-import { TransactionHistoryEntryInterface } from '../interfaces';
 import { HistoryEventDataInterface } from '../interfaces/history-event-message';
+import { TransactionHistoryEntryInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 
 @Injectable()

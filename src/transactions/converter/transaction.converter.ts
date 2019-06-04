@@ -2,16 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 
 import { TransactionDto } from '../dto';
-import { CheckoutTransactionInterface, TransactionInterface } from '../interfaces';
+import { CheckoutTransactionInterface } from '../interfaces/checkout';
+import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionCartConverter } from './transaction-cart.converter';
 import { TransactionSantanderApplicationConverter } from './transaction-santander-application.converter';
 
 @Injectable()
 export class TransactionConverter {
 
-  public static fromCheckoutTransaction(checkoutTransaction: CheckoutTransactionInterface): TransactionInterface {
-    const transaction: TransactionInterface =
-      plainToClass<TransactionInterface, CheckoutTransactionInterface>(
+  public static fromCheckoutTransaction(
+    checkoutTransaction: CheckoutTransactionInterface,
+  ): TransactionPackedDetailsInterface {
+    const transaction: TransactionPackedDetailsInterface =
+      plainToClass<TransactionPackedDetailsInterface, CheckoutTransactionInterface>(
         TransactionDto,
         checkoutTransaction,
       );
@@ -24,7 +27,7 @@ export class TransactionConverter {
 
     if (checkoutTransaction.payment_details) {
       TransactionSantanderApplicationConverter.setSantanderApplication(transaction, checkoutTransaction);
-      transaction.payment_details = JSON.stringify(transaction.payment_details);
+      transaction.payment_details = JSON.stringify(checkoutTransaction.payment_details);
     }
 
     if (checkoutTransaction.business) {

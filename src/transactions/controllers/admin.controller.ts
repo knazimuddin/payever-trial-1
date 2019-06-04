@@ -14,10 +14,9 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-
-import { ActionPayloadDto } from '../dto';
-import { TransactionActionsAwareInterface } from '../interfaces';
-import { TransactionModel } from '../models';
+import { ActionPayloadDto } from '../dto/action-payload';
+import { ActionsAwareInterface } from '../interfaces/awareness';
+import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
 
 // TODO: unify with business controller
@@ -59,7 +58,7 @@ export class AdminController {
   public async getDetailByReference(
     @Param('reference') reference: string,
   ) {
-    const transaction = await this.transactionsService.findOneByParams({ reference });
+    const transaction = await this.transactionsService.findUnpackedByParams({ reference });
 
     if (!transaction) {
       throw new NotFoundException(`Transaction not found.`);
@@ -74,7 +73,8 @@ export class AdminController {
     @Param('uuid') uuid: string,
   ): Promise<any> {
     let actions = [];
-    const transaction: TransactionModel = await this.transactionsService.findOneByParams({ uuid });
+    const transaction: TransactionUnpackedDetailsInterface =
+      await this.transactionsService.findUnpackedByParams({ uuid });
 
     if (!transaction) {
       throw new NotFoundException(`Transaction not found.`);
@@ -96,11 +96,11 @@ export class AdminController {
     @Param('uuid') uuid: string,
     @Param('action') action: string,
     @Body() actionPayload: ActionPayloadDto,
-  ): Promise<TransactionActionsAwareInterface> {
+  ): Promise<ActionsAwareInterface> {
     let actions: string[];
 
     this.dtoValidation.checkFileUploadDto(actionPayload);
-    const transaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
+    const transaction: TransactionUnpackedDetailsInterface = await this.transactionsService.findUnpackedByUuid(uuid);
 
     try {
       await this.messagingService.runAction(transaction, action, actionPayload);
@@ -109,7 +109,8 @@ export class AdminController {
       throw new BadRequestException(e.message);
     }
 
-    const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
+    const updatedTransaction: TransactionUnpackedDetailsInterface =
+      await this.transactionsService.findUnpackedByUuid(uuid);
     // Send update to checkout-php
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
@@ -131,10 +132,10 @@ export class AdminController {
   @HttpCode(HttpStatus.OK)
   public async updateStatus(
     @Param('uuid') uuid: string,
-  ): Promise<TransactionActionsAwareInterface> {
+  ): Promise<ActionsAwareInterface> {
     let actions: any[];
 
-    const transaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
+    const transaction: TransactionUnpackedDetailsInterface = await this.transactionsService.findUnpackedByUuid(uuid);
 
     try {
       await this.messagingService.updateStatus(transaction);
@@ -143,7 +144,8 @@ export class AdminController {
       throw new BadRequestException(`Error occured during status update. Please try again later.`);
     }
 
-    const updatedTransaction: TransactionModel = await this.transactionsService.findOneByUuid(uuid);
+    const updatedTransaction: TransactionUnpackedDetailsInterface =
+      await this.transactionsService.findUnpackedByUuid(uuid);
     // Send update to checkout-php
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);

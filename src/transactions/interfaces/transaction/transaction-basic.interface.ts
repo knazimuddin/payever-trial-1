@@ -1,14 +1,16 @@
-import { AddressInterface } from './address.interface';
+import { AddressInterface } from '../address.interface';
+import { SantanderApplicationAwareInterface } from '../awareness';
 import { TransactionCartItemInterface } from './transaction-cart-item.interface';
 import { TransactionHistoryEntryInterface } from './transaction-history-entry.interface';
-import { TransactionSantanderApplicationAwareInterface } from './transaction-santander-application-aware.interface';
 
-export interface TransactionInterface extends TransactionSantanderApplicationAwareInterface {
+export interface TransactionBasicInterface extends SantanderApplicationAwareInterface {
   id: string;
   original_id: string; // id from mysql db
   uuid: string;
   action_running: boolean;
   amount: number;
+  amount_refunded?: number;
+  amount_rest?: number;
   billing_address: AddressInterface;
   business_option_id: number;
   business_uuid: string;
@@ -26,7 +28,6 @@ export interface TransactionInterface extends TransactionSantanderApplicationAwa
   items: TransactionCartItemInterface[];
   merchant_email: string;
   merchant_name: string;
-  payment_details: string; // Serialized big object
   payment_fee: number;
   payment_flow_id: string;
   place: string;

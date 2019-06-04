@@ -33,12 +33,7 @@ export class PaymentFlowService {
   }
 
   public async findOneById(id: string): Promise<PaymentFlowModel> {
-    const flow: PaymentFlowModel = await this.model.findOne({id});
-
-    return flow
-      ? flow.toObject({ virtuals: true })
-      : null
-    ;
+    return this.model.findOne({id});
   }
 
   public async removeById(id: string): Promise<void> {

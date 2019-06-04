@@ -36,13 +36,13 @@ export class HistoryEventsController {
     const message: HistoryEventActionCompletedInterface =
       this.messageBusService.unwrapMessage<HistoryEventActionCompletedInterface>(msg.data);
     this.logger.log({ text: 'ACTION.COMPLETED', message });
-    const searchParams = message.payment.uuid
+    const search = message.payment.uuid
       ? { uuid: message.payment.uuid }
       : { original_id: message.payment.id }
     ;
 
-    this.logger.log({ text: 'ACTION.COMPLETED Search Params', searchParams });
-    const transaction: TransactionModel = await this.transactionService.findOneByParams(searchParams);
+    this.logger.log({ text: 'ACTION.COMPLETED Search Params', searchParams: search });
+    const transaction: TransactionModel = await this.transactionService.findModelByParams(search);
     if (!transaction) {
       this.logger.warn({ text: 'ACTION.COMPLETED: Transaction is not found', data: message.payment });
 
@@ -65,13 +65,13 @@ export class HistoryEventsController {
       this.messageBusService.unwrapMessage<HistoryEventAddHistoryInterface>(msg.data);
     this.logger.log({ text: 'HISTORY.ADD', message });
     // @TODO use only uuid later, no original_id
-    const searchParams = message.payment.uuid
+    const search = message.payment.uuid
       ? { uuid: message.payment.uuid }
       : { original_id: message.payment.id }
     ;
 
-    this.logger.log({ text: 'HISTORY.ADD Search Params', searchParams });
-    const transaction: TransactionModel = await this.transactionService.findOneByParams(searchParams);
+    this.logger.log({ text: 'HISTORY.ADD Search Params', searchParams: search });
+    const transaction: TransactionModel = await this.transactionService.findModelByParams(search);
     if (!transaction) {
       this.logger.warn({ text: 'HISTORY.ADD: Transaction is not found', data: message.payment });
 

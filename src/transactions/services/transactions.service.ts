@@ -5,14 +5,16 @@ import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notificati
 import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 import { TransactionCartConverter, TransactionSantanderApplicationConverter } from '../converter';
+import { TransactionPaymentDetailsConverter } from '../converter/transaction-payment-details.converter';
 import { RpcResultDto } from '../dto';
 import { client } from '../es-temp/transactions-search';
+import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
 import {
-  CheckoutTransactionInterface,
+  TransactionBasicInterface,
   TransactionCartItemInterface,
-  TransactionInterface,
-  TransactionRpcUpdateInterface,
-} from '../interfaces';
+  TransactionPackedDetailsInterface,
+  TransactionUnpackedDetailsInterface,
+} from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 
 @Injectable()
@@ -24,7 +26,7 @@ export class TransactionsService {
     private readonly logger: Logger,
   ) {}
 
-  public async create(transactionDto: TransactionInterface): Promise<TransactionModel> {
+  public async create(transactionDto: TransactionPackedDetailsInterface): Promise<TransactionModel> {
     if (transactionDto.id) {
       transactionDto.original_id = transactionDto.id;
     }
@@ -92,17 +94,14 @@ export class TransactionsService {
 
   public async updateByUuid(
     transactionUuid: string,
-    transactionDto: TransactionInterface,
+    transactionDto: TransactionPackedDetailsInterface,
   ): Promise<TransactionModel> {
-    // a bit dirty, sorry
-    // if (typeof (transaction.payment_details) !== 'string') {
-    //   transaction.payment_details = JSON.stringify(transaction.payment_details);
-    // }
-
     transactionDto.uuid = transactionUuid;
 
     const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
-      { uuid: transactionUuid },
+      {
+        uuid: transactionUuid,
+      },
       transactionDto,
       {
         new: true,
@@ -115,18 +114,26 @@ export class TransactionsService {
     return updated;
   }
 
-  public async findOneByUuid(transactionUuid: string): Promise<TransactionModel> {
-    return this.findOneByParams({ uuid: transactionUuid });
+  public async findModelByUuid(transactionUuid: string): Promise<TransactionModel> {
+    return this.findModelByParams({ uuid: transactionUuid });
   }
 
-  public async findOneByParams(params): Promise<TransactionModel> {
+  public async findModelByParams(params): Promise<TransactionModel> {
+    return this.transactionModel.findOne(params);
+  }
+
+  public async findUnpackedByUuid(transactionUuid: string): Promise<TransactionUnpackedDetailsInterface> {
+    return this.findUnpackedByParams({ uuid: transactionUuid });
+  }
+
+  public async findUnpackedByParams(params): Promise<TransactionUnpackedDetailsInterface> {
     const transaction: TransactionModel = await this.transactionModel.findOne(params);
 
     if (!transaction) {
       return;
     }
 
-    return this.prepareTransactionForOutput(transaction.toObject({ virtuals: true }));
+    return TransactionPaymentDetailsConverter.convert(transaction.toObject({ virtuals: true }));
   }
 
   public async findAll(businessId) {
@@ -137,21 +144,27 @@ export class TransactionsService {
     await this.transactionModel.findOneAndRemove({ uuid: transactionUuid });
   }
 
-  public async applyActionRpcResult(transaction: TransactionModel, result: RpcResultDto): Promise<void> {
+  public async applyActionRpcResult(
+    transaction: TransactionUnpackedDetailsInterface,
+    result: RpcResultDto,
+  ): Promise<void> {
     await this.applyPaymentProperties(transaction, result);
     await this.applyPaymentItems(transaction, result);
   }
 
-  public async applyRpcResult(transaction: TransactionModel, result: RpcResultDto): Promise<void> {
+  public async applyRpcResult(
+    transaction: TransactionUnpackedDetailsInterface,
+    result: RpcResultDto,
+  ): Promise<void> {
     await this.applyPaymentProperties(transaction, result);
   }
 
   public async applyPaymentProperties(
-    transaction: TransactionModel,
+    transaction: TransactionUnpackedDetailsInterface,
     result: RpcResultDto,
   ): Promise<void> {
     const paymentResult: CheckoutTransactionInterface = result.payment;
-    const updating: TransactionRpcUpdateInterface = {};
+    const updating: CheckoutTransactionRpcUpdateInterface = {};
 
     if (!paymentResult.amount || paymentResult.amount <= 0) {
       throw new RpcException(`Can not apply empty or negative amount for transaction #${transaction.id}`);
@@ -169,7 +182,9 @@ export class TransactionsService {
     }
 
     await this.transactionModel.updateOne(
-      { uuid: transaction.uuid },
+      {
+        uuid: transaction.uuid,
+      },
       {
         $set: updating,
       },
@@ -177,34 +192,21 @@ export class TransactionsService {
   }
 
   public async applyPaymentItems(
-    transaction: TransactionModel,
+    transaction: TransactionBasicInterface,
     result: RpcResultDto,
   ): Promise<void> {
     const items: TransactionCartItemInterface[] =
       TransactionCartConverter.fromCheckoutTransactionCart(result.payment_items, transaction.business_uuid);
 
     await this.transactionModel.updateOne(
-      { uuid: transaction.uuid },
+      {
+        uuid: transaction.uuid,
+      },
       {
         $set: {
           items,
         },
       },
     );
-  }
-
-  public prepareTransactionForOutput(transaction) {
-    try {
-      transaction.payment_details =
-        transaction.payment_details
-          ? JSON.parse(transaction.payment_details)
-          : {}
-        ;
-    } catch (e) {
-      this.logger.log(e);
-      // just skipping payment_details
-    }
-
-    return transaction;
   }
 }
