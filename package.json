@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "build": "tsc --noEmit",
     "cli": "ts-node src/cli.ts",
     "cucumber": "./node_modules/.bin/cucumber-js",
     "cucumber:all": "./node_modules/.bin/cucumber-js features/tests/",
@@ -21,16 +22,16 @@
     "@nestjs/common": "6.0.5",
     "@nestjs/core": "6.0.5",
     "@nestjs/elasticsearch": "6.0.1",
-    "@nestjs/jwt": "^6.0.0",
+    "@nestjs/jwt": "6.0.0",
     "@nestjs/microservices": "6.0.5",
     "@nestjs/mongoose": "6.0.0",
     "@nestjs/passport": "6.0.0",
     "@nestjs/platform-express": "6.0.5",
-    "@nestjs/swagger": "^3.0.2",
-    "@nestjs/testing": "6.0.5",
+    "@nestjs/platform-fastify": "6.0.5",
+    "@nestjs/swagger": "3.0.2",
     "@nestjs/typeorm": "6.0.0",
     "@nestjs/websockets": "6.0.5",
-    "@pe/nest-kit": "^4.4.4",
+    "@pe/nest-kit": "^4.4.6",
     "@pe/notifications-sdk": "^2.0.0",
     "@types/dotenv": "^6.1.1",
     "@types/elasticsearch": "^5.0.32",
@@ -63,7 +64,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "@nestjs/testing": "^6.0.5",
+    "@nestjs/testing": "6.0.5",
     "@pe/cucumber-sdk": "^0.1.6",
     "@types/chai": "^4.1.7",
     "@types/chai-as-promised": "^7.1.0",
