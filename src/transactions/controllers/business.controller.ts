@@ -110,7 +110,7 @@ export class BusinessController {
 
   @Get('detail/:uuid')
   @HttpCode(HttpStatus.OK)
-  @Roles(RolesEnum.merchant)
+  @Roles(RolesEnum.merchant, RolesEnum.oauth)
   public async getDetail(
     @ParamModel(
       {
