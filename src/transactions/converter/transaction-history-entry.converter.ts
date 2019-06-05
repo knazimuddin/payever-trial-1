@@ -36,7 +36,10 @@ export class TransactionHistoryEntryConverter {
       created_at: createdAt,
     };
 
-    history.refund_items = this.processRefundItems(transaction, data.refund_items);
+    history.refund_items = data.refund_items
+      ? this.processRefundItems(transaction, data.refund_items)
+      : []
+    ;
 
     return history;
   }
