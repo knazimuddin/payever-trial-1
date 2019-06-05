@@ -174,6 +174,7 @@ export class TransactionsService {
     updating.delivery_fee = paymentResult.delivery_fee;
     updating.status = paymentResult.status;
     updating.specific_status = paymentResult.specific_status;
+    updating.reference = paymentResult.reference;
     updating.place = result.workflow_state;
 
     if (paymentResult.payment_details) {

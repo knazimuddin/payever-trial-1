@@ -7,4 +7,5 @@ export interface CheckoutTransactionRpcUpdateInterface extends SantanderApplicat
   place?: string;
   specific_status?: string;
   status?: string;
+  reference?: string;
 }
