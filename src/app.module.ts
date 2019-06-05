@@ -22,6 +22,7 @@ import { TransactionsModule } from './transactions/transactions.module';
       {
         useCreateIndex: true,
         useNewUrlParser: true,
+        useFindAndModify: false,
       },
     ),
     NestKitLoggingModule.forRoot({
