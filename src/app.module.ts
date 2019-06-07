@@ -22,6 +22,7 @@ import { TransactionsModule } from './transactions/transactions.module';
       {
         useCreateIndex: true,
         useNewUrlParser: true,
+        useFindAndModify: false,
       },
     ),
     NestKitLoggingModule.forRoot({
@@ -35,11 +36,16 @@ import { TransactionsModule } from './transactions/transactions.module';
     IntegrationModule,
     TransactionsModule,
     TransactionsEsSearch,
+    ApmModule.forRoot(
+      environment.apm.enable,
+      environment.apm.options,
+    ),
+    CommandModule,
+    RabbitMqModule.forRoot(environment.rabbitmq),
   ],
   providers: [
   ],
 })
-export class ApplicationModule implements NestModule {
-  public configure() {
-  }
+export class AppModule implements NestModule {
+  public configure() {}
 }

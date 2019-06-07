@@ -1,41 +1,57 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectRabbitMqClient, RabbitMqClient } from '@pe/nest-kit';
 import { Model } from 'mongoose';
+
 import { RabbitRoutingKeys } from '../../enums';
+import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
+import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
+import { TransactionModel } from '../models';
 
 @Injectable()
 export class StatisticsService {
+
   constructor(
+    @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
-    @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
-    private readonly logger: Logger,
   ) {
   }
 
-  public async processAcceptedTransaction(transaction: any) {
-    await this.rabbitClient
-    .sendAsync(
-      {
-        channel: RabbitRoutingKeys.TransactionsPaymentAdd,
-        exchange: 'async_events',
-      },
-      {
-        name: RabbitRoutingKeys.TransactionsPaymentAdd,
-        payload: {
-          id: transaction.uuid,
-          amount: transaction.amount,
-          date: transaction.updated_at,
-          items: transaction.items,
-          channel_set: {
-            id: transaction.channel_set_uuid,
+  /**
+   * This method should be called right before updating transaction
+   * Thus it can handle transaction status changing.
+   */
+  public async processAcceptedTransaction(id: string, updating: TransactionPackedDetailsInterface) {
+    const existing = await this.transactionsModel.findOne({ uuid: id }).lean();
+
+    if (!existing) {
+      return;
+    }
+
+    if (existing.status !== updating.status && updating.status === 'STATUS_ACCEPTED') {
+      await this.rabbitClient
+        .sendAsync(
+          {
+            channel: RabbitRoutingKeys.TransactionsPaymentAdd,
+            exchange: 'async_events',
           },
-          business: {
-            id: transaction.business_uuid,
+          {
+            name: RabbitRoutingKeys.TransactionsPaymentAdd,
+            payload: {
+              id: existing.uuid,
+              amount: updating.amount,
+              date: updating.updated_at,
+              items: existing.items,
+              channel_set: {
+                id: existing.channel_set_uuid,
+              },
+              business: {
+                id: existing.business_uuid,
+              },
+            },
           },
-        },
-      },
-    );
+        );
+    }
   }
 
   public async processMigratedTransaction(transaction: any) {
@@ -97,7 +113,7 @@ export class StatisticsService {
     }
   }
 
-  public async processRefundedTransaction(id: string, refund: any) {
+  public async processRefundedTransaction(id: string, refund: HistoryEventActionCompletedInterface) {
     const existing = await this.transactionsModel.findOne({ uuid: id }).lean();
 
     if (!existing) {

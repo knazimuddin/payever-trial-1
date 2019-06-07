@@ -1,18 +1,23 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
-import { TransactionsService } from '../services';
-import { StatisticsService } from '../services/statistics.service';
+import { TransactionConverter, TransactionHistoryEntryConverter } from '../converter';
+import { CheckoutTransactionInterface } from '../interfaces/checkout';
+import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
+import { TransactionModel } from '../models';
+import { StatisticsService, TransactionsService } from '../services';
 
 @Controller()
 export class MigrateEventsController {
 
-  private messageBusService: MessageBusService = new MessageBusService({
-    rsa: environment.rsa,
-  }, this.logger);
+  private messageBusService: MessageBusService = new MessageBusService(
+    {
+      rsa: environment.rsa,
+    },
+    this.logger,
+  );
 
   constructor(
     private readonly transactionsService: TransactionsService,
@@ -26,20 +31,34 @@ export class MigrateEventsController {
     origin: 'rabbitmq',
   })
   public async onActionMigrateEvent(msg: any) {
-    const data = this.messageBusService.unwrapMessage<any>(msg.data);
+    const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
     console.log('ACTION.MIGRATE!', data.payment);
-    const transaction: any = data.payment;
-    this.transactionsService.prepareTransactionForInsert(transaction);
+    const checkoutTransaction: CheckoutTransactionInterface = data.payment;
+    const transaction: TransactionPackedDetailsInterface =
+      TransactionConverter.fromCheckoutTransaction(checkoutTransaction);
 
-    if (transaction.items.length) {
-      transaction.items = this.transactionsService.prepareTransactionCartForInsert(
-        transaction.items,
-        transaction.business_uuid,
-      );
+    if (checkoutTransaction.history && checkoutTransaction.history.length) {
+      for (const historyItem of checkoutTransaction.history) {
+        transaction.history.push(
+          TransactionHistoryEntryConverter.fromCheckoutTransactionHistoryItem(
+            historyItem.action,
+            historyItem.created_at,
+            historyItem,
+          ),
+        );
+      }
     }
 
-    const created = await this.transactionsService.createOrUpdate(transaction);
-    await this.statisticsService.processMigratedTransaction(created.lean());
+    const created: TransactionModel = await this.createOrUpdate(transaction);
+    await this.statisticsService.processMigratedTransaction(created);
     console.log('TRANSACTION MIGRATE COMPLETED');
+  }
+
+  private async createOrUpdate(transaction: TransactionPackedDetailsInterface) {
+    if (await this.transactionsService.findUnpackedByUuid( transaction.uuid )) {
+      return this.transactionsService.updateByUuid(transaction.uuid, transaction);
+    }
+
+    return this.transactionsService.create(transaction);
   }
 }

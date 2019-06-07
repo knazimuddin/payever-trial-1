@@ -1,131 +1,66 @@
 import { Schema } from 'mongoose';
-import { v4 as uuid } from 'uuid';
+import { AddressSchema } from './address.schema';
+import { TransactionCartItemSchema } from './transaction-cart-item-schema';
+import { TransactionHistoryEntrySchema } from './transaction-history-entry.schema';
 
-export const AddressSchema = new Schema({
-  city: String,
-  company: String,
-  country: String, // code like de/en
-  country_name: String,
-  email: String,
-  fax: String,
-  first_name: String,
-  last_name: String,
-  mobile_phone: String,
-  phone: String,
-  salutation: String,
-  social_security_number: String,
-  type: String, // 'billing' | 'shipping'
-  street: String,
-  zip_code: String,
-});
+export const TransactionSchemaName = 'Transaction';
 
-export const TransactionItemSchema = new Schema({
-  _id: String,
-  uuid: String,
-  created_at: Date,
-  description: String,
-  fixed_shipping_price: Number,
-  identifier: String,
-  item_type: String,
-  name: String,
-  price: Number,
-  price_net: Number,
-  product_variant_uuid: String,
-  quantity: Number,
-  shipping_price: Number,
-  shipping_settings_rate: Number,
-  shipping_settings_rate_type: String,
-  shipping_type: String,
-  thumbnail: String,
-  updated_at: Date,
-  url: String,
-  vat_rate: Number,
-  weight: Number,
-});
-
-TransactionItemSchema.post('init', function() {
-  this.uuid = this.uuid || this._id;
-});
-
-export const TransactionRefundItemSchema = new Schema({
-  // uuid: String,
-  item_uuid: String,
-  count: Number,
-});
-
-export const TransactionUploadItemSchema = new Schema({
-  type: String,
-  name: String,
-});
-
-export const TransactionHistoryEntrySchema = new Schema({
-  action: String,
-  amount: Number,
-  reference: String,
-  created_at: Date,
-  is_restock_items: Boolean,
-  params: String,
-  payment_status: String,
-  reason: String,
-  upload_items: [TransactionUploadItemSchema],
-  refund_items: [TransactionRefundItemSchema],
-});
-
-export const TransactionsSchema = new Schema({
+export const TransactionSchema = new Schema({
+  // _id: { type: String }, // id from mysql db
+  original_id: { type: String, unique: true }, // id from mysql db
+  uuid: { type: String, required: true, unique: true },
   action_running: { type: Boolean, required: false, default: false },
   amount: Number,
   billing_address: AddressSchema,
   business_option_id: Number,
-  business_uuid: {type: String},
+  business_uuid: { type: String },
   channel: String, // 'store', ...
   channel_uuid: String,
   channel_set_uuid: String,
-  created_at: {type: Date, required: true},
-  currency: {type: String, required: true},
-  customer_email: {type: String},
-  customer_name: {type: String, required: true},
+  created_at: { type: Date, required: true },
+  currency: { type: String, required: true },
+  customer_email: { type: String },
+  customer_name: { type: String, required: true },
   delivery_fee: Number,
   down_payment: Number,
   fee_accepted: Boolean,
   history: [TransactionHistoryEntrySchema],
-  items: [TransactionItemSchema],
+  items: [TransactionCartItemSchema],
   merchant_email: String,
   merchant_name: String,
-  original_id: {type: String, unique: true}, // id from mysql db
   payment_details: String, // Serialized big object
   payment_fee: Number,
   payment_flow_id: String,
   place: String,
   reference: String,
   santander_applications: [String],
-  shipping_address: {type: AddressSchema},
+  shipping_address: { type: AddressSchema },
   shipping_category: String,
   shipping_method_name: String,
   shipping_option_name: String,
   specific_status: String,
-  status: {type: String, required: true},
+  status: { type: String, required: true },
   status_color: {type: String},
   store_id: String,
   store_name: String,
-  total: {type: Number, required: true},
-  type: {type: String, required: true},
+  total: { type: Number, required: true} ,
+  type: { type: String, required: true },
   updated_at: Date,
-  uuid: {type: String, required: true, default: uuid, unique: true},
   user_uuid: String,
   invoice_id: String,
 });
 
-TransactionsSchema.index('uuid', {unique: true});
-TransactionsSchema.index('santander_applications');
-TransactionsSchema.index('original_id', {unique: true});
-TransactionsSchema.index('reference');
-TransactionsSchema.index('customer_name');
-TransactionsSchema.index('customer_email');
-TransactionsSchema.index('merchant_name');
-TransactionsSchema.index('merchant_email');
-TransactionsSchema.index({ status: 1, _id: 1 });
+TransactionSchema.index({ uuid: 1});
+TransactionSchema.index({ santander_applications: 1});
+TransactionSchema.index({ original_id: 1});
+TransactionSchema.index({ reference: 1});
+TransactionSchema.index({ customer_name: 1});
+TransactionSchema.index({ customer_email: 1});
+TransactionSchema.index({ merchant_name: 1});
+TransactionSchema.index({ merchant_email: 1});
+TransactionSchema.index({ status: 1, _id: 1 });
 
-TransactionsSchema.virtual('amount_refunded').get(function() {
+TransactionSchema.virtual('amount_refunded').get(function() {
   let totalRefunded = 0;
 
   if (this.history) {
@@ -138,11 +73,11 @@ TransactionsSchema.virtual('amount_refunded').get(function() {
   return totalRefunded;
 });
 
-TransactionsSchema.virtual('amount_rest').get(function() {
+TransactionSchema.virtual('amount_rest').get(function() {
   return this.amount - this.amount_refunded;
 });
 
-TransactionsSchema.virtual('available_refund_items').get(function() {
+TransactionSchema.virtual('available_refund_items').get(function() {
   const refundItems = [];
 
   this.items.forEach((item) => {
@@ -156,7 +91,6 @@ TransactionsSchema.virtual('available_refund_items').get(function() {
           if (refundedLog && refundedLog.count) {
             availableCount -= refundedLog.count;
           }
-
         }
       });
     }

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-
-import { ActionPayloadDto } from '../dto';
+import { ActionPayloadDto } from '../dto/action-payload';
 
 @Injectable()
 export class DtoValidationService {

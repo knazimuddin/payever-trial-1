@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { snakeCase } from 'lodash';
-import * as moment from 'moment';
 import { Model } from 'mongoose';
 import { PagingResultDto } from '../dto';
 import { FilterConditionEnum } from '../enum';
@@ -14,8 +13,7 @@ export class TransactionsGridService {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
     private readonly currencyExchangeService: CurrencyExchangeService,
-  ) {
-  }
+  ) {}
 
   public async getList(
     filters = {},
@@ -62,9 +60,15 @@ export class TransactionsGridService {
           must: {
             query_string: {
               query: `*${search}*`,
-              fields: ['original_id^1', 'customer_name^1', 'merchant_name^1',
-                'reference^1', 'payment_details.finance_id^1',
-                'payment_details.application_no^1', 'customer_email^1'],
+              fields: [
+                'original_id^1',
+                'customer_name^1',
+                'merchant_name^1',
+                'reference^1',
+                'payment_details.finance_id^1',
+                'payment_details.application_no^1',
+                'customer_email^1',
+              ],
             },
           },
         },
@@ -110,7 +114,7 @@ export class TransactionsGridService {
   public async count(
     filters,
     search = null,
-  ) {
+  ): Promise<number> {
     const mongoFilters = {};
     if (filters) {
       this.addFilters(mongoFilters, filters);
@@ -151,7 +155,10 @@ export class TransactionsGridService {
           },
         ]);
 
-      res = res && res[0] ? res[0].total : null;
+      res = res && res[0]
+        ? res[0].total
+        : null
+      ;
     } else {
       const rates = await this.currencyExchangeService.getCurrencyExchanges();
       res = await this.transactionsModel
@@ -165,12 +172,18 @@ export class TransactionsGridService {
           },
         ]);
 
-      const totalPerCurrency: number = res.reduce((acc, currentVal) => {
-        const rate = rates.find(x => x.code === currentVal._id);
-        const addition = rate ? currentVal.total / rate.rate : currentVal.total;
+      const totalPerCurrency: number = res.reduce(
+        (acc, currentVal) => {
+          const filteredRate = rates.find(x => x.code === currentVal._id);
+          const addition = filteredRate
+            ? currentVal.total / filteredRate.rate
+            : currentVal.total
+          ;
 
-        return acc + addition;
-      }, 0);
+          return acc + addition;
+        },
+        0,
+      );
 
       const rate = rates.find(x => x.code === currency);
 
@@ -307,7 +320,7 @@ export class TransactionsGridService {
             });
             condition = {};
             condition[field] = {};
-            condition[field] = { $in: regex };
+            condition[field] = { $nin: regex };
             mongoFilters.$and.push(condition);
           }
           break;

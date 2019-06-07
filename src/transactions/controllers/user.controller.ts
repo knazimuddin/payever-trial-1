@@ -1,19 +1,11 @@
-import {
-  Controller,
-  Get, Headers,
-  HttpCode,
-  HttpStatus, NotFoundException,
-  Param,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, NotFoundException, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
+import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum, User, UserTokenInterface } from '@pe/nest-kit/modules/auth';
-
-import {
-  TransactionsGridService,
-  TransactionsService,
-} from '../services';
+import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import { TransactionModel } from '../models';
+import { TransactionSchemaName } from '../schemas';
+import { TransactionsGridService, TransactionsService } from '../services';
 
 @Controller('user')
 @ApiUseTags('user')
@@ -26,9 +18,8 @@ export class UserController {
 
   constructor(
     private readonly transactionsService: TransactionsService,
-    private readonly transactionsGridService: TransactionsGridService
-  ) {
-  }
+    private readonly transactionsGridService: TransactionsGridService,
+  ) {}
 
   @Get('list')
   @HttpCode(HttpStatus.OK)
@@ -53,14 +44,22 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   public async getDetail(
     @User() user: UserTokenInterface,
-    @Param('uuid') uuid: string,
+    @ParamModel(
+      {
+        reference: ':reference',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
   ): Promise<any> {
-    let transaction;
-    let actions = [];
+    const actions: string[] = [];
+    const found: TransactionUnpackedDetailsInterface =
+      await this.transactionsService.findUnpackedByParams({ uuid: transaction.uuid, user_uuid: user.id });
 
-    transaction = await this.transactionsService.findOneByParams({ uuid, user_uuid: user.id });
+    if (!found) {
+      throw new NotFoundException(`Transaction not found.`);
+    }
 
-    return { ...transaction, actions };
+    return { ...found, actions };
   }
 
   @Get('settings')
