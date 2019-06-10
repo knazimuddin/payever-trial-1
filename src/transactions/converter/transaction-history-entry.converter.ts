@@ -12,13 +12,23 @@ export class TransactionHistoryEntryConverter {
     createdAt: Date,
     data: HistoryEventDataInterface,
   ): TransactionHistoryEntryInterface {
-    return {
+    const item: TransactionHistoryEntryInterface = {
       action: type,
       amount: data.amount,
       payment_status: data.payment_status,
       reason: data.reason,
       created_at: createdAt,
     };
+
+    if (data.saved_data) {
+      item.upload_items = data.saved_data;
+    }
+
+    if (data.items_restocked) {
+      item.is_restock_items = data.items_restocked;
+    }
+
+    return item;
   }
 
   public static fromHistoryRefundCompletedMessage(
