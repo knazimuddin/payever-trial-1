@@ -4,8 +4,10 @@ import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum, User, UserTokenInterface } from '@pe/nest-kit/modules/auth';
 import { PagingResultDto } from '../dto';
 import { ActionItemInterface } from '../interfaces';
-import { ActionsAwareInterface } from '../interfaces/awareness';
-import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import {
+  TransactionUnpackedDetailsInterface,
+  TransactionWithAvailableActionsInterface,
+} from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import { TransactionsGridService, TransactionsService } from '../services';
@@ -53,7 +55,7 @@ export class UserController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<ActionsAwareInterface> {
+  ): Promise<TransactionWithAvailableActionsInterface> {
     const actions: ActionItemInterface[] = [];
     const found: TransactionUnpackedDetailsInterface =
       await this.transactionsService.findUnpackedByParams({ uuid: transaction.uuid, user_uuid: user.id });

@@ -20,8 +20,10 @@ import { TransactionPaymentDetailsConverter } from '../converter/transaction-pay
 import { PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { ActionItemInterface } from '../interfaces';
-import { ActionsAwareInterface } from '../interfaces/awareness';
-import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import {
+  TransactionUnpackedDetailsInterface,
+  TransactionWithAvailableActionsInterface,
+} from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
@@ -103,7 +105,7 @@ export class BusinessController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<ActionsAwareInterface>  {
+  ): Promise<TransactionWithAvailableActionsInterface>  {
     let actions: ActionItemInterface[];
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
@@ -136,7 +138,7 @@ export class BusinessController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<ActionsAwareInterface> {
+  ): Promise<TransactionWithAvailableActionsInterface> {
     let actions: ActionItemInterface[];
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
@@ -171,7 +173,7 @@ export class BusinessController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
-  ): Promise<ActionsAwareInterface> {
+  ): Promise<TransactionWithAvailableActionsInterface> {
     let actions: ActionItemInterface[];
     this.dtoValidation.checkFileUploadDto(actionPayload);
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
@@ -228,7 +230,7 @@ export class BusinessController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<ActionsAwareInterface> {
+  ): Promise<TransactionWithAvailableActionsInterface> {
     let actions: ActionItemInterface[];
     const outputTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
