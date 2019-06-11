@@ -15,7 +15,9 @@ import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { TransactionPaymentDetailsConverter } from '../converter/transaction-payment-details.converter';
+import { PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
+import { ActionItemInterface } from '../interfaces';
 import { ActionsAwareInterface } from '../interfaces/awareness';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
@@ -38,8 +40,7 @@ export class AdminController {
     private readonly transactionsGridService: TransactionsGridService,
     private readonly messagingService: MessagingService,
     private readonly logger: Logger,
-  ) {
-  }
+  ) {}
 
   @Get('list')
   @HttpCode(HttpStatus.OK)
@@ -51,7 +52,7 @@ export class AdminController {
     @Query('query') search: string,
     @Query('filters') filters: any = {},
     @Query('currency') currency: string,
-  ): Promise<any> {
+  ): Promise<PagingResultDto> {
     return this.transactionsGridService
       .getList(filters, orderBy, direction, search, +page, +limit, currency);
   }
@@ -65,23 +66,8 @@ export class AdminController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ) {
-    return TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
-    );
-  }
-
-  @Get('detail/:uuid')
-  @HttpCode(HttpStatus.OK)
-  public async getDetail(
-    @ParamModel(
-      {
-        uuid: ':uuid',
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
-  ): Promise<any> {
-    let actions = [];
+  ): Promise<ActionsAwareInterface>  {
+    let actions: ActionItemInterface[] = [];
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
@@ -93,7 +79,32 @@ export class AdminController {
       actions = [];
     }
 
-    return { ...transaction, actions };
+    return { ...unpackedTransaction, actions };
+  }
+
+  @Get('detail/:uuid')
+  @HttpCode(HttpStatus.OK)
+  public async getDetail(
+    @ParamModel(
+      {
+        uuid: ':uuid',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+  ): Promise<ActionsAwareInterface> {
+    let actions: ActionItemInterface[] = [];
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
+
+    try {
+      actions = await this.messagingService.getActionsList(unpackedTransaction);
+    } catch (e) {
+      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
+      actions = [];
+    }
+
+    return { ...unpackedTransaction, actions };
   }
 
   @Post(':uuid/action/:action')
@@ -108,7 +119,7 @@ export class AdminController {
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<ActionsAwareInterface> {
-    let actions: string[];
+    let actions: ActionItemInterface[];
 
     this.dtoValidation.checkFileUploadDto(actionPayload);
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
@@ -151,7 +162,7 @@ export class AdminController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
   ): Promise<ActionsAwareInterface> {
-    let actions: any[];
+    let actions: ActionItemInterface[];
 
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),

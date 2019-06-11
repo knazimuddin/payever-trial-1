@@ -1,12 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRabbitMqClient, RabbitMqClient } from '@pe/nest-kit';
+import { InjectRabbitMqClient, MessageInterface, RabbitMqClient } from '@pe/nest-kit';
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { of } from 'rxjs';
 import { catchError, map, take, timeout } from 'rxjs/operators';
 import { environment } from '../../environments';
+import { TransactionConverter } from '../converter';
 import { NextActionDto } from '../dto/next-action.dto';
+import { ActionItemInterface } from '../interfaces';
 import { ActionPayloadInterface, FieldsInterface, UnwrappedFieldsInterface } from '../interfaces/action-payload';
-import { CheckoutTransactionInterface, CheckoutTransactionRpcActionInterface } from '../interfaces/checkout';
+import {
+  CheckoutRpcPayloadInterface,
+  CheckoutTransactionInterface,
+  CheckoutTransactionRpcActionInterface,
+} from '../interfaces/checkout';
 import { TransactionBasicInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { BusinessPaymentOptionModel, PaymentFlowModel } from '../models';
 import { BusinessPaymentOptionService } from './business-payment-option.service';
@@ -43,10 +49,12 @@ export class MessagingService {
     return this.flowService.findOneById(flowId);
   }
 
-  public async getActionsList(transaction: TransactionUnpackedDetailsInterface): Promise<any[]> {
-    let payload: any = null;
+  public async getActionsList(
+    transaction: TransactionUnpackedDetailsInterface,
+  ): Promise<ActionItemInterface[]> {
+    let payload: CheckoutRpcPayloadInterface;
     try {
-      const data = await this.createPayloadData(transaction);
+      const data: CheckoutTransactionRpcActionInterface = await this.createPayloadData(transaction);
       if (data) {
         payload = {
           action: 'action.list',
@@ -66,15 +74,18 @@ export class MessagingService {
       return [];
     }
 
-    const responseActions = await this.runPaymentRpc(transaction, payload, 'action');
-    if (!responseActions) {
+    const actionsResponse: { [key: string]: boolean } = await this.runPaymentRpc(transaction, payload, 'action');
+    if (!actionsResponse) {
       return [];
     }
 
-    let actions = Object.keys(responseActions).map((key) => ({
-      action: key,
-      enabled: responseActions[key],
-    }));
+    let actions: ActionItemInterface[] = Object.keys(actionsResponse)
+      .map(
+        (key) => ({
+          action: key,
+          enabled: actionsResponse[key],
+        }),
+      );
 
     /**
      * This hack is only for FE improvement. FE for "Edit action" is not implemented in DK.
@@ -92,8 +103,7 @@ export class MessagingService {
     action: string,
     actionPayload: ActionPayloadInterface,
   ): Promise<void> {
-    let payload = null;
-
+    let payload: CheckoutRpcPayloadInterface;
     try {
       const dto: CheckoutTransactionRpcActionInterface = await this.createPayloadData(transaction);
       if (dto) {
@@ -156,10 +166,9 @@ export class MessagingService {
   }
 
   public async updateStatus(transaction: TransactionUnpackedDetailsInterface): Promise<void> {
-    let payload = null;
-
+    let payload: CheckoutRpcPayloadInterface;
     try {
-      const dto = await this.createPayloadData(transaction);
+      const dto: CheckoutTransactionRpcActionInterface = await this.createPayloadData(transaction);
       if (dto) {
         payload = {
           action: 'status',
@@ -198,14 +207,17 @@ export class MessagingService {
   }
 
   public async sendTransactionUpdate(transaction: TransactionUnpackedDetailsInterface): Promise<void> {
-    const converted: CheckoutTransactionInterface = this.transformTransactionForPhp(transaction);
-    const payload: any = { payment: converted };
+    const converted: CheckoutTransactionInterface = TransactionConverter.toCheckoutTransaction(transaction);
+    const payload: { payment: CheckoutTransactionInterface } = { payment: converted };
     this.logger.log({
       message: 'SENDING "transactions_app.payment.updated" event',
       payload: payload,
       context: 'MessagingService',
     });
-    const message = this.messageBusService.createMessage('transactions_app.payment.updated', payload);
+    const message: MessageInterface = this.messageBusService.createMessage(
+      'transactions_app.payment.updated',
+      payload,
+    );
 
     await this.rabbitClient
       .sendAsync(
@@ -245,8 +257,8 @@ export class MessagingService {
 
   private async runPaymentRpc(
     transaction: TransactionUnpackedDetailsInterface,
-    payload,
-    messageIdentifier,
+    payload: CheckoutRpcPayloadInterface,
+    messageIdentifier: string,
   ): Promise<any> {
     return new Promise((resolve, reject) => {
       this.rabbitClient.send(
@@ -275,15 +287,7 @@ export class MessagingService {
   private async createPayloadData(
     transaction: TransactionUnpackedDetailsInterface,
   ): Promise<CheckoutTransactionRpcActionInterface> {
-    const payload: CheckoutTransactionInterface = Object.assign({}, transaction);
-
-    this.fixDates(payload);
-    this.fixId(payload);
-
-    payload.address = transaction.billing_address;
-    // @TODO this should be done on BE side
-    payload.reference = transaction.uuid;
-
+    const payload: CheckoutTransactionInterface = TransactionConverter.toCheckoutTransaction(transaction);
     const dto: CheckoutTransactionRpcActionInterface = {
       payment: payload,
       payment_details: transaction.payment_details,
@@ -319,7 +323,7 @@ export class MessagingService {
           },
         );
 
-        return null;
+        return;
       }
 
       if (payload.payment_flow_id) {
@@ -327,8 +331,6 @@ export class MessagingService {
         dto.payment_flow.business_payment_option = await this.getBusinessPaymentOption(transaction);
       }
     } catch (e) {
-      console.log(e);
-
       this.logger.error(
         {
           message: `Transaction ${transaction.uuid} -> Cannot resolve payment flow`,
@@ -338,23 +340,10 @@ export class MessagingService {
         },
       );
 
-      return null;
+      return;
     }
 
     return dto;
-  }
-
-  private fixDates(transaction) {
-    Object.keys(transaction).forEach((key) => {
-      if (transaction[key] instanceof Date) {
-        // @TODO fix time shift issues
-        transaction[key] = transaction[key].toISOString().split('.')[0] + '+00:00';
-      }
-    });
-  }
-
-  private fixId(transaction) {
-    transaction.id = transaction.original_id;
   }
 
   private prepareActionFields(
@@ -389,14 +378,5 @@ export class MessagingService {
     }
 
     return fields;
-  }
-
-  private transformTransactionForPhp(
-    transaction: TransactionUnpackedDetailsInterface,
-  ): CheckoutTransactionInterface {
-    const payload: CheckoutTransactionInterface = Object.assign({}, transaction);
-    payload.id = transaction.original_id;
-
-    return payload;
   }
 }
