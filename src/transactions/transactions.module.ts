@@ -11,6 +11,7 @@ import {
   FlowEventsController,
   HistoryEventsController,
   MigrateEventsController,
+  ThirdPartyEventsController,
   TransactionEventsController,
   UserController,
 } from './controllers';
@@ -55,6 +56,7 @@ import {
     MigrateEventsController,
     TransactionEventsController,
     UserController,
+    ThirdPartyEventsController,
   ],
   providers: [
     BusinessPaymentOptionService,

@@ -60,6 +60,10 @@ export const rabbitMqQueues = [
         source: 'async_events',
         routingKey: RabbitRoutingKeys.CodeUpdated,
       },
+      {
+        source: 'async_events',
+        routingKey: RabbitRoutingKeys.ThirdPartyPaymentActionRequested,
+      },
     ],
   },
 ];
