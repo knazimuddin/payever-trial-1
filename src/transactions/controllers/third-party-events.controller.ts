@@ -36,12 +36,23 @@ export class ThirdPartyEventsController {
     const data: ThirdPartyActionRequestInterface = this.messageBusService
       .unwrapMessage<ThirdPartyActionRequestInterface>(msg.data);
 
+    this.logger.debug({
+      message: `THIRD-PARTY.ACTION Transaction action request`,
+      data,
+      context: 'ThirdPartyEventsController',
+    });
+
     const transaction: TransactionModel = await this.transactionService.findModelByParams({
       reference: data.reference,
       business_uuid: data.business.id,
     });
 
     if (!transaction) {
+      this.logger.warn({
+        message: `THIRD-PARTY.ACTION Transaction not found by reference ${data.reference}`,
+        context: 'ThirdPartyEventsController',
+      });
+
       return;
     }
 
@@ -53,6 +64,12 @@ export class ThirdPartyEventsController {
     const targetAction: ActionItemInterface = actions.find(item => item.action === data.action);
 
     if (!targetAction || !targetAction.enabled) {
+      this.logger.warn({
+        message: `THIRD-PARTY.ACTION Transaction action not allowed for reference ${data.reference}`,
+        targetAction,
+        context: 'ThirdPartyEventsController',
+      });
+
       return;
     }
 
