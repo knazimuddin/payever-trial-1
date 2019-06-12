@@ -17,9 +17,13 @@ import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import * as moment from 'moment';
 import { TransactionPaymentDetailsConverter } from '../converter/transaction-payment-details.converter';
+import { PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { ActionsAwareInterface } from '../interfaces/awareness';
-import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import { ActionItemInterface } from '../interfaces';
+import {
+  TransactionUnpackedDetailsInterface,
+  TransactionWithAvailableActionsInterface,
+} from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
@@ -37,8 +41,7 @@ export class BusinessController {
     private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
     private readonly logger: Logger,
-  ) {
-  }
+  ) {}
 
   @Get('list')
   @HttpCode(HttpStatus.OK)
@@ -51,7 +54,7 @@ export class BusinessController {
     @Query('page') page: number = 1,
     @Query('query') search: string,
     @Query('filters') filters: any = {},
-  ): Promise<any> {
+  ): Promise<PagingResultDto> {
     filters.business_uuid = {
       condition: 'is',
       value: businessId,
@@ -102,10 +105,26 @@ export class BusinessController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ) {
-    return TransactionPaymentDetailsConverter.convert(
+  ): Promise<TransactionWithAvailableActionsInterface>  {
+    let actions: ActionItemInterface[];
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
+
+    try {
+      actions = await this.messagingService.getActionsList(unpackedTransaction);
+    } catch (e) {
+      this.logger.error(
+        {
+          message: `Error occured while getting transaction actions`,
+          error: e.message,
+          context: 'BusinessController',
+        },
+      );
+      actions = [];
+    }
+
+    return { ...unpackedTransaction, actions };
   }
 
   @Get('detail/:uuid')
@@ -119,9 +138,8 @@ export class BusinessController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<any> {
-    let actions: any[];
-
+  ): Promise<TransactionWithAvailableActionsInterface> {
+    let actions: ActionItemInterface[];
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
@@ -155,11 +173,9 @@ export class BusinessController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
-  ): Promise<ActionsAwareInterface> {
-    let actions: string[];
-
+  ): Promise<TransactionWithAvailableActionsInterface> {
+    let actions: ActionItemInterface[];
     this.dtoValidation.checkFileUploadDto(actionPayload);
-
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
@@ -207,11 +223,16 @@ export class BusinessController {
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
   public async updateStatus(
-    @ParamModel({ uuid: ':uuid', business_uuid: ':businessId'}, TransactionSchemaName) transaction: TransactionModel,
-  ): Promise<ActionsAwareInterface> {
-    let actions: string[];
-
-    const outputTransaction: TransactionUnpackedDetailsInterface  = TransactionPaymentDetailsConverter.convert(
+    @ParamModel(
+      {
+        uuid: ':uuid',
+        business_uuid: ':businessId',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+  ): Promise<TransactionWithAvailableActionsInterface> {
+    let actions: ActionItemInterface[];
+    const outputTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
 

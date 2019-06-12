@@ -22,7 +22,7 @@ export interface CheckoutTransactionInterface extends UnpackedDetailsAwareInterf
   channel: string; // 'store', ...
   channel_uuid: string;
   channel_set_uuid: string;
-  created_at: Date;
+  created_at: string;
   currency: string;
   customer_email: string;
   customer_name: string;
@@ -49,7 +49,7 @@ export interface CheckoutTransactionInterface extends UnpackedDetailsAwareInterf
   store_name: string;
   total: number;
   type: string;
-  updated_at: Date;
+  updated_at: string;
   user_uuid: string;
   payment_type?: string;
 }
