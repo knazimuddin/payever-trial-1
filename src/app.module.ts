@@ -35,8 +35,6 @@ import { TransactionsModule } from './transactions/transactions.module';
     IntegrationModule,
     TransactionsModule,
     TransactionsEsSearch,
-    CommandModule,
-    RabbitMqModule.forRoot(environment.rabbitmq),
   ],
   providers: [
   ],
