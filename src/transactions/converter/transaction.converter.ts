@@ -72,7 +72,7 @@ export class TransactionConverter {
       address: transaction.billing_address,
       created_at: DateConverter.fromDateToAtomFormat(transaction.created_at),
       updated_at: DateConverter.fromDateToAtomFormat(transaction.updated_at),
-      reference: transaction.uuid,
+      reference: transaction.reference,
 
       uuid: transaction.uuid,
       action_running: transaction.action_running,
