@@ -33,12 +33,12 @@ export class MessagingService {
   private readonly rpcTimeout: number = 30000;
 
   constructor(
+    @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly flowService: PaymentFlowService,
-    private readonly logger: Logger,
     private readonly paymentMicroService: PaymentsMicroService,
-    @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
+    private readonly logger: Logger,
   ) {}
 
   public getBusinessPaymentOption(transaction: TransactionBasicInterface): Promise<BusinessPaymentOptionModel> {

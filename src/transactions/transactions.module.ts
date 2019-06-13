@@ -24,6 +24,7 @@ import {
   TransactionSchemaName,
 } from './schemas';
 import {
+  ActionsRetriever,
   BusinessPaymentOptionService,
   CurrencyExchangeService,
   DtoValidationService,
@@ -59,6 +60,7 @@ import {
     ThirdPartyEventsController,
   ],
   providers: [
+    ActionsRetriever,
     BusinessPaymentOptionService,
     CurrencyExchangeService,
     DtoValidationService,

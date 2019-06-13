@@ -43,6 +43,7 @@
     "db-migrate": "^0.11.5",
     "db-migrate-mongodb": "^1.5.0",
     "db-migrate-plugin-typescript": "^2.0.0",
+    "elastic-apm-node": "^2.6.0",
     "elasticsearch": "^15.4.1",
     "jsonpack": "^1.1.5",
     "jsonwebtoken": "^8.5.1",

@@ -14,19 +14,21 @@ import {
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
+import { TransactionOutputConverter } from '../converter';
 import { TransactionPaymentDetailsConverter } from '../converter/transaction-payment-details.converter';
 import { PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { ActionItemInterface } from '../interfaces';
-import {
-  TransactionUnpackedDetailsInterface,
-  TransactionWithAvailableActionsInterface,
-} from '../interfaces/transaction';
+import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
-import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
+import {
+  ActionsRetriever,
+  DtoValidationService,
+  MessagingService,
+  TransactionsGridService,
+  TransactionsService,
+} from '../services';
 
-// TODO: unify with business controller
 @Controller('admin')
 @ApiUseTags('admin')
 @UseGuards(JwtAuthGuard)
@@ -41,6 +43,7 @@ export class AdminController {
     private readonly transactionsService: TransactionsService,
     private readonly transactionsGridService: TransactionsGridService,
     private readonly messagingService: MessagingService,
+    private readonly actionsRetriever: ActionsRetriever,
     private readonly logger: Logger,
   ) {}
 
@@ -68,20 +71,15 @@ export class AdminController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface>  {
-    let actions: ActionItemInterface[] = [];
+  ): Promise<TransactionOutputInterface>  {
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
 
-    try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
-      actions = [];
-    }
-
-    return { ...unpackedTransaction, actions };
+    return TransactionOutputConverter.convert(
+      unpackedTransaction,
+      await this.actionsRetriever.retrieve(unpackedTransaction),
+    );
   }
 
   @Get('detail/:uuid')
@@ -93,20 +91,15 @@ export class AdminController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface> {
-    let actions: ActionItemInterface[] = [];
+  ): Promise<TransactionOutputInterface> {
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
 
-    try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
-      actions = [];
-    }
-
-    return { ...unpackedTransaction, actions };
+    return TransactionOutputConverter.convert(
+      unpackedTransaction,
+      await this.actionsRetriever.retrieve(unpackedTransaction),
+    );
   }
 
   @Post(':uuid/action/:action')
@@ -120,9 +113,7 @@ export class AdminController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
-  ): Promise<TransactionWithAvailableActionsInterface> {
-    let actions: ActionItemInterface[];
-
+  ): Promise<TransactionOutputInterface> {
     this.dtoValidation.checkFileUploadDto(actionPayload);
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
@@ -131,7 +122,13 @@ export class AdminController {
     try {
       await this.messagingService.runAction(unpackedTransaction, action, actionPayload);
     } catch (e) {
-      this.logger.log('Error occured during running action:\n', e);
+      this.logger.error(
+        {
+          message: `Error occured during running action`,
+          error: e.message,
+          context: 'AdminController',
+        },
+      );
       throw new BadRequestException(e.message);
     }
 
@@ -144,14 +141,10 @@ export class AdminController {
       throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
     }
 
-    try {
-      actions = await this.messagingService.getActionsList(updatedTransaction);
-    } catch (e) {
-      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
-      actions = [];
-    }
-
-    return { ...updatedTransaction, actions };
+    return TransactionOutputConverter.convert(
+      updatedTransaction,
+      await this.actionsRetriever.retrieve(updatedTransaction),
+    );
   }
 
   @Get(':uuid/update-status')
@@ -163,9 +156,7 @@ export class AdminController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface> {
-    let actions: ActionItemInterface[];
-
+  ): Promise<TransactionOutputInterface> {
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
@@ -173,7 +164,14 @@ export class AdminController {
     try {
       await this.messagingService.updateStatus(unpackedTransaction);
     } catch (e) {
-      this.logger.error(`Error occured during status update: ${e}`);
+      this.logger.error(
+        {
+          message: `Error occured during status update`,
+          error: e.message,
+          context: 'AdminController',
+        },
+      );
+
       throw new BadRequestException(`Error occured during status update. Please try again later.`);
     }
 
@@ -186,14 +184,10 @@ export class AdminController {
       throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
     }
 
-    try {
-      actions = await this.messagingService.getActionsList(updatedTransaction);
-    } catch (e) {
-      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
-      actions = [];
-    }
-
-    return { ...updatedTransaction, actions };
+    return TransactionOutputConverter.convert(
+      updatedTransaction,
+      await this.actionsRetriever.retrieve(updatedTransaction),
+    );
   }
 
   @Get('settings')

@@ -16,17 +16,20 @@ import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import * as moment from 'moment';
+import { TransactionOutputConverter } from '../converter';
 import { TransactionPaymentDetailsConverter } from '../converter/transaction-payment-details.converter';
 import { PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { ActionItemInterface } from '../interfaces';
-import {
-  TransactionUnpackedDetailsInterface,
-  TransactionWithAvailableActionsInterface,
-} from '../interfaces/transaction';
+import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
-import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
+import {
+  ActionsRetriever,
+  DtoValidationService,
+  MessagingService,
+  TransactionsGridService,
+  TransactionsService,
+} from '../services';
 
 @Controller('business/:businessId')
 @ApiUseTags('business')
@@ -40,6 +43,7 @@ export class BusinessController {
     private readonly transactionsGridService: TransactionsGridService,
     private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
+    private readonly actionsRetriever: ActionsRetriever,
     private readonly logger: Logger,
   ) {}
 
@@ -105,26 +109,15 @@ export class BusinessController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface>  {
-    let actions: ActionItemInterface[];
+  ): Promise<TransactionOutputInterface>  {
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
 
-    try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(
-        {
-          message: `Error occured while getting transaction actions`,
-          error: e.message,
-          context: 'BusinessController',
-        },
-      );
-      actions = [];
-    }
-
-    return { ...unpackedTransaction, actions };
+    return TransactionOutputConverter.convert(
+      unpackedTransaction,
+      await this.actionsRetriever.retrieve(unpackedTransaction),
+    );
   }
 
   @Get('detail/:uuid')
@@ -138,26 +131,15 @@ export class BusinessController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface> {
-    let actions: ActionItemInterface[];
+  ): Promise<TransactionOutputInterface> {
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
 
-    try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(
-        {
-          message: `Error occured while getting transaction actions`,
-          error: e.message,
-          context: 'BusinessController',
-        },
-      );
-      actions = [];
-    }
-
-    return { ...unpackedTransaction, actions };
+    return TransactionOutputConverter.convert(
+      unpackedTransaction,
+      await this.actionsRetriever.retrieve(unpackedTransaction),
+    );
   }
 
   @Post(':uuid/action/:action')
@@ -173,8 +155,7 @@ export class BusinessController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
-  ): Promise<TransactionWithAvailableActionsInterface> {
-    let actions: ActionItemInterface[];
+  ): Promise<TransactionOutputInterface> {
     this.dtoValidation.checkFileUploadDto(actionPayload);
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
@@ -203,20 +184,10 @@ export class BusinessController {
       throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
     }
 
-    try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(
-        {
-          message: `Error occurred while getting transaction actions`,
-          error: e.message,
-          context: 'BusinessController',
-        },
-      );
-      actions = [];
-    }
-
-    return { ...updatedTransaction, actions };
+    return TransactionOutputConverter.convert(
+      updatedTransaction,
+      await this.actionsRetriever.retrieve(updatedTransaction),
+    );
   }
 
   @Get(':uuid/update-status')
@@ -230,14 +201,13 @@ export class BusinessController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface> {
-    let actions: ActionItemInterface[];
-    const outputTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+  ): Promise<TransactionOutputInterface> {
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
 
     try {
-      await this.messagingService.updateStatus(outputTransaction);
+      await this.messagingService.updateStatus(unpackedTransaction);
     } catch (e) {
       this.logger.error(
         {
@@ -249,29 +219,19 @@ export class BusinessController {
       throw new BadRequestException(`Error occured during status update. Please try again later. ${e.message}`);
     }
 
-    const updated: TransactionUnpackedDetailsInterface =
+    const updatedTransaction: TransactionUnpackedDetailsInterface =
       await this.transactionsService.findUnpackedByUuid(transaction.uuid);
-    // Send update to checkout-php
+      // Send update to checkout-php
     try {
-      await this.messagingService.sendTransactionUpdate(updated);
+      await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
       throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
     }
 
-    try {
-      actions = await this.messagingService.getActionsList(outputTransaction);
-    } catch (e) {
-      this.logger.error(
-        {
-          message: `Error occurred while getting transaction actions`,
-          error: e.message,
-          context: 'BusinessController',
-        },
-      );
-      actions = [];
-    }
-
-    return { ...updated, actions };
+    return TransactionOutputConverter.convert(
+      updatedTransaction,
+      await this.actionsRetriever.retrieve(updatedTransaction),
+    );
   }
 
   @Get('settings')
