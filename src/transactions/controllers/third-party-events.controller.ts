@@ -1,10 +1,9 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { MessageBusService } from '@pe/nest-kit';
-
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
-import { TransactionPaymentDetailsConverter } from '../converter/transaction-payment-details.converter';
+import { TransactionPaymentDetailsConverter } from '../converter';
 import { ActionItemInterface } from '../interfaces';
 import { ThirdPartyActionRequestInterface } from '../interfaces/third-party';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
