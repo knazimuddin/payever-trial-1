@@ -9,6 +9,13 @@ export class TransactionOutputConverter {
     transaction: TransactionUnpackedDetailsInterface,
     actions: ActionItemInterface[],
   ): TransactionOutputInterface {
+    const details = transaction.payment_details;
+    delete details.finance_id;
+    delete details.application_no;
+    delete details.application_number;
+    delete details.usage_text;
+    delete details.pan_id;
+
     return {
       actions: actions,
       transaction: {
@@ -26,7 +33,14 @@ export class TransactionOutputConverter {
       billing_address: transaction.billing_address,
       details: {
         ...transaction.payment_details,
-        reference: transaction.reference,
+        order: {
+          finance_id: transaction.payment_details.finance_id,
+          application_no: transaction.payment_details.application_no,
+          application_number: transaction.payment_details.application_number,
+          usage_text: transaction.payment_details.usage_text,
+          pan_id: transaction.payment_details.pan_id,
+          reference: transaction.reference,
+        },
       },
       payment_option: {
         id: transaction.business_option_id,

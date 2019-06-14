@@ -1,3 +1,4 @@
+export * from './output-details.interface';
 export * from './transaction-basic.interface';
 export * from './transaction-cart-item.interface';
 export * from './transaction-history-entry.interface';

@@ -1,10 +1,10 @@
 import { ActionItemInterface } from '../action-item.interface';
 import { AddressInterface } from '../address.interface';
 import {
+  OutputDetailsInterface,
   TransactionCartItemInterface,
   TransactionHistoryEntryInterface,
   TransactionRefundItemInterface,
-  UnpackedDetailsInterface,
 } from './index';
 
 export interface TransactionOutputInterface {
@@ -21,7 +21,7 @@ export interface TransactionOutputInterface {
     created_at: Date;
     updated_at: Date;
   };
-  details: UnpackedDetailsInterface;
+  details: OutputDetailsInterface;
   payment_option: {
     id: number;
     type: string;
@@ -49,7 +49,7 @@ export interface TransactionOutputInterface {
     id: string;
   };
   channel: {
-    name: string; // 'store', ...
+    name: string; // 'link', 'pos',...
     uuid: string;
   };
   customer: {
