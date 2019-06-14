@@ -14,7 +14,6 @@ export interface TransactionOutputInterface {
     original_id: string;
     uuid: string;
     currency: string;
-    reference: string;
     amount: number;
     amount_refunded?: number;
     amount_rest?: number;

@@ -16,7 +16,6 @@ export class TransactionOutputConverter {
         original_id: transaction.original_id,
         uuid: transaction.uuid,
         currency: transaction.currency,
-        reference: transaction.reference,
         amount: transaction.amount,
         amount_refunded: transaction.amount_refunded,
         amount_rest: transaction.amount_rest,
@@ -25,7 +24,10 @@ export class TransactionOutputConverter {
         updated_at: transaction.updated_at,
       },
       billing_address: transaction.billing_address,
-      details: transaction.payment_details,
+      details: {
+        ...transaction.payment_details,
+        reference: transaction.reference,
+      },
       payment_option: {
         id: transaction.business_option_id,
         type: transaction.type,
