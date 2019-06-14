@@ -1,9 +1,10 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 
-import { MessageBusService } from '@pe/nest-kit/modules/message';
+import { IncomingMessageInterface, MessageBusService, TypedMessageInterface } from '@pe/nest-kit/modules/message';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
+import { DateConverter } from '../converter';
 import {
   HistoryEventActionCompletedInterface,
   HistoryEventAddHistoryInterface,
@@ -32,9 +33,12 @@ export class HistoryEventsController {
     name: RabbitRoutingKeys.PaymentActionCompleted,
     origin: 'rabbitmq',
   })
-  public async onActionCompletedEvent(msg: any): Promise<void> {
+  public async onActionCompletedEvent(
+    msg: IncomingMessageInterface<HistoryEventActionCompletedInterface>,
+  ): Promise<void> {
+    const metadata: TypedMessageInterface<HistoryEventActionCompletedInterface> = msg.data;
     const message: HistoryEventActionCompletedInterface =
-      this.messageBusService.unwrapMessage<HistoryEventActionCompletedInterface>(msg.data);
+      this.messageBusService.unwrapMessage<HistoryEventActionCompletedInterface>(metadata);
     this.logger.log({ text: 'ACTION.COMPLETED', message });
     const search = message.payment.uuid
       ? { uuid: message.payment.uuid }
@@ -51,7 +55,12 @@ export class HistoryEventsController {
 
     this.logger.log({ text: 'ACTION.COMPLETED: Transaction found', transaction });
     await this.statisticsService.processRefundedTransaction(transaction.uuid, message);
-    await this.historyService.processHistoryRecord(transaction, message.action, new Date(), message.data);
+    await this.historyService.processHistoryRecord(
+      transaction,
+      message.action,
+      (metadata.createdAt && DateConverter.fromAtomFormatToDate(metadata.createdAt)) || new Date(),
+      message.data,
+    );
     this.logger.log({ text: 'ACTION.COMPLETED: Saved', transaction });
   }
 
@@ -60,7 +69,10 @@ export class HistoryEventsController {
     name: RabbitRoutingKeys.PaymentHistoryAdd,
     origin: 'rabbitmq',
   })
-  public async onHistoryAddEvent(msg: any): Promise<void> {
+  public async onHistoryAddEvent(
+    msg: IncomingMessageInterface<HistoryEventAddHistoryInterface>,
+  ): Promise<void> {
+    const metadata: TypedMessageInterface<HistoryEventAddHistoryInterface> = msg.data;
     const message: HistoryEventAddHistoryInterface =
       this.messageBusService.unwrapMessage<HistoryEventAddHistoryInterface>(msg.data);
     this.logger.log({ text: 'HISTORY.ADD', message });
@@ -79,7 +91,12 @@ export class HistoryEventsController {
     }
 
     this.logger.log({ text: 'HISTORY.ADD: Transaction found', transaction });
-    await this.historyService.processHistoryRecord(transaction, message.history_type, new Date(), message.data);
+    await this.historyService.processHistoryRecord(
+      transaction,
+      message.history_type,
+      (metadata.createdAt && DateConverter.fromAtomFormatToDate(metadata.createdAt)) || new Date(),
+      message.data,
+    );
     this.logger.log({ text: 'HISTORY.ADD: Saved', transaction });
   }
 }
