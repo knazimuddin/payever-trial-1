@@ -30,17 +30,14 @@ export class TransactionOutputConverter {
         id: transaction.business_option_id,
         type: transaction.type,
         down_payment: transaction.down_payment,
+        payment_fee: transaction.payment_fee,
+        fee_accepted: transaction.fee_accepted,
       },
       status: {
         general: transaction.status,
         specific: transaction.specific_status,
         place: transaction.place,
         color: transaction.status_color,
-      },
-      fees: {
-        payment_fee: transaction.payment_fee,
-        delivery_fee: transaction.delivery_fee,
-        fee_accepted: transaction.fee_accepted,
       },
       channel_set: {
         uuid: transaction.channel_set_uuid,
@@ -76,6 +73,7 @@ export class TransactionOutputConverter {
         category: transaction.shipping_category,
         method_name: transaction.shipping_method_name,
         option_name: transaction.shipping_option_name,
+        delivery_fee: transaction.delivery_fee,
       },
       store: {
         id: transaction.store_id,

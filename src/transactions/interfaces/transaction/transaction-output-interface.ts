@@ -27,6 +27,8 @@ export interface TransactionOutputInterface {
     id: number;
     type: string;
     down_payment: number;
+    payment_fee: number;
+    fee_accepted: boolean;
   };
   status: {
     general: string;
@@ -64,16 +66,12 @@ export interface TransactionOutputInterface {
     email: string;
     name: string;
   };
-  fees: {
-    payment_fee: number;
-    delivery_fee: number;
-    fee_accepted: boolean;
-  };
   shipping: {
     address: AddressInterface;
     category: string;
     method_name: string;
     option_name: string;
+    delivery_fee: number;
   };
   store: {
     id: string;
