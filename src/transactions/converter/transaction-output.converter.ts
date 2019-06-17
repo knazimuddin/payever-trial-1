@@ -15,6 +15,8 @@ export class TransactionOutputConverter {
     delete details.application_number;
     delete details.usage_text;
     delete details.pan_id;
+    delete details.iban;
+    delete details.bank_i_b_a_n;
 
     return {
       actions: actions,
@@ -39,6 +41,7 @@ export class TransactionOutputConverter {
           usage_text: transaction.payment_details.usage_text,
           pan_id: transaction.payment_details.pan_id,
           reference: transaction.reference,
+          iban: transaction.payment_details.iban || transaction.payment_details.bank_i_b_a_n,
         },
       },
       payment_option: {
