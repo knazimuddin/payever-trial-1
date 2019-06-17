@@ -35,8 +35,7 @@ export class TransactionOutputConverter {
         ...transaction.payment_details,
         order: {
           finance_id: transaction.payment_details.finance_id,
-          application_no: transaction.payment_details.application_no,
-          application_number: transaction.payment_details.application_number,
+          application_no: transaction.payment_details.application_no || transaction.payment_details.application_number,
           usage_text: transaction.payment_details.usage_text,
           pan_id: transaction.payment_details.pan_id,
           reference: transaction.reference,
