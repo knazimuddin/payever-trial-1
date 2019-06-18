@@ -155,37 +155,36 @@ export class BusinessController {
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionOutputInterface> {
-    this.dtoValidation.checkFileUploadDto(actionPayload);
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
+    const updatedTransaction = await this.doAction(
+      transaction,
+      actionPayload,
+      action,
     );
-
-    try {
-      await this.messagingService.runAction(unpackedTransaction, action, actionPayload);
-    } catch (e) {
-      this.logger.log(
-        {
-          message: `Error occured during running action`,
-          error: e.message,
-          context: 'BusinessController',
-        },
-      );
-
-      throw new BadRequestException(e.message);
-    }
-
-    const updatedTransaction: TransactionUnpackedDetailsInterface =
-      await this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
-    // Send update to checkout-php
-    try {
-      await this.messagingService.sendTransactionUpdate(updatedTransaction);
-    } catch (e) {
-      throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
-    }
 
     return TransactionOutputConverter.convert(
       updatedTransaction,
       await this.actionsRetriever.retrieve(updatedTransaction),
+    );
+  }
+
+  @Post(':uuid/legacy-api-action/:action')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.oauth)
+  public async runLegacyApiAction(
+    @Param('action') action: string,
+    @ParamModel(
+      {
+        uuid: ':uuid',
+        business_uuid: ':businessId',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+    @Body() actionPayload: ActionPayloadDto,
+  ): Promise<TransactionUnpackedDetailsInterface> {
+    return this.doAction(
+      transaction,
+      actionPayload,
+      action,
     );
   }
 
@@ -254,5 +253,41 @@ export class BusinessController {
       limit: '',
       order_by: '',
     };
+  }
+
+  private async doAction(
+    transaction: TransactionModel,
+    actionPayload: ActionPayloadDto,
+    action: string,
+  ): Promise<TransactionUnpackedDetailsInterface> {
+    this.dtoValidation.checkFileUploadDto(actionPayload);
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
+
+    try {
+      await this.messagingService.runAction(unpackedTransaction, action, actionPayload);
+    } catch (e) {
+      this.logger.log(
+        {
+          message: `Error occurred during running action`,
+          error: e.message,
+          context: 'BusinessController',
+        },
+      );
+
+      throw new BadRequestException(e.message);
+    }
+
+    const updatedTransaction: TransactionUnpackedDetailsInterface =
+      await this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
+    // Send update to checkout-php
+    try {
+      await this.messagingService.sendTransactionUpdate(updatedTransaction);
+    } catch (e) {
+      throw new BadRequestException(`Error occurred while sending transaction update: ${e.message}`);
+    }
+
+    return updatedTransaction;
   }
 }
