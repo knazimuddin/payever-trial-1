@@ -9,7 +9,7 @@ export const TransactionHistoryEntrySchema = new Schema({
   reference: String,
   created_at: Date,
   is_restock_items: Boolean,
-  params: String,
+  params: Schema.Types.Mixed,
   payment_status: String,
   reason: String,
   upload_items: [TransactionUploadItemSchema],

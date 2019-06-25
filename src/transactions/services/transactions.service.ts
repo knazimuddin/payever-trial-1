@@ -4,8 +4,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
-import { TransactionCartConverter, TransactionSantanderApplicationConverter } from '../converter';
-import { TransactionPaymentDetailsConverter } from '../converter/transaction-payment-details.converter';
+import {
+  TransactionCartConverter,
+  TransactionPaymentDetailsConverter,
+  TransactionSantanderApplicationConverter,
+} from '../converter';
 import { RpcResultDto } from '../dto';
 import { client } from '../es-temp/transactions-search';
 import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
@@ -15,7 +18,7 @@ import {
   TransactionPackedDetailsInterface,
   TransactionUnpackedDetailsInterface,
 } from '../interfaces/transaction';
-import { TransactionModel } from '../models';
+import { TransactionHistoryEntryModel, TransactionModel } from '../models';
 
 @Injectable()
 export class TransactionsService {
@@ -106,6 +109,30 @@ export class TransactionsService {
       {
         new: true,
         upsert: true,
+      },
+    );
+
+    await this.bulkIndex('transactions', 'transaction', updated.toObject(), 'update');
+
+    return updated;
+  }
+
+  public async updateHistoryByUuid(
+    transactionUuid: string,
+    transactionHistory: TransactionHistoryEntryModel[],
+  ): Promise<TransactionModel> {
+
+    const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
+      {
+        uuid: transactionUuid,
+      },
+      {
+        $set: {
+          history: transactionHistory,
+        },
+      },
+      {
+        new: true,
       },
     );
 
