@@ -16,7 +16,7 @@ import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import * as moment from 'moment';
-import { TransactionPaymentDetailsConverter } from '../converter/transaction-payment-details.converter';
+import { TransactionPaymentDetailsConverter } from '../converter';
 import { PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { ActionItemInterface } from '../interfaces';
