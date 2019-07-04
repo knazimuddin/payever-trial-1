@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRabbitMqClient, MessageInterface, RabbitMqClient } from '@pe/nest-kit';
+import { MessageInterface, RabbitMqClient } from '@pe/nest-kit';
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { of } from 'rxjs';
 import { catchError, map, take, timeout } from 'rxjs/operators';
@@ -38,7 +38,7 @@ export class MessagingService {
     private readonly flowService: PaymentFlowService,
     private readonly logger: Logger,
     private readonly paymentMicroService: PaymentsMicroService,
-    @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
+    private readonly rabbitClient: RabbitMqClient,
   ) {}
 
   public getBusinessPaymentOption(transaction: TransactionBasicInterface): Promise<BusinessPaymentOptionModel> {

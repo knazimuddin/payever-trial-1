@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { InjectRabbitMqClient, RabbitMqClient } from '@pe/nest-kit';
+import { RabbitMqClient } from '@pe/nest-kit';
 import { Model } from 'mongoose';
 
 import { RabbitRoutingKeys } from '../../enums';
@@ -13,7 +13,7 @@ export class StatisticsService {
 
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
-    @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
+    private readonly rabbitClient: RabbitMqClient,
   ) {
   }
 
@@ -30,7 +30,7 @@ export class StatisticsService {
 
     if (existing.status !== updating.status && updating.status === 'STATUS_ACCEPTED') {
       await this.rabbitClient
-        .sendAsync(
+        .send(
           {
             channel: RabbitRoutingKeys.TransactionsPaymentAdd,
             exchange: 'async_events',
@@ -57,7 +57,7 @@ export class StatisticsService {
   public async processMigratedTransaction(transaction: any) {
     if (transaction.status === 'STATUS_ACCEPTED' || transaction.status === 'STATUS_PAID') {
       await this.rabbitClient
-        .sendAsync(
+        .send(
           {
             channel: RabbitRoutingKeys.TransactionsPaymentAdd,
             exchange: 'async_events',
