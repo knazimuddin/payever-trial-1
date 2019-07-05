@@ -193,7 +193,7 @@ export class MessagingService {
     paymentMethod: string,
     payload: any,
   ): Promise<any> {
-    return this.rabbitClient.callAsync(
+    return this.rabbitClient.send(
       {
         channel: this.paymentMicroService.getChannelByPaymentType(paymentMethod, environment.stub),
       },
@@ -220,7 +220,7 @@ export class MessagingService {
     );
 
     await this.rabbitClient
-      .sendAsync(
+      .send(
         { channel: 'transactions_app.payment.updated', exchange: 'async_events' },
         message,
       );
@@ -260,8 +260,7 @@ export class MessagingService {
     payload: CheckoutRpcPayloadInterface,
     messageIdentifier: string,
   ): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this.rabbitClient.send(
+      return this.rabbitClient.send(
         { channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub) },
         this.paymentMicroService.createPaymentMicroMessage(
           transaction.type,
@@ -269,19 +268,7 @@ export class MessagingService {
           payload,
           environment.stub,
         ),
-      ).pipe(
-        take(1),
-        timeout(this.rpcTimeout),
-        map((m) => this.messageBusService.unwrapRpcMessage(m)),
-        catchError((e) => {
-          reject(e);
-
-          return of(null);
-        }),
-      ).subscribe((reply) => {
-        resolve(reply);
-      });
-    });
+      );
   }
 
   private async createPayloadData(
