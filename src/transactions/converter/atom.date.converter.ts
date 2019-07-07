@@ -1,7 +1,4 @@
-import { Injectable } from '@nestjs/common';
-
-@Injectable()
-export class DateConverter {
+export class AtomDateConverter {
 
   public static fromAtomFormatToDate(incoming: string): any {
     const parsed: RegExpMatchArray = incoming.match(

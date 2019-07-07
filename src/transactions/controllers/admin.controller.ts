@@ -14,8 +14,8 @@ import {
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-import { TransactionPaymentDetailsConverter } from '../converter/transaction-payment-details.converter';
-import { PagingResultDto } from '../dto';
+import { TransactionPaymentDetailsConverter } from '../converter';
+import { PagingResultDto, SortDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { ActionItemInterface } from '../interfaces';
 import {
@@ -24,7 +24,7 @@ import {
 } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
-import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
+import { DtoValidationService, ElasticSearchService, MessagingService, TransactionsService } from '../services';
 
 // TODO: unify with business controller
 @Controller('admin')
@@ -39,7 +39,7 @@ export class AdminController {
   constructor(
     private readonly dtoValidation: DtoValidationService,
     private readonly transactionsService: TransactionsService,
-    private readonly transactionsGridService: TransactionsGridService,
+    private readonly searchService: ElasticSearchService,
     private readonly messagingService: MessagingService,
     private readonly logger: Logger,
   ) {}
@@ -49,14 +49,15 @@ export class AdminController {
   public async getList(
     @Query('orderBy') orderBy: string = 'created_at',
     @Query('direction') direction: string = 'asc',
-    @Query('limit') limit: number = 3,
+    @Query('limit') limit: number = 10,
     @Query('page') page: number = 1,
     @Query('query') search: string,
     @Query('filters') filters: any = {},
     @Query('currency') currency: string,
   ): Promise<PagingResultDto> {
-    return this.transactionsGridService
-      .getList(filters, orderBy, direction, search, +page, +limit, currency);
+    const sort: SortDto = new SortDto(orderBy, direction);
+
+    return this.searchService.getResult(filters, sort, search, +page, +limit, currency);
   }
 
   @Get('detail/reference/:reference')

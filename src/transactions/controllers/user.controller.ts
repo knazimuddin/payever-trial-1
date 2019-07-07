@@ -2,7 +2,7 @@ import { Controller, Get, HttpCode, HttpStatus, NotFoundException, Query, UseGua
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum, User, UserTokenInterface } from '@pe/nest-kit/modules/auth';
-import { PagingResultDto } from '../dto';
+import { PagingResultDto, SortDto } from '../dto';
 import { ActionItemInterface } from '../interfaces';
 import {
   TransactionUnpackedDetailsInterface,
@@ -10,7 +10,8 @@ import {
 } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
-import { TransactionsGridService, TransactionsService } from '../services';
+import { ElasticSearchService, TransactionsService } from '../services';
+import { UserFilter } from '../tools';
 
 @Controller('user')
 @ApiUseTags('user')
@@ -23,7 +24,7 @@ export class UserController {
 
   constructor(
     private readonly transactionsService: TransactionsService,
-    private readonly transactionsGridService: TransactionsGridService,
+    private readonly searchService: ElasticSearchService,
   ) {}
 
   @Get('list')
@@ -32,17 +33,15 @@ export class UserController {
     @User() user: UserTokenInterface,
     @Query('orderBy') orderBy: string = 'created_at',
     @Query('direction') direction: string = 'asc',
-    @Query('limit') limit: number = 3,
+    @Query('limit') limit: number = 10,
     @Query('page') page: number = 1,
     @Query('query') search: string,
     @Query('filters') filters: any = {},
   ): Promise<PagingResultDto> {
-    filters.user_uuid = {
-      condition: 'is',
-      value: user.id,
-    };
+    filters = UserFilter.apply(user.id, filters);
+    const sort: SortDto = new SortDto(orderBy, direction);
 
-    return this.transactionsGridService.getList(filters, orderBy, direction, search, +page, +limit);
+    return this.searchService.getResult(filters, sort, search, +page, +limit);
   }
 
   @Get('detail/:uuid')

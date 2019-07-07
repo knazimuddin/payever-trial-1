@@ -15,6 +15,8 @@ import {
   TransactionEventsController,
   UserController,
 } from './controllers';
+import { DebugController } from './controllers/debug.controller';
+import { ElasticSearchClient } from './elasticsearch/elastic-search.client';
 import {
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,
@@ -27,13 +29,14 @@ import {
   BusinessPaymentOptionService,
   CurrencyExchangeService,
   DtoValidationService,
+  ElasticSearchService,
   MessagingService,
+  MongoSearchService,
   PaymentFlowService,
   PaymentsMicroService,
   StatisticsService,
   StubService,
   TransactionHistoryService,
-  TransactionsGridService,
   TransactionsService,
 } from './services';
 
@@ -57,12 +60,18 @@ import {
     TransactionEventsController,
     UserController,
     ThirdPartyEventsController,
+
+    DebugController,
+
   ],
   providers: [
     BusinessPaymentOptionService,
     CurrencyExchangeService,
     DtoValidationService,
     MessagingService,
+    MongoSearchService,
+    ElasticSearchClient,
+    ElasticSearchService,
     PaymentFlowService,
     PaymentsMicroService,
     StatisticsService,
@@ -70,7 +79,6 @@ import {
     TransactionHistoryService,
     TransactionsEsExportCommand,
     TransactionsExportCommand,
-    TransactionsGridService,
     TransactionsService,
   ],
 })

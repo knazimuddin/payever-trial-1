@@ -1,9 +1,7 @@
-import { Injectable } from '@nestjs/common';
 import { CheckoutTransactionHistoryItemInterface } from '../interfaces/checkout';
 import { TransactionHistoryEntryInterface } from '../interfaces/transaction';
-import { DateConverter } from './date.converter';
+import { AtomDateConverter } from './atom.date.converter';
 
-@Injectable()
 export class CheckoutTransactionHistoryEntryConverter {
 
   public static fromTransactionHistoryItem(
@@ -13,7 +11,7 @@ export class CheckoutTransactionHistoryEntryConverter {
       action: data.action,
       amount: data.amount,
       payment_status: data.payment_status,
-      created_at: DateConverter.fromDateToAtomFormat(data.created_at),
+      created_at: AtomDateConverter.fromDateToAtomFormat(data.created_at),
     };
 
     if (data.params) {

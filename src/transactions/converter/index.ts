@@ -1,5 +1,6 @@
+export * from './atom.date.converter';
 export * from './checkout-transaction-history-entry.converter';
-export * from './date.converter';
+export * from './date-string.helper';
 export * from './transaction.converter';
 export * from './transaction-cart.converter';
 export * from './transaction-history-entry.converter';

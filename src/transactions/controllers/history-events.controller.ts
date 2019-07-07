@@ -4,7 +4,7 @@ import { MessagePattern } from '@nestjs/microservices';
 import { IncomingMessageInterface, MessageBusService, TypedMessageInterface } from '@pe/nest-kit/modules/message';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
-import { DateConverter } from '../converter';
+import { AtomDateConverter } from '../converter';
 import {
   HistoryEventActionCompletedInterface,
   HistoryEventAddHistoryInterface,
@@ -58,7 +58,7 @@ export class HistoryEventsController {
     await this.historyService.processHistoryRecord(
       transaction,
       message.action,
-      (metadata.createdAt && DateConverter.fromAtomFormatToDate(metadata.createdAt)) || new Date(),
+      (metadata.createdAt && AtomDateConverter.fromAtomFormatToDate(metadata.createdAt)) || new Date(),
       message.data,
     );
     this.logger.log({ text: 'ACTION.COMPLETED: Saved', transaction });
@@ -94,7 +94,7 @@ export class HistoryEventsController {
     await this.historyService.processHistoryRecord(
       transaction,
       message.history_type,
-      (metadata.createdAt && DateConverter.fromAtomFormatToDate(metadata.createdAt)) || new Date(),
+      (metadata.createdAt && AtomDateConverter.fromAtomFormatToDate(metadata.createdAt)) || new Date(),
       message.data,
     );
     this.logger.log({ text: 'HISTORY.ADD: Saved', transaction });

@@ -4,8 +4,8 @@ import { plainToClass } from 'class-transformer';
 import { TransactionDto } from '../dto';
 import { CheckoutTransactionHistoryItemInterface, CheckoutTransactionInterface } from '../interfaces/checkout';
 import { TransactionPackedDetailsInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import { AtomDateConverter } from './atom.date.converter';
 import { CheckoutTransactionHistoryEntryConverter } from './checkout-transaction-history-entry.converter';
-import { DateConverter } from './date.converter';
 import { TransactionCartConverter } from './transaction-cart.converter';
 import { TransactionSantanderApplicationConverter } from './transaction-santander-application.converter';
 
@@ -53,8 +53,8 @@ export class TransactionConverter {
       );
     }
 
-    transaction.created_at = DateConverter.fromAtomFormatToDate(checkoutTransaction.created_at);
-    transaction.updated_at = DateConverter.fromAtomFormatToDate(checkoutTransaction.updated_at);
+    transaction.created_at = AtomDateConverter.fromAtomFormatToDate(checkoutTransaction.created_at);
+    transaction.updated_at = AtomDateConverter.fromAtomFormatToDate(checkoutTransaction.updated_at);
 
     /**
      * We do not update history with current operation.
@@ -75,8 +75,8 @@ export class TransactionConverter {
     return {
       id: transaction.original_id,
       address: transaction.billing_address,
-      created_at: DateConverter.fromDateToAtomFormat(transaction.created_at),
-      updated_at: DateConverter.fromDateToAtomFormat(transaction.updated_at),
+      created_at: AtomDateConverter.fromDateToAtomFormat(transaction.created_at),
+      updated_at: AtomDateConverter.fromDateToAtomFormat(transaction.updated_at),
       reference: transaction.reference || transaction.uuid,
 
       uuid: transaction.uuid,

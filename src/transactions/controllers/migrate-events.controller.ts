@@ -3,7 +3,7 @@ import { MessagePattern } from '@nestjs/microservices';
 import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
-import { DateConverter, TransactionConverter, TransactionHistoryEntryConverter } from '../converter';
+import { AtomDateConverter, TransactionConverter, TransactionHistoryEntryConverter } from '../converter';
 import { CheckoutTransactionInterface } from '../interfaces/checkout';
 import { TransactionHistoryEntryInterface, TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionHistoryEntryModel, TransactionModel } from '../models';
@@ -46,7 +46,7 @@ export class MigrateEventsController {
         const record: TransactionHistoryEntryInterface =
           TransactionHistoryEntryConverter.fromCheckoutTransactionHistoryItem(
             historyItem.action,
-            (historyItem.created_at && DateConverter.fromAtomFormatToDate(historyItem.created_at)) || new Date(),
+            (historyItem.created_at && AtomDateConverter.fromAtomFormatToDate(historyItem.created_at)) || new Date(),
             historyItem,
           );
 

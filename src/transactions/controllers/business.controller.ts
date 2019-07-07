@@ -17,7 +17,7 @@ import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import * as moment from 'moment';
 import { TransactionPaymentDetailsConverter } from '../converter';
-import { PagingResultDto } from '../dto';
+import { PagingResultDto, SortDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { ActionItemInterface } from '../interfaces';
 import {
@@ -26,7 +26,8 @@ import {
 } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
-import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
+import { DtoValidationService, ElasticSearchService, MessagingService, TransactionsService } from '../services';
+import { BusinessFilter } from '../tools';
 
 @Controller('business/:businessId')
 @ApiUseTags('business')
@@ -37,7 +38,7 @@ import { DtoValidationService, MessagingService, TransactionsGridService, Transa
 export class BusinessController {
   constructor(
     private readonly transactionsService: TransactionsService,
-    private readonly transactionsGridService: TransactionsGridService,
+    private readonly searchService: ElasticSearchService,
     private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
     private readonly logger: Logger,
@@ -50,17 +51,15 @@ export class BusinessController {
     @Param('businessId') businessId: string,
     @Query('orderBy') orderBy: string = 'created_at',
     @Query('direction') direction: string = 'asc',
-    @Query('limit') limit: number = 3,
+    @Query('limit') limit: number = 10,
     @Query('page') page: number = 1,
     @Query('query') search: string,
     @Query('filters') filters: any = {},
   ): Promise<PagingResultDto> {
-    filters.business_uuid = {
-      condition: 'is',
-      value: businessId,
-    };
+    const sort: SortDto = new SortDto(orderBy, direction);
+    filters = BusinessFilter.apply(businessId, filters);
 
-    return this.transactionsGridService.getList(filters, orderBy, direction, search, +page, +limit);
+    return this.searchService.getResult(filters, sort, search, +page, +limit);
   }
 
   @Get('csv')

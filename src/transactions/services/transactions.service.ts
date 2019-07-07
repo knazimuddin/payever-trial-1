@@ -10,7 +10,7 @@ import {
   TransactionSantanderApplicationConverter,
 } from '../converter';
 import { RpcResultDto } from '../dto';
-import { client } from '../es-temp/transactions-search';
+import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
 import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
 import {
   TransactionBasicInterface,
@@ -26,6 +26,7 @@ export class TransactionsService {
   constructor(
     @InjectModel('Transaction') private readonly transactionModel: Model<TransactionModel>,
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
+    private readonly elasticSearchClient: ElasticSearchClient,
     private readonly logger: Logger,
   ) {}
 
@@ -40,7 +41,7 @@ export class TransactionsService {
 
     try {
       const created: TransactionModel = await this.transactionModel.create(transactionDto);
-      await this.bulkIndex('transactions', 'transaction', created.toObject());
+      await this.elasticSearchClient.bulkIndex('transactions', 'transaction', created.toObject());
 
       await this.notificationsEmitter.sendNotification(
         {
@@ -64,37 +65,6 @@ export class TransactionsService {
     }
   }
 
-  public async bulkIndex(index, type, item, operation = 'index') {
-    const bulkBody = [];
-    item.mongoId = item._id;
-    delete item._id;
-    bulkBody.push({
-      [operation]: {
-        _index: index,
-        _type: type,
-        _id: item.mongoId,
-      },
-    });
-
-    if (operation === 'update') {
-      bulkBody.push({doc: item});
-    }
-    else {
-      bulkBody.push(item);
-    }
-
-    await client.bulk({ body: bulkBody })
-      .then(response => {
-        let errorCount = 0;
-        for (const responseItem of response.items) {
-          if (responseItem.index && responseItem.index.error) {
-            console.log(++errorCount, responseItem.index.error);
-          }
-        }
-      })
-      .catch(console.log);
-  }
-
   public async updateByUuid(
     transactionUuid: string,
     transactionDto: TransactionPackedDetailsInterface,
@@ -112,7 +82,7 @@ export class TransactionsService {
       },
     );
 
-    await this.bulkIndex('transactions', 'transaction', updated.toObject(), 'update');
+    await this.elasticSearchClient.bulkIndex('transactions', 'transaction', updated.toObject(), 'update');
 
     return updated;
   }
@@ -136,7 +106,7 @@ export class TransactionsService {
       },
     );
 
-    await this.bulkIndex('transactions', 'transaction', updated.toObject(), 'update');
+    await this.elasticSearchClient.bulkIndex('transactions', 'transaction', updated.toObject(), 'update');
 
     return updated;
   }

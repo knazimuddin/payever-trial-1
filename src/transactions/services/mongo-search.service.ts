@@ -1,47 +1,53 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { snakeCase } from 'lodash';
 import { Model } from 'mongoose';
-import { PagingResultDto } from '../dto';
+import { DateStringHelper } from '../converter';
+import { PagingResultDto, SortDto } from '../dto';
 import { FilterConditionEnum } from '../enum';
-import { client } from '../es-temp/transactions-search';
+import { TransactionModel } from '../models';
 import { CurrencyExchangeService } from './currency-exchange.service';
 
 @Injectable()
-export class TransactionsGridService {
+export class MongoSearchService {
 
   constructor(
-    @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
+    @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly currencyExchangeService: CurrencyExchangeService,
   ) {}
 
-  public async getList(
-    filters = {},
-    orderBy: string,
-    direction: string,
-    search = null,
-    page: number = null,
-    limit = null,
-    currency = null,
+  public async getResult(
+    incomingFilters: any,
+    sort: SortDto,
+    search?: string,
+    page?: number,
+    limit?: number,
+    currency?: string,
   ): Promise<PagingResultDto> {
-    const sort = {};
-    sort[snakeCase(orderBy)] = direction.toLowerCase();
+    const mongoFilters: any = {};
+    if (incomingFilters) {
+      this.addFilters(mongoFilters, incomingFilters);
+    }
+    if (search) {
+      this.addSearchFilters(mongoFilters, search);
+    }
 
     return Promise
       .all([
-        this.findMany(filters, sort, search, +page, +limit),
-        this.count(filters, search),
-        this.total(filters, search, currency),
-        this.distinctFieldValues('status', filters, search),
-        this.distinctFieldValues('specific_status', filters, search),
+        this.search(mongoFilters, sort, search, +page, +limit),
+        this.count(mongoFilters, search),
+        this.total(mongoFilters, search, currency),
+        this.distinctFieldValues('status', mongoFilters, search),
+        this.distinctFieldValues('specific_status', mongoFilters, search),
       ])
       .then((res) => {
         return {
           collection: res[0],
           pagination_data: {
-            totalCount: res[1],
-            total: res[2],
-            current: page,
+            total: res[1],
+            page: page,
+          },
+          aggregations: {
+            amount: res[2],
           },
           filters: {},
           usage: {
@@ -49,50 +55,17 @@ export class TransactionsGridService {
             specific_statuses: res[4],
           },
         };
-      });
+      })
+    ;
   }
 
-  public async search(search, business_uuid) {
-    const body: any = {
-      from: 0,
-      query: {
-        bool: {
-          must: {
-            query_string: {
-              query: `*${search}*`,
-              fields: [
-                'original_id^1',
-                'customer_name^1',
-                'merchant_name^1',
-                'reference^1',
-                'payment_details.finance_id^1',
-                'payment_details.application_no^1',
-                'customer_email^1',
-              ],
-            },
-          },
-        },
-      },
-    };
-    if (business_uuid) {
-      body.query.bool.filter = {
-        match: {
-          business_uuid: business_uuid,
-        },
-      };
-    }
-
-    return client.search({ index: 'transactions', body: body }).then((results: any) => {
-      return results.hits.hits.map(elem => {
-        elem._source._id = elem._source.mongoId;
-        delete elem._source.mongoId;
-
-        return elem._source;
-      });
-    });
-  }
-
-  public async findMany(filters:any = {}, sort = {}, search = null, page: number = null, limit = null) {
+  public async search(
+    filters: any,
+    sort: SortDto,
+    search?: string,
+    page?: number,
+    limit?: number,
+  ): Promise<any> {
     const mongoFilters: any = {};
     if (filters) {
       this.addFilters(mongoFilters, filters);
@@ -105,10 +78,8 @@ export class TransactionsGridService {
       .find(mongoFilters)
       .limit(limit)
       .skip(limit * (page - 1))
-      .sort(sort)
+      .sort({ [sort.field]: sort.direction })
       .exec();
-
-    // return this.search(search, mongoFilters.business_uuid);
   }
 
   public async count(
@@ -352,9 +323,9 @@ export class TransactionsGridService {
           _filter.value.forEach(elem => {
             condition.$and.push({
               [field]: {
-                $gte: this.getTargetDate(elem),
-                $lt: this.getTargetTomorrowDate(elem),
-              }
+                $gte: DateStringHelper.getDateStart(elem),
+                $lt: DateStringHelper.getTomorrowDateStart(elem),
+              },
             });
 
             return condition;
@@ -367,10 +338,10 @@ export class TransactionsGridService {
             condition.$and.push({
               [field]: {
                 $not: {
-                  $gte: this.getTargetDate(elem),
-                  $lt: this.getTargetTomorrowDate(elem),
+                  $gte: DateStringHelper.getDateStart(elem),
+                  $lt: DateStringHelper.getTomorrowDateStart(elem),
                 },
-              }
+              },
             });
 
             return condition;
@@ -378,7 +349,7 @@ export class TransactionsGridService {
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.AfterDate:
-          timeStamps = _filter.value.map(elem => this.getTargetDate(elem).getTime());
+          timeStamps = _filter.value.map(elem => (new Date(DateStringHelper.getDateStart(elem))).getTime());
           condition = {};
           condition[field] = {};
           condition[field] = {
@@ -387,7 +358,7 @@ export class TransactionsGridService {
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.BeforeDate:
-          timeStamps = _filter.value.map(elem => this.getTargetTomorrowDate(elem).getTime());
+          timeStamps = _filter.value.map(elem => (new Date(DateStringHelper.getTomorrowDateStart(elem))).getTime());
           condition = {};
           condition[field] = {};
           condition[field] = {
@@ -396,8 +367,8 @@ export class TransactionsGridService {
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.BetweenDates:
-          from = _filter.value.map(elem => this.getTargetDate(elem.dateFrom).getTime());
-          to = _filter.value.map(elem => this.getTargetTomorrowDate(elem.dateTo).getTime());
+          from = _filter.value.map(elem => (new Date(DateStringHelper.getDateStart(elem))).getTime());
+          to = _filter.value.map(elem => (new Date(DateStringHelper.getTomorrowDateStart(elem))).getTime());
           condition = {};
           condition[field] = {};
           condition[field] = {
@@ -412,20 +383,5 @@ export class TransactionsGridService {
     if (!mongoFilters.$and.length) {
       delete mongoFilters.$and;
     }
-  }
-
-  private getTargetDate(value: string) {
-    const date = new Date(value);
-    date.setSeconds(0);
-
-    return date;
-  }
-
-  private getTargetTomorrowDate(value: string) {
-    const date = new Date(value);
-    date.setDate(date.getDate() + 1);
-    date.setSeconds(0);
-
-    return date;
   }
 }
