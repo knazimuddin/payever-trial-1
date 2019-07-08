@@ -197,7 +197,6 @@ export class ElasticSearchService {
   private createFiltersBody() {
     return {
       must: [],
-      filter: [],
       must_not : [],
     };
   }
@@ -236,7 +235,7 @@ export class ElasticSearchService {
   private addFilter(elasticFilters, field: string, filter: any) {
     if (field === 'channel_set_uuid') {
       const condition = {
-        match: {
+        match_phrase: {
           channel_set_uuid: filter.value,
         },
       };
@@ -265,7 +264,7 @@ export class ElasticSearchService {
         case FilterConditionEnum.Is:
           for (const value of _filter.value) {
             condition = {
-              match: {
+              match_phrase: {
                 [field]: value,
               },
             };
@@ -276,7 +275,7 @@ export class ElasticSearchService {
         case FilterConditionEnum.IsNot:
           for (const value of _filter.value) {
             condition = {
-              match: {
+              match_phrase: {
                 [field]: value,
               },
             };
