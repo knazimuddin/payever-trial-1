@@ -18,6 +18,11 @@ export const environment: any = {
   statusPort: env.STATUS_APP_PORT,
   stub: env.STUB === 'true',
   elasticSearch: env.ELASTIC_HOST,
+  redis: {
+    url: env.REDIS_URL,
+    retryAttempts: env.REDIS_RETRY_ATTEMPTS,
+    retryDelay: env.REDIS_RETRY_DELAY,
+  },
   refreshTokenExpiresIn: (
     isNumeric(env.JWT_REFRESH_TOKEN_EXPIRES_IN)
       ? parseInt(env.JWT_REFRESH_TOKEN_EXPIRES_IN, 10)
