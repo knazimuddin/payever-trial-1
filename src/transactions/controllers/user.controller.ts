@@ -51,7 +51,7 @@ export class UserController {
     @User() user: UserTokenInterface,
     @ParamModel(
       {
-        reference: ':reference',
+        uuid: ':uuid',
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
