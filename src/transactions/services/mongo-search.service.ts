@@ -45,8 +45,6 @@ export class MongoSearchService {
           pagination_data: {
             total: res[1],
             page: page,
-          },
-          aggregations: {
             amount: res[2],
           },
           filters: {},

@@ -43,8 +43,6 @@ export class ElasticSearchService {
           pagination_data: {
             total: res[0].total,
             page: page,
-          },
-          aggregations: {
             amount: res[1],
           },
           filters: {},
