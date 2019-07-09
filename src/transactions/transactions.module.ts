@@ -15,7 +15,6 @@ import {
   TransactionEventsController,
   UserController,
 } from './controllers';
-import { DebugController } from './controllers/debug.controller';
 import { ElasticSearchClient } from './elasticsearch/elastic-search.client';
 import {
   BusinessPaymentOptionSchema,
@@ -60,9 +59,6 @@ import {
     TransactionEventsController,
     UserController,
     ThirdPartyEventsController,
-
-    DebugController,
-
   ],
   providers: [
     BusinessPaymentOptionService,
