@@ -1,11 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRabbitMqClient, MessageInterface, RabbitMqClient } from '@pe/nest-kit';
+import { MessageInterface, RabbitMqClient, RabbitMqRPCClient } from '@pe/nest-kit';
 import { MessageBusService } from '@pe/nest-kit/modules/message';
-import { of } from 'rxjs';
-import { catchError, map, take, timeout } from 'rxjs/operators';
 import { environment } from '../../environments';
 import { TransactionConverter } from '../converter';
-import { NextActionDto } from '../dto/next-action.dto';
+import { NextActionDto } from '../dto';
 import { ActionItemInterface } from '../interfaces';
 import { ActionPayloadInterface, FieldsInterface, UnwrappedFieldsInterface } from '../interfaces/action-payload';
 import {
@@ -30,15 +28,14 @@ export class MessagingService {
     this.logger,
   );
 
-  private readonly rpcTimeout: number = 30000;
-
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly flowService: PaymentFlowService,
     private readonly logger: Logger,
     private readonly paymentMicroService: PaymentsMicroService,
-    @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
+    private readonly rabbitRpcClient: RabbitMqRPCClient,
+    private readonly rabbitClient: RabbitMqClient,
   ) {}
 
   public getBusinessPaymentOption(transaction: TransactionBasicInterface): Promise<BusinessPaymentOptionModel> {
@@ -193,7 +190,7 @@ export class MessagingService {
     paymentMethod: string,
     payload: any,
   ): Promise<any> {
-    return this.rabbitClient.callAsync(
+    return this.rabbitRpcClient.send(
       {
         channel: this.paymentMicroService.getChannelByPaymentType(paymentMethod, environment.stub),
       },
@@ -220,7 +217,7 @@ export class MessagingService {
     );
 
     await this.rabbitClient
-      .sendAsync(
+      .send(
         { channel: 'transactions_app.payment.updated', exchange: 'async_events' },
         message,
       );
@@ -260,28 +257,17 @@ export class MessagingService {
     payload: CheckoutRpcPayloadInterface,
     messageIdentifier: string,
   ): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this.rabbitClient.send(
-        { channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub) },
-        this.paymentMicroService.createPaymentMicroMessage(
-          transaction.type,
-          messageIdentifier,
-          payload,
-          environment.stub,
-        ),
-      ).pipe(
-        take(1),
-        timeout(this.rpcTimeout),
-        map((m) => this.messageBusService.unwrapRpcMessage(m)),
-        catchError((e) => {
-          reject(e);
-
-          return of(null);
-        }),
-      ).subscribe((reply) => {
-        resolve(reply);
-      });
-    });
+    return this.rabbitRpcClient.send(
+      {
+        channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub),
+      },
+      this.paymentMicroService.createPaymentMicroMessage(
+        transaction.type,
+        messageIdentifier,
+        payload,
+        environment.stub,
+      ),
+    );
   }
 
   private async createPayloadData(

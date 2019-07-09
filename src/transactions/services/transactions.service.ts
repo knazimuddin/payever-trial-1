@@ -11,6 +11,7 @@ import {
 } from '../converter';
 import { RpcResultDto } from '../dto';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
+import { ElasticTransactionEnum } from '../enum';
 import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
 import {
   TransactionBasicInterface,
@@ -41,7 +42,11 @@ export class TransactionsService {
 
     try {
       const created: TransactionModel = await this.transactionModel.create(transactionDto);
-      await this.elasticSearchClient.bulkIndex('transactions', 'transaction', created.toObject());
+      await this.elasticSearchClient.singleIndex(
+        ElasticTransactionEnum.index,
+        ElasticTransactionEnum.type,
+        created.toObject(),
+      );
 
       await this.notificationsEmitter.sendNotification(
         {
@@ -82,7 +87,12 @@ export class TransactionsService {
       },
     );
 
-    await this.elasticSearchClient.bulkIndex('transactions', 'transaction', updated.toObject(), 'update');
+    await this.elasticSearchClient.singleIndex(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      updated.toObject(),
+      'update',
+    );
 
     return updated;
   }
@@ -106,7 +116,12 @@ export class TransactionsService {
       },
     );
 
-    await this.elasticSearchClient.bulkIndex('transactions', 'transaction', updated.toObject(), 'update');
+    await this.elasticSearchClient.singleIndex(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      updated.toObject(),
+      'update',
+    );
 
     return updated;
   }

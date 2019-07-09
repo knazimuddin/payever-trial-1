@@ -9,9 +9,41 @@ export class ElasticSearchClient {
     log: 'error',
   });
 
+  public async singleIndex(index: string, type: string, item: any, operation: string = 'index') {
+    const bulkBody = [];
+    item.mongoId = item._id;
+    delete item._id;
+    bulkBody.push({
+      [operation]: {
+        _index: index,
+        _type: type,
+        _id: item.mongoId,
+      },
+    });
+
+    if (operation === 'update') {
+      bulkBody.push({doc: item});
+    } else {
+      bulkBody.push(item);
+    }
+
+    await this.client
+      .bulk({ body: bulkBody })
+      .then(response => {
+        console.log(JSON.stringify(response, null, 2));
+
+        let errorCount = 0;
+        for (const responseItem of response.items) {
+          if (responseItem.index && responseItem.index.error) {
+            console.log(++errorCount, responseItem.index.error);
+          }
+        }
+      })
+      .catch(console.log);
+  }
+
   public async bulkIndex(index: string, type: string, data: any, operation: string = 'index') {
     const bulkBody = [];
-
     for (const item of data) {
       const plain = item.toObject();
       plain.mongoId = item._id;
