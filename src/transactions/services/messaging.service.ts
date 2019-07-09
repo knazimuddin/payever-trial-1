@@ -1,8 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MessageInterface, RabbitMqClient, RabbitMqRPCClient } from '@pe/nest-kit';
 import { MessageBusService } from '@pe/nest-kit/modules/message';
-import { of } from 'rxjs';
-import { catchError, map, take, timeout } from 'rxjs/operators';
 import { environment } from '../../environments';
 import { TransactionConverter } from '../converter';
 import { NextActionDto } from '../dto/next-action.dto';
@@ -30,15 +28,13 @@ export class MessagingService {
     this.logger,
   );
 
-  private readonly rpcTimeout: number = 30000;
-
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly flowService: PaymentFlowService,
     private readonly logger: Logger,
     private readonly paymentMicroService: PaymentsMicroService,
-    private readonly rpcRabbitClient: RabbitMqRPCClient,
+    private readonly rabbitRpcClient: RabbitMqRPCClient,
     private readonly rabbitClient: RabbitMqClient,
   ) {}
 
@@ -194,7 +190,7 @@ export class MessagingService {
     paymentMethod: string,
     payload: any,
   ): Promise<any> {
-    return this.rpcRabbitClient.send(
+    return this.rabbitRpcClient.send(
       {
         channel: this.paymentMicroService.getChannelByPaymentType(paymentMethod, environment.stub),
       },
@@ -261,15 +257,17 @@ export class MessagingService {
     payload: CheckoutRpcPayloadInterface,
     messageIdentifier: string,
   ): Promise<any> {
-      return this.rabbitClient.send(
-        { channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub) },
-        this.paymentMicroService.createPaymentMicroMessage(
-          transaction.type,
-          messageIdentifier,
-          payload,
-          environment.stub,
-        ),
-      );
+    return this.rabbitRpcClient.send(
+      {
+        channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub),
+      },
+      this.paymentMicroService.createPaymentMicroMessage(
+        transaction.type,
+        messageIdentifier,
+        payload,
+        environment.stub,
+      ),
+    );
   }
 
   private async createPayloadData(
