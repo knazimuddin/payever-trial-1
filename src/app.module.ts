@@ -15,7 +15,7 @@ import { TransactionsModule } from './transactions/transactions.module';
       environment.apm.options,
     ),
     CommandModule,
-    JwtAuthModule.forRoot(environment.jwtOptions),
+    JwtAuthModule.forRoot(environment.jwtOptions, environment.redis),
     MongooseModule.forRoot(
       environment.mongodb,
       {
