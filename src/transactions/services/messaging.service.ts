@@ -189,8 +189,8 @@ export class MessagingService {
   public async externalCapture(
     paymentMethod: string,
     payload: any,
-  ): Promise<any> {
-    return this.rabbitRpcClient.send(
+  ): Promise<void> {
+    await this.rabbitRpcClient.send(
       {
         channel: this.paymentMicroService.getChannelByPaymentType(paymentMethod, environment.stub),
       },
@@ -257,7 +257,7 @@ export class MessagingService {
     payload: CheckoutRpcPayloadInterface,
     messageIdentifier: string,
   ): Promise<any> {
-    return this.rabbitRpcClient.send(
+    const result: any = await this.rabbitRpcClient.send(
       {
         channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub),
       },
@@ -268,6 +268,8 @@ export class MessagingService {
         environment.stub,
       ),
     );
+
+    return this.messageBusService.unwrapRpcMessage(result);
   }
 
   private async createPayloadData(
