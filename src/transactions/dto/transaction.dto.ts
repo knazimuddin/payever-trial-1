@@ -12,6 +12,7 @@ export class TransactionDto implements TransactionPackedDetailsInterface {
   public action_running: boolean;
   public amount: number;
   public billing_address: AddressInterface;
+  public address?: AddressInterface;
   public business_option_id: number;
   public business_uuid: string;
   public channel: string; // 'store', ...

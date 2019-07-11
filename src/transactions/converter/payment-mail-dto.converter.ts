@@ -20,7 +20,7 @@ export class PaymentMailDtoConverter {
         created_at: paymentSubmittedDto.payment.created_at,
         customer_email: paymentSubmittedDto.payment.customer_email,
         customer_name: paymentSubmittedDto.payment.customer_name,
-        address: paymentSubmittedDto.payment.shipping_address,
+        address: paymentSubmittedDto.payment.address,
         vat_rate: PaymentMailDtoConverter.calculateTaxAmount(paymentSubmittedDto),
       },
 
