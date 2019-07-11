@@ -15,9 +15,10 @@ import {
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
+import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import * as moment from 'moment';
 import { TransactionPaymentDetailsConverter } from '../converter';
-import { PagingResultDto, SortDto } from '../dto';
+import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { ActionItemInterface } from '../interfaces';
 import {
@@ -49,17 +50,11 @@ export class BusinessController {
   @Roles(RolesEnum.merchant)
   public async getList(
     @Param('businessId') businessId: string,
-    @Query('orderBy') orderBy: string = 'created_at',
-    @Query('direction') direction: string = 'asc',
-    @Query('limit') limit: number = 10,
-    @Query('page') page: number = 1,
-    @Query('query') search: string,
-    @Query('filters') filters: any = {},
+    @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
-    const sort: SortDto = new SortDto(orderBy, direction);
-    filters = BusinessFilter.apply(businessId, filters);
+    listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
 
-    return this.searchService.getResult(filters, sort, search, +page, +limit);
+    return this.searchService.getResult(listDto);
   }
 
   @Get('csv')

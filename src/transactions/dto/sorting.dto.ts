@@ -1,6 +1,6 @@
 import { snakeCase } from 'lodash';
 
-export class SortDto {
+export class SortingDto {
   constructor(
     public field: string,
     public direction: string,

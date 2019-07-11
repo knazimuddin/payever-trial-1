@@ -1,8 +1,8 @@
-import { Controller, Get, HttpCode, HttpStatus, NotFoundException, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, NotFoundException, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
-import { ParamModel } from '@pe/nest-kit';
+import { ParamModel, QueryDto } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum, User, UserTokenInterface } from '@pe/nest-kit/modules/auth';
-import { PagingResultDto, SortDto } from '../dto';
+import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionItemInterface } from '../interfaces';
 import {
   TransactionUnpackedDetailsInterface,
@@ -31,17 +31,11 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   public async getList(
     @User() user: UserTokenInterface,
-    @Query('orderBy') orderBy: string = 'created_at',
-    @Query('direction') direction: string = 'asc',
-    @Query('limit') limit: number = 10,
-    @Query('page') page: number = 1,
-    @Query('query') search: string,
-    @Query('filters') filters: any = {},
+    @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
-    filters = UserFilter.apply(user.id, filters);
-    const sort: SortDto = new SortDto(orderBy, direction);
+    listDto.filters = UserFilter.apply(user.id, listDto.filters);
 
-    return this.searchService.getResult(filters, sort, search, +page, +limit);
+    return this.searchService.getResult(listDto);
   }
 
   @Get('detail/:uuid')

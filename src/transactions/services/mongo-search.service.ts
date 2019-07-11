@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { DateStringHelper } from '../converter';
-import { PagingResultDto, SortDto } from '../dto';
+import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
 import { FilterConditionEnum } from '../enum';
 import { TransactionModel } from '../models';
 import { CurrencyExchangeService } from './currency-exchange.service';
@@ -15,36 +15,29 @@ export class MongoSearchService {
     private readonly currencyExchangeService: CurrencyExchangeService,
   ) {}
 
-  public async getResult(
-    incomingFilters: any,
-    sort: SortDto,
-    search?: string,
-    page?: number,
-    limit?: number,
-    currency?: string,
-  ): Promise<PagingResultDto> {
+  public async getResult(listDto: ListQueryDto): Promise<PagingResultDto> {
     const mongoFilters: any = {};
-    if (incomingFilters) {
-      this.addFilters(mongoFilters, incomingFilters);
+    if (listDto.filters) {
+      this.addFilters(mongoFilters, listDto.filters);
     }
-    if (search) {
-      this.addSearchFilters(mongoFilters, search);
+    if (listDto.search) {
+      this.addSearchFilters(mongoFilters, listDto.search);
     }
 
     return Promise
       .all([
-        this.search(mongoFilters, sort, search, +page, +limit),
-        this.count(mongoFilters, search),
-        this.total(mongoFilters, search, currency),
-        this.distinctFieldValues('status', mongoFilters, search),
-        this.distinctFieldValues('specific_status', mongoFilters, search),
+        this.search(mongoFilters, listDto.sorting, listDto.paging),
+        this.count(mongoFilters),
+        this.total(mongoFilters, listDto.currency),
+        this.distinctFieldValues('status', mongoFilters),
+        this.distinctFieldValues('specific_status', mongoFilters),
       ])
       .then((res) => {
         return {
           collection: res[0],
           pagination_data: {
             total: res[1],
-            page: page,
+            page: listDto.page,
             amount: res[2],
           },
           filters: {},
@@ -59,63 +52,30 @@ export class MongoSearchService {
 
   public async search(
     filters: any,
-    sort: SortDto,
-    search?: string,
-    page?: number,
-    limit?: number,
+    sorting: { [key: string]: string },
+    paging: PagingDto,
   ): Promise<any> {
-    const mongoFilters: any = {};
-    if (filters) {
-      this.addFilters(mongoFilters, filters);
-    }
-    if (search) {
-      this.addSearchFilters(mongoFilters, search);
-    }
-
     return this.transactionsModel
-      .find(mongoFilters)
-      .limit(limit)
-      .skip(limit * (page - 1))
-      .sort({ [sort.field]: sort.direction })
+      .find(filters)
+      .limit(paging.limit)
+      .skip(paging.limit * (paging.page - 1))
+      .sort(sorting)
+      .exec()
+    ;
+  }
+
+  public async count(filters): Promise<number> {
+    return this.transactionsModel
+      .countDocuments(filters)
       .exec();
   }
 
-  public async count(
-    filters,
-    search = null,
-  ): Promise<number> {
-    const mongoFilters = {};
-    if (filters) {
-      this.addFilters(mongoFilters, filters);
-    }
-    if (search) {
-      this.addSearchFilters(mongoFilters, search);
-    }
-
-    return this.transactionsModel
-      .countDocuments(mongoFilters)
-      .exec();
-  }
-
-  public async total(
-    filters = {},
-    search = null,
-    currency = null,
-  ): Promise<number> {
-    const mongoFilters = {};
-    if (filters) {
-      this.addFilters(mongoFilters, filters);
-    }
-    if (search) {
-      this.addSearchFilters(mongoFilters, search);
-    }
-
+  public async total(filters = {}, currency = null): Promise<number> {
     let res: any;
-
     if (!currency) {
       res = await this.transactionsModel
         .aggregate([
-          { $match: mongoFilters },
+          { $match: filters },
           {
             $group: {
               _id: null,
@@ -132,7 +92,7 @@ export class MongoSearchService {
       const rates = await this.currencyExchangeService.getCurrencyExchanges();
       res = await this.transactionsModel
         .aggregate([
-          { $match: mongoFilters },
+          { $match: filters },
           {
             $group: {
               _id: '$currency',
@@ -162,21 +122,9 @@ export class MongoSearchService {
     return res;
   }
 
-  public async distinctFieldValues(
-    field,
-    filters = {},
-    search = null,
-  ) {
-    const mongoFilters = {};
-    if (filters) {
-      this.addFilters(mongoFilters, filters);
-    }
-    if (search) {
-      this.addSearchFilters(mongoFilters, search);
-    }
-
+  public async distinctFieldValues(field, filters = {}) {
     return this.transactionsModel
-      .find(mongoFilters)
+      .find(filters)
       .distinct(field)
       .exec();
   }

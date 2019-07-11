@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DateStringHelper } from '../converter';
-import { PagingResultDto, SortDto } from '../dto';
+import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
 import { ElasticTransactionEnum, FilterConditionEnum } from '../enum';
 import { CurrencyExchangeService } from './currency-exchange.service';
@@ -13,27 +13,19 @@ export class ElasticSearchService {
     private readonly elasticSearchClient: ElasticSearchClient,
   ) {}
 
-  public async getResult(
-    incomingFilters: any,
-    sort: SortDto,
-    search?: string,
-    page?: number,
-    limit?: number,
-    currency?: string,
-  ): Promise<PagingResultDto> {
+  public async getResult(listDto: ListQueryDto): Promise<PagingResultDto> {
     const elasticFilters: any = this.createFiltersBody();
-    if (incomingFilters) {
-      this.addFilters(elasticFilters, incomingFilters);
+    if (listDto.filters) {
+      this.addFilters(elasticFilters, listDto.filters);
     }
-    if (search) {
-      this.addSearchFilters(elasticFilters, search);
+    if (listDto.search) {
+      this.addSearchFilters(elasticFilters, listDto.search);
     }
-    const sorting = this.createSortingBody(sort);
 
     return Promise
       .all([
-        this.search(elasticFilters, sorting, page, limit),
-        this.totalAmount(elasticFilters, currency),
+        this.search(elasticFilters, listDto.sorting, listDto.paging),
+        this.totalAmount(elasticFilters, listDto.currency),
         this.distinctFieldValues('status', elasticFilters),
         this.distinctFieldValues('specific_status', elasticFilters),
       ])
@@ -42,7 +34,7 @@ export class ElasticSearchService {
           collection: res[0].collection,
           pagination_data: {
             total: res[0].total,
-            page: page,
+            page: listDto.page,
             amount: res[1],
           },
           filters: {},
@@ -55,15 +47,55 @@ export class ElasticSearchService {
     ;
   }
 
+  //
+  // public async searchByFilters() {
+  //   const body: any = {
+  //     from: 0,
+  //     size: 20,
+  //     query: {
+  //       bool: {
+  //         must: [
+  //           {
+  //             match_phrase: {
+  //               business_uuid: '4a26ca49-6ad1-11e7-9350-305a3a774e3f',
+  //             },
+  //           },
+  //         ],
+  //         must_not: [
+  //         ],
+  //       },
+  //     },
+  //     // sort: [sorting],
+  //     // aggs : {
+  //     //   statuses : {
+  //     //     terms : {
+  //     //       field : 'status',
+  //     //     },
+  //     //   },
+  //     //   total_amount: {
+  //     //     sum: {
+  //     //       field : 'total',
+  //     //     },
+  //     //   },
+  //     //   count: {
+  //     //     value_count: {
+  //     //       field : 'mongoId',
+  //     //     },
+  //     //   },
+  //     // },
+  //   };
+  //
+  //   return this.elasticSearchClient.search(ElasticTransactionEnum.index, body);
+  // }
+
   private async search(
     filters: any,
     sorting: { [key: string]: string },
-    page?: number,
-    limit?: number,
+    paging: PagingDto,
   ) {
     const body = {
-      from: limit * (page - 1),
-      size: limit,
+      from: paging.limit * (paging.page - 1),
+      size: paging.limit,
       sort: [
         sorting,
       ],
@@ -198,12 +230,6 @@ export class ElasticSearchService {
     return {
       must: [],
       must_not : [],
-    };
-  }
-
-  private createSortingBody(sort: SortDto): { [key: string]: string } {
-    return {
-      [sort.field]: sort.direction,
     };
   }
 

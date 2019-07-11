@@ -8,14 +8,13 @@ import {
   Logger,
   Param,
   Post,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
-import { ParamModel } from '@pe/nest-kit';
+import { ParamModel, QueryDto } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { TransactionPaymentDetailsConverter } from '../converter';
-import { PagingResultDto, SortDto } from '../dto';
+import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { ActionItemInterface } from '../interfaces';
 import {
@@ -47,17 +46,9 @@ export class AdminController {
   @Get('list')
   @HttpCode(HttpStatus.OK)
   public async getList(
-    @Query('orderBy') orderBy: string = 'created_at',
-    @Query('direction') direction: string = 'asc',
-    @Query('limit') limit: number = 10,
-    @Query('page') page: number = 1,
-    @Query('query') search: string,
-    @Query('filters') filters: any = {},
-    @Query('currency') currency: string,
+    @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
-    const sort: SortDto = new SortDto(orderBy, direction);
-
-    return this.searchService.getResult(filters, sort, search, +page, +limit, currency);
+    return this.searchService.getResult(listDto);
   }
 
   @Get('detail/reference/:reference')
