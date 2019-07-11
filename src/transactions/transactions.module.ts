@@ -15,6 +15,7 @@ import {
   TransactionEventsController,
   UserController,
 } from './controllers';
+import { PaymentMailEventProducer } from './producer';
 import { ElasticSearchClient } from './elasticsearch/elastic-search.client';
 import {
   BusinessPaymentOptionSchema,
@@ -76,6 +77,7 @@ import {
     TransactionsEsExportCommand,
     TransactionsExportCommand,
     TransactionsService,
+    PaymentMailEventProducer,
   ],
 })
 export class TransactionsModule {}

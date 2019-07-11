@@ -8,3 +8,5 @@ export * from './rpc-result.dto';
 export * from './sorting.dto';
 export * from './transaction.dto';
 export * from './transaction-cart-item.dto';
+export * from './payment-submitted.dto';
+export * from './mail';
