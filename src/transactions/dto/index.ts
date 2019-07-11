@@ -3,3 +3,5 @@ export * from './paging-result.dto';
 export * from './rpc-result.dto';
 export * from './transaction.dto';
 export * from './transaction-cart-item.dto';
+export * from './payment-submitted.dto';
+export * from './mail';
