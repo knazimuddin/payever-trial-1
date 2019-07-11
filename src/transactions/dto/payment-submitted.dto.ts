@@ -1,5 +1,5 @@
-import { TransactionDto } from './transaction.dto';
+import { TransactionPaymentDto } from './transaction-payment.dto';
 
-export class PaymentSubmittedDto{
-  public payment: TransactionDto;
+export class PaymentSubmittedDto {
+  public payment: TransactionPaymentDto;
 }

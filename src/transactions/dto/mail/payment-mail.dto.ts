@@ -1,4 +1,4 @@
-import { BusinessDto } from './business.dto';
+import { BusinessDto } from '../business.dto';
 import { PaymentItemDto } from './payment-item.dto';
 import { PaymentDto } from './payment.dto';
 

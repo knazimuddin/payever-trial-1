@@ -9,7 +9,7 @@ export class PaymentMailDtoConverter {
       cc: [],
       template_name: 'order_invoice_template',
       business: {
-        uuid: paymentSubmittedDto.payment.business_uuid,
+        uuid: paymentSubmittedDto.payment.business.uuid,
       },
       payment: {
         id: paymentSubmittedDto.payment.id,
