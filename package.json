@@ -12,7 +12,7 @@
     "server": "nodemon",
     "start": "ts-node src/main.ts",
     "start:migration:dev": "nodemon --watch src --exec 'ts-node src/migration-main.ts'",
-    "test": "jest --config=jest.json",
+    "test": "mocha -r ts-node/register --recursive ./tests/**/*.spec.ts",
     "test:coverage": "jest --config=jest.json --coverage --coverageDirectory=coverage",
     "test:watch": "jest --watch --config=jest.json",
     "tslint": "tslint --project tsconfig.json",

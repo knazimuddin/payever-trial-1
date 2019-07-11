@@ -30,6 +30,6 @@ export class PaymentMailEventProducer {
   }
 
   private isInvoiceSendNeeded(paymentSubmittedDto: PaymentSubmittedDto): boolean {
-    return ['shop', 'pos'].indexOf(paymentSubmittedDto.payment.channel) !== -1;
+    return ['shop', 'pos', 'mail'].indexOf(paymentSubmittedDto.payment.channel) !== -1;
   }
 }
