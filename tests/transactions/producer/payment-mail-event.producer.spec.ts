@@ -24,7 +24,7 @@ describe('PaymentMailEventProducer ', () => {
         {
           provide: RabbitMqClient,
           useValue: {
-            sendAsync: () => {},
+            send: () => {},
           },
         },
       ],
@@ -36,7 +36,7 @@ describe('PaymentMailEventProducer ', () => {
 
   beforeEach(async () => {
     sandbox = sinon.createSandbox();
-    sandbox.stub(rabbitMqClient, 'sendAsync').resolves();
+    sandbox.stub(rabbitMqClient, 'send').resolves();
   });
 
   afterEach(async () => {
@@ -69,7 +69,7 @@ describe('PaymentMailEventProducer ', () => {
 
         await paymentMailEventProducer.produceOrderInvoiceEvent(paymentSubmittedDto);
 
-        expect(rabbitMqClient.sendAsync).to.have.been.calledWithMatch(
+        expect(rabbitMqClient.send).to.have.been.calledWithMatch(
           {
             exchange: 'async_events',
             channel: eventName,
@@ -97,7 +97,7 @@ describe('PaymentMailEventProducer ', () => {
 
           await paymentMailEventProducer.produceOrderInvoiceEvent(paymentSubmittedDto);
 
-          expect(rabbitMqClient.sendAsync).to.have.not.been.called;
+          expect(rabbitMqClient.send).to.have.not.been.called;
         });
       }
     }
@@ -112,7 +112,7 @@ describe('PaymentMailEventProducer ', () => {
 
       await paymentMailEventProducer.produceOrderInvoiceEvent(paymentSubmittedDto);
 
-      expect(rabbitMqClient.sendAsync).to.have.not.been.called;
+      expect(rabbitMqClient.send).to.have.not.been.called;
     });
   });
 });
