@@ -83,7 +83,7 @@ export class TransactionEventsController {
   })
   public async onTransactionSubmittedEvent(msg: any): Promise<void> {
     const data: PaymentSubmittedDto = this.messageBusService.unwrapMessage<PaymentSubmittedDto>(msg.data);
-    console.log('PAYMENT.SUBMIT', data);
+    this.logger.log(data, 'PAYMENT.SUBMIT');
 
     return this.paymentMailEventProducer.produceOrderInvoiceEvent(data);
   }
