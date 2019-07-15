@@ -22,6 +22,9 @@ export class PaymentMailDtoConverter {
         customer_name: paymentSubmittedDto.payment.customer_name,
         address: paymentSubmittedDto.payment.address,
         vat_rate: PaymentMailDtoConverter.calculateTaxAmount(paymentSubmittedDto),
+        payment_option: {
+          payment_method: paymentSubmittedDto.payment.payment_type,
+        },
       },
 
       payment_items: paymentSubmittedDto.payment.items.map((item: TransactionCartItemDto): PaymentItemDto => ({
