@@ -1,33 +1,27 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-
 import { rabbitMqQueues } from './rabbit-mq-queues';
+import ProcessEnv = NodeJS.ProcessEnv;
 
 dotenv.config();
-const env = process.env;
-const isNumeric = (n) => {
+const env: ProcessEnv = process.env;
+const isNumeric: (n: any) => boolean = (n: any): boolean => {
   return !isNaN(parseInt(n, 10)) && isFinite(n);
 };
 
 export const environment: any = {
-  production: env.PRODUCTION_MODE === 'true',
-  applicationName: env.APP_NAME,
-  port: env.APP_PORT,
-  mongodb: env.MONGODB_URL,
-  connectMicroUrlBase: env.MICRO_URL_CONNECT,
-  statusPort: env.STATUS_APP_PORT,
-  stub: env.STUB === 'true',
-  elasticSearch: env.ELASTIC_HOST,
-  redis: {
-    url: env.REDIS_URL,
-    retryAttempts: env.REDIS_RETRY_ATTEMPTS,
-    retryDelay: env.REDIS_RETRY_DELAY,
+  apm: {
+    enable: env.APM_SERVICE_ENABLE === 'true',
+    options: {
+      active: env.ELASTIC_APM_ACTIVE,
+      logLevel: env.ELASTIC_APM_LOG_LEVEL,
+      serverUrl: env.ELASTIC_APM_SERVER_URL,
+      serviceName: env.ELASTIC_APM_SERVICE_NAME,
+    },
   },
-  refreshTokenExpiresIn: (
-    isNumeric(env.JWT_REFRESH_TOKEN_EXPIRES_IN)
-      ? parseInt(env.JWT_REFRESH_TOKEN_EXPIRES_IN, 10)
-      : env.JWT_REFRESH_TOKEN_EXPIRES_IN
-  ),
+  applicationName: env.APP_NAME,
+  connectMicroUrlBase: env.MICRO_URL_CONNECT,
+  elasticSearch: env.ELASTIC_HOST,
   jwtOptions: {
     // this should be set to PEM encoded private key for RSA/ECDSA for production
     // @see https://github.com/auth0/node-jsonwebtoken#jwtsignpayload-secretorprivatekey-options-callback
@@ -35,34 +29,40 @@ export const environment: any = {
     signOptions: {
       expiresIn: (
         isNumeric(env.JWT_EXPIRES_IN)
-          ? parseInt(env.JWT_EXPIRES_IN, 10)
-          : env.JWT_EXPIRES_IN
+        ? parseInt(env.JWT_EXPIRES_IN, 10)
+        : env.JWT_EXPIRES_IN
       ),
     },
   },
+  mongodb: env.MONGODB_URL,
+  port: env.APP_PORT,
+  production: env.PRODUCTION_MODE === 'true',
   rabbitmq: {
-    urls: [env.RABBITMQ_URL],
-    queues: rabbitMqQueues,
     exchanges: [
       {
         name: 'async_events',
-        type: 'direct',
         options: { durable: true },
+        type: 'direct',
       },
     ],
-    prefetchCount: 1,
     isGlobalPrefetchCount: false,
+    prefetchCount: 1,
+    queues: rabbitMqQueues,
+    urls: [env.RABBITMQ_URL],
   },
+  redis: {
+    retryAttempts: env.REDIS_RETRY_ATTEMPTS,
+    retryDelay: env.REDIS_RETRY_DELAY,
+    url: env.REDIS_URL,
+  },
+  refreshTokenExpiresIn: (
+    isNumeric(env.JWT_REFRESH_TOKEN_EXPIRES_IN)
+    ? parseInt(env.JWT_REFRESH_TOKEN_EXPIRES_IN, 10)
+    : env.JWT_REFRESH_TOKEN_EXPIRES_IN
+  ),
   rsa: {
     private: path.resolve(env.RABBITMQ_CERTIFICATE_PATH),
   },
-  apm: {
-    enable: env.APM_SERVICE_ENABLE === 'true',
-    options: {
-      active: env.ELASTIC_APM_ACTIVE,
-      serverUrl: env.ELASTIC_APM_SERVER_URL,
-      logLevel: env.ELASTIC_APM_LOG_LEVEL,
-      serviceName: env.ELASTIC_APM_SERVICE_NAME,
-    },
-  },
+  statusPort: env.STATUS_APP_PORT,
+  stub: env.STUB === 'true',
 };
