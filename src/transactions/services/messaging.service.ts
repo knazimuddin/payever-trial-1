@@ -29,7 +29,6 @@ export class MessagingService {
   );
 
   constructor(
-    @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly flowService: PaymentFlowService,
