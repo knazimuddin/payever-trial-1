@@ -3,6 +3,8 @@ import { DateStringHelper } from '../converter';
 import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
 import { ElasticTransactionEnum, FilterConditionEnum } from '../enum';
+import { CurrencyInterface } from '../interfaces';
+import { TransactionBasicInterface } from '../interfaces/transaction';
 import { CurrencyExchangeService } from './currency-exchange.service';
 
 @Injectable()
@@ -29,7 +31,7 @@ export class ElasticSearchService {
         this.distinctFieldValues('status', elasticFilters),
         this.distinctFieldValues('specific_status', elasticFilters),
       ])
-      .then((res) => {
+      .then((res: any) => {
         return {
           collection: res[0].collection,
           pagination_data: {
@@ -39,61 +41,20 @@ export class ElasticSearchService {
           },
           filters: {},
           usage: {
-            statuses: res[2],
-            specific_statuses: res[3],
+            statuses: res[2].map((bucket: { key: string } ) => bucket.key.toUpperCase()),
+            specific_statuses: res[3].map((bucket: { key: string } ) => bucket.key.toUpperCase()),
           },
         };
       })
     ;
   }
 
-  //
-  // public async searchByFilters() {
-  //   const body: any = {
-  //     from: 0,
-  //     size: 20,
-  //     query: {
-  //       bool: {
-  //         must: [
-  //           {
-  //             match_phrase: {
-  //               business_uuid: '4a26ca49-6ad1-11e7-9350-305a3a774e3f',
-  //             },
-  //           },
-  //         ],
-  //         must_not: [
-  //         ],
-  //       },
-  //     },
-  //     // sort: [sorting],
-  //     // aggs : {
-  //     //   statuses : {
-  //     //     terms : {
-  //     //       field : 'status',
-  //     //     },
-  //     //   },
-  //     //   total_amount: {
-  //     //     sum: {
-  //     //       field : 'total',
-  //     //     },
-  //     //   },
-  //     //   count: {
-  //     //     value_count: {
-  //     //       field : 'mongoId',
-  //     //     },
-  //     //   },
-  //     // },
-  //   };
-  //
-  //   return this.elasticSearchClient.search(ElasticTransactionEnum.index, body);
-  // }
-
   private async search(
     filters: any,
     sorting: { [key: string]: string },
     paging: PagingDto,
-  ) {
-    const body = {
+  ): Promise<{ collection: TransactionBasicInterface[], total: number }> {
+    const body: any = {
       from: paging.limit * (paging.page - 1),
       size: paging.limit,
       sort: [
@@ -108,7 +69,7 @@ export class ElasticSearchService {
       .then((results: any) => {
         return {
           collection: results.hits.hits.map(
-            elem => {
+            (elem: any) => {
               elem._source._id = elem._source.mongoId;
               delete elem._source.mongoId;
 
@@ -121,8 +82,8 @@ export class ElasticSearchService {
   }
 
   private async totalAmount(
-    elasticFilters = {},
-    currency = null,
+    elasticFilters: any = {},
+    currency: string = null,
   ): Promise<number> {
     return currency
       ? this.calculateAmountMultiCurrency(elasticFilters, currency)
@@ -130,8 +91,8 @@ export class ElasticSearchService {
     ;
   }
 
-  private async calculateAmountSingleCurrency(filters = {}): Promise<number> {
-    const body = {
+  private async calculateAmountSingleCurrency(filters: any = {}): Promise<number> {
+    const body: any = {
       from: 0,
       query: {
         bool: filters,
@@ -152,10 +113,10 @@ export class ElasticSearchService {
   }
 
   private async calculateAmountMultiCurrency(
-    filters = {},
+    filters: any = {},
     currency: string,
   ): Promise<number> {
-    const body = {
+    const body: any = {
       from: 0,
       query: {
         bool: filters,
@@ -176,16 +137,18 @@ export class ElasticSearchService {
       },
     };
 
-    const rates = await this.currencyExchangeService.getCurrencyExchanges();
+    const rates: CurrencyInterface[] = await this.currencyExchangeService.getCurrencyExchanges();
     const amounts: Array<{ key: string, total_amount: { value: number }}> =
       await this.elasticSearchClient
         .search(ElasticTransactionEnum.index, body)
         .then((results: any) => results.aggregations.total_amount.buckets)
     ;
     const totalPerCurrency: number = amounts.reduce(
-      (total, currentVal) => {
-        const filteredRate = rates.find(x => x.code.toUpperCase() === currentVal.key.toUpperCase());
-        const addition = filteredRate
+      (total: number, currentVal: { key: string, total_amount: { value: number }}) => {
+        const filteredRate: CurrencyInterface = rates.find(
+          (x: CurrencyInterface) => x.code.toUpperCase() === currentVal.key.toUpperCase()
+        );
+        const addition: number = filteredRate
           ? currentVal.total_amount.value / filteredRate.rate
           : currentVal.total_amount.value
         ;
@@ -195,16 +158,16 @@ export class ElasticSearchService {
       0,
     );
 
-    const rate = rates.find(x => x.code === currency);
+    const rate: CurrencyInterface = rates.find((x: CurrencyInterface) => x.code === currency);
 
     return totalPerCurrency * rate.rate;
   }
 
   private async distinctFieldValues(
-    field,
-    filters = {},
+    field: string,
+    filters: any = {},
   ): Promise<number> {
-    const body = {
+    const body: any = {
       from: 0,
       query: {
         bool: filters,
@@ -222,19 +185,18 @@ export class ElasticSearchService {
       .then((result: any) => result
         .aggregations[field]
         .buckets
-        .map(bucket => bucket.key.toUpperCase()),
       );
   }
 
-  private createFiltersBody() {
+  private createFiltersBody(): { must: any[], must_not: any[] } {
     return {
       must: [],
       must_not : [],
     };
   }
 
-  private addSearchFilters(filters: any, search: string) {
-    const condition = {
+  private addSearchFilters(filters: any, search: string): void {
+    const condition: { query_string: any } = {
       query_string: {
         query: `*${search}*`,
         fields: [
@@ -252,21 +214,19 @@ export class ElasticSearchService {
     filters.must.push(condition);
   }
 
-  private addFilters(elasticFilters: any, inputFilters: any) {
+  private addFilters(elasticFilters: any, inputFilters: any): void {
     for (const key of Object.keys(inputFilters)) {
       this.addFilter(elasticFilters, key, inputFilters[key]);
     }
   }
 
-  private addFilter(elasticFilters, field: string, filter: any) {
+  private addFilter(elasticFilters: any, field: string, filter: any): void {
     if (field === 'channel_set_uuid') {
-      const condition = {
+      elasticFilters.must.push({
         match_phrase: {
           channel_set_uuid: filter.value,
         },
-      };
-
-      elasticFilters.must.push(condition);
+      });
 
       return;
     }
@@ -282,10 +242,10 @@ export class ElasticSearchService {
       if (!Array.isArray(_filter.value)) {
         _filter.value = [_filter.value];
       }
-      let condition;
-      let timeStamps;
-      let from;
-      let to;
+      let condition: {};
+      let timeStamps: number[];
+      let from: any;
+      let to: any;
       switch (_filter.condition) {
         case FilterConditionEnum.Is:
           for (const value of _filter.value) {
@@ -409,8 +369,8 @@ export class ElasticSearchService {
           }
           break;
         case FilterConditionEnum.Between:
-          from = _filter.value.map(elem => parseInt(elem.from, 10));
-          to = _filter.value.map(elem => parseInt(elem.to, 10));
+          from = _filter.value.map((elem: { from: string }) => parseInt(elem.from, 10));
+          to = _filter.value.map((elem: { to: string }) => parseInt(elem.to, 10));
 
           condition = {
             range: {
@@ -449,7 +409,7 @@ export class ElasticSearchService {
           }
           break;
         case FilterConditionEnum.AfterDate:
-          timeStamps = _filter.value.map(elem => (new Date(DateStringHelper.getDateStart(elem))).getTime());
+          timeStamps = _filter.value.map((elem: string) => (new Date(DateStringHelper.getDateStart(elem))).getTime());
           condition = {
             range: {
               [field]: {
@@ -460,7 +420,7 @@ export class ElasticSearchService {
           elasticFilters.must.push(condition);
           break;
         case FilterConditionEnum.BeforeDate:
-          timeStamps = _filter.value.map(elem => (new Date(DateStringHelper.getTomorrowDateStart(elem))).getTime());
+          timeStamps = _filter.value.map((elem: string) => (new Date(DateStringHelper.getTomorrowDateStart(elem))).getTime());
           condition = {
             range: {
               [field]: {
@@ -471,8 +431,8 @@ export class ElasticSearchService {
           elasticFilters.must.push(condition);
           break;
         case FilterConditionEnum.BetweenDates:
-          from = _filter.value.map(elem => (new Date(DateStringHelper.getDateStart(elem.from))).getTime());
-          to = _filter.value.map(elem => (new Date(DateStringHelper.getTomorrowDateStart(elem.to))).getTime());
+          from = _filter.value.map((elem: { from: string }) => (new Date(DateStringHelper.getDateStart(elem.from))).getTime());
+          to = _filter.value.map((elem: { to: string }) => (new Date(DateStringHelper.getTomorrowDateStart(elem.to))).getTime());
 
           condition = {
             range: {

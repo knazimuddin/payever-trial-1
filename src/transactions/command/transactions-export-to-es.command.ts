@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Command } from '@pe/nest-kit';
 import { Model } from 'mongoose';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
 import { ElasticIndexingTextFieldsEnum, ElasticTransactionEnum } from '../enum';
+import { TransactionModel } from '../models';
 
 @Injectable()
 export class TransactionsEsExportCommand {
@@ -13,22 +14,22 @@ export class TransactionsEsExportCommand {
   ) {}
 
   @Command({ command: 'transactions:export:es', describe: 'Export transactions for widgets' })
-  public async transactionsEsExport() {
+  public async transactionsEsExport(): Promise<void> {
     const count: number = await this.transactionsModel.countDocuments();
     const limit: number = 200;
     let start: number = 0;
 
     while (start < count) {
-      const transactions = await this.getWithLimit(start, limit);
+      const transactions: TransactionModel[] = await this.getWithLimit(start, limit);
       start += limit;
-      console.log(`${transactions.length} items parsed`);
+      Logger.log(`${transactions.length} items parsed`);
       await this.elasticSearchClient.bulkIndex(
         ElasticTransactionEnum.index,
         ElasticTransactionEnum.type,
         transactions,
       );
 
-      console.log(`Exported ${start} of ${count}`);
+      Logger.log(`Exported ${start} of ${count}`);
     }
 
     for (const item in ElasticIndexingTextFieldsEnum) {
@@ -47,9 +48,9 @@ export class TransactionsEsExportCommand {
       {},
       null,
       {
-        sort: { _id: 1 },
-        skip: start,
         limit: limit,
+        skip: start,
+        sort: { _id: 1 },
       },
     );
   }

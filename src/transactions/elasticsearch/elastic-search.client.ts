@@ -1,16 +1,17 @@
-import { Injectable } from '@nestjs/common';
-import * as elasticsearch from 'elasticsearch';
+import { Injectable, Logger } from '@nestjs/common';
+import { Client } from 'elasticsearch';
 import { environment } from '../../environments';
+import { TransactionBasicInterface } from '../interfaces/transaction';
 
 @Injectable()
 export class ElasticSearchClient {
-  private client = new elasticsearch.Client({
+  private client: Client = new Client({
     host: environment.elasticSearch,
     log: 'error',
   });
 
-  public async singleIndex(index: string, type: string, item: any, operation: string = 'index') {
-    const bulkBody = [];
+  public async singleIndex(index: string, type: string, item: any, operation: string = 'index'): Promise<void> {
+    const bulkBody: any = [];
     item.mongoId = item._id;
     delete item._id;
     bulkBody.push({
@@ -29,23 +30,23 @@ export class ElasticSearchClient {
 
     await this.client
       .bulk({ body: bulkBody })
-      .then(response => {
-        console.log(JSON.stringify(response, null, 2));
+      .then((response: any) => {
+        Logger.log(JSON.stringify(response, null, 2));
 
-        let errorCount = 0;
+        let errorCount: number = 0;
         for (const responseItem of response.items) {
           if (responseItem.index && responseItem.index.error) {
-            console.log(++errorCount, responseItem.index.error);
+            Logger.log(++errorCount, responseItem.index.error);
           }
         }
       })
-      .catch(console.log);
+      .catch(Logger.log);
   }
 
-  public async bulkIndex(index: string, type: string, data: any, operation: string = 'index') {
-    const bulkBody = [];
+  public async bulkIndex(index: string, type: string, data: any, operation: string = 'index'): Promise<void> {
+    const bulkBody: any = [];
     for (const item of data) {
-      const plain = item.toObject();
+      const plain: TransactionBasicInterface & { _id: string, mongoId: string } = item.toObject();
       plain.mongoId = item._id;
       delete plain._id;
 
@@ -66,20 +67,19 @@ export class ElasticSearchClient {
 
     await this.client
       .bulk({ body: bulkBody })
-      .then(response => {
-        let errorCount = 0;
+      .then((response: any) => {
+        let errorCount: number = 0;
         for (const item of response.items) {
           if (item.index && item.index.error) {
-            console.log(++errorCount, item.index.error);
+            Logger.log(++errorCount, item.index.error);
           }
         }
 
-        console.log(
-          `Successfully indexed ${data.length - errorCount}
-         out of ${data.length} items`,
+        Logger.log(
+          `Successfully indexed ${data.length - errorCount} out of ${data.length} items`,
         );
       })
-      .catch(console.log)
+      .catch(Logger.log)
     ;
   }
 
@@ -97,8 +97,8 @@ export class ElasticSearchClient {
           },
         },
       })
-      .then(response => console.log(response))
-      .catch(console.log)
+      .then((response: any) => Logger.log(response))
+      .catch(Logger.log)
     ;
   }
 
@@ -108,7 +108,7 @@ export class ElasticSearchClient {
         index: index,
         body: search,
       })
-      .catch(console.log)
+      .catch(Logger.log)
     ;
   }
 }
