@@ -4,9 +4,11 @@ import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
 import { TransactionConverter } from '../converter';
+import { PaymentSubmittedDto } from '../dto';
 import { CheckoutTransactionInterface } from '../interfaces/checkout';
 import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
+import { PaymentMailEventProducer } from '../producer';
 import { StatisticsService, TransactionsService } from '../services';
 
 @Controller()
@@ -22,6 +24,7 @@ export class TransactionEventsController {
     private readonly transactionsService: TransactionsService,
     private readonly statisticsService: StatisticsService,
     private readonly logger: Logger,
+    private readonly paymentMailEventProducer: PaymentMailEventProducer,
   ) { }
 
   @MessagePattern({
@@ -71,5 +74,17 @@ export class TransactionEventsController {
     console.log('PAYMENT.REMOVE', data);
 
     return this.transactionsService.removeByUuid(data.payment.uuid);
+  }
+
+  @MessagePattern({
+    channel: RabbitChannels.Transactions,
+    name: RabbitRoutingKeys.PaymentSubmitted,
+    origin: 'rabbitmq',
+  })
+  public async onTransactionSubmittedEvent(msg: any): Promise<void> {
+    const data: PaymentSubmittedDto = this.messageBusService.unwrapMessage<PaymentSubmittedDto>(msg.data);
+    console.log('PAYMENT.SUBMIT', data);
+
+    return this.paymentMailEventProducer.produceOrderInvoiceEvent(data);
   }
 }

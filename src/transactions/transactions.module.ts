@@ -15,6 +15,7 @@ import {
   TransactionEventsController,
   UserController,
 } from './controllers';
+import { PaymentMailEventProducer } from './producer';
 import {
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,
@@ -74,6 +75,7 @@ import {
     TransactionsExportCommand,
     TransactionsGridService,
     TransactionsService,
+    PaymentMailEventProducer,
   ],
 })
 export class TransactionsModule {}

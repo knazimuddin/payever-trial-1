@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 
 import { TransactionDto } from '../dto';
-import { CheckoutTransactionInterface } from '../interfaces/checkout';
+import { CheckoutTransactionHistoryItemInterface, CheckoutTransactionInterface } from '../interfaces/checkout';
 import { TransactionPackedDetailsInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import { CheckoutTransactionHistoryEntryConverter } from './checkout-transaction-history-entry.converter';
 import { DateConverter } from './date.converter';
 import { TransactionCartConverter } from './transaction-cart.converter';
 import { TransactionSantanderApplicationConverter } from './transaction-santander-application.converter';
@@ -67,6 +68,10 @@ export class TransactionConverter {
   public static toCheckoutTransaction(
     transaction: TransactionUnpackedDetailsInterface,
   ): CheckoutTransactionInterface {
+    const history: CheckoutTransactionHistoryItemInterface[] = transaction.history.map(
+      item => CheckoutTransactionHistoryEntryConverter.fromTransactionHistoryItem(item),
+    );
+
     return {
       id: transaction.original_id,
       address: transaction.billing_address,
@@ -88,7 +93,7 @@ export class TransactionConverter {
       delivery_fee: transaction.delivery_fee,
       down_payment: transaction.down_payment,
       fee_accepted: transaction.fee_accepted,
-      history: transaction.history,
+      history: history,
       items: transaction.items,
       merchant_email: transaction.merchant_email,
       merchant_name: transaction.merchant_name,
