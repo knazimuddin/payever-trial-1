@@ -5,38 +5,43 @@ import { PaymentItemDto, PaymentMailDto, PaymentSubmittedDto, TransactionCartIte
 export class PaymentMailDtoConverter {
   public static fromPaymentSubmittedDto(paymentSubmittedDto: PaymentSubmittedDto): PaymentMailDto {
     return {
-      to: paymentSubmittedDto.payment.customer_email,
       cc: [],
+      to: paymentSubmittedDto.payment.customer_email,
+
       template_name: 'order_invoice_template',
+
       business: {
         uuid: paymentSubmittedDto.payment.business.uuid,
       },
       payment: {
         id: paymentSubmittedDto.payment.id,
+
+        address: paymentSubmittedDto.payment.address,
+
         amount: paymentSubmittedDto.payment.amount,
+        created_at: paymentSubmittedDto.payment.created_at,
         currency: paymentSubmittedDto.payment.currency,
         reference: paymentSubmittedDto.payment.reference,
         total: paymentSubmittedDto.payment.total,
-        created_at: paymentSubmittedDto.payment.created_at,
+        vat_rate: PaymentMailDtoConverter.calculateTaxAmount(paymentSubmittedDto),
+
         customer_email: paymentSubmittedDto.payment.customer_email,
         customer_name: paymentSubmittedDto.payment.customer_name,
-        address: paymentSubmittedDto.payment.address,
-        vat_rate: PaymentMailDtoConverter.calculateTaxAmount(paymentSubmittedDto),
       },
 
       payment_items: paymentSubmittedDto.payment.items.map((item: TransactionCartItemDto): PaymentItemDto => ({
-        uuid: item.uuid,
-        thumbnail: item.thumbnail,
+        name: item.name,
         price: item.price,
         quantity: item.quantity,
+        thumbnail: item.thumbnail,
+        uuid: item.uuid,
         vat_rate: item.vat_rate,
-        name: item.name,
       })),
     };
   }
 
   private static calculateTaxAmount(paymentSubmittedDto: PaymentSubmittedDto): number {
-    let taxAmount = 0;
+    let taxAmount: number = 0;
     for (const item of paymentSubmittedDto.payment.items) {
       taxAmount += item.vat_rate;
     }

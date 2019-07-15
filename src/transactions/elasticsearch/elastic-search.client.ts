@@ -16,9 +16,9 @@ export class ElasticSearchClient {
     delete item._id;
     bulkBody.push({
       [operation]: {
+        _id: item.mongoId,
         _index: index,
         _type: type,
-        _id: item.mongoId,
       },
     });
 
@@ -52,9 +52,9 @@ export class ElasticSearchClient {
 
       bulkBody.push({
         [operation]: {
+          _id: item._id,
           _index: index,
           _type: type,
-          _id: item._id,
         },
       });
 
@@ -88,11 +88,12 @@ export class ElasticSearchClient {
       .putMapping({
         index: index,
         type: type,
+
         body: {
           properties: {
             [field]: {
-              type: 'text',
               fielddata: true,
+              type: 'text',
             },
           },
         },
@@ -105,8 +106,8 @@ export class ElasticSearchClient {
   public async search(index: string, search: any): Promise<any> {
     return this.client
       .search({
-        index: index,
         body: search,
+        index: index,
       })
       .catch(Logger.log)
     ;

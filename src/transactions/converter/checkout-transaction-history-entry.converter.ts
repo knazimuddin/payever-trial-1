@@ -10,8 +10,8 @@ export class CheckoutTransactionHistoryEntryConverter {
     const item: CheckoutTransactionHistoryItemInterface = {
       action: data.action,
       amount: data.amount,
-      payment_status: data.payment_status,
       created_at: AtomDateConverter.fromDateToAtomFormat(data.created_at),
+      payment_status: data.payment_status,
     };
 
     if (data.params) {
