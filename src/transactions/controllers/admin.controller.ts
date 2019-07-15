@@ -61,19 +61,7 @@ export class AdminController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
   ): Promise<TransactionWithAvailableActionsInterface>  {
-    let actions: ActionItemInterface[] = [];
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
-    );
-
-    try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
-      actions = [];
-    }
-
-    return { ...unpackedTransaction, actions };
+    return this.getDetails(transaction);
   }
 
   @Get('detail/:uuid')
@@ -86,19 +74,7 @@ export class AdminController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
   ): Promise<TransactionWithAvailableActionsInterface> {
-    let actions: ActionItemInterface[] = [];
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
-    );
-
-    try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
-      actions = [];
-    }
-
-    return { ...unpackedTransaction, actions };
+    return this.getDetails(transaction);
   }
 
   @Post(':uuid/action/:action')
@@ -129,7 +105,7 @@ export class AdminController {
 
     const updatedTransaction: TransactionUnpackedDetailsInterface =
       await this.transactionsService.findUnpackedByUuid(transaction.uuid);
-    // Send update to checkout-php
+    /** Send update to checkout-php */
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
@@ -171,7 +147,7 @@ export class AdminController {
 
     const updatedTransaction: TransactionUnpackedDetailsInterface =
       await this.transactionsService.findUnpackedByUuid(transaction.uuid);
-    // Send update to checkout-php
+    /** Send update to checkout-php */
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
@@ -205,9 +181,25 @@ export class AdminController {
       ],
       direction: '',
       filters: null,
-      id: null, // 9???
+      id: null,
       limit: '',
       order_by: '',
     };
+  }
+
+  private async getDetails(transaction: TransactionModel): Promise<TransactionWithAvailableActionsInterface>  {
+    let actions: ActionItemInterface[] = [];
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
+
+    try {
+      actions = await this.messagingService.getActionsList(unpackedTransaction);
+    } catch (e) {
+      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
+      actions = [];
+    }
+
+    return { ...unpackedTransaction, actions };
   }
 }

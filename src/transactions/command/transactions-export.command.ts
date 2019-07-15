@@ -40,9 +40,9 @@ export class TransactionsExportCommand {
       },
       null,
       {
-        sort: { _id: 1 },
-        skip: start,
         limit: limit,
+        skip: start,
+        sort: { _id: 1 },
       },
     );
   }
