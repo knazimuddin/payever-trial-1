@@ -30,6 +30,7 @@ describe('PaymentMailDtoConverter ', () => {
           address: {
             street: 'street name',
           },
+          payment_type: 'payment_type',
         },
       } as PaymentSubmittedDto;
 
@@ -51,6 +52,9 @@ describe('PaymentMailDtoConverter ', () => {
           customer_name: paymentSubmittedDto.payment.customer_name,
           address: paymentSubmittedDto.payment.address,
           vat_rate: 0,
+          payment_option: {
+            payment_method: paymentSubmittedDto.payment.payment_type,
+          }
         },
         payment_items: [],
       };

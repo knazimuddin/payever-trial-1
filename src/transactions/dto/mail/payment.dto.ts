@@ -11,4 +11,7 @@ export class PaymentDto {
   public created_at: Date;
   public address: AddressInterface;
   public vat_rate: number;
+  public payment_option: {
+    payment_method: string;
+  };
 }
