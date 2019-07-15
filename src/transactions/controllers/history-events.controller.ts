@@ -1,6 +1,5 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-
 import { IncomingMessageInterface, MessageBusService, TypedMessageInterface } from '@pe/nest-kit/modules/message';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
@@ -26,7 +25,7 @@ export class HistoryEventsController {
     private readonly historyService: TransactionHistoryService,
     private readonly statisticsService: StatisticsService,
     private readonly logger: Logger,
-  ) { }
+  ) {}
 
   @MessagePattern({
     channel: RabbitChannels.Transactions,
@@ -40,7 +39,7 @@ export class HistoryEventsController {
     const message: HistoryEventActionCompletedInterface =
       this.messageBusService.unwrapMessage<HistoryEventActionCompletedInterface>(metadata);
     this.logger.log({ text: 'ACTION.COMPLETED', message });
-    const search = message.payment.uuid
+    const search: { [key: string]: string } = message.payment.uuid
       ? { uuid: message.payment.uuid }
       : { original_id: message.payment.id }
     ;
@@ -77,7 +76,7 @@ export class HistoryEventsController {
       this.messageBusService.unwrapMessage<HistoryEventAddHistoryInterface>(msg.data);
     this.logger.log({ text: 'HISTORY.ADD', message });
     // @TODO use only uuid later, no original_id
-    const search = message.payment.uuid
+    const search: { [key: string]: string } = message.payment.uuid
       ? { uuid: message.payment.uuid }
       : { original_id: message.payment.id }
     ;

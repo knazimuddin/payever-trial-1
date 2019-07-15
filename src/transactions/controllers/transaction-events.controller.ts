@@ -33,7 +33,8 @@ export class TransactionEventsController {
     origin: 'rabbitmq',
   })
   public async onTransactionCreateEvent(msg: any): Promise<void> {
-    const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
+    const data: { payment: CheckoutTransactionInterface } =
+      this.messageBusService.unwrapMessage<{ payment: CheckoutTransactionInterface }>(msg.data);
     this.logger.log({ text: 'PAYMENT.CREATE', data });
 
     const checkoutTransaction: CheckoutTransactionInterface = data.payment;
@@ -51,7 +52,8 @@ export class TransactionEventsController {
     origin: 'rabbitmq',
   })
   public async onTransactionUpdateEvent(msg: any): Promise<void> {
-    const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
+    const data: { payment: CheckoutTransactionInterface } =
+      this.messageBusService.unwrapMessage<{ payment: CheckoutTransactionInterface }>(msg.data);
     this.logger.log({ text: 'PAYMENT.UPDATE', data });
 
     const checkoutTransaction: CheckoutTransactionInterface = data.payment;
@@ -70,8 +72,9 @@ export class TransactionEventsController {
     origin: 'rabbitmq',
   })
   public async onTransactionRemoveEvent(msg: any): Promise<void> {
-    const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
-    console.log('PAYMENT.REMOVE', data);
+    const data: { payment: CheckoutTransactionInterface } =
+      this.messageBusService.unwrapMessage<{ payment: CheckoutTransactionInterface }>(msg.data);
+    this.logger.log({ text: 'PAYMENT.REMOVE: Prepared transaction', data });
 
     return this.transactionsService.removeByUuid(data.payment.uuid);
   }

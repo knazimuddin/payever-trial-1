@@ -11,7 +11,6 @@ import { StatisticsService, TransactionsService } from '../services';
 
 @Controller()
 export class MigrateEventsController {
-
   private messageBusService: MessageBusService = new MessageBusService(
     {
       rsa: environment.rsa,
@@ -26,13 +25,12 @@ export class MigrateEventsController {
   ) {}
 
   @MessagePattern({
-    channel: 'async_events_transactions_micro',
     name: RabbitRoutingKeys.PaymentMigrate,
     origin: 'rabbitmq',
   })
   public async onActionMigrateEvent(msg: any): Promise<void> {
     const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
-    console.log('ACTION.MIGRATE!', data.payment);
+    this.logger.log('ACTION.MIGRATE!', data.payment);
     const checkoutTransaction: CheckoutTransactionInterface = data.payment;
     const transaction: TransactionPackedDetailsInterface =
       TransactionConverter.fromCheckoutTransaction(checkoutTransaction);
@@ -46,7 +44,9 @@ export class MigrateEventsController {
         const record: TransactionHistoryEntryInterface =
           TransactionHistoryEntryConverter.fromCheckoutTransactionHistoryItem(
             historyItem.action,
-            (historyItem.created_at && AtomDateConverter.fromAtomFormatToDate(historyItem.created_at)) || new Date(),
+            (
+              historyItem.created_at && AtomDateConverter.fromAtomFormatToDate(historyItem.created_at)
+            ) || new Date(),
             historyItem,
           );
 
@@ -60,7 +60,7 @@ export class MigrateEventsController {
       await this.transactionsService.updateHistoryByUuid(created.uuid, history);
 
     await this.statisticsService.processMigratedTransaction(createdWithHistory);
-    console.log('TRANSACTION MIGRATE COMPLETED');
+    this.logger.log('TRANSACTION MIGRATE COMPLETED');
   }
 
   private async createOrUpdate(transaction: TransactionPackedDetailsInterface): Promise<TransactionModel> {
