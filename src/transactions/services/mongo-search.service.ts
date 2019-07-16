@@ -83,7 +83,9 @@ export class MongoSearchService {
               total: { $sum: '$total' },
             },
           },
-        ]);
+        ])
+        .exec()
+      ;
 
       res = res && res[0]
         ? res[0].total
@@ -100,7 +102,9 @@ export class MongoSearchService {
               total: { $sum: '$total' },
             },
           },
-        ]);
+        ])
+        .exec()
+      ;
 
       const totalPerCurrency: number = res.reduce(
         (acc: number, currentVal: { _id: string, total: number }) => {
