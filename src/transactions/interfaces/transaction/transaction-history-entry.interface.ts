@@ -6,7 +6,7 @@ export interface TransactionHistoryEntryInterface {
   amount: number;
   payment_status: string;
   created_at: Date;
-  params?: string;
+  params?: {};
   reason?: string;
   is_restock_items?: boolean;
   upload_items?: TransactionUploadItemInterface[];

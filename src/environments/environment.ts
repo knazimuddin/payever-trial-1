@@ -21,7 +21,7 @@ export const environment: any = {
   redis: {
     url: env.REDIS_URL,
     retryAttempts: env.REDIS_RETRY_ATTEMPTS,
-    retryDelay: env.REDIS_RETRY_ATTEMPTS,
+    retryDelay: env.REDIS_RETRY_DELAY,
   },
   refreshTokenExpiresIn: (
     isNumeric(env.JWT_REFRESH_TOKEN_EXPIRES_IN)
