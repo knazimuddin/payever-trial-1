@@ -268,7 +268,16 @@ export class MongoSearchService {
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.IsNotDate:
-          const isNotDateCondition: { $and: Array<{ [key: string]: { $not: { $gte: string, $lt: string }}}> } = { $and: [] };
+          const isNotDateCondition: {
+            $and: Array<{
+              [key: string]: {
+                $not: {
+                  $gte: string,
+                  $lt: string
+                }
+              }
+            }>
+          } = { $and: [] };
           _filter.value.forEach((elem: string) => {
             isNotDateCondition.$and.push({
               [field]: {
@@ -284,22 +293,30 @@ export class MongoSearchService {
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.AfterDate:
-          timeStamps = _filter.value.map((elem: string) => (new Date(DateStringHelper.getDateStart(elem))).getTime());
+          timeStamps = _filter.value.map(
+            (elem: string) => (new Date(DateStringHelper.getDateStart(elem))).getTime(),
+          );
           condition[field] = {
             $gte: Math.max(...timeStamps),
           };
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.BeforeDate:
-          timeStamps = _filter.value.map((elem: string) => (new Date(DateStringHelper.getTomorrowDateStart(elem))).getTime());
+          timeStamps = _filter.value.map(
+            (elem: string) => (new Date(DateStringHelper.getTomorrowDateStart(elem))).getTime(),
+          );
           condition[field] = {
             $lt: Math.min(...timeStamps),
           };
           mongoFilters.$and.push(condition);
           break;
         case FilterConditionEnum.BetweenDates:
-          from = _filter.value.map((elem: string) => (new Date(DateStringHelper.getDateStart(elem))).getTime());
-          to = _filter.value.map((elem: string) => (new Date(DateStringHelper.getTomorrowDateStart(elem))).getTime());
+          from = _filter.value.map(
+            (elem: string) => (new Date(DateStringHelper.getDateStart(elem))).getTime(),
+          );
+          to = _filter.value.map(
+            (elem: string) => (new Date(DateStringHelper.getTomorrowDateStart(elem))).getTime(),
+          );
           condition[field] = {
             $gte: Math.max(from),
             $lte: Math.min(to),

@@ -35,7 +35,6 @@ import {
   PaymentFlowService,
   PaymentsMicroService,
   StatisticsService,
-  StubService,
   TransactionHistoryService,
   TransactionsService,
 } from './services';
@@ -72,7 +71,6 @@ import {
     PaymentFlowService,
     PaymentsMicroService,
     StatisticsService,
-    StubService,
     TransactionHistoryService,
     TransactionsEsExportCommand,
     TransactionsExportCommand,

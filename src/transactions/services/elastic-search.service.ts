@@ -398,7 +398,9 @@ export class ElasticSearchService {
           }
           break;
         case FilterConditionEnum.AfterDate:
-          timeStamps = _filter.value.map((elem: string) => (new Date(DateStringHelper.getDateStart(elem))).getTime());
+          timeStamps = _filter.value.map(
+            (elem: string) => (new Date(DateStringHelper.getDateStart(elem))).getTime(),
+          );
           condition = {
             range: {
               [field]: {
@@ -409,7 +411,9 @@ export class ElasticSearchService {
           elasticFilters.must.push(condition);
           break;
         case FilterConditionEnum.BeforeDate:
-          timeStamps = _filter.value.map((elem: string) => (new Date(DateStringHelper.getTomorrowDateStart(elem))).getTime());
+          timeStamps = _filter.value.map(
+            (elem: string) => (new Date(DateStringHelper.getTomorrowDateStart(elem))).getTime(),
+          );
           condition = {
             range: {
               [field]: {
@@ -420,8 +424,12 @@ export class ElasticSearchService {
           elasticFilters.must.push(condition);
           break;
         case FilterConditionEnum.BetweenDates:
-          from = _filter.value.map((elem: { from: string }) => (new Date(DateStringHelper.getDateStart(elem.from))).getTime());
-          to = _filter.value.map((elem: { to: string }) => (new Date(DateStringHelper.getTomorrowDateStart(elem.to))).getTime());
+          from = _filter.value.map(
+            (elem: { from: string }) => (new Date(DateStringHelper.getDateStart(elem.from))).getTime(),
+          );
+          to = _filter.value.map(
+            (elem: { to: string }) => (new Date(DateStringHelper.getTomorrowDateStart(elem.to))).getTime(),
+          );
 
           condition = {
             range: {
