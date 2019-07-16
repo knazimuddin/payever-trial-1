@@ -27,6 +27,9 @@ export class PaymentMailDtoConverter {
 
         customer_email: paymentSubmittedDto.payment.customer_email,
         customer_name: paymentSubmittedDto.payment.customer_name,
+        payment_option: {
+          payment_method: paymentSubmittedDto.payment.payment_type,
+        },
       },
 
       payment_items: paymentSubmittedDto.payment.items.map((item: TransactionCartItemDto): PaymentItemDto => ({

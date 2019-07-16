@@ -7,4 +7,5 @@ export class TransactionPaymentDto extends TransactionDto {
   public address?: AddressInterface;
   public business?: BusinessDto;
   public status: PaymentStatusesEnum;
+  public payment_type: string;
 }
