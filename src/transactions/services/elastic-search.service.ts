@@ -6,7 +6,8 @@ import { ElasticTransactionEnum, FilterConditionEnum } from '../enum';
 import { CurrencyInterface } from '../interfaces';
 import { TransactionBasicInterface } from '../interfaces/transaction';
 import { CurrencyExchangeService } from './currency-exchange.service';
-import { IsConditionFilter } from './elastic-filters/is-condition.filter';
+import { IsConditionFilter } from './elastic-filters';
+import { IsNotConditionFilter } from './elastic-filters/is-not-condition.filter';
 
 @Injectable()
 export class ElasticSearchService {
@@ -252,14 +253,7 @@ export class ElasticSearchService {
           IsConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.IsNot:
-          for (const value of _filter.value) {
-            condition = {
-              match_phrase: {
-                [field]: value,
-              },
-            };
-            elasticFilters.must_not.push(condition);
-          }
+          IsNotConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.StartsWith:
           for (const value of _filter.value) {
