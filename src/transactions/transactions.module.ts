@@ -41,15 +41,6 @@ import {
 } from './services';
 
 @Module({
-  imports: [
-    HttpModule,
-    MongooseModule.forFeature([
-      { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
-      { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
-      { name: TransactionSchemaName, schema: TransactionSchema },
-    ]),
-    NotificationsSdkModule,
-  ],
   controllers: [
     AdminController,
     BpoEventsController,
@@ -60,6 +51,15 @@ import {
     TransactionEventsController,
     UserController,
     ThirdPartyEventsController,
+  ],
+  imports: [
+    HttpModule,
+    MongooseModule.forFeature([
+      { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
+      { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
+      { name: TransactionSchemaName, schema: TransactionSchema },
+    ]),
+    NotificationsSdkModule,
   ],
   providers: [
     BusinessPaymentOptionService,

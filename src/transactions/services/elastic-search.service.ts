@@ -34,15 +34,15 @@ export class ElasticSearchService {
       .then((res: any) => {
         return {
           collection: res[0].collection,
-          pagination_data: {
-            total: res[0].total,
-            page: listDto.page,
-            amount: res[1],
-          },
           filters: {},
+          pagination_data: {
+            amount: res[1],
+            page: listDto.page,
+            total: res[0].total,
+          },
           usage: {
-            statuses: res[2].map((bucket: { key: string } ) => bucket.key.toUpperCase()),
             specific_statuses: res[3].map((bucket: { key: string } ) => bucket.key.toUpperCase()),
+            statuses: res[2].map((bucket: { key: string } ) => bucket.key.toUpperCase()),
           },
         };
       })
@@ -56,13 +56,13 @@ export class ElasticSearchService {
   ): Promise<{ collection: TransactionBasicInterface[], total: number }> {
     const body: any = {
       from: paging.limit * (paging.page - 1),
+      query: {
+        bool: filters,
+      },
       size: paging.limit,
       sort: [
         sorting,
       ],
-      query: {
-        bool: filters,
-      },
     };
 
     return this.elasticSearchClient.search(ElasticTransactionEnum.index, body)
@@ -93,16 +93,16 @@ export class ElasticSearchService {
 
   private async calculateAmountSingleCurrency(filters: any = {}): Promise<number> {
     const body: any = {
-      from: 0,
-      query: {
-        bool: filters,
-      },
       aggs : {
         total_amount: {
           sum: {
             field : 'total',
           },
         },
+      },
+      from: 0,
+      query: {
+        bool: filters,
       },
     };
 
@@ -117,15 +117,8 @@ export class ElasticSearchService {
     currency: string,
   ): Promise<number> {
     const body: any = {
-      from: 0,
-      query: {
-        bool: filters,
-      },
       aggs : {
         total_amount: {
-          terms: {
-            field : 'currency',
-          },
           aggs: {
             total_amount: {
               sum: {
@@ -133,7 +126,14 @@ export class ElasticSearchService {
               },
             },
           },
+          terms: {
+            field : 'currency',
+          },
         },
+      },
+      from: 0,
+      query: {
+        bool: filters,
       },
     };
 
@@ -168,16 +168,16 @@ export class ElasticSearchService {
     filters: any = {},
   ): Promise<number> {
     const body: any = {
-      from: 0,
-      query: {
-        bool: filters,
-      },
       aggs: {
         [field]: {
           terms: {
             field : field,
           },
         },
+      },
+      from: 0,
+      query: {
+        bool: filters,
       },
     };
 
@@ -198,7 +198,6 @@ export class ElasticSearchService {
   private addSearchFilters(filters: any, search: string): void {
     const condition: { query_string: any } = {
       query_string: {
-        query: `*${search}*`,
         fields: [
           'original_id^1',
           'customer_name^1',
@@ -208,6 +207,7 @@ export class ElasticSearchService {
           'payment_details.application_no^1',
           'customer_email^1',
         ],
+        query: `*${search}*`,
       },
     };
 
@@ -272,10 +272,10 @@ export class ElasticSearchService {
           for (const value of _filter.value) {
             condition = {
               query_string: {
-                query: `${value}*`,
                 fields: [
                   `${field}^1`,
                 ],
+                query: `${value}*`,
               },
             };
             elasticFilters.must.push(condition);
@@ -285,10 +285,10 @@ export class ElasticSearchService {
           for (const value of _filter.value) {
             condition = {
               query_string: {
-                query: `*${value}`,
                 fields: [
                   `${field}^1`,
                 ],
+                query: `*${value}`,
               },
             };
             elasticFilters.must.push(condition);
@@ -298,10 +298,10 @@ export class ElasticSearchService {
           for (const value of _filter.value) {
             condition = {
               query_string: {
-                query: `*${value}*`,
                 fields: [
                   `${field}^1`,
                 ],
+                query: `*${value}*`,
               },
             };
             elasticFilters.must.push(condition);
@@ -311,10 +311,10 @@ export class ElasticSearchService {
           for (const value of _filter.value) {
             condition = {
               query_string: {
-                query: `*${value}*`,
                 fields: [
                   `${field}^1`,
                 ],
+                query: `*${value}*`,
               },
             };
             elasticFilters.must_not.push(condition);

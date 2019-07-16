@@ -50,9 +50,9 @@ export class TransactionsService {
 
       await this.notificationsEmitter.sendNotification(
         {
-          kind: 'business',
-          entity: transactionDto.business_uuid,
           app: 'transactions',
+          entity: transactionDto.business_uuid,
+          kind: 'business',
         },
         `notification.transactions.title.new_transaction`,
         {
@@ -130,7 +130,7 @@ export class TransactionsService {
     return this.findModelByParams({ uuid: transactionUuid });
   }
 
-  public async findModelByParams(params): Promise<TransactionModel> {
+  public async findModelByParams(params: any): Promise<TransactionModel> {
     return this.transactionModel.findOne(params);
   }
 
@@ -138,7 +138,7 @@ export class TransactionsService {
     return this.findUnpackedByParams({ uuid: transactionUuid });
   }
 
-  public async findUnpackedByParams(params): Promise<TransactionUnpackedDetailsInterface> {
+  public async findUnpackedByParams(params: any): Promise<TransactionUnpackedDetailsInterface> {
     const transaction: TransactionModel = await this.transactionModel.findOne(params);
 
     if (!transaction) {
@@ -148,7 +148,7 @@ export class TransactionsService {
     return TransactionPaymentDetailsConverter.convert(transaction.toObject({ virtuals: true }));
   }
 
-  public async findAll(businessId) {
+  public async findAll(businessId: string): Promise<TransactionModel[]> {
     return this.transactionModel.find({business_uuid: businessId});
   }
 
