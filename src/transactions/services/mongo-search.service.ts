@@ -273,10 +273,10 @@ export class MongoSearchService {
               [key: string]: {
                 $not: {
                   $gte: string,
-                  $lt: string
-                }
-              }
-            }>
+                  $lt: string,
+                },
+              },
+            }>,
           } = { $and: [] };
           _filter.value.forEach((elem: string) => {
             isNotDateCondition.$and.push({
