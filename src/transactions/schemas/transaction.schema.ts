@@ -99,7 +99,7 @@ TransactionSchema.virtual('available_refund_items').get(function(): TransactionR
       this.history.forEach((historyEntry: TransactionHistoryEntryInterface) => {
         if (historyEntry.refund_items) {
           const refundedLog: TransactionRefundItemInterface = historyEntry.refund_items.find(
-            (refundedItem: TransactionRefundItemInterface) => item.uuid === refundedItem.item_uuid
+            (refundedItem: TransactionRefundItemInterface) => item.uuid === refundedItem.item_uuid,
           );
 
           if (refundedLog && refundedLog.count) {

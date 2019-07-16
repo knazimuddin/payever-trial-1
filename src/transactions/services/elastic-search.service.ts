@@ -148,7 +148,7 @@ export class ElasticSearchService {
     const totalPerCurrency: number = amounts.reduce(
       (total: number, currentVal: { key: string, total_amount: { value: number }}) => {
         const filteredRate: CurrencyInterface = rates.find(
-          (x: CurrencyInterface) => x.code.toUpperCase() === currentVal.key.toUpperCase()
+          (x: CurrencyInterface) => x.code.toUpperCase() === currentVal.key.toUpperCase(),
         );
         const addition: number = filteredRate
           ? currentVal.total_amount.value / filteredRate.rate
@@ -184,9 +184,11 @@ export class ElasticSearchService {
     };
 
     return this.elasticSearchClient.search(ElasticTransactionEnum.index, body)
-      .then((result: any) => result
-        .aggregations[field]
-        .buckets
+      .then(
+        (result: any) => result
+          .aggregations[field]
+          .buckets
+        ,
       );
   }
 

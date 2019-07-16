@@ -55,7 +55,7 @@ export class ThirdPartyEventsController {
 
     const actions: ActionItemInterface[] = await this.messagingService.getActionsList(unpackedTransaction);
     const targetAction: ActionItemInterface = actions.find(
-      (item: ActionItemInterface) => item.action === data.action
+      (item: ActionItemInterface) => item.action === data.action,
     );
 
     if (!targetAction || !targetAction.enabled) {
