@@ -21,7 +21,7 @@ export const TransactionSchema: Schema = new Schema({
   business_option_id: Number,
   business_uuid: { type: String },
 
-  channel: String, // 'store', ...
+  channel: String,
   channel_set_uuid: String,
   channel_uuid: String,
 
