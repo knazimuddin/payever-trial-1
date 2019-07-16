@@ -6,6 +6,7 @@ import { ElasticTransactionEnum, FilterConditionEnum } from '../enum';
 import { CurrencyInterface } from '../interfaces';
 import { TransactionBasicInterface } from '../interfaces/transaction';
 import { CurrencyExchangeService } from './currency-exchange.service';
+import { IsConditionFilter } from './elastic-filters/is-condition.filter';
 
 @Injectable()
 export class ElasticSearchService {
@@ -41,8 +42,8 @@ export class ElasticSearchService {
             total: res[0].total,
           },
           usage: {
-            specific_statuses: res[3].map((bucket: { key: string } ) => bucket.key.toUpperCase()),
-            statuses: res[2].map((bucket: { key: string } ) => bucket.key.toUpperCase()),
+            specific_statuses: res[3].map((bucket: { key: string }) => bucket.key.toUpperCase()),
+            statuses: res[2].map((bucket: { key: string }) => bucket.key.toUpperCase()),
           },
         };
       })
@@ -248,15 +249,7 @@ export class ElasticSearchService {
       let to: any;
       switch (_filter.condition) {
         case FilterConditionEnum.Is:
-          for (const value of _filter.value) {
-            condition = {
-              match_phrase: {
-                [field]: value,
-              },
-            };
-            elasticFilters.must.push(condition);
-          }
-
+          IsConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.IsNot:
           for (const value of _filter.value) {
