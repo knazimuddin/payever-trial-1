@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { BusinessPaymentOptionInterface } from '../interfaces';
@@ -9,13 +9,13 @@ export class BusinessPaymentOptionService {
 
   constructor(
     @InjectModel('BusinessPaymentOption') private readonly model: Model<BusinessPaymentOptionModel>,
+    private readonly logger: Logger,
   ) {}
 
   public async createOrUpdate(
     businessPaymentOptionDto: BusinessPaymentOptionInterface,
   ): Promise<BusinessPaymentOptionModel> {
-    const dto = {
-      // _id: businessPaymentOption.uuid,
+    const dto: BusinessPaymentOptionInterface = {
       ...businessPaymentOptionDto,
     };
 
@@ -24,14 +24,11 @@ export class BusinessPaymentOptionService {
         id: businessPaymentOptionDto.id,
       },
       {
-        $setOnInsert: {
-          // _id: businessPaymentOption.uuid,
-        },
         $set: this.wrap(dto),
       },
       {
-        upsert: true,
         new: true,
+        upsert: true,
       },
     );
 
@@ -52,7 +49,11 @@ export class BusinessPaymentOptionService {
       try {
         bpo.options = JSON.parse(bpo.options);
       } catch (e) {
-        // nothing we should do
+        this.logger.warn({
+          bpo: bpo,
+          context: 'BusinessPaymentOptionService',
+          message: 'Error during BPO options unwrap',
+        });
       }
     }
 
@@ -68,7 +69,11 @@ export class BusinessPaymentOptionService {
       try {
         bpo.options = JSON.stringify(bpo.options);
       } catch (e) {
-        // nothing we should do
+        this.logger.warn({
+          bpo: bpo,
+          context: 'BusinessPaymentOptionService',
+          message: 'Error during BPO options wrap',
+        });
       }
     }
 

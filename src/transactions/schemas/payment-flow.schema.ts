@@ -1,31 +1,35 @@
 import { Schema } from 'mongoose';
 
-export const PaymentFlowSchemaName = 'PaymentFlow';
+export const PaymentFlowSchemaName: string = 'PaymentFlow';
 
-export const PaymentFlowSchema = new Schema(
+export const PaymentFlowSchema: Schema = new Schema(
   {
-    // _id: { type: String },
     id: String,
+
     amount: Number,
+    currency: String,
+
+    first_name: String,
+    last_name: String,
+
+    city: String,
+    country: String,
+    street: String,
+    zip_code: String,
+
     shipping_fee: Number,
     shipping_method_code: String,
     shipping_method_name: String,
-    tax_value: Number,
-    currency: String,
+
+    callback: String,
+    channel_set_uuid: String,
+    express: Boolean,
+    origin: String,
     reference: String,
     salutation: String,
-    first_name: String,
-    last_name: String,
-    country: String,
-    city: String,
-    zip_code: String,
-    street: String,
-    channel_set_uuid: String,
-    step: String,
     state: String,
-    origin: String,
-    express: Boolean,
-    callback: String,
+    step: String,
+    tax_value: Number,
     x_frame_host: String,
   },
   {

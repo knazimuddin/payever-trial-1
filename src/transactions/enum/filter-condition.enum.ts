@@ -13,6 +13,8 @@ export const enum FilterConditionEnum {
   BeforeDate = 'beforeDate',
   BetweenDates = 'betweenDates',
   GreaterThan = 'greaterThan',
+  GreaterThanOrEqual = 'greaterThanOrEqual',
   LessThan = 'lessThan',
+  LessThanOrEqual = 'lessThanOrEqual',
   Between = 'between',
 }

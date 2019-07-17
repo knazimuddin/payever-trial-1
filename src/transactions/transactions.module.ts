@@ -15,6 +15,7 @@ import {
   TransactionEventsController,
   UserController,
 } from './controllers';
+import { ElasticSearchClient } from './elasticsearch/elastic-search.client';
 import { PaymentMailEventProducer } from './producer';
 import {
   BusinessPaymentOptionSchema,
@@ -29,26 +30,17 @@ import {
   BusinessPaymentOptionService,
   CurrencyExchangeService,
   DtoValidationService,
+  ElasticSearchService,
   MessagingService,
+  MongoSearchService,
   PaymentFlowService,
   PaymentsMicroService,
   StatisticsService,
-  StubService,
   TransactionHistoryService,
-  TransactionsGridService,
   TransactionsService,
 } from './services';
 
 @Module({
-  imports: [
-    HttpModule,
-    MongooseModule.forFeature([
-      { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
-      { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
-      { name: TransactionSchemaName, schema: TransactionSchema },
-    ]),
-    NotificationsSdkModule,
-  ],
   controllers: [
     AdminController,
     BpoEventsController,
@@ -60,20 +52,30 @@ import {
     UserController,
     ThirdPartyEventsController,
   ],
+  imports: [
+    HttpModule,
+    MongooseModule.forFeature([
+      { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
+      { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
+      { name: TransactionSchemaName, schema: TransactionSchema },
+    ]),
+    NotificationsSdkModule,
+  ],
   providers: [
     ActionsRetriever,
     BusinessPaymentOptionService,
     CurrencyExchangeService,
     DtoValidationService,
     MessagingService,
+    MongoSearchService,
+    ElasticSearchClient,
+    ElasticSearchService,
     PaymentFlowService,
     PaymentsMicroService,
     StatisticsService,
-    StubService,
     TransactionHistoryService,
     TransactionsEsExportCommand,
     TransactionsExportCommand,
-    TransactionsGridService,
     TransactionsService,
     PaymentMailEventProducer,
   ],

@@ -1,22 +1,26 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { DocumentBuilder, SwaggerBaseConfig, SwaggerDocument, SwaggerModule } from '@nestjs/swagger';
 import { RABBITMQ_SERVER } from '@pe/nest-kit';
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
 import * as APM from 'elastic-apm-node';
+import * as jwt from 'fastify-jwt';
 
 import { AppModule } from './app.module';
 import { environment } from './environments';
 
-async function bootstrap() {
-  const app = await NestFactory.create(
+async function bootstrap(): Promise<void> {
+  const app: NestFastifyApplication = await NestFactory.create<NestFastifyApplication>(
     AppModule,
+    new FastifyAdapter(),
     {
       logger: false,
     },
   );
 
-  const logger = app.get(NestKitLogger);
+  app.register(jwt, {secret: environment.jwtOptions.secretOrPrivateKey});
+  const logger: NestKitLogger = app.get(NestKitLogger);
   app.useLogger(logger);
 
   APM.isStarted() && logger.log('APM running');
@@ -26,7 +30,7 @@ async function bootstrap() {
   app.enableCors({ maxAge: 600 });
   app.enableShutdownHooks();
 
-  const options = new DocumentBuilder()
+  const options: SwaggerBaseConfig = new DocumentBuilder()
     .setTitle('Transactions')
     .setDescription('The transactions app API description')
     .setVersion('1.0')
@@ -34,7 +38,7 @@ async function bootstrap() {
     .addTag('transactions')
     .addBearerAuth()
     .build();
-  const document = SwaggerModule.createDocument(app, options);
+  const document: SwaggerDocument = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api-docs', app, document);
 
   app.connectMicroservice({
@@ -44,6 +48,7 @@ async function bootstrap() {
   await app.startAllMicroservicesAsync();
   await app.listen(
     environment.port,
+    '0.0.0.0',
     () => logger.log(`Transactions app started at port ${environment.port}`, 'NestApplication'),
   );
 }

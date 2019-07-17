@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { RabbitMqClient } from '@pe/nest-kit';
 import { Model } from 'mongoose';
-
 import { RabbitRoutingKeys } from '../../enums';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
@@ -14,15 +13,14 @@ export class StatisticsService {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly rabbitClient: RabbitMqClient,
-  ) {
-  }
+  ) {}
 
   /**
    * This method should be called right before updating transaction
    * Thus it can handle transaction status changing.
    */
-  public async processAcceptedTransaction(id: string, updating: TransactionPackedDetailsInterface) {
-    const existing = await this.transactionsModel.findOne({ uuid: id }).lean();
+  public async processAcceptedTransaction(id: string, updating: TransactionPackedDetailsInterface): Promise<void> {
+    const existing: TransactionModel = await this.transactionsModel.findOne({ uuid: id }).lean();
 
     if (!existing) {
       return;
@@ -38,23 +36,23 @@ export class StatisticsService {
           {
             name: RabbitRoutingKeys.TransactionsPaymentAdd,
             payload: {
-              id: existing.uuid,
               amount: updating.amount,
-              date: updating.updated_at,
-              items: existing.items,
-              channel_set: {
-                id: existing.channel_set_uuid,
-              },
               business: {
                 id: existing.business_uuid,
               },
+              channel_set: {
+                id: existing.channel_set_uuid,
+              },
+              date: updating.updated_at,
+              id: existing.uuid,
+              items: existing.items,
             },
           },
         );
     }
   }
 
-  public async processMigratedTransaction(transaction: any) {
+  public async processMigratedTransaction(transaction: TransactionPackedDetailsInterface): Promise<void> {
     if (transaction.status === 'STATUS_ACCEPTED' || transaction.status === 'STATUS_PAID') {
       await this.rabbitClient
         .send(
@@ -65,16 +63,16 @@ export class StatisticsService {
           {
             name: RabbitRoutingKeys.TransactionsPaymentAdd,
             payload: {
-              id: transaction.uuid,
               amount: transaction.amount,
-              date: transaction.updated_at,
-              items: transaction.items,
-              channel_set: {
-                id: transaction.channel_set_uuid,
-              },
               business: {
                 id: transaction.business_uuid,
               },
+              channel_set: {
+                id: transaction.channel_set_uuid,
+              },
+              date: transaction.updated_at,
+              id: transaction.uuid,
+              items: transaction.items,
             },
           },
         );
@@ -89,7 +87,7 @@ export class StatisticsService {
       }
 
       await this.rabbitClient
-        .sendAsync(
+        .send(
           {
             channel: RabbitRoutingKeys.TransactionsPaymentAdd,
             exchange: 'async_events',
@@ -97,24 +95,24 @@ export class StatisticsService {
           {
             name: RabbitRoutingKeys.TransactionsPaymentAdd,
             payload: {
-              id: transaction.uuid,
               amount: Number(transaction.amount) - Number(refundedAmount),
-              date: transaction.updated_at,
-              items: transaction.items,
-              channel_set: {
-                id: transaction.channel_set_uuid,
-              },
               business: {
                 id: transaction.business_uuid,
               },
+              channel_set: {
+                id: transaction.channel_set_uuid,
+              },
+              date: transaction.updated_at,
+              id: transaction.uuid,
+              items: transaction.items,
             },
           },
         );
     }
   }
 
-  public async processRefundedTransaction(id: string, refund: HistoryEventActionCompletedInterface) {
-    const existing = await this.transactionsModel.findOne({ uuid: id }).lean();
+  public async processRefundedTransaction(id: string, refund: HistoryEventActionCompletedInterface): Promise<void> {
+    const existing: TransactionModel = await this.transactionsModel.findOne({ uuid: id }).lean();
 
     if (!existing) {
       return;
@@ -122,7 +120,7 @@ export class StatisticsService {
 
     if (refund.action && refund.action === 'refund') {
       await this.rabbitClient
-        .sendAsync(
+        .send(
           {
             channel: RabbitRoutingKeys.TransactionsPaymentSubtract,
             exchange: 'async_events',
@@ -130,16 +128,16 @@ export class StatisticsService {
           {
             name: RabbitRoutingKeys.TransactionsPaymentSubtract,
             payload: {
-              id: existing.uuid,
               amount: refund.data.amount,
-              date: existing.updated_at,
-              items: existing.items,
-              channel_set: {
-                id: existing.channel_set_uuid,
-              },
               business: {
                 id: existing.business_uuid,
               },
+              channel_set: {
+                id: existing.channel_set_uuid,
+              },
+              date: existing.updated_at,
+              id: existing.uuid,
+              items: existing.items,
             },
           },
         );
