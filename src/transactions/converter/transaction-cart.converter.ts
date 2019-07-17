@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { TransactionCartItemDto } from '../dto';
 import { CheckoutTransactionCartItemInterface } from '../interfaces/checkout';
 import { TransactionCartItemInterface } from '../interfaces/transaction';
-import { ProductUuid } from '../tools/product-uuid';
+import { ProductUuid } from '../tools';
 
 @Injectable()
 export class TransactionCartConverter {
@@ -23,6 +23,8 @@ export class TransactionCartConverter {
           ? cartItem.product_uuid
           : null
         ,
+
+        created_at: cartItem.created_at,
         description: cartItem.description,
         fixed_shipping_price: cartItem.fixed_shipping_price,
         identifier: cartItem.identifier,
@@ -41,7 +43,6 @@ export class TransactionCartConverter {
         url: cartItem.url,
         vat_rate: cartItem.vat_rate,
         weight: cartItem.weight,
-        created_at: cartItem.created_at,
       };
 
       newCart.push(newCartItem);

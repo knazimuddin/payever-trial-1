@@ -1,11 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRabbitMqClient, MessageInterface, RabbitMqClient } from '@pe/nest-kit';
+import { MessageInterface, RabbitMqClient, RabbitMqRPCClient } from '@pe/nest-kit';
 import { MessageBusService } from '@pe/nest-kit/modules/message';
-import { of } from 'rxjs';
-import { catchError, map, take, timeout } from 'rxjs/operators';
 import { environment } from '../../environments';
 import { TransactionConverter } from '../converter';
-import { NextActionDto } from '../dto/next-action.dto';
+import { NextActionDto } from '../dto';
 import { ActionItemInterface } from '../interfaces';
 import { ActionPayloadInterface, FieldsInterface, UnwrappedFieldsInterface } from '../interfaces/action-payload';
 import {
@@ -30,15 +28,14 @@ export class MessagingService {
     this.logger,
   );
 
-  private readonly rpcTimeout: number = 30000;
-
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly flowService: PaymentFlowService,
-    private readonly logger: Logger,
     private readonly paymentMicroService: PaymentsMicroService,
-    @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
+    private readonly rabbitRpcClient: RabbitMqRPCClient,
+    private readonly rabbitClient: RabbitMqClient,
+    private readonly logger: Logger,
   ) {}
 
   public getBusinessPaymentOption(transaction: TransactionBasicInterface): Promise<BusinessPaymentOptionModel> {
@@ -64,10 +61,10 @@ export class MessagingService {
     } catch (e) {
       this.logger.error(
         {
+          context: 'MessagingService',
+          error: e.message,
           message: `Could not prepare payload for actions call`,
           transaction: transaction,
-          error: e.message,
-          context: 'MessagingService',
         },
       );
 
@@ -81,7 +78,7 @@ export class MessagingService {
 
     let actions: ActionItemInterface[] = Object.keys(actionsResponse)
       .map(
-        (key) => ({
+        (key: string) => ({
           action: key,
           enabled: actionsResponse[key],
         }),
@@ -92,7 +89,7 @@ export class MessagingService {
      * Thus we disable it here to prevent inconveniences.
      */
     if (transaction.type === 'santander_installment_dk') {
-      actions = actions.filter(x => x.action !== 'edit');
+      actions = actions.filter((x: ActionItemInterface) => x.action !== 'edit');
     }
 
     return actions;
@@ -134,12 +131,12 @@ export class MessagingService {
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
     this.logger.log({
-      message: 'RPC action result',
-      transaction: transaction,
       action: action,
       actionPayload: actionPayload,
-      rpcResult: rpcResult,
       context: 'MessagingService',
+      message: 'RPC action result',
+      rpcResult: rpcResult,
+      transaction: transaction,
     });
 
     await this.transactionsService.applyActionRpcResult(transaction, rpcResult);
@@ -157,7 +154,7 @@ export class MessagingService {
   ): Promise<void> {
     switch (nextAction.type) {
       case 'action':
-        // stub for action behaviour
+        /** stub for action behaviour */
         break;
       case 'external_capture':
         await this.externalCapture(nextAction.payment_method, nextAction.payload);
@@ -181,10 +178,10 @@ export class MessagingService {
 
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'payment');
     this.logger.log({
-      message: 'RPC status update result',
-      transaction: transaction,
-      rpcResult: rpcResult,
       context: 'MessagingService',
+      message: 'RPC status update result',
+      rpcResult: rpcResult,
+      transaction: transaction,
     });
     await this.transactionsService.applyRpcResult(transaction, rpcResult);
   }
@@ -192,8 +189,8 @@ export class MessagingService {
   public async externalCapture(
     paymentMethod: string,
     payload: any,
-  ): Promise<any> {
-    return this.rabbitClient.callAsync(
+  ): Promise<void> {
+    await this.rabbitRpcClient.send(
       {
         channel: this.paymentMicroService.getChannelByPaymentType(paymentMethod, environment.stub),
       },
@@ -210,9 +207,9 @@ export class MessagingService {
     const converted: CheckoutTransactionInterface = TransactionConverter.toCheckoutTransaction(transaction);
     const payload: { payment: CheckoutTransactionInterface } = { payment: converted };
     this.logger.log({
+      context: 'MessagingService',
       message: 'SENDING "transactions_app.payment.updated" event',
       payload: payload,
-      context: 'MessagingService',
     });
     const message: MessageInterface = this.messageBusService.createMessage(
       'transactions_app.payment.updated',
@@ -220,7 +217,7 @@ export class MessagingService {
     );
 
     await this.rabbitClient
-      .sendAsync(
+      .send(
         { channel: 'transactions_app.payment.updated', exchange: 'async_events' },
         message,
       );
@@ -260,28 +257,19 @@ export class MessagingService {
     payload: CheckoutRpcPayloadInterface,
     messageIdentifier: string,
   ): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this.rabbitClient.send(
-        { channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub) },
-        this.paymentMicroService.createPaymentMicroMessage(
-          transaction.type,
-          messageIdentifier,
-          payload,
-          environment.stub,
-        ),
-      ).pipe(
-        take(1),
-        timeout(this.rpcTimeout),
-        map((m) => this.messageBusService.unwrapRpcMessage(m)),
-        catchError((e) => {
-          reject(e);
+    const result: any = await this.rabbitRpcClient.send(
+      {
+        channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub),
+      },
+      this.paymentMicroService.createPaymentMicroMessage(
+        transaction.type,
+        messageIdentifier,
+        payload,
+        environment.stub,
+      ),
+    );
 
-          return of(null);
-        }),
-      ).subscribe((reply) => {
-        resolve(reply);
-      });
-    });
+    return this.messageBusService.unwrapRpcMessage(result);
   }
 
   private async createPayloadData(
@@ -289,11 +277,11 @@ export class MessagingService {
   ): Promise<CheckoutTransactionRpcActionInterface> {
     const payload: CheckoutTransactionInterface = TransactionConverter.toCheckoutTransaction(transaction);
     const dto: CheckoutTransactionRpcActionInterface = {
-      payment: payload,
-      payment_details: transaction.payment_details,
       business: {
         id: transaction.business_uuid,
       },
+      payment: payload,
+      payment_details: transaction.payment_details,
     };
 
     try {
@@ -302,10 +290,10 @@ export class MessagingService {
 
       this.logger.log(
         {
+          context: 'MessagingService',
+          credentials: dto.credentials,
           message: `Transaction ${transaction.uuid} dto credentials`,
           transaction: payload,
-          credentials: dto.credentials,
-          context: 'MessagingService',
         },
       );
     } catch (e) {
@@ -317,9 +305,9 @@ export class MessagingService {
       if (!paymentFlow) {
         this.logger.error(
           {
+            context: 'MessagingService',
             message: `Transaction ${transaction.uuid} -> Payment flow cannot be null`,
             transaction: payload,
-            context: 'MessagingService',
           },
         );
 
@@ -333,10 +321,10 @@ export class MessagingService {
     } catch (e) {
       this.logger.error(
         {
+          context: 'MessagingService',
+          error: e,
           message: `Transaction ${transaction.uuid} -> Cannot resolve payment flow`,
           transaction: payload,
-          error: e,
-          context: 'MessagingService',
         },
       );
 
@@ -350,13 +338,13 @@ export class MessagingService {
     transaction: TransactionBasicInterface,
     action: string,
     fields: FieldsInterface & UnwrappedFieldsInterface,
-  ) {
+  ): FieldsInterface & UnwrappedFieldsInterface {
     // @TODO ask FE to remove wrapper object!
     if ((action === 'refund' || action === 'return') && fields.payment_return) {
       fields.amount = fields.payment_return.amount || fields.amount || 0.0;
       fields.reason = fields.payment_return.reason || fields.reason || null;
       fields.refunded_amount = transaction.amount_refunded;
-      // php BE asked for camel case version of this field too
+      /** php microservices use JMS Serializer, thus need this field in camel case also */
       fields.refundedAmount = fields.refunded_amount;
     }
     if (action === 'change_amount' && fields.payment_change_amount) {
@@ -365,15 +353,15 @@ export class MessagingService {
     if (action === 'edit' && fields.payment_update) {
       fields = {
         ...fields,
-        reason: fields.payment_update.reason,
-        payment_items: fields.payment_update.updateData
-          ? fields.payment_update.updateData.productLine
-          : []
-        ,
         delivery_fee: fields.payment_update.updateData
           ? parseFloat(fields.payment_update.updateData.deliveryFee)
           : null
         ,
+        payment_items: fields.payment_update.updateData
+          ? fields.payment_update.updateData.productLine
+          : []
+        ,
+        reason: fields.payment_update.reason,
       };
     }
 

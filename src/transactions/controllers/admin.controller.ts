@@ -8,14 +8,13 @@ import {
   Logger,
   Param,
   Post,
-  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
-import { ParamModel } from '@pe/nest-kit';
+import { ParamModel, QueryDto } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-import { TransactionPaymentDetailsConverter } from '../converter/transaction-payment-details.converter';
-import { PagingResultDto } from '../dto';
+import { TransactionPaymentDetailsConverter } from '../converter';
+import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { ActionItemInterface } from '../interfaces';
 import {
@@ -24,7 +23,7 @@ import {
 } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
-import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
+import { DtoValidationService, ElasticSearchService, MessagingService, TransactionsService } from '../services';
 
 // TODO: unify with business controller
 @Controller('admin')
@@ -39,7 +38,7 @@ export class AdminController {
   constructor(
     private readonly dtoValidation: DtoValidationService,
     private readonly transactionsService: TransactionsService,
-    private readonly transactionsGridService: TransactionsGridService,
+    private readonly searchService: ElasticSearchService,
     private readonly messagingService: MessagingService,
     private readonly logger: Logger,
   ) {}
@@ -47,16 +46,9 @@ export class AdminController {
   @Get('list')
   @HttpCode(HttpStatus.OK)
   public async getList(
-    @Query('orderBy') orderBy: string = 'created_at',
-    @Query('direction') direction: string = 'asc',
-    @Query('limit') limit: number = 3,
-    @Query('page') page: number = 1,
-    @Query('query') search: string,
-    @Query('filters') filters: any = {},
-    @Query('currency') currency: string,
+    @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
-    return this.transactionsGridService
-      .getList(filters, orderBy, direction, search, +page, +limit, currency);
+    return this.searchService.getResult(listDto);
   }
 
   @Get('detail/reference/:reference')
@@ -69,19 +61,7 @@ export class AdminController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
   ): Promise<TransactionWithAvailableActionsInterface>  {
-    let actions: ActionItemInterface[] = [];
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
-    );
-
-    try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
-      actions = [];
-    }
-
-    return { ...unpackedTransaction, actions };
+    return this.getDetails(transaction);
   }
 
   @Get('detail/:uuid')
@@ -94,19 +74,7 @@ export class AdminController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
   ): Promise<TransactionWithAvailableActionsInterface> {
-    let actions: ActionItemInterface[] = [];
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
-    );
-
-    try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
-      actions = [];
-    }
-
-    return { ...unpackedTransaction, actions };
+    return this.getDetails(transaction);
   }
 
   @Post(':uuid/action/:action')
@@ -137,7 +105,7 @@ export class AdminController {
 
     const updatedTransaction: TransactionUnpackedDetailsInterface =
       await this.transactionsService.findUnpackedByUuid(transaction.uuid);
-    // Send update to checkout-php
+    /** Send update to checkout-php */
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
@@ -179,7 +147,7 @@ export class AdminController {
 
     const updatedTransaction: TransactionUnpackedDetailsInterface =
       await this.transactionsService.findUnpackedByUuid(transaction.uuid);
-    // Send update to checkout-php
+    /** Send update to checkout-php */
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
@@ -213,9 +181,25 @@ export class AdminController {
       ],
       direction: '',
       filters: null,
-      id: null, // 9???
+      id: null,
       limit: '',
       order_by: '',
     };
+  }
+
+  private async getDetails(transaction: TransactionModel): Promise<TransactionWithAvailableActionsInterface>  {
+    let actions: ActionItemInterface[] = [];
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
+
+    try {
+      actions = await this.messagingService.getActionsList(unpackedTransaction);
+    } catch (e) {
+      this.logger.error(`Error occured while getting transaction actions: ${e.message}`);
+      actions = [];
+    }
+
+    return { ...unpackedTransaction, actions };
   }
 }

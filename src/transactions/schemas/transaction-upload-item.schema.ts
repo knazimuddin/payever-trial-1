@@ -1,7 +1,6 @@
 import { Schema } from 'mongoose';
 
-export const TransactionUploadItemSchema = new Schema({
-  // _id: { type: String, default: uuid },
-  type: String,
+export const TransactionUploadItemSchema: Schema = new Schema({
   name: String,
+  type: String,
 });

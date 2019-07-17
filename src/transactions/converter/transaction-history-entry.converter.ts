@@ -15,9 +15,9 @@ export class TransactionHistoryEntryConverter {
     const item: TransactionHistoryEntryInterface = {
       action: type,
       amount: data.amount,
+      created_at: createdAt,
       payment_status: data.payment_status,
       reason: data.reason,
-      created_at: createdAt,
     };
 
     if (data.saved_data) {
@@ -40,10 +40,10 @@ export class TransactionHistoryEntryConverter {
     const history: TransactionHistoryEntryInterface = {
       action: type,
       amount: data.amount,
+      created_at: createdAt,
+      is_restock_items: data.items_restocked ? data.items_restocked : false,
       payment_status: data.payment_status,
       reason: data.reason,
-      is_restock_items: data.items_restocked ? data.items_restocked : false,
-      created_at: createdAt,
     };
 
     history.refund_items = data.refund_items
@@ -55,22 +55,30 @@ export class TransactionHistoryEntryConverter {
   }
 
   public static fromCheckoutTransactionHistoryItem(
-    historyType: string,
+    type: string,
     createdAt: Date,
     data: CheckoutTransactionHistoryItemInterface,
   ): TransactionHistoryEntryInterface {
-    return {
-      action: historyType,
-      payment_status: data.payment_status,
+    const item: TransactionHistoryEntryInterface = {
+      action: type,
       amount: data.amount,
-      params: data.params,
       created_at: createdAt,
-      is_restock_items: data.items_restocked
-        ? data.items_restocked
-        : null
-      ,
+      payment_status: data.payment_status,
       reason: data.reason,
     };
+
+    if (data.items_restocked) {
+      item.is_restock_items = data.items_restocked;
+    }
+
+    if (data.params) {
+      item.params = Array.isArray(data.params)
+        ? {}
+        : data.params
+      ;
+    }
+
+    return item;
   }
 
   private static processRefundItems(
@@ -89,8 +97,8 @@ export class TransactionHistoryEntryConverter {
 
       if (cartItem) {
         items.push({
-          item_uuid: cartItem.id,
           count: refundItem.count,
+          item_uuid: cartItem.id,
         });
       }
     }
