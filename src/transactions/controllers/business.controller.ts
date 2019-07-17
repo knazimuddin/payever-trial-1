@@ -92,7 +92,7 @@ export class BusinessController {
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionOutputInterface> {
-    const updatedTransaction = await this.doAction(
+    const updatedTransaction: TransactionUnpackedDetailsInterface = await this.doAction(
       transaction,
       actionPayload,
       action,
@@ -111,8 +111,8 @@ export class BusinessController {
     @Param('action') action: string,
     @ParamModel(
       {
-        uuid: ':uuid',
         business_uuid: ':businessId',
+        uuid: ':uuid',
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
@@ -250,9 +250,9 @@ export class BusinessController {
     } catch (e) {
       this.logger.log(
         {
-          message: `Error occurred during running action`,
-          error: e.message,
           context: 'BusinessController',
+          error: e.message,
+          message: `Error occurred during running action`,
         },
       );
 
@@ -261,7 +261,7 @@ export class BusinessController {
 
     const updatedTransaction: TransactionUnpackedDetailsInterface =
       await this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
-    // Send update to checkout-php
+    /** Send update to checkout-php */
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
@@ -271,7 +271,7 @@ export class BusinessController {
     return updatedTransaction;
   }
 
-  private async getDetails(transaction: TransactionModel): Promise<TransactionWithAvailableActionsInterface>  {
+  private async getDetails(transaction: TransactionModel): Promise<TransactionOutputInterface>  {
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );

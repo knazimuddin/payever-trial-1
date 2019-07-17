@@ -62,7 +62,7 @@ export class AdminController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface>  {
+  ): Promise<TransactionOutputInterface>  {
     return this.getDetails(transaction);
   }
 
@@ -75,7 +75,7 @@ export class AdminController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface> {
+  ): Promise<TransactionOutputInterface> {
     return this.getDetails(transaction);
   }
 
@@ -101,9 +101,9 @@ export class AdminController {
     } catch (e) {
       this.logger.error(
         {
-          message: `Error occured during running action`,
-          error: e.message,
           context: 'AdminController',
+          error: e.message,
+          message: `Error occured during running action`,
         },
       );
       throw new BadRequestException(e.message);
@@ -143,9 +143,9 @@ export class AdminController {
     } catch (e) {
       this.logger.error(
         {
-          message: `Error occured during status update`,
-          error: e.message,
           context: 'AdminController',
+          error: e.message,
+          message: `Error occured during status update`,
         },
       );
 
@@ -190,7 +190,7 @@ export class AdminController {
     };
   }
 
-  private async getDetails(transaction: TransactionModel): Promise<TransactionWithAvailableActionsInterface>  {
+  private async getDetails(transaction: TransactionModel): Promise<TransactionOutputInterface>  {
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
