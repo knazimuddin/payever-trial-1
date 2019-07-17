@@ -11,17 +11,18 @@ export class TransactionPaymentDetailsConverter {
       id: transaction.id,
       original_id: transaction.original_id,
       uuid: transaction.uuid,
+
       action_running: transaction.action_running,
-      available_refund_items: transaction.available_refund_items,
       amount: transaction.amount,
       amount_refunded: transaction.amount_refunded,
       amount_rest: transaction.amount_rest,
+      available_refund_items: transaction.available_refund_items,
       billing_address: transaction.billing_address,
       business_option_id: transaction.business_option_id,
       business_uuid: transaction.business_uuid,
       channel: transaction.channel,
-      channel_uuid: transaction.channel_uuid,
       channel_set_uuid: transaction.channel_set_uuid,
+      channel_uuid: transaction.channel_uuid,
       created_at: transaction.created_at,
       currency: transaction.currency,
       customer_email: transaction.customer_email,
@@ -61,13 +62,13 @@ export class TransactionPaymentDetailsConverter {
         : {}
       ;
     } catch (e) {
+      /** just skipping payment_details */
       Logger.log({
+        context: 'TransactionService',
+        error: e.message,
         message: 'Error during unpack of payment details',
         transaction: transaction,
-        error: e.message,
-        context: 'TransactionService',
       });
-      // just skipping payment_details
     }
 
     return unpacked;
