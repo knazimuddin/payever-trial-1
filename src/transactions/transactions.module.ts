@@ -26,6 +26,7 @@ import {
   TransactionSchemaName,
 } from './schemas';
 import {
+  ActionsRetriever,
   BusinessPaymentOptionService,
   CurrencyExchangeService,
   DtoValidationService,
@@ -61,6 +62,7 @@ import {
     NotificationsSdkModule,
   ],
   providers: [
+    ActionsRetriever,
     BusinessPaymentOptionService,
     CurrencyExchangeService,
     DtoValidationService,

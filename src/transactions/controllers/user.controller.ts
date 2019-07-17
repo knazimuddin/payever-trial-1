@@ -2,12 +2,10 @@ import { Controller, Get, HttpCode, HttpStatus, NotFoundException, UseGuards } f
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel, QueryDto } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum, User, UserTokenInterface } from '@pe/nest-kit/modules/auth';
+import { TransactionOutputConverter } from '../converter';
 import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionItemInterface } from '../interfaces';
-import {
-  TransactionUnpackedDetailsInterface,
-  TransactionWithAvailableActionsInterface,
-} from '../interfaces/transaction';
+import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import { ElasticSearchService, TransactionsService } from '../services';
@@ -48,7 +46,7 @@ export class UserController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface> {
+  ): Promise<TransactionOutputInterface> {
     const actions: ActionItemInterface[] = [];
     const found: TransactionUnpackedDetailsInterface =
       await this.transactionsService.findUnpackedByParams({ uuid: transaction.uuid, user_uuid: user.id });
@@ -57,7 +55,7 @@ export class UserController {
       throw new NotFoundException(`Transaction not found.`);
     }
 
-    return { ...found, actions };
+    return TransactionOutputConverter.convert(found, actions);
   }
 
   @Get('settings')

@@ -17,17 +17,19 @@ import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import * as moment from 'moment';
-import { TransactionPaymentDetailsConverter } from '../converter';
+import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
 import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { ActionItemInterface } from '../interfaces';
-import {
-  TransactionUnpackedDetailsInterface,
-  TransactionWithAvailableActionsInterface,
-} from '../interfaces/transaction';
+import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
-import { DtoValidationService, ElasticSearchService, MessagingService, TransactionsService } from '../services';
+import {
+  ActionsRetriever,
+  DtoValidationService,
+  ElasticSearchService,
+  MessagingService,
+  TransactionsService,
+} from '../services';
 import { BusinessFilter } from '../tools';
 
 @Controller('business/:businessId')
@@ -42,6 +44,7 @@ export class BusinessController {
     private readonly searchService: ElasticSearchService,
     private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
+    private readonly actionsRetriever: ActionsRetriever,
     private readonly logger: Logger,
   ) {}
 
@@ -56,7 +59,7 @@ export class BusinessController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface>  {
+  ): Promise<TransactionOutputInterface>  {
     return this.getDetails(transaction);
   }
 
@@ -71,7 +74,7 @@ export class BusinessController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface> {
+  ): Promise<TransactionOutputInterface> {
     return this.getDetails(transaction);
   }
 
@@ -88,50 +91,38 @@ export class BusinessController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
-  ): Promise<TransactionWithAvailableActionsInterface> {
-    let actions: ActionItemInterface[];
-    this.dtoValidation.checkFileUploadDto(actionPayload);
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
+  ): Promise<TransactionOutputInterface> {
+    const updatedTransaction: TransactionUnpackedDetailsInterface = await this.doAction(
+      transaction,
+      actionPayload,
+      action,
     );
 
-    try {
-      await this.messagingService.runAction(unpackedTransaction, action, actionPayload);
-    } catch (e) {
-      this.logger.log(
-        {
-          context: 'BusinessController',
-          error: e.message,
-          message: `Error occured during running action`,
-        },
-      );
+    return TransactionOutputConverter.convert(
+      updatedTransaction,
+      await this.actionsRetriever.retrieve(updatedTransaction),
+    );
+  }
 
-      throw new BadRequestException(e.message);
-    }
-
-    const updatedTransaction: TransactionUnpackedDetailsInterface =
-      await this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
-    /** Send update to checkout-php */
-    try {
-      await this.messagingService.sendTransactionUpdate(updatedTransaction);
-    } catch (e) {
-      throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
-    }
-
-    try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(
-        {
-          context: 'BusinessController',
-          error: e.message,
-          message: `Error occurred while getting transaction actions`,
-        },
-      );
-      actions = [];
-    }
-
-    return { ...updatedTransaction, actions };
+  @Post(':uuid/legacy-api-action/:action')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.oauth)
+  public async runLegacyApiAction(
+    @Param('action') action: string,
+    @ParamModel(
+      {
+        business_uuid: ':businessId',
+        uuid: ':uuid',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+    @Body() actionPayload: ActionPayloadDto,
+  ): Promise<TransactionUnpackedDetailsInterface> {
+    return this.doAction(
+      transaction,
+      actionPayload,
+      action,
+    );
   }
 
   @Get(':uuid/update-status')
@@ -145,14 +136,13 @@ export class BusinessController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface> {
-    let actions: ActionItemInterface[];
-    const outputTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+  ): Promise<TransactionOutputInterface> {
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
 
     try {
-      await this.messagingService.updateStatus(outputTransaction);
+      await this.messagingService.updateStatus(unpackedTransaction);
     } catch (e) {
       this.logger.error(
         {
@@ -164,29 +154,19 @@ export class BusinessController {
       throw new BadRequestException(`Error occured during status update. Please try again later. ${e.message}`);
     }
 
-    const updated: TransactionUnpackedDetailsInterface =
+    const updatedTransaction: TransactionUnpackedDetailsInterface =
       await this.transactionsService.findUnpackedByUuid(transaction.uuid);
     /** Send update to checkout-php */
     try {
-      await this.messagingService.sendTransactionUpdate(updated);
+      await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
       throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
     }
 
-    try {
-      actions = await this.messagingService.getActionsList(outputTransaction);
-    } catch (e) {
-      this.logger.error(
-        {
-          context: 'BusinessController',
-          error: e.message,
-          message: `Error occurred while getting transaction actions`,
-        },
-      );
-      actions = [];
-    }
-
-    return { ...updated, actions };
+    return TransactionOutputConverter.convert(
+      updatedTransaction,
+      await this.actionsRetriever.retrieve(updatedTransaction),
+    );
   }
 
   @Get('list')
@@ -255,25 +235,50 @@ export class BusinessController {
     };
   }
 
-  private async getDetails(transaction: TransactionModel): Promise<TransactionWithAvailableActionsInterface>  {
-    let actions: ActionItemInterface[];
+  private async doAction(
+    transaction: TransactionModel,
+    actionPayload: ActionPayloadDto,
+    action: string,
+  ): Promise<TransactionUnpackedDetailsInterface> {
+    this.dtoValidation.checkFileUploadDto(actionPayload);
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
 
     try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
+      await this.messagingService.runAction(unpackedTransaction, action, actionPayload);
     } catch (e) {
-      this.logger.error(
+      this.logger.log(
         {
           context: 'BusinessController',
           error: e.message,
-          message: `Error occured while getting transaction actions`,
+          message: `Error occurred during running action`,
         },
       );
-      actions = [];
+
+      throw new BadRequestException(e.message);
     }
 
-    return { ...unpackedTransaction, actions };
+    const updatedTransaction: TransactionUnpackedDetailsInterface =
+      await this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
+    /** Send update to checkout-php */
+    try {
+      await this.messagingService.sendTransactionUpdate(updatedTransaction);
+    } catch (e) {
+      throw new BadRequestException(`Error occurred while sending transaction update: ${e.message}`);
+    }
+
+    return updatedTransaction;
+  }
+
+  private async getDetails(transaction: TransactionModel): Promise<TransactionOutputInterface>  {
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
+
+    return TransactionOutputConverter.convert(
+      unpackedTransaction,
+      await this.actionsRetriever.retrieve(unpackedTransaction),
+    );
   }
 }
