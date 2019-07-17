@@ -1,4 +1,5 @@
-import { FilterConditionEnum } from '../../enum';
+import { FilterConditionEnum } from '../enum';
+import { StringFilterInterface } from './interfaces';
 
 export class IsNotConditionFilter {
   public static getName(): string {
@@ -8,7 +9,7 @@ export class IsNotConditionFilter {
   public static apply(
     elasticFilters: any,
     field: string,
-    _filter: any,
+    _filter: StringFilterInterface,
   ): void {
     for (const value of _filter.value) {
       const condition: {} = {

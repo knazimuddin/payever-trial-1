@@ -1,13 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { DateStringHelper } from '../converter';
 import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
+import {
+  AfterDateConditionFilter,
+  BeforeDateConditionFilter,
+  BetweenConditionFilter,
+  BetweenDatesConditionFilter,
+  ContainsConditionFilter,
+  DoesNotContainConditionFilter,
+  EndsWithConditionFilter,
+  GreaterThenConditionFilter,
+  GreaterThenOrEqualConditionFilter,
+  IsConditionFilter,
+  IsDateConditionFilter,
+  IsNotConditionFilter,
+  IsNotDateConditionFilter,
+  LessThenConditionFilter,
+  LessThenOrEqualConditionFilter,
+  StartsWithConditionFilter,
+} from '../elastic-filters';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
 import { ElasticTransactionEnum, FilterConditionEnum } from '../enum';
 import { CurrencyInterface } from '../interfaces';
 import { TransactionBasicInterface } from '../interfaces/transaction';
 import { CurrencyExchangeService } from './currency-exchange.service';
-import { IsConditionFilter } from './elastic-filters';
-import { IsNotConditionFilter } from './elastic-filters/is-not-condition.filter';
 
 @Injectable()
 export class ElasticSearchService {
@@ -246,10 +261,6 @@ export class ElasticSearchService {
       if (!Array.isArray(_filter.value)) {
         _filter.value = [_filter.value];
       }
-      let condition: {};
-      let timeStamps: number[];
-      let from: any;
-      let to: any;
       switch (_filter.condition) {
         case FilterConditionEnum.Is:
           IsConditionFilter.apply(elasticFilters, field, _filter);
@@ -258,188 +269,46 @@ export class ElasticSearchService {
           IsNotConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.StartsWith:
-          for (const value of _filter.value) {
-            condition = {
-              query_string: {
-                fields: [
-                  `${field}^1`,
-                ],
-                query: `${value}*`,
-              },
-            };
-            elasticFilters.must.push(condition);
-          }
+          StartsWithConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.EndsWith:
-          for (const value of _filter.value) {
-            condition = {
-              query_string: {
-                fields: [
-                  `${field}^1`,
-                ],
-                query: `*${value}`,
-              },
-            };
-            elasticFilters.must.push(condition);
-          }
+          EndsWithConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.Contains:
-          for (const value of _filter.value) {
-            condition = {
-              query_string: {
-                fields: [
-                  `${field}^1`,
-                ],
-                query: `*${value}*`,
-              },
-            };
-            elasticFilters.must.push(condition);
-          }
+          ContainsConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.DoesNotContain:
-          for (const value of _filter.value) {
-            condition = {
-              query_string: {
-                fields: [
-                  `${field}^1`,
-                ],
-                query: `*${value}*`,
-              },
-            };
-            elasticFilters.must_not.push(condition);
-          }
+          DoesNotContainConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.GreaterThan:
-          for (const value of _filter.value) {
-            condition = {
-              range: {
-                [field]: {
-                  gt: value,
-                },
-              },
-            };
-            elasticFilters.must.push(condition);
-          }
+          GreaterThenConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.GreaterThanOrEqual:
-          for (const value of _filter.value) {
-            condition = {
-              range: {
-                [field]: {
-                  gte: value,
-                },
-              },
-            };
-            elasticFilters.must.push(condition);
-          }
+          GreaterThenOrEqualConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.LessThan:
-          for (const value of _filter.value) {
-            condition = {
-              range: {
-                [field]: {
-                  lt: value,
-                },
-              },
-            };
-            elasticFilters.must.push(condition);
-          }
+          LessThenConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.LessThanOrEqual:
-          for (const value of _filter.value) {
-            condition = {
-              range: {
-                [field]: {
-                  lte: value,
-                },
-              },
-            };
-            elasticFilters.must.push(condition);
-          }
+          LessThenOrEqualConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.Between:
-          from = _filter.value.map((elem: { from: string }) => parseInt(elem.from, 10));
-          to = _filter.value.map((elem: { to: string }) => parseInt(elem.to, 10));
-
-          condition = {
-            range: {
-              [field]: {
-                gte: Math.max(...from),
-                lte: Math.min(...to),
-              },
-            },
-          };
-          elasticFilters.must.push(condition);
+          BetweenConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.IsDate:
-          for (const value of _filter.value) {
-            condition = {
-              range: {
-                [field]: {
-                  gte: DateStringHelper.getDateStart(value),
-                  lt: DateStringHelper.getTomorrowDateStart(value),
-                },
-              },
-            };
-            elasticFilters.must.push(condition);
-          }
+          IsDateConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.IsNotDate:
-          for (const value of _filter.value) {
-            condition = {
-              range: {
-                [field]: {
-                  gte: DateStringHelper.getDateStart(value),
-                  lt: DateStringHelper.getTomorrowDateStart(value),
-                },
-              },
-            };
-            elasticFilters.must_not.push(condition);
-          }
+          IsNotDateConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.AfterDate:
-          timeStamps = _filter.value.map(
-            (elem: string) => (new Date(DateStringHelper.getDateStart(elem))).getTime(),
-          );
-          condition = {
-            range: {
-              [field]: {
-                gte: (new Date(Math.max(...timeStamps))).toISOString(),
-              },
-            },
-          };
-          elasticFilters.must.push(condition);
+          AfterDateConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.BeforeDate:
-          timeStamps = _filter.value.map(
-            (elem: string) => (new Date(DateStringHelper.getTomorrowDateStart(elem))).getTime(),
-          );
-          condition = {
-            range: {
-              [field]: {
-                lt: (new Date(Math.min(...timeStamps))).toISOString(),
-              },
-            },
-          };
-          elasticFilters.must.push(condition);
+          BeforeDateConditionFilter.apply(elasticFilters, field, _filter);
           break;
         case FilterConditionEnum.BetweenDates:
-          from = _filter.value.map(
-            (elem: { from: string }) => (new Date(DateStringHelper.getDateStart(elem.from))).getTime(),
-          );
-          to = _filter.value.map(
-            (elem: { to: string }) => (new Date(DateStringHelper.getTomorrowDateStart(elem.to))).getTime(),
-          );
-
-          condition = {
-            range: {
-              [field]: {
-                gte: (new Date(Math.max(...from))).toISOString(),
-                lt: (new Date(Math.min(...to))).toISOString(),
-              },
-            },
-          };
-          elasticFilters.must.push(condition);
+          BetweenDatesConditionFilter.apply(elasticFilters, field, _filter);
           break;
       }
     }
