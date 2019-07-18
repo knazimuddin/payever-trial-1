@@ -6,6 +6,7 @@ import { RABBITMQ_SERVER } from '@pe/nest-kit';
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
 import * as APM from 'elastic-apm-node';
 import * as jwt from 'fastify-jwt';
+import * as qs from 'qs';
 
 import { AppModule } from './app.module';
 import { environment } from './environments';
@@ -13,7 +14,9 @@ import { environment } from './environments';
 async function bootstrap(): Promise<void> {
   const app: NestFastifyApplication = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter(),
+    new FastifyAdapter({
+      querystringParser: (str: string): any => qs.parse(str),
+    }),
     {
       logger: false,
     },

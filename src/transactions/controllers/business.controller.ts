@@ -32,6 +32,9 @@ import {
 } from '../services';
 import { BusinessFilter } from '../tools';
 
+const BusinessPlaceholder: string = ':businessId';
+const UuidPlaceholder: string = ':uuid';
+
 @Controller('business/:businessId')
 @ApiUseTags('business')
 @UseGuards(JwtAuthGuard)
@@ -54,7 +57,7 @@ export class BusinessController {
   public async getDetailByReference(
     @ParamModel(
       {
-        business_uuid: ':businessId',
+        business_uuid: BusinessPlaceholder,
         reference: ':reference',
       },
       TransactionSchemaName,
@@ -69,8 +72,8 @@ export class BusinessController {
   public async getDetail(
     @ParamModel(
       {
-        business_uuid: ':businessId',
-        uuid: ':uuid',
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
@@ -85,8 +88,8 @@ export class BusinessController {
     @Param('action') action: string,
     @ParamModel(
       {
-        business_uuid: ':businessId',
-        uuid: ':uuid',
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
@@ -111,8 +114,8 @@ export class BusinessController {
     @Param('action') action: string,
     @ParamModel(
       {
-        business_uuid: ':businessId',
-        uuid: ':uuid',
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
@@ -131,8 +134,8 @@ export class BusinessController {
   public async updateStatus(
     @ParamModel(
       {
-        business_uuid: ':businessId',
-        uuid: ':uuid',
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
