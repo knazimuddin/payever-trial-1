@@ -1,9 +1,9 @@
-import { FilterConditionEnum } from '../enum';
-import { StringFilterInterface } from './interfaces';
+import { FilterConditionEnum } from '../../enum';
+import { StringFilterInterface } from '../interfaces';
 
-export class StartsWithConditionFilter {
+export class DoesNotContainConditionFilter {
   public static getName(): string {
-    return FilterConditionEnum.StartsWith;
+    return FilterConditionEnum.DoesNotContain;
   }
 
   public static apply(
@@ -17,10 +17,10 @@ export class StartsWithConditionFilter {
           fields: [
             `${field}^1`,
           ],
-          query: `${value}*`,
+          query: `*${value}*`,
         },
       };
-      elasticFilters.must.push(condition);
+      elasticFilters.must_not.push(condition);
     }
   }
 }

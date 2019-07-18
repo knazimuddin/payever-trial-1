@@ -1,9 +1,9 @@
-import { FilterConditionEnum } from '../enum';
-import { StringFilterInterface } from './interfaces';
+import { FilterConditionEnum } from '../../enum';
+import { StringFilterInterface } from '../interfaces';
 
-export class IsConditionFilter {
+export class GreaterThenOrEqualConditionFilter {
   public static getName(): string {
-    return FilterConditionEnum.Is;
+    return FilterConditionEnum.GreaterThanOrEqual;
   }
 
   public static apply(
@@ -13,8 +13,10 @@ export class IsConditionFilter {
   ): void {
     for (const value of _filter.value) {
       const condition: {} = {
-        match_phrase: {
-          [field]: value,
+        range: {
+          [field]: {
+            gte: value,
+          },
         },
       };
       elasticFilters.must.push(condition);

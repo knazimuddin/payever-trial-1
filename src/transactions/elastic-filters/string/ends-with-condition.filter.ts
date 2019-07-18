@@ -1,9 +1,9 @@
-import { FilterConditionEnum } from '../enum';
-import { StringFilterInterface } from './interfaces';
+import { FilterConditionEnum } from '../../enum';
+import { StringFilterInterface } from '../interfaces';
 
-export class ContainsConditionFilter {
+export class EndsWithConditionFilter {
   public static getName(): string {
-    return FilterConditionEnum.Contains;
+    return FilterConditionEnum.EndsWith;
   }
 
   public static apply(
@@ -17,7 +17,7 @@ export class ContainsConditionFilter {
           fields: [
             `${field}^1`,
           ],
-          query: `*${value}*`,
+          query: `*${value}`,
         },
       };
       elasticFilters.must.push(condition);

@@ -1,4 +1,4 @@
-import { FilterConditionEnum } from '../enum';
+import { FilterConditionEnum } from '../../enum';
 
 interface BetweenFilterInterface {
   value: Array<{

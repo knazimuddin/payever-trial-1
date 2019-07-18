@@ -1,9 +1,9 @@
-import { FilterConditionEnum } from '../enum';
-import { StringFilterInterface } from './interfaces';
+import { FilterConditionEnum } from '../../enum';
+import { StringFilterInterface } from '../interfaces';
 
-export class DoesNotContainConditionFilter {
+export class IsNotConditionFilter {
   public static getName(): string {
-    return FilterConditionEnum.DoesNotContain;
+    return FilterConditionEnum.IsNot;
   }
 
   public static apply(
@@ -13,11 +13,8 @@ export class DoesNotContainConditionFilter {
   ): void {
     for (const value of _filter.value) {
       const condition: {} = {
-        query_string: {
-          fields: [
-            `${field}^1`,
-          ],
-          query: `*${value}*`,
+        match_phrase: {
+          [field]: value,
         },
       };
       elasticFilters.must_not.push(condition);

@@ -1,9 +1,9 @@
-import { FilterConditionEnum } from '../enum';
-import { StringFilterInterface } from './interfaces';
+import { FilterConditionEnum } from '../../enum';
+import { StringFilterInterface } from '../interfaces';
 
-export class IsNotConditionFilter {
+export class IsConditionFilter {
   public static getName(): string {
-    return FilterConditionEnum.IsNot;
+    return FilterConditionEnum.Is;
   }
 
   public static apply(
@@ -17,7 +17,7 @@ export class IsNotConditionFilter {
           [field]: value,
         },
       };
-      elasticFilters.must_not.push(condition);
+      elasticFilters.must.push(condition);
     }
   }
 }

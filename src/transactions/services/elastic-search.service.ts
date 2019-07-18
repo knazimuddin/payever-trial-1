@@ -1,25 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
-import {
-  AfterDateConditionFilter,
-  BeforeDateConditionFilter,
-  BetweenConditionFilter,
-  BetweenDatesConditionFilter,
-  ContainsConditionFilter,
-  DoesNotContainConditionFilter,
-  EndsWithConditionFilter,
-  GreaterThenConditionFilter,
-  GreaterThenOrEqualConditionFilter,
-  IsConditionFilter,
-  IsDateConditionFilter,
-  IsNotConditionFilter,
-  IsNotDateConditionFilter,
-  LessThenConditionFilter,
-  LessThenOrEqualConditionFilter,
-  StartsWithConditionFilter,
-} from '../elastic-filters';
+import { FiltersList } from '../elastic-filters/filters.list';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
-import { ElasticTransactionEnum, FilterConditionEnum } from '../enum';
+import { ElasticTransactionEnum } from '../enum';
 import { CurrencyInterface } from '../interfaces';
 import { TransactionBasicInterface } from '../interfaces/transaction';
 import { CurrencyExchangeService } from './currency-exchange.service';
@@ -261,55 +244,11 @@ export class ElasticSearchService {
       if (!Array.isArray(_filter.value)) {
         _filter.value = [_filter.value];
       }
-      switch (_filter.condition) {
-        case FilterConditionEnum.Is:
-          IsConditionFilter.apply(elasticFilters, field, _filter);
+      for (const elasticFilter of FiltersList) {
+        if (_filter.condition === elasticFilter.getName()) {
+          elasticFilter.apply(elasticFilters, field, _filter);
           break;
-        case FilterConditionEnum.IsNot:
-          IsNotConditionFilter.apply(elasticFilters, field, _filter);
-          break;
-        case FilterConditionEnum.StartsWith:
-          StartsWithConditionFilter.apply(elasticFilters, field, _filter);
-          break;
-        case FilterConditionEnum.EndsWith:
-          EndsWithConditionFilter.apply(elasticFilters, field, _filter);
-          break;
-        case FilterConditionEnum.Contains:
-          ContainsConditionFilter.apply(elasticFilters, field, _filter);
-          break;
-        case FilterConditionEnum.DoesNotContain:
-          DoesNotContainConditionFilter.apply(elasticFilters, field, _filter);
-          break;
-        case FilterConditionEnum.GreaterThan:
-          GreaterThenConditionFilter.apply(elasticFilters, field, _filter);
-          break;
-        case FilterConditionEnum.GreaterThanOrEqual:
-          GreaterThenOrEqualConditionFilter.apply(elasticFilters, field, _filter);
-          break;
-        case FilterConditionEnum.LessThan:
-          LessThenConditionFilter.apply(elasticFilters, field, _filter);
-          break;
-        case FilterConditionEnum.LessThanOrEqual:
-          LessThenOrEqualConditionFilter.apply(elasticFilters, field, _filter);
-          break;
-        case FilterConditionEnum.Between:
-          BetweenConditionFilter.apply(elasticFilters, field, _filter);
-          break;
-        case FilterConditionEnum.IsDate:
-          IsDateConditionFilter.apply(elasticFilters, field, _filter);
-          break;
-        case FilterConditionEnum.IsNotDate:
-          IsNotDateConditionFilter.apply(elasticFilters, field, _filter);
-          break;
-        case FilterConditionEnum.AfterDate:
-          AfterDateConditionFilter.apply(elasticFilters, field, _filter);
-          break;
-        case FilterConditionEnum.BeforeDate:
-          BeforeDateConditionFilter.apply(elasticFilters, field, _filter);
-          break;
-        case FilterConditionEnum.BetweenDates:
-          BetweenDatesConditionFilter.apply(elasticFilters, field, _filter);
-          break;
+        }
       }
     }
   }

@@ -1,9 +1,9 @@
-import { FilterConditionEnum } from '../enum';
-import { StringFilterInterface } from './interfaces';
+import { FilterConditionEnum } from '../../enum';
+import { StringFilterInterface } from '../interfaces';
 
-export class GreaterThenConditionFilter {
+export class LessThenConditionFilter {
   public static getName(): string {
-    return FilterConditionEnum.GreaterThan;
+    return FilterConditionEnum.LessThan;
   }
 
   public static apply(
@@ -15,7 +15,7 @@ export class GreaterThenConditionFilter {
       const condition: {} = {
         range: {
           [field]: {
-            gt: value,
+            lt: value,
           },
         },
       };

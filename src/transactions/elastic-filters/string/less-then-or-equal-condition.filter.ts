@@ -1,9 +1,9 @@
-import { FilterConditionEnum } from '../enum';
-import { StringFilterInterface } from './interfaces';
+import { FilterConditionEnum } from '../../enum';
+import { StringFilterInterface } from '../interfaces';
 
-export class EndsWithConditionFilter {
+export class LessThenOrEqualConditionFilter {
   public static getName(): string {
-    return FilterConditionEnum.EndsWith;
+    return FilterConditionEnum.LessThanOrEqual;
   }
 
   public static apply(
@@ -13,11 +13,10 @@ export class EndsWithConditionFilter {
   ): void {
     for (const value of _filter.value) {
       const condition: {} = {
-        query_string: {
-          fields: [
-            `${field}^1`,
-          ],
-          query: `*${value}`,
+        range: {
+          [field]: {
+            lte: value,
+          },
         },
       };
       elasticFilters.must.push(condition);
