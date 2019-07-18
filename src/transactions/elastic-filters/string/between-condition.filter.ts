@@ -1,11 +1,5 @@
 import { FilterConditionEnum } from '../../enum';
-
-interface BetweenFilterInterface {
-  value: Array<{
-    from: string,
-    to: string,
-  }>,
-}
+import { BetweenFilterInterface } from '../interfaces';
 
 export class BetweenConditionFilter {
   public static getName(): string {
