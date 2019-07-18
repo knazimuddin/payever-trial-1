@@ -1,3 +1,3 @@
 export interface StringFilterInterface {
-  value: string[],
+  value: string[];
 }
