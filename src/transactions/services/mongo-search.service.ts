@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { DateStringHelper } from '../converter';
 import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
-import { FilterConditionEnum } from '../enum';
 import { CurrencyInterface } from '../interfaces';
 import { TransactionModel } from '../models';
+import { FiltersList } from '../mongo-filters/filters.list';
 import { CurrencyExchangeService } from './currency-exchange.service';
 
 @Injectable()
@@ -155,12 +154,6 @@ export class MongoSearchService {
   }
 
   private addFilter(mongoFilters: any, field: string, filter: any): void {
-    if (field === 'business_uuid') {
-      mongoFilters[field] = filter.value;
-
-      return;
-    }
-
     if (field === 'channel_set_uuid') {
       mongoFilters[field] = filter.value;
 
@@ -179,150 +172,11 @@ export class MongoSearchService {
       if (!Array.isArray(_filter.value)) {
         _filter.value = [_filter.value];
       }
-      let condition: {};
-      let timeStamps: number[];
-      let from: any;
-      let to: any;
-      switch (_filter.condition) {
-        case FilterConditionEnum.Is:
-          condition = {};
-          condition[field] = { $in: _filter.value };
-          mongoFilters.$and.push(condition);
+      for (const mongoFilter of FiltersList) {
+        if (_filter.condition === mongoFilter.getName()) {
+          mongoFilter.apply(mongoFilters, field, _filter);
           break;
-        case FilterConditionEnum.IsNot:
-          condition[field] = { $nin: _filter.value };
-          mongoFilters.$and.push(condition);
-          break;
-        case FilterConditionEnum.StartsWith:
-          if (_filter.value.length) {
-            const regex: RegExp[] = [];
-            _filter.value.forEach((elem: string) => {
-              regex.push(new RegExp(`^${elem}`, 'i'));
-            });
-            condition[field] = { $in: regex };
-            mongoFilters.$and.push(condition);
-          }
-          break;
-        case FilterConditionEnum.EndsWith:
-          if (_filter.value.length) {
-            const regex: RegExp[] = [];
-            _filter.value.forEach((elem: string) => {
-              regex.push(new RegExp(`${elem}$`, 'i'));
-            });
-            condition[field] = { $in: regex };
-            mongoFilters.$and.push(condition);
-          }
-          break;
-        case FilterConditionEnum.Contains:
-          if (_filter.value.length) {
-            const regex: RegExp[] = [];
-            _filter.value.forEach((elem: string) => {
-              regex.push(new RegExp(`${elem}`, 'i'));
-            });
-            condition = {};
-            condition[field] = { $in: regex };
-            mongoFilters.$and.push(condition);
-          }
-          break;
-        case FilterConditionEnum.DoesNotContain:
-          if (_filter.value.length) {
-            const regex: RegExp[] = [];
-            _filter.value.forEach((elem: string) => {
-              regex.push(new RegExp(`${elem}`, 'i'));
-            });
-            condition = {};
-            condition[field] = { $nin: regex };
-            mongoFilters.$and.push(condition);
-          }
-          break;
-        case FilterConditionEnum.GreaterThan:
-          condition[field] = { $gt: Math.max(_filter.value) };
-          mongoFilters.$and.push(condition);
-          break;
-        case FilterConditionEnum.LessThan:
-          condition[field] = { $lt: Math.min(_filter.value) };
-          mongoFilters.$and.push(condition);
-          break;
-        case FilterConditionEnum.Between:
-          condition = {};
-          from = _filter.value.map((elem: { from: string }) => parseInt(elem.from, 10));
-          to = _filter.value.map((elem: { to: string }) => parseInt(elem.to, 10));
-          condition[field] = {
-            $gte: Math.max(...from),
-            $lte: Math.min(...to),
-          };
-          mongoFilters.$and.push(condition);
-          break;
-        case FilterConditionEnum.IsDate:
-          const isDateCondition: { $and: Array<{ [key: string]: { $gte: string, $lt: string }}> } = { $and: [] };
-          _filter.value.forEach((elem: string) => {
-            isDateCondition.$and.push({
-              [field]: {
-                $gte: DateStringHelper.getDateStart(elem),
-                $lt: DateStringHelper.getTomorrowDateStart(elem),
-              },
-            });
-
-            return isDateCondition;
-          });
-          mongoFilters.$and.push(condition);
-          break;
-        case FilterConditionEnum.IsNotDate:
-          const isNotDateCondition: {
-            $and: Array<{
-              [key: string]: {
-                $not: {
-                  $gte: string,
-                  $lt: string,
-                },
-              },
-            }>,
-          } = { $and: [] };
-          _filter.value.forEach((elem: string) => {
-            isNotDateCondition.$and.push({
-              [field]: {
-                $not: {
-                  $gte: DateStringHelper.getDateStart(elem),
-                  $lt: DateStringHelper.getTomorrowDateStart(elem),
-                },
-              },
-            });
-
-            return isNotDateCondition;
-          });
-          mongoFilters.$and.push(condition);
-          break;
-        case FilterConditionEnum.AfterDate:
-          timeStamps = _filter.value.map(
-            (elem: string) => (new Date(DateStringHelper.getDateStart(elem))).getTime(),
-          );
-          condition[field] = {
-            $gte: Math.max(...timeStamps),
-          };
-          mongoFilters.$and.push(condition);
-          break;
-        case FilterConditionEnum.BeforeDate:
-          timeStamps = _filter.value.map(
-            (elem: string) => (new Date(DateStringHelper.getTomorrowDateStart(elem))).getTime(),
-          );
-          condition[field] = {
-            $lt: Math.min(...timeStamps),
-          };
-          mongoFilters.$and.push(condition);
-          break;
-        case FilterConditionEnum.BetweenDates:
-          from = _filter.value.map(
-            (elem: string) => (new Date(DateStringHelper.getDateStart(elem))).getTime(),
-          );
-          to = _filter.value.map(
-            (elem: string) => (new Date(DateStringHelper.getTomorrowDateStart(elem))).getTime(),
-          );
-          condition[field] = {
-            $gte: Math.max(from),
-            $lte: Math.min(to),
-          };
-          mongoFilters.$and.push(condition);
-          break;
+        }
       }
     }
 
