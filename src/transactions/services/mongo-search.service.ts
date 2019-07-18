@@ -60,14 +60,11 @@ export class MongoSearchService {
       .limit(paging.limit)
       .skip(paging.limit * (paging.page - 1))
       .sort(sorting)
-      .exec()
     ;
   }
 
   public async count(filters: any): Promise<number> {
-    return this.transactionsModel
-      .countDocuments(filters)
-      .exec();
+    return this.transactionsModel.countDocuments(filters);
   }
 
   public async total(filters: any = {}, currency?: string): Promise<number> {
@@ -83,7 +80,6 @@ export class MongoSearchService {
             },
           },
         ])
-        .exec()
       ;
 
       res = res && res[0]
@@ -102,7 +98,6 @@ export class MongoSearchService {
             },
           },
         ])
-        .exec()
       ;
 
       const totalPerCurrency: number = res.reduce(
@@ -131,7 +126,7 @@ export class MongoSearchService {
     return this.transactionsModel
       .find(filters)
       .distinct(field)
-      .exec();
+    ;
   }
 
   private addSearchFilters(filters: any, search: string): void {
