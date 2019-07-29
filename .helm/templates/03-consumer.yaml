@@ -1,6 +1,6 @@
 {{ $chartName := .Chart.Name }}
 {{ $values := .Values }}
-{{ $appName := $chartName }}
+{{ $appName := printf "%s-consumer" $chartName }}
 
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -17,7 +17,6 @@ metadata:
   annotations:
     {{ $appName }}/deploy-timestamp: {{ now }}
     "werf.io/track": "true"
-
 spec:
   replicas: {{ $values.replicaCount }}
 
@@ -62,17 +61,12 @@ spec:
         - name: node
           image: {{ $values.image.nodejs }}
           imagePullPolicy: IfNotPresent
-          command: [ "/bin/bash", "-c", "/payever/deploy/deploy.sh" ]
+          command: [ "/bin/bash", "-c", "/payever/deploy/consumer.sh" ]
 
           lifecycle:
             preStop:
               exec:
-                command: ["sleep", "15"]
-
-          ports:
-            - containerPort: {{ $values.service.containerPort }}
-              protocol: TCP
-              name: http
+                command: ["sleep", "5"]
 
           livenessProbe:
             httpGet:
