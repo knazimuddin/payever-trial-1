@@ -20,6 +20,8 @@ metadata:
     "werf.io/track": "true"
 
 spec:
+  ttlSecondsAfterFinished: 30
+
   template:
     metadata:
       labels:
