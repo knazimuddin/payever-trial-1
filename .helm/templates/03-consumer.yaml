@@ -21,7 +21,11 @@ spec:
   replicas: {{ $values.replicaCount }}
 
   strategy:
-    type: Recreate
+    type: RollingUpdate
+
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
 
   selector:
     matchLabels:
@@ -59,6 +63,11 @@ spec:
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "-c", "/payever/deploy/consumer.sh" ]
 
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "15"]
+
           livenessProbe:
             httpGet:
               path: /api/status
@@ -73,6 +82,9 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 15
+
+          resources:
+{{ toYaml $values.resources | indent 12 }}
 
           envFrom:
             - configMapRef:
