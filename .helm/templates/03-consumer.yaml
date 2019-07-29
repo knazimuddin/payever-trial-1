@@ -1,0 +1,106 @@
+{{ $chartName := .Chart.Name }}
+{{ $values := .Values }}
+{{ $appName := printf "%s-consumer" $chartName }}
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+
+metadata:
+  name: {{ $appName }}
+  namespace: {{ $values.namespace }}
+
+  labels:
+    app: {{ $appName }}
+    tier: app
+    layer: nodejs-backend
+
+  annotations:
+    {{ $appName }}/deploy-timestamp: {{ now }}
+
+spec:
+  replicas: {{ $values.replicaCount }}
+
+  strategy:
+    type: RollingUpdate
+
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+  selector:
+    matchLabels:
+      app: {{ $appName }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ $appName }}
+        tier: app
+        layer: nodejs-backend
+
+      annotations:
+        seccomp.security.alpha.kubernetes.io/pod: 'runtime/default'
+
+    spec:
+      priorityClassName: app-9stars
+
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_worker
+                operator: In
+                values:
+                - "true"
+
+      imagePullSecrets:
+        - name: {{ $values.image.pullSecretName }}
+
+      containers:
+        - name: node
+          image: {{ $values.image.nodejs }}
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash", "-c", "/payever/deploy/consumer.sh" ]
+
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sleep", "15"]
+
+          ports:
+            - containerPort: {{ $values.service.containerPort }}
+              protocol: TCP
+              name: http
+
+          livenessProbe:
+            httpGet:
+              path: /api/status
+              port: {{ $values.service.statusPort }}
+            initialDelaySeconds: 90
+            periodSeconds: 5
+
+          readinessProbe:
+            httpGet:
+              path: /api/status
+              port: {{ $values.service.statusPort }}
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            failureThreshold: 15
+
+          resources:
+{{ toYaml $values.resources | indent 12 }}
+
+          envFrom:
+            - configMapRef:
+                name: {{ $chartName }}
+
+            - configMapRef:
+                name: micro-url-map
+
+            - secretRef:
+                name: {{ $chartName }}
+
+          env:
+            - name: KUBERNETES_DEPLOYED
+              value: "{{ now }}"
