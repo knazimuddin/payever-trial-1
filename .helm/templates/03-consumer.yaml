@@ -1,6 +1,6 @@
 {{ $chartName := .Chart.Name }}
 {{ $values := .Values }}
-{{ $appName := $chartName }}
+{{ $appName := printf "%s-consumer" $chartName }}
 
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -21,11 +21,7 @@ spec:
   replicas: {{ $values.replicaCount }}
 
   strategy:
-    type: RollingUpdate
-
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+    type: Recreate
 
   selector:
     matchLabels:
@@ -61,17 +57,7 @@ spec:
         - name: node
           image: {{ $values.image.nodejs }}
           imagePullPolicy: IfNotPresent
-          command: [ "/bin/bash", "-c", "/payever/deploy/deploy.sh" ]
-
-          lifecycle:
-            preStop:
-              exec:
-                command: ["sleep", "15"]
-
-          ports:
-            - containerPort: {{ $values.service.containerPort }}
-              protocol: TCP
-              name: http
+          command: [ "/bin/bash", "-c", "/payever/deploy/consumer.sh" ]
 
           livenessProbe:
             httpGet:
@@ -87,9 +73,6 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 15
-
-          resources:
-{{ toYaml $values.resources | indent 12 }}
 
           envFrom:
             - configMapRef:
