@@ -1,235 +1,225 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
-
 import { Model } from 'mongoose';
-import { client } from '../es-temp/transactions-search';
-import { ProductUuid } from '../tools/product-uuid';
-import { TransactionUpdateDto } from '../dto/transaction-update.dto';
-import { classToPlain } from 'class-transformer';
+import { v4 as uuid } from 'uuid';
+import {
+  TransactionCartConverter,
+  TransactionPaymentDetailsConverter,
+  TransactionSantanderApplicationConverter,
+} from '../converter';
+import { RpcResultDto } from '../dto';
+import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
+import { ElasticTransactionEnum } from '../enum';
+import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
+import {
+  TransactionBasicInterface,
+  TransactionCartItemInterface,
+  TransactionPackedDetailsInterface,
+  TransactionUnpackedDetailsInterface,
+} from '../interfaces/transaction';
+import { TransactionHistoryEntryModel, TransactionModel } from '../models';
 
 @Injectable()
 export class TransactionsService {
 
   constructor(
-    @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
-    @InjectNotificationsEmitter() private notificationsEmitter: NotificationsEmitter,
+    @InjectModel('Transaction') private readonly transactionModel: Model<TransactionModel>,
+    @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
+    private readonly elasticSearchClient: ElasticSearchClient,
     private readonly logger: Logger,
-  ) {
-  }
+  ) {}
 
-  public async create(transaction: any) {
-    if (transaction.id) {
-      transaction.original_id = transaction.id;
+  public async create(transactionDto: TransactionPackedDetailsInterface): Promise<TransactionModel> {
+    if (transactionDto.id) {
+      transactionDto.original_id = transactionDto.id;
     }
 
-    const created = await this.transactionsModel.create(transaction);
-    this.notificationsEmitter.sendNotification(
+    if (!transactionDto.uuid) {
+      transactionDto.uuid = uuid();
+    }
+
+    try {
+      const created: TransactionModel = await this.transactionModel.create(transactionDto);
+      await this.elasticSearchClient.singleIndex(
+        ElasticTransactionEnum.index,
+        ElasticTransactionEnum.type,
+        created.toObject(),
+      );
+
+      await this.notificationsEmitter.sendNotification(
+        {
+          app: 'transactions',
+          entity: transactionDto.business_uuid,
+          kind: 'business',
+        },
+        `notification.transactions.title.new_transaction`,
+        {
+          transactionId: transactionDto.uuid,
+        },
+      );
+
+      return created;
+    } catch (err) {
+      if (err.name === 'MongoError' && err.code === 11000) {
+        this.logger.warn({ text: `Attempting to create existing Transaction with uuid '${transactionDto.uuid}'`});
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  public async updateByUuid(
+    transactionUuid: string,
+    transactionDto: TransactionPackedDetailsInterface,
+  ): Promise<TransactionModel> {
+    transactionDto.uuid = transactionUuid;
+
+    const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
       {
-        kind: 'business',
-        entity: transaction.business_uuid,
-        app: 'transactions',
+        uuid: transactionUuid,
       },
-      `notification.transactions.title.new_transaction`,
+      transactionDto,
       {
-        transactionId: transaction.uuid,
+        new: true,
+        upsert: true,
       },
     );
 
-    return created;
+    await this.elasticSearchClient.singleIndex(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      updated.toObject(),
+      'update',
+    );
+
+    return updated;
   }
 
-  public async bulkIndex(index, type, item, operation = 'index') {
-    const bulkBody = [];
-    item.mongoId = item._id;
-    delete item._id;
-    bulkBody.push({
-      [operation]: {
-        _index: index,
-        _type: type,
-        _id: item.mongoId,
+  public async updateHistoryByUuid(
+    transactionUuid: string,
+    transactionHistory: TransactionHistoryEntryModel[],
+  ): Promise<TransactionModel> {
+
+    const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
+      {
+        uuid: transactionUuid,
       },
-    });
+      {
+        $set: {
+          history: transactionHistory,
+        },
+      },
+      {
+        new: true,
+      },
+    );
 
-    if (operation === 'update') {
-      bulkBody.push({doc: item});
-    }
-    else {
-      bulkBody.push(item);
-    }
+    await this.elasticSearchClient.singleIndex(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      updated.toObject(),
+      'update',
+    );
 
-    await client.bulk({ body: bulkBody })
-      .then(response => {
-        let errorCount = 0;
-        response.items.forEach(item => {
-          if (item.index && item.index.error) {
-            console.log(++errorCount, item.index.error);
-          }
-        });
-      })
-      .catch(console.log);
+    return updated;
   }
 
-  public async update(uuid, data: TransactionUpdateDto) {
-    return this.transactionsModel.findOneAndUpdate({uuid}, classToPlain(data), {new: true});
+  public async findModelByUuid(transactionUuid: string): Promise<TransactionModel> {
+    return this.findModelByParams({ uuid: transactionUuid });
   }
 
-  public async updateByUuid(uuid, data: any) {
-    // a bit dirty, sorry
-    if (typeof (data.payment_details) !== 'string') {
-      this.setSantanderApplication(data);
-      data.payment_details = JSON.stringify(data.payment_details);
-    }
-    const transaction = data;
-    data.uuid = uuid;
-    await this.bulkIndex('transactions', 'transaction', transaction, 'update');
-
-    return this.transactionsModel.findOneAndUpdate({ uuid }, data);
+  public async findModelByParams(params: any): Promise<TransactionModel> {
+    return this.transactionModel.findOne(params);
   }
 
-  public async deleteAll() {
-    return this.transactionsModel.collection.drop();
+  public async findUnpackedByUuid(transactionUuid: string): Promise<TransactionUnpackedDetailsInterface> {
+    return this.findUnpackedByParams({ uuid: transactionUuid });
   }
 
-  public async createOrUpdate(transaction: any) {
-    if (transaction.uuid) {
-      const existing = await this.transactionsModel.findOne({ uuid: transaction.uuid });
-      if (existing) {
-        await this.bulkIndex('transactions', 'transaction', transaction, 'update');
-
-        return this.transactionsModel.findOneAndUpdate({ uuid: transaction.uuid }, transaction);
-      }
-    }
-
-    transaction = this.create(transaction);
-    await this.bulkIndex('transactions', 'transaction', transaction);
-
-    return transaction;
-  }
-
-  public async findOneAndUpdate(conditions: any, update: any) {
-    return this.transactionsModel.findOneAndUpdate(conditions, update);
-  }
-
-  public async findOneByUuid(uuid: string) {
-    return await this.transactionsModel.findOne({ uuid });
-  }
-
-  public async findOne(uuid: string) {
-    return this.findOneByParams({ uuid });
-  }
-
-  public async findAll(businessId) {
-    return this.transactionsModel.find({ business_uuid: businessId });
-  }
-
-  public async findOneByParams(params) {
-    const transaction = await this.transactionsModel.findOne(params);
+  public async findUnpackedByParams(params: any): Promise<TransactionUnpackedDetailsInterface> {
+    const transaction: TransactionModel = await this.transactionModel.findOne(params);
 
     if (!transaction) {
-      throw new NotFoundException(`Transaction not found by the following params: ${JSON.stringify(params)}`);
-    }
-
-    return this.prepareTransactionForOutput(transaction.toObject({ virtuals: true }));
-  }
-
-  public async removeByUuid(uuid: string) {
-    return this.transactionsModel.findOneAndRemove({ uuid });
-  }
-
-  public prepareTransactionForInsert(transaction) {
-    if (transaction.address) {
-      transaction.billing_address = transaction.address;
-    }
-
-    transaction.type = transaction.type || transaction.payment_type;
-
-    if (typeof (transaction.payment_details) !== 'string' && transaction.payment_details) {
-      this.setSantanderApplication(transaction);
-      transaction.payment_details = JSON.stringify(transaction.payment_details);
-    }
-
-    if (transaction.business) {
-      transaction.business_uuid = transaction.business.uuid;
-      transaction.merchant_name = transaction.business.company_name;
-      transaction.merchant_email = transaction.business.company_email;
-    }
-
-    if (transaction.payment_flow) {
-      transaction.payment_flow_id = transaction.payment_flow.id;
-    }
-
-    if (transaction.channel_set) {
-      transaction.channel_set_uuid = transaction.channel_set.uuid;
-    }
-
-    if (transaction.history && transaction.history.length) {
-      transaction.history.map((historyItem) => {
-        return this.prepareTransactionHistoryItemForInsert(historyItem.action, historyItem.created_at, historyItem);
-      });
-    }
-  }
-
-  public prepareTransactionHistoryItemForInsert(historyType, createdAt, data) {
-    const result: any = {
-      ...data.data,
-      action: historyType,
-      upload_items: data.data && data.data.saved_data,
-      created_at: createdAt,
-    };
-
-    if (data.items_restocked) {
-      result.is_restock_items = data.items_restocked;
-    }
-
-    return result;
-  }
-
-  public prepareTransactionCartForInsert(cartItems, businessId) {
-    const newCart = [];
-
-    for (const cartItem of cartItems) {
-      if (cartItem.product_uuid) {
-        cartItem._id = cartItem.product_uuid;
-        cartItem.uuid = cartItem.product_uuid;
-      } else {
-        cartItem._id = ProductUuid.generate(businessId, `${cartItem.name}${cartItem.product_variant_uuid}`);
-        cartItem.uuid = null;
-      }
-      newCart.push(cartItem);
-    }
-
-    return newCart;
-  }
-
-  private setSantanderApplication(transaction: any): void {
-    if (!transaction.payment_details) {
       return;
     }
 
-    transaction.santander_applications = [];
-
-    if (transaction.payment_details.finance_id) {
-      transaction.santander_applications.push(transaction.payment_details.finance_id);
-    }
-
-    if (transaction.payment_details.application_no) {
-      transaction.santander_applications.push(transaction.payment_details.application_no);
-    }
-
-    if (transaction.payment_details.application_number) {
-      transaction.santander_applications.push(transaction.payment_details.application_number);
-    }
+    return TransactionPaymentDetailsConverter.convert(transaction.toObject({ virtuals: true }));
   }
 
-  private prepareTransactionForOutput(transaction) {
-    try {
-      transaction.payment_details = transaction.payment_details ? JSON.parse(transaction.payment_details) : {};
-    } catch (e) {
-      this.logger.log(e);
-      // just skipping payment_details
+  public async findAll(businessId: string): Promise<TransactionModel[]> {
+    return this.transactionModel.find({business_uuid: businessId});
+  }
+
+  public async removeByUuid(transactionUuid: string): Promise<void> {
+    await this.transactionModel.findOneAndRemove({ uuid: transactionUuid });
+  }
+
+  public async applyActionRpcResult(
+    transaction: TransactionUnpackedDetailsInterface,
+    result: RpcResultDto,
+  ): Promise<void> {
+    await this.applyPaymentProperties(transaction, result);
+    await this.applyPaymentItems(transaction, result);
+  }
+
+  public async applyRpcResult(
+    transaction: TransactionUnpackedDetailsInterface,
+    result: RpcResultDto,
+  ): Promise<void> {
+    await this.applyPaymentProperties(transaction, result);
+  }
+
+  public async applyPaymentProperties(
+    transaction: TransactionUnpackedDetailsInterface,
+    result: RpcResultDto,
+  ): Promise<void> {
+    const paymentResult: CheckoutTransactionInterface = result.payment;
+    const updating: CheckoutTransactionRpcUpdateInterface = {};
+
+    if (!paymentResult.amount || paymentResult.amount <= 0) {
+      throw new RpcException(`Can not apply empty or negative amount for transaction #${transaction.id}`);
     }
 
-    return transaction;
+    updating.amount = paymentResult.amount;
+    updating.delivery_fee = paymentResult.delivery_fee;
+    updating.status = paymentResult.status;
+    updating.specific_status = paymentResult.specific_status;
+    updating.reference = paymentResult.reference;
+    updating.place = result.workflow_state;
+
+    if (paymentResult.payment_details) {
+      TransactionSantanderApplicationConverter.setSantanderApplication(updating, result);
+      updating.payment_details = JSON.stringify(result);
+    }
+
+    await this.transactionModel.updateOne(
+      {
+        uuid: transaction.uuid,
+      },
+      {
+        $set: updating,
+      },
+    );
+  }
+
+  public async applyPaymentItems(
+    transaction: TransactionBasicInterface,
+    result: RpcResultDto,
+  ): Promise<void> {
+    const items: TransactionCartItemInterface[] =
+      TransactionCartConverter.fromCheckoutTransactionCart(result.payment_items, transaction.business_uuid);
+
+    await this.transactionModel.updateOne(
+      {
+        uuid: transaction.uuid,
+      },
+      {
+        $set: {
+          items,
+        },
+      },
+    );
   }
 }

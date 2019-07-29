@@ -1,11 +1,9 @@
-import { Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ApmModule, CommandModule, JwtAuthModule, RabbitMqModule } from '@pe/nest-kit';
 import { NestKitLoggingModule } from '@pe/nest-kit/modules/logging';
 import { StatusModule } from '@pe/nest-kit/modules/status';
-
 import { environment } from './environments';
-import { TransactionsEsSearch } from './esTransactions/esTransactions.module';
 import { IntegrationModule } from './integration';
 import { TransactionsModule } from './transactions/transactions.module';
 
@@ -16,17 +14,18 @@ import { TransactionsModule } from './transactions/transactions.module';
       environment.apm.options,
     ),
     CommandModule,
-    JwtAuthModule.forRoot(environment.jwtOptions),
+    JwtAuthModule.forRoot(environment.jwtOptions, environment.redis),
     MongooseModule.forRoot(
       environment.mongodb,
       {
         useCreateIndex: true,
+        useFindAndModify: false,
         useNewUrlParser: true,
       },
     ),
     NestKitLoggingModule.forRoot({
-      isProduction: environment.production,
       applicationName: environment.applicationName,
+      isProduction: environment.production,
     }),
     RabbitMqModule.forRoot(environment.rabbitmq),
     StatusModule.forRoot({
@@ -34,12 +33,10 @@ import { TransactionsModule } from './transactions/transactions.module';
     }),
     IntegrationModule,
     TransactionsModule,
-    TransactionsEsSearch,
   ],
   providers: [
   ],
 })
-export class ApplicationModule implements NestModule {
-  public configure() {
-  }
+export class AppModule implements NestModule {
+  public configure(): MiddlewareConsumer | void {}
 }

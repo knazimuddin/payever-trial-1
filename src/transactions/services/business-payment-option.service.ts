@@ -1,63 +1,66 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { BusinessPaymentOptionInterface } from '../interfaces';
+import { BusinessPaymentOptionModel } from '../models';
 
 @Injectable()
 export class BusinessPaymentOptionService {
 
-  constructor(@InjectModel('BusinessPaymentOption') private readonly model: Model<any>) {
+  constructor(
+    @InjectModel('BusinessPaymentOption') private readonly model: Model<BusinessPaymentOptionModel>,
+    private readonly logger: Logger,
+  ) {}
+
+  public async createOrUpdate(
+    businessPaymentOptionDto: BusinessPaymentOptionInterface,
+  ): Promise<BusinessPaymentOptionModel> {
+    const dto: BusinessPaymentOptionInterface = {
+      ...businessPaymentOptionDto,
+    };
+
+    await this.model.updateOne(
+      {
+        id: businessPaymentOptionDto.id,
+      },
+      {
+        $set: this.wrap(dto),
+      },
+      {
+        new: true,
+        upsert: true,
+      },
+    );
+
+    return this.findOneById(businessPaymentOptionDto.id);
   }
 
-  public async count() {
-    return this.model.count({}).exec();
-  }
-
-  public async createOrUpdate(bpo: any) {
-    if (bpo.uuid) {
-      bpo = this.wrap(bpo);
-      const existing = await this.model.findOne({uuid: bpo.uuid});
-      if (existing) {
-        return this.model.findOneAndUpdate({uuid: bpo.uuid}, bpo);
-      } else {
-        return this.create(bpo);
-      }
-    }
-  }
-
-  public async findOneById(id: number) {
-    return this.findOneByParams({id});
-  }
-
-  public async findOneByParams(params) {
-    const bpo = await this.model.findOne(params);
+  public async findOneById(id: number): Promise<BusinessPaymentOptionModel> {
+    const bpo: BusinessPaymentOptionModel = await this.model.findOne({id});
 
     return bpo
-      ? this.unwrap(bpo.toObject({virtuals: true}))
+      ? this.unwrap(bpo.toObject({ virtuals: true }))
       : null
     ;
   }
 
-  public async removeById(id: string) {
-    return this.model.findOneAndRemove({id});
-  }
-
-  public unwrap(bpo) {
+  private unwrap(bpo: BusinessPaymentOptionModel): BusinessPaymentOptionModel {
     if (bpo.options) {
       try {
         bpo.options = JSON.parse(bpo.options);
       } catch (e) {
-        // nothing we should do
+        this.logger.warn({
+          bpo: bpo,
+          context: 'BusinessPaymentOptionService',
+          message: 'Error during BPO options unwrap',
+        });
       }
     }
 
     return bpo;
   }
 
-  private async create(bpo: any) {
-    return this.model.create(bpo);
-  }
-
-  private wrap(bpo) {
+  private wrap(bpo: BusinessPaymentOptionInterface): BusinessPaymentOptionInterface {
     if (Array.isArray(bpo.credentials)) {
       bpo.credentials = {};
     }
@@ -66,7 +69,11 @@ export class BusinessPaymentOptionService {
       try {
         bpo.options = JSON.stringify(bpo.options);
       } catch (e) {
-        // nothing we should do
+        this.logger.warn({
+          bpo: bpo,
+          context: 'BusinessPaymentOptionService',
+          message: 'Error during BPO options wrap',
+        });
       }
     }
 

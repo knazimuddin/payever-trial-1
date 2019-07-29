@@ -1,63 +1,83 @@
 import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
-import { environment } from '../environments';
-
 import { TransactionsEsExportCommand } from './command/transactions-export-to-es.command';
 import { TransactionsExportCommand } from './command/transactions-export.command';
+
 import {
   AdminController,
+  BpoEventsController,
   BusinessController,
-  DevController,
-  MicroEventsController,
+  FlowEventsController,
+  HistoryEventsController,
   MigrateEventsController,
+  ThirdPartyEventsController,
+  TransactionEventsController,
   UserController,
 } from './controllers';
-import { BusinessPaymentOptionSchema, PaymentFlowSchema, TransactionsSchema } from './schemas';
+import { ElasticSearchClient } from './elasticsearch/elastic-search.client';
+import { PaymentMailEventProducer } from './producer';
 import {
+  BusinessPaymentOptionSchema,
+  BusinessPaymentOptionSchemaName,
+  PaymentFlowSchema,
+  PaymentFlowSchemaName,
+  TransactionSchema,
+  TransactionSchemaName,
+} from './schemas';
+import {
+  ActionsRetriever,
   BusinessPaymentOptionService,
   CurrencyExchangeService,
   DtoValidationService,
+  ElasticSearchService,
   MessagingService,
+  MongoSearchService,
   PaymentFlowService,
   PaymentsMicroService,
-  StubService,
-  TransactionsGridService,
+  StatisticsService,
+  TransactionHistoryService,
   TransactionsService,
 } from './services';
-import { StatisticsService } from './services/statistics.service';
 
 @Module({
+  controllers: [
+    AdminController,
+    BpoEventsController,
+    BusinessController,
+    FlowEventsController,
+    HistoryEventsController,
+    MigrateEventsController,
+    TransactionEventsController,
+    UserController,
+    ThirdPartyEventsController,
+  ],
   imports: [
     HttpModule,
-    NotificationsSdkModule.forRoot({
-      rabbitMqOptions: environment.rabbitmq,
-    }),
-    MongooseModule.forFeature([{ name: 'Transaction', schema: TransactionsSchema }]),
-    MongooseModule.forFeature([{ name: 'BusinessPaymentOption', schema: BusinessPaymentOptionSchema }]),
-    MongooseModule.forFeature([{ name: 'PaymentFlow', schema: PaymentFlowSchema }]),
-  ],
-  controllers: [
-    BusinessController,
-    DevController,
-    MicroEventsController,
-    MigrateEventsController,
-    UserController,
-    AdminController,
+    MongooseModule.forFeature([
+      { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
+      { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
+      { name: TransactionSchemaName, schema: TransactionSchema },
+    ]),
+    NotificationsSdkModule,
   ],
   providers: [
+    ActionsRetriever,
     BusinessPaymentOptionService,
-    MessagingService,
-    PaymentFlowService,
-    StubService,
-    TransactionsGridService,
-    TransactionsService,
-    StatisticsService,
-    DtoValidationService,
-    TransactionsExportCommand,
-    TransactionsEsExportCommand,
     CurrencyExchangeService,
+    DtoValidationService,
+    MessagingService,
+    MongoSearchService,
+    ElasticSearchClient,
+    ElasticSearchService,
+    PaymentFlowService,
     PaymentsMicroService,
+    StatisticsService,
+    TransactionHistoryService,
+    TransactionsEsExportCommand,
+    TransactionsExportCommand,
+    TransactionsService,
+    PaymentMailEventProducer,
   ],
 })
 export class TransactionsModule {}

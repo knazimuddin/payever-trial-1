@@ -1,20 +1,19 @@
 import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-
 import { MongooseSchemas } from './config';
 import { IntegrationController } from './controllers';
 import { IntegrationService } from './services';
 
 @Module({
-  imports: [
-    HttpModule,
-    MongooseModule.forFeature(MongooseSchemas),
+  controllers: [
+    IntegrationController,
   ],
   exports: [
     IntegrationService,
   ],
-  controllers: [
-    IntegrationController,
+  imports: [
+    HttpModule,
+    MongooseModule.forFeature(MongooseSchemas),
   ],
   providers: [
     IntegrationService,

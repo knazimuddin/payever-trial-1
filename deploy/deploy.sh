@@ -1,4 +1,7 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-/usr/local/bin/npm run migrations up || exec $?
+set -e
+
+/usr/local/bin/npm run probe-mongo
+/usr/local/bin/npm run migrations up
 /usr/local/bin/npm run start

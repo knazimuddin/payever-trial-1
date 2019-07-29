@@ -1,49 +1,41 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { PaymentFlowInterface } from '../interfaces';
+import { PaymentFlowModel } from '../models';
 
 @Injectable()
 export class PaymentFlowService {
 
   constructor(
-    @InjectModel('PaymentFlow') private readonly model: Model<any>,
+    @InjectModel('PaymentFlow') private readonly model: Model<PaymentFlowModel>,
   ) {}
 
-  public async createOrUpdate(flow: any) {
-    if (flow.id) {
-      flow = this.wrap(flow);
-      const existing = await this.model.findOne({id: flow.id});
-      if (existing) {
-        return this.model.findOneAndUpdate({id: flow.id}, flow);
-      } else {
-        return this.model.create(flow);
-      }
+  public async createOrUpdate(flowDto: PaymentFlowInterface): Promise<PaymentFlowModel> {
+    const dto: PaymentFlowInterface = {
+      ...flowDto,
+    };
+
+    if (await this.model.findOne({ id: flowDto.id })) {
+      delete flowDto.id;
+      await this.model.findOneAndUpdate(
+        {
+          id: flowDto.id,
+        },
+        flowDto,
+      );
+    } else {
+      await this.model.create(dto);
     }
+
+    return this.model.findOne({ id: flowDto.id });
   }
 
-  public async findOne(id: string) {
-    return this.findOneByParams({id});
+  public async findOneById(id: string): Promise<PaymentFlowModel> {
+    return this.model.findOne({id});
   }
 
-  public async findOneByParams(params) {
-    const flow = await this.model.findOne(params);
-
-    return flow ? this.unwrap(flow.toObject({virtuals: true})) : null;
-  }
-
-  public async removeById(id: string) {
-    return this.model.findOneAndRemove({id});
-  }
-
-  private async create(flow: any) {
-    return this.model.create(flow);
-  }
-
-  private wrap(flow) {
-    return flow;
-  }
-
-  private unwrap(flow) {
-    return flow;
+  public async removeById(id: string): Promise<void> {
+    await this.model.findOneAndRemove({id});
   }
 }

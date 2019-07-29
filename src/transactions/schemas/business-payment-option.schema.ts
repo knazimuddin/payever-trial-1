@@ -1,36 +1,24 @@
 import { Schema } from 'mongoose';
-import { v4 as uuid } from 'uuid';
 
-export const BusinessPaymentOptionSchema = new Schema({
-  payment_option_id: Number,
-  _id: { type: String, default: uuid },
-  id: { type: Number, unique: true },
-  uuid: { type: String, unique: true },
-  accept_fee: Boolean,
-  status: String,
-  fixed_fee: Number,
-  variable_fee: Number,
-  credentials: Schema.Types.Mixed,
-  options: String, // json of options array
-  completed: Boolean,
-  shop_redirect_enabled: Boolean,
-});
+export const BusinessPaymentOptionSchemaName: string = 'BusinessPaymentOption';
 
-// {
-  // payment_option_id: 9,
-  // id: 2568,
-  // accept_fee: false,
-  // status: 'enabled',
-  // fixed_fee: 0,
-  // variable_fee: 0,
-  // credentials:
-   // { vendorNumber: '8207777400',
-     // password: 'NetAdam123',
-     // isDownPaymentAllowed: true,
-     // isEmailNotificationAllowed: false,
-     // clickAndCollect: false },
-  // options: [],
-  // completed: true,
-  // shop_redirect_enabled: false,
-  // uuid: '608d848c-af3a-11e7-8ccc-525400000108'
-// }
+export const BusinessPaymentOptionSchema: Schema = new Schema(
+  {
+    id: { type: Number, unique: true },
+    uuid: { type: String, unique: true },
+
+    accept_fee: Boolean,
+    completed: Boolean,
+    credentials: Schema.Types.Mixed,
+    fixed_fee: Number,
+    /** json of array options */
+    options: String,
+    payment_option_id: Number,
+    shop_redirect_enabled: Boolean,
+    status: String,
+    variable_fee: Number,
+  },
+  {
+    id: false,
+  },
+);

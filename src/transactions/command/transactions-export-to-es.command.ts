@@ -1,76 +1,56 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Command } from '@pe/nest-kit';
 import { Model } from 'mongoose';
-import { Command } from '@pe/nest-kit/modules/command';
-import {client} from "../es-temp/transactions-search";
-
-const bulkIndex =  async (index, type, data) => {
-  const bulkBody = [];
-  data.forEach(item => {
-    item = item.toObject();
-    item.mongoId = item._id;
-    delete item._id;
-    bulkBody.push({
-      index: {
-        _index: index,
-        _type: type,
-        _id: item.mongoId,
-      },
-    });
-
-    bulkBody.push(item);
-  });
-
-  if (!bulkBody.length) {
-    return;
-  }
-  await client.bulk({body: bulkBody})
-    .then(response => {
-      let errorCount = 0;
-      response.items.forEach(item => {
-        if (item.index && item.index.error) {
-          console.log(++errorCount, item.index.error);
-        }
-      });
-      console.log(
-        `Successfully indexed ${data.length - errorCount}
-         out of ${data.length} items`,
-      );
-    })
-    .catch(console.log);
-};
+import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
+import { ElasticIndexingTextFieldsEnum, ElasticTransactionEnum } from '../enum';
+import { TransactionModel } from '../models';
 
 @Injectable()
 export class TransactionsEsExportCommand {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
-  ) { }
+    private readonly elasticSearchClient: ElasticSearchClient,
+  ) {}
 
   @Command({ command: 'transactions:export:es', describe: 'Export transactions for widgets' })
-  public async transactionsEsExport() {
+  public async transactionsEsExport(): Promise<void> {
     const count: number = await this.transactionsModel.countDocuments();
     const limit: number = 200;
     let start: number = 0;
 
     while (start < count) {
-      const transactions = await this.getWithLimit(start, limit);
+      const transactions: TransactionModel[] = await this.getWithLimit(start, limit);
       start += limit;
-      console.log(`${transactions.length} items parsed`);
-      await bulkIndex('transactions', 'transaction', transactions);
+      Logger.log(`${transactions.length} items parsed`);
+      await this.elasticSearchClient.bulkIndex(
+        ElasticTransactionEnum.index,
+        ElasticTransactionEnum.type,
+        transactions,
+      );
 
-      console.log(`Exported ${start} of ${count}`);
+      Logger.log(`Exported ${start} of ${count}`);
+    }
+
+    for (const item in ElasticIndexingTextFieldsEnum) {
+      if (ElasticIndexingTextFieldsEnum[item]) {
+        await this.elasticSearchClient.setupFieldMapping(
+          ElasticTransactionEnum.index,
+          ElasticTransactionEnum.type,
+          ElasticIndexingTextFieldsEnum[item],
+        );
+      }
     }
   }
 
   private async getWithLimit(start: number, limit: number): Promise<any[]> {
     return this.transactionsModel.find(
-      {
-      },
+      {},
       null,
       {
-        sort: { _id: 1 },
-        skip: start,
         limit: limit,
+        skip: start,
+        sort: { _id: 1 },
       },
     );
   }

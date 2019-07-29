@@ -1,19 +1,15 @@
-import {
-  Controller,
-  Get, Headers,
-  HttpCode,
-  HttpStatus, NotFoundException,
-  Param,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, NotFoundException, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
+import { ParamModel, QueryDto } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum, User, UserTokenInterface } from '@pe/nest-kit/modules/auth';
-
-import {
-  TransactionsGridService,
-  TransactionsService,
-} from '../services';
+import { TransactionOutputConverter } from '../converter';
+import { ListQueryDto, PagingResultDto } from '../dto';
+import { ActionItemInterface } from '../interfaces';
+import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import { TransactionModel } from '../models';
+import { TransactionSchemaName } from '../schemas';
+import { ElasticSearchService, TransactionsService } from '../services';
+import { UserFilter } from '../tools';
 
 @Controller('user')
 @ApiUseTags('user')
@@ -26,41 +22,40 @@ export class UserController {
 
   constructor(
     private readonly transactionsService: TransactionsService,
-    private readonly transactionsGridService: TransactionsGridService
-  ) {
-  }
+    private readonly searchService: ElasticSearchService,
+  ) {}
 
   @Get('list')
   @HttpCode(HttpStatus.OK)
   public async getList(
     @User() user: UserTokenInterface,
-    @Query('orderBy') orderBy: string = 'created_at',
-    @Query('direction') direction: string = 'asc',
-    @Query('limit') limit: number = 3,
-    @Query('page') page: number = 1,
-    @Query('query') search: string,
-    @Query('filters') filters: any = {},
-  ): Promise<any> {
-    filters.user_uuid = {
-      condition: 'is',
-      value: user.id,
-    };
+    @QueryDto() listDto: ListQueryDto,
+  ): Promise<PagingResultDto> {
+    listDto.filters = UserFilter.apply(user.id, listDto.filters);
 
-    return this.transactionsGridService.getList(filters, orderBy, direction, search, +page, +limit);
+    return this.searchService.getResult(listDto);
   }
 
   @Get('detail/:uuid')
   @HttpCode(HttpStatus.OK)
   public async getDetail(
     @User() user: UserTokenInterface,
-    @Param('uuid') uuid: string,
-  ): Promise<any> {
-    let transaction;
-    let actions = [];
+    @ParamModel(
+      {
+        uuid: ':uuid',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+  ): Promise<TransactionOutputInterface> {
+    const actions: ActionItemInterface[] = [];
+    const found: TransactionUnpackedDetailsInterface =
+      await this.transactionsService.findUnpackedByParams({ uuid: transaction.uuid, user_uuid: user.id });
 
-    transaction = await this.transactionsService.findOneByParams({ uuid, user_uuid: user.id });
+    if (!found) {
+      throw new NotFoundException(`Transaction not found.`);
+    }
 
-    return { ...transaction, actions };
+    return TransactionOutputConverter.convert(found, actions);
   }
 
   @Get('settings')
