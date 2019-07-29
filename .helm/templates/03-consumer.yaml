@@ -59,34 +59,6 @@ spec:
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "-c", "/payever/deploy/consumer.sh" ]
 
-          lifecycle:
-            preStop:
-              exec:
-                command: ["sleep", "15"]
-
-          ports:
-            - containerPort: {{ $values.service.containerPort }}
-              protocol: TCP
-              name: http
-
-          livenessProbe:
-            httpGet:
-              path: /api/status
-              port: {{ $values.service.statusPort }}
-            initialDelaySeconds: 90
-            periodSeconds: 5
-
-          readinessProbe:
-            httpGet:
-              path: /api/status
-              port: {{ $values.service.statusPort }}
-            initialDelaySeconds: 15
-            periodSeconds: 5
-            failureThreshold: 15
-
-          resources:
-{{ toYaml $values.resources | indent 12 }}
-
           envFrom:
             - configMapRef:
                 name: {{ $chartName }}
