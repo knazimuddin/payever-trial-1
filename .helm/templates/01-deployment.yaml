@@ -1,20 +1,24 @@
+{{ $chartName := .Chart.Name }}
+{{ $values := .Values }}
+{{ $appName := $chartName }}
+
 apiVersion: extensions/v1beta1
 kind: Deployment
 
 metadata:
-  name: {{ .Chart.Name }}
-  namespace: {{ .Values.namespace }}
+  name: {{ $appName }}
+  namespace: {{ $values.namespace }}
 
   labels:
-    app: {{ .Chart.Name }}
+    app: {{ $appName }}
     tier: app
     layer: nodejs-backend
 
   annotations:
-    {{ .Chart.Name }}/deploy-timestamp: {{ now }}
+    {{ $appName }}/deploy-timestamp: {{ now }}
 
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ $values.replicaCount }}
 
   strategy:
     type: RollingUpdate
@@ -25,12 +29,12 @@ spec:
 
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}
+      app: {{ $appName }}
 
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}
+        app: {{ $appName }}
         tier: app
         layer: nodejs-backend
 
@@ -51,13 +55,13 @@ spec:
                 - "true"
 
       imagePullSecrets:
-        - name: {{ .Values.image.pullSecretName }}
+        - name: {{ $values.image.pullSecretName }}
 
       containers:
-        - name: {{ .Chart.Name }}
-          image: {{ .Values.image.nodejs }}
-          imagePullPolicy: Always
-          command: [ "/bin/sh", "-c", "/payever/deploy/deploy.sh" ]
+        - name: node
+          image: {{ $values.image.nodejs }}
+          imagePullPolicy: IfNotPresent
+          command: [ "/bin/bash", "-c", "/payever/deploy/deploy.sh" ]
 
           lifecycle:
             preStop:
@@ -65,37 +69,37 @@ spec:
                 command: ["sleep", "15"]
 
           ports:
-            - containerPort: {{ .Values.service.containerPort }}
+            - containerPort: {{ $values.service.containerPort }}
               protocol: TCP
               name: http
 
           livenessProbe:
             httpGet:
               path: /api/status
-              port: {{ .Values.service.statusPort }}
+              port: {{ $values.service.statusPort }}
             initialDelaySeconds: 90
-            periodSeconds: 5
+            periodSeconds: 15
 
           readinessProbe:
             httpGet:
               path: /api/status
-              port: {{ .Values.service.statusPort }}
-            initialDelaySeconds: 15
+              port: {{ $values.service.statusPort }}
+            initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 15
 
           resources:
-{{ toYaml .Values.resources | indent 12 }}
+{{ toYaml $values.resources | indent 12 }}
 
           envFrom:
             - configMapRef:
-                name: {{ .Chart.Name }}
+                name: {{ $chartName }}
 
             - configMapRef:
                 name: micro-url-map
 
             - secretRef:
-                name: {{ .Chart.Name }}
+                name: {{ $chartName }}
 
           env:
             - name: KUBERNETES_DEPLOYED
