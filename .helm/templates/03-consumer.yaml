@@ -59,6 +59,21 @@ spec:
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "-c", "/payever/deploy/consumer.sh" ]
 
+          livenessProbe:
+            httpGet:
+              path: /api/status
+              port: {{ $values.service.statusPort }}
+            initialDelaySeconds: 90
+            periodSeconds: 15
+
+          readinessProbe:
+            httpGet:
+              path: /api/status
+              port: {{ $values.service.statusPort }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 15
+
           envFrom:
             - configMapRef:
                 name: {{ $chartName }}
