@@ -31,7 +31,7 @@
     "@nestjs/swagger": "^3.1.0",
     "@nestjs/websockets": "6.0.5",
     "@pe/dev-kit": "^0.1.4",
-    "@pe/nest-kit": "^4.7.5-temp-status",
+    "@pe/nest-kit": "^4.7.6",
     "@pe/notifications-sdk": "^3.0.1",
     "@types/dotenv": "^6.1.1",
     "@types/elasticsearch": "^5.0.32",
