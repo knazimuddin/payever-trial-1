@@ -3,9 +3,13 @@ import { plainToClass } from 'class-transformer';
 
 import { TransactionDto } from '../dto';
 import { CheckoutTransactionHistoryItemInterface, CheckoutTransactionInterface } from '../interfaces/checkout';
-import { TransactionPackedDetailsInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import {
+  TransactionHistoryEntryInterface,
+  TransactionPackedDetailsInterface,
+  TransactionUnpackedDetailsInterface,
+} from '../interfaces/transaction';
+import { AtomDateConverter } from './atom.date.converter';
 import { CheckoutTransactionHistoryEntryConverter } from './checkout-transaction-history-entry.converter';
-import { DateConverter } from './date.converter';
 import { TransactionCartConverter } from './transaction-cart.converter';
 import { TransactionSantanderApplicationConverter } from './transaction-santander-application.converter';
 
@@ -53,8 +57,8 @@ export class TransactionConverter {
       );
     }
 
-    transaction.created_at = DateConverter.fromAtomFormatToDate(checkoutTransaction.created_at);
-    transaction.updated_at = DateConverter.fromAtomFormatToDate(checkoutTransaction.updated_at);
+    transaction.created_at = AtomDateConverter.fromAtomFormatToDate(checkoutTransaction.created_at);
+    transaction.updated_at = AtomDateConverter.fromAtomFormatToDate(checkoutTransaction.updated_at);
 
     /**
      * We do not update history with current operation.
@@ -69,24 +73,25 @@ export class TransactionConverter {
     transaction: TransactionUnpackedDetailsInterface,
   ): CheckoutTransactionInterface {
     const history: CheckoutTransactionHistoryItemInterface[] = transaction.history.map(
-      item => CheckoutTransactionHistoryEntryConverter.fromTransactionHistoryItem(item),
+      (item: TransactionHistoryEntryInterface) =>
+        CheckoutTransactionHistoryEntryConverter.fromTransactionHistoryItem(item),
     );
 
     return {
       id: transaction.original_id,
-      address: transaction.billing_address,
-      created_at: DateConverter.fromDateToAtomFormat(transaction.created_at),
-      updated_at: DateConverter.fromDateToAtomFormat(transaction.updated_at),
-      reference: transaction.reference || transaction.uuid,
-
       uuid: transaction.uuid,
+
+      address: transaction.billing_address,
+      created_at: AtomDateConverter.fromDateToAtomFormat(transaction.created_at),
+      updated_at: AtomDateConverter.fromDateToAtomFormat(transaction.updated_at),
+
       action_running: transaction.action_running,
       amount: transaction.amount,
       business_option_id: transaction.business_option_id,
       business_uuid: transaction.business_uuid,
       channel: transaction.channel,
-      channel_uuid: transaction.channel_uuid,
       channel_set_uuid: transaction.channel_set_uuid,
+      channel_uuid: transaction.channel_uuid,
       currency: transaction.currency,
       customer_email: transaction.customer_email,
       customer_name: transaction.customer_name,
@@ -101,6 +106,7 @@ export class TransactionConverter {
       payment_fee: transaction.payment_fee,
       payment_flow_id: transaction.payment_flow_id,
       place: transaction.place,
+      reference: transaction.reference || transaction.uuid,
       santander_applications: transaction.santander_applications,
       shipping_address: transaction.shipping_address,
       shipping_category: transaction.shipping_category,
