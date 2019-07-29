@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Brackets, SelectQueryBuilder, WhereExpression } from 'typeorm';
-import { Transaction } from '../entities/transaction.entity';
 import { omit } from 'lodash';
+import { Repository } from 'typeorm';
+import { Transaction } from '../entities';
 
 @Injectable()
 export class MigrationService {
@@ -11,7 +11,7 @@ export class MigrationService {
     @InjectRepository(Transaction) private readonly transactionRepository: Repository<Transaction>,
   ) {}
 
-  async find(): Promise<any> {
+  public async find(): Promise<any> {
     const query = this.transactionRepository
       .createQueryBuilder('payments')
       .select()
@@ -36,5 +36,4 @@ export class MigrationService {
       };
     });
   }
-
 }

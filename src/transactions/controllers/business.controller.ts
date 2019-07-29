@@ -1,53 +1,52 @@
 import {
+  BadRequestException,
   Body,
   Controller,
-  Delete,
   Get,
-  Headers,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
-  Patch,
   Post,
-  UseGuards,
   Query,
-  InternalServerErrorException,
-  BadRequestException,
-  NotFoundException,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
-import { ClientProxy, MessagePattern } from '@nestjs/microservices';
-import { ApiUseTags, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { snakeCase } from 'lodash';
-import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
+import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
+import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-
-import { ActionPayloadDto } from '../dto';
-
-import { TransactionsService, TransactionsGridService, MessagingService } from '../services';
-import { environment } from '../../environments';
+import * as moment from 'moment';
+import { TransactionPaymentDetailsConverter } from '../converter';
+import { PagingResultDto } from '../dto';
+import { ActionPayloadDto } from '../dto/action-payload';
+import { ActionItemInterface } from '../interfaces';
+import {
+  TransactionUnpackedDetailsInterface,
+  TransactionWithAvailableActionsInterface,
+} from '../interfaces/transaction';
+import { TransactionModel } from '../models';
+import { TransactionSchemaName } from '../schemas';
+import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
 
 @Controller('business/:businessId')
 @ApiUseTags('business')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
-@Roles(RolesEnum.merchant)
-@ApiResponse({status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.'})
-@ApiResponse({status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.'})
+@ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
+@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class BusinessController {
-
-  rabbitClient: ClientProxy;
-
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly transactionsGridService: TransactionsGridService,
+    private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
-  ) {
-    this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
-  }
+    private readonly logger: Logger,
+  ) {}
 
   @Get('list')
   @HttpCode(HttpStatus.OK)
-  async getList(
+  @Roles(RolesEnum.merchant)
+  public async getList(
     @Param('businessId') businessId: string,
     @Query('orderBy') orderBy: string = 'created_at',
     @Query('direction') direction: string = 'asc',
@@ -55,163 +54,232 @@ export class BusinessController {
     @Query('page') page: number = 1,
     @Query('query') search: string,
     @Query('filters') filters: any = {},
+  ): Promise<PagingResultDto> {
+    filters.business_uuid = {
+      condition: 'is',
+      value: businessId,
+    };
+
+    return this.transactionsGridService.getList(filters, orderBy, direction, search, +page, +limit);
+  }
+
+  @Get('csv')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant)
+  public async getCsv(
+    @Param('businessId') businessId: string,
+    @Query() query,
+    @Res() res: any,
   ): Promise<any> {
+    const separator = ',';
+    const transactions = await this.transactionsService.findAll(businessId);
+    const columns = JSON.parse(query.columns);
+    let header = 'CHANNEL,ID,TOTAL';
+    columns.forEach(elem => {
+      header = `${header}${separator}${elem.title}`;
+    });
+    let csv =  `${header}`;
+    transactions.forEach(transaction => {
+      csv = `${csv}\n`;
+      csv = `${csv}${transaction.channel}`;
+      csv = `${csv}${separator}${transaction.original_id}`;
+      csv = `${csv}${separator}${transaction.total}`;
+      columns.forEach(column => {
+        csv = `${csv}${separator}${transaction[column.name] || ''}`;
+      });
+    });
+    res.set('Content-Transfer-Encoding', `binary`);
+    res.set('Access-Control-Expose-Headers', `Content-Disposition,X-Suggested-Filename`);
+    res.set('Content-disposition', `attachment;filename=${query.businessName}-${moment().format('DD-MM-YYYY')}.csv`);
+    res.send(csv);
+  }
+
+  @Get('detail/reference/:reference')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  public async getDetailByReference(
+    @ParamModel(
+      {
+        reference: ':reference',
+        business_uuid: ':businessId',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+  ): Promise<TransactionWithAvailableActionsInterface>  {
+    let actions: ActionItemInterface[];
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
+
     try {
-      filters.business_uuid = {
-        condition: 'is',
-        value: businessId,
-      };
-
-      const sort = {};
-      sort[snakeCase(orderBy)] = direction.toLowerCase();
-
-      return Promise.all([
-        this.transactionsGridService.findMany(filters, sort, search, +page, +limit),
-        this.transactionsGridService.count(filters, search),
-        this.transactionsGridService.total(filters, search),
-      ])
-        .then((res) => {
-          return {
-            collection: res[0],
-            pagination_data: {
-              totalCount: res[1],
-              total: res[2],
-              current: page,
-            },
-            filters: {},
-            usage: {},
-          };
-        });
-
-    } catch (error) {
-      throw error;
+      actions = await this.messagingService.getActionsList(unpackedTransaction);
+    } catch (e) {
+      this.logger.error(
+        {
+          message: `Error occured while getting transaction actions`,
+          error: e.message,
+          context: 'BusinessController',
+        },
+      );
+      actions = [];
     }
+
+    return { ...unpackedTransaction, actions };
   }
 
   @Get('detail/:uuid')
   @HttpCode(HttpStatus.OK)
-  async getDetail(
-    @Param('uuid') uuid: string,
-    @Headers() headers: any,
-  ): Promise<any> {
-    let transaction;
-    let actions;
+  @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  public async getDetail(
+    @ParamModel(
+      {
+        uuid: ':uuid',
+        business_uuid: ':businessId',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+  ): Promise<TransactionWithAvailableActionsInterface> {
+    let actions: ActionItemInterface[];
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
 
     try {
-      transaction = await this.transactionsService.findOneByParams({uuid});
+      actions = await this.messagingService.getActionsList(unpackedTransaction);
     } catch (e) {
-      throw new NotFoundException();
-    }
-
-    if (!transaction) {
-      throw new NotFoundException();
-    }
-
-    try {
-      actions = await this.messagingService.getActions(transaction, headers);
-    } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e}`);
+      this.logger.error(
+        {
+          message: `Error occured while getting transaction actions`,
+          error: e.message,
+          context: 'BusinessController',
+        },
+      );
       actions = [];
     }
 
-    return {...transaction, actions};
+    return { ...unpackedTransaction, actions };
   }
 
   @Post(':uuid/action/:action')
   @HttpCode(HttpStatus.OK)
-  async runAction(
-    @Param('uuid') uuid: string,
+  @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  public async runAction(
     @Param('action') action: string,
+    @ParamModel(
+      {
+        uuid: ':uuid',
+        business_uuid: ':businessId',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
-    @Headers() headers: any,
-  ): Promise<any> {
-    let transaction: any;
-    let updatedTransaction: any;
-    let actions: any;
+  ): Promise<TransactionWithAvailableActionsInterface> {
+    let actions: ActionItemInterface[];
+    this.dtoValidation.checkFileUploadDto(actionPayload);
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
 
     try {
-      transaction = await this.transactionsService.findOne(uuid);
+      await this.messagingService.runAction(unpackedTransaction, action, actionPayload);
     } catch (e) {
-      throw new NotFoundException();
+      this.logger.log(
+        {
+          message: `Error occured during running action`,
+          error: e.message,
+          context: 'BusinessController',
+        },
+      );
+
+      throw new BadRequestException(e.message);
     }
 
-    try {
-      updatedTransaction = await this.messagingService.runAction(transaction, action, actionPayload, headers);
-    } catch (e) {
-      console.log('Error occured during running action:\n', e);
-      throw new BadRequestException(e);
-    }
-
-    // Send update to php
+    const updatedTransaction: TransactionUnpackedDetailsInterface =
+      await this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
+    // Send update to checkout-php
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
-      throw new BadRequestException(`Error occured while sending transaction update: ${e}`);
+      throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
     }
 
     try {
-      actions = await this.messagingService.getActions(updatedTransaction, headers);
+      actions = await this.messagingService.getActionsList(unpackedTransaction);
     } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e}`);
+      this.logger.error(
+        {
+          message: `Error occurred while getting transaction actions`,
+          error: e.message,
+          context: 'BusinessController',
+        },
+      );
       actions = [];
     }
 
-    return updatedTransaction;
+    return { ...updatedTransaction, actions };
   }
 
   @Get(':uuid/update-status')
   @HttpCode(HttpStatus.OK)
-  async updateStatus(
-    @Param('uuid') uuid: string,
-    @Headers() headers: any,
-  ): Promise<any> {
-    let transaction: any;
-    let updatedTransaction: any;
-    let actions: any;
+  @Roles(RolesEnum.merchant)
+  public async updateStatus(
+    @ParamModel(
+      {
+        uuid: ':uuid',
+        business_uuid: ':businessId',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+  ): Promise<TransactionWithAvailableActionsInterface> {
+    let actions: ActionItemInterface[];
+    const outputTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
 
     try {
-      transaction = await this.transactionsService.findOne(uuid);
+      await this.messagingService.updateStatus(outputTransaction);
     } catch (e) {
-      throw new NotFoundException();
+      this.logger.error(
+        {
+          message: `Error occurred during status update`,
+          error: e.message,
+          context: 'BusinessController',
+        },
+      );
+      throw new BadRequestException(`Error occured during status update. Please try again later. ${e.message}`);
+    }
+
+    const updated: TransactionUnpackedDetailsInterface =
+      await this.transactionsService.findUnpackedByUuid(transaction.uuid);
+    // Send update to checkout-php
+    try {
+      await this.messagingService.sendTransactionUpdate(updated);
+    } catch (e) {
+      throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
     }
 
     try {
-      await this.messagingService.updateStatus(transaction, headers);
+      actions = await this.messagingService.getActionsList(outputTransaction);
     } catch (e) {
-      console.error(`Error occured during status update: ${e}`);
-      throw new BadRequestException(`Error occured during status update. Please try again later.`);
-    }
-
-    try {
-      updatedTransaction = await this.transactionsService.findOneByParams({uuid});
-    } catch (e) {
-      throw new NotFoundException();
-    }
-
-    // Send update to php
-    try {
-      await this.messagingService.sendTransactionUpdate(updatedTransaction);
-    } catch (e) {
-      throw new BadRequestException(`Error occured while sending transaction update: ${e}`);
-    }
-
-    try {
-      actions = await this.messagingService.getActions(transaction, headers);
-    } catch (e) {
-      console.error(`Error occured while getting transaction actions: ${e}`);
+      this.logger.error(
+        {
+          message: `Error occurred while getting transaction actions`,
+          error: e.message,
+          context: 'BusinessController',
+        },
+      );
       actions = [];
     }
 
-    return {...updatedTransaction, actions};
+    return { ...updated, actions };
   }
 
   @Get('settings')
   @HttpCode(HttpStatus.OK)
-  async getSettings(
-    @Param('businessId') businessId: string,
-  ): Promise<any> {
+  @Roles(RolesEnum.merchant)
+  public async getSettings(): Promise<any> {
     return {
-      columns_to_show : [
+      columns_to_show: [
         'created_at',
         'customer_email',
         'customer_name',
@@ -228,5 +296,4 @@ export class BusinessController {
       order_by: '',
     };
   }
-
 }

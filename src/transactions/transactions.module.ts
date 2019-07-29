@@ -1,39 +1,77 @@
-import { Module, HttpModule } from '@nestjs/common';
+import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { NotificationsSdkModule } from '@pe/notifications-sdk';
+import { TransactionsEsExportCommand } from './command/transactions-export-to-es.command';
+import { TransactionsExportCommand } from './command/transactions-export.command';
 
-import { BusinessController, DevController, MicroEventsController, MigrateEventsController } from './controllers';
+import {
+  AdminController,
+  BpoEventsController,
+  BusinessController,
+  FlowEventsController,
+  HistoryEventsController,
+  MigrateEventsController,
+  ThirdPartyEventsController,
+  TransactionEventsController,
+  UserController,
+} from './controllers';
+import {
+  BusinessPaymentOptionSchema,
+  BusinessPaymentOptionSchemaName,
+  PaymentFlowSchema,
+  PaymentFlowSchemaName,
+  TransactionSchema,
+  TransactionSchemaName,
+} from './schemas';
 import {
   BusinessPaymentOptionService,
+  CurrencyExchangeService,
+  DtoValidationService,
   MessagingService,
   PaymentFlowService,
+  PaymentsMicroService,
+  StatisticsService,
   StubService,
+  TransactionHistoryService,
   TransactionsGridService,
   TransactionsService,
 } from './services';
-import { TransactionsSchema, PaymentFlowSchema, BusinessPaymentOptionSchema } from './schemas';
-import { StatisticsService } from './services/statistics.service';
 
 @Module({
   imports: [
     HttpModule,
-    MongooseModule.forFeature([{ name: 'TransactionsSchema', schema: TransactionsSchema }]),
-    MongooseModule.forFeature([{ name: 'BusinessPaymentOptionSchema', schema: BusinessPaymentOptionSchema }]),
-    MongooseModule.forFeature([{ name: 'PaymentFlowSchema', schema: PaymentFlowSchema }]),
+    MongooseModule.forFeature([
+      { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
+      { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
+      { name: TransactionSchemaName, schema: TransactionSchema },
+    ]),
+    NotificationsSdkModule,
   ],
   controllers: [
+    AdminController,
+    BpoEventsController,
     BusinessController,
-    DevController,
-    MicroEventsController,
+    FlowEventsController,
+    HistoryEventsController,
     MigrateEventsController,
+    TransactionEventsController,
+    UserController,
+    ThirdPartyEventsController,
   ],
   providers: [
     BusinessPaymentOptionService,
+    CurrencyExchangeService,
+    DtoValidationService,
     MessagingService,
     PaymentFlowService,
+    PaymentsMicroService,
+    StatisticsService,
     StubService,
+    TransactionHistoryService,
+    TransactionsEsExportCommand,
+    TransactionsExportCommand,
     TransactionsGridService,
     TransactionsService,
-    StatisticsService,
   ],
 })
 export class TransactionsModule {}

@@ -1,160 +1,281 @@
-import { Injectable, HttpService } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { Observable, of } from 'rxjs';
-import { map, tap, catchError, take, timeout } from 'rxjs/operators';
-
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectRabbitMqClient, MessageInterface, RabbitMqClient } from '@pe/nest-kit';
 import { MessageBusService } from '@pe/nest-kit/modules/message';
-import { RabbitmqClient } from '@pe/nest-kit/modules/rabbitmq';
-
-import { TransactionsService } from './transactions.service';
+import { of } from 'rxjs';
+import { catchError, map, take, timeout } from 'rxjs/operators';
+import { environment } from '../../environments';
+import { TransactionConverter } from '../converter';
+import { NextActionDto } from '../dto/next-action.dto';
+import { ActionItemInterface } from '../interfaces';
+import { ActionPayloadInterface, FieldsInterface, UnwrappedFieldsInterface } from '../interfaces/action-payload';
+import {
+  CheckoutRpcPayloadInterface,
+  CheckoutTransactionInterface,
+  CheckoutTransactionRpcActionInterface,
+} from '../interfaces/checkout';
+import { TransactionBasicInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import { BusinessPaymentOptionModel, PaymentFlowModel } from '../models';
 import { BusinessPaymentOptionService } from './business-payment-option.service';
 import { PaymentFlowService } from './payment-flow.service';
-
-import { environment } from '../../environments';
+import { PaymentsMicroService } from './payments-micro.service';
+import { TransactionsService } from './transactions.service';
 
 @Injectable()
 export class MessagingService {
 
-  private rabbitClient: ClientProxy;
+  private messageBusService: MessageBusService = new MessageBusService(
+    {
+      rsa: environment.rsa,
+    },
+    this.logger,
+  );
 
-  private messageBusService: MessageBusService = new MessageBusService({
-    rsa: environment.rsa,
-  });
-
-  private readonly rpcTimeout: number = 5000;
+  private readonly rpcTimeout: number = 30000;
 
   constructor(
-    private readonly httpService: HttpService,
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly flowService: PaymentFlowService,
-  ) {
-    this.rabbitClient = new RabbitmqClient(environment.rabbitmq);
-  }
+    private readonly logger: Logger,
+    private readonly paymentMicroService: PaymentsMicroService,
+    @InjectRabbitMqClient() private readonly rabbitClient: RabbitMqClient,
+  ) {}
 
-  getBusinessPaymentOption(transaction: any) {
+  public getBusinessPaymentOption(transaction: TransactionBasicInterface): Promise<BusinessPaymentOptionModel> {
     return this.bpoService.findOneById(transaction.business_option_id);
   }
 
-  // Uncomment when payment flow will be retrieved from local projection
-  getPaymentFlow(flowId: string) {
-    return this.flowService.findOne(flowId);
+  public getPaymentFlow(flowId: string): Promise<PaymentFlowModel> {
+    return this.flowService.findOneById(flowId);
   }
 
-  async getActions(transaction, headers) {
-    return new Promise(async (resolve, reject) => {
-      let payload: any;
-      try {
+  public async getActionsList(
+    transaction: TransactionUnpackedDetailsInterface,
+  ): Promise<ActionItemInterface[]> {
+    let payload: CheckoutRpcPayloadInterface;
+    try {
+      const data: CheckoutTransactionRpcActionInterface = await this.createPayloadData(transaction);
+      if (data) {
         payload = {
           action: 'action.list',
-          data: await this.createPayloadData(transaction, headers),
+          data,
         };
-      } catch (error) {
-        console.error('Could not prepare payload for actions call:', error);
-        resolve([]);
       }
+    } catch (e) {
+      this.logger.error(
+        {
+          message: `Could not prepare payload for actions call`,
+          transaction: transaction,
+          error: e.message,
+          context: 'MessagingService',
+        },
+      );
 
-      const message = this.messageBusService.createPaymentMicroMessage(transaction.type, 'action', payload, environment.stub);
+      return [];
+    }
 
-      this.rabbitClient.send(
-        { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
-        message,
-      ).pipe(
-        take(1),
-        timeout(this.rpcTimeout),
-        map((msg) => this.messageBusService.unwrapRpcMessage(msg)),
-        map((actions) => {
-          return Object.keys(actions).map((key) => ({
-            action: key,
-            enabled: actions[key],
-          }));
+    const actionsResponse: { [key: string]: boolean } = await this.runPaymentRpc(transaction, payload, 'action');
+    if (!actionsResponse) {
+      return [];
+    }
+
+    let actions: ActionItemInterface[] = Object.keys(actionsResponse)
+      .map(
+        (key) => ({
+          action: key,
+          enabled: actionsResponse[key],
         }),
-        catchError((e) => {
-          console.error(`Error while resolving actions by rpc call:`, e);
-          return of([]);
-        }),
-      ).subscribe((actions) => {
-        resolve(actions);
-      });
-    });
+      );
+
+    /**
+     * This hack is only for FE improvement. FE for "Edit action" is not implemented in DK.
+     * Thus we disable it here to prevent inconveniences.
+     */
+    if (transaction.type === 'santander_installment_dk') {
+      actions = actions.filter(x => x.action !== 'edit');
+    }
+
+    return actions;
   }
 
-  async runAction(transaction, action, actionPayload, headers) {
-    let dto;
-
+  public async runAction(
+    transaction: TransactionUnpackedDetailsInterface,
+    action: string,
+    actionPayload: ActionPayloadInterface,
+  ): Promise<void> {
+    let payload: CheckoutRpcPayloadInterface;
     try {
-      dto = await this.createPayloadData(transaction, headers);
+      const dto: CheckoutTransactionRpcActionInterface = await this.createPayloadData(transaction);
+      if (dto) {
+        if (action === 'capture' && actionPayload.fields.capture_funds) {
+          dto.payment.amount = parseFloat(actionPayload.fields.capture_funds.amount);
+        }
+
+        dto.payment_items = transaction.items;
+
+        dto.action = action;
+
+        if (actionPayload.fields) {
+          dto.fields = this.prepareActionFields(transaction, action, actionPayload.fields);
+        }
+
+        if (actionPayload.files) {
+          dto.files = actionPayload.files;
+        }
+
+        payload = {
+          action: 'action.do',
+          data: dto,
+        };
+      }
     } catch (e) {
       throw new Error(`Cannot prepare dto for run action: ${e}`);
     }
 
-    dto.action = action;
-
-    if (actionPayload.fields) {
-      dto.fields = this.prepareActionFields(transaction, action, actionPayload.fields);
-    }
-
-    if (actionPayload.files) {
-      dto.files = actionPayload.files;
-    }
-
-    const payload = {
-      action: 'action.do',
-      data: dto,
-    };
-
     const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
+    this.logger.log({
+      message: 'RPC action result',
+      transaction: transaction,
+      action: action,
+      actionPayload: actionPayload,
+      rpcResult: rpcResult,
+      context: 'MessagingService',
+    });
 
-    const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
-    updatedTransaction.payment_details = rpcResult.payment_details;
-    updatedTransaction.items = rpcResult.payment_items;
-    updatedTransaction.place = rpcResult.workflow_state;
-    delete updatedTransaction.history; // we do not update history here. History events comming separately, there is a chance to overwrite saved history here
-    this.transactionsService.prepareTransactionForInsert(updatedTransaction);
-    await this.transactionsService.updateByUuid(updatedTransaction.uuid, updatedTransaction);
-    return updatedTransaction;
+    await this.transactionsService.applyActionRpcResult(transaction, rpcResult);
+
+    if (rpcResult && rpcResult.next_action) {
+      const updatedTransaction: TransactionUnpackedDetailsInterface =
+        await this.transactionsService.findUnpackedByUuid(transaction.uuid);
+      await this.runNextAction(updatedTransaction, rpcResult.next_action);
+    }
   }
 
-  async updateStatus(transaction, headers) {
-    let dto;
+  public async runNextAction(
+    transaction: TransactionUnpackedDetailsInterface,
+    nextAction: NextActionDto,
+  ): Promise<void> {
+    switch (nextAction.type) {
+      case 'action':
+        // stub for action behaviour
+        break;
+      case 'external_capture':
+        await this.externalCapture(nextAction.payment_method, nextAction.payload);
+        break;
+    }
+  }
 
+  public async updateStatus(transaction: TransactionUnpackedDetailsInterface): Promise<void> {
+    let payload: CheckoutRpcPayloadInterface;
     try {
-      dto = await this.createPayloadData(transaction, headers);
+      const dto: CheckoutTransactionRpcActionInterface = await this.createPayloadData(transaction);
+      if (dto) {
+        payload = {
+          action: 'status',
+          data: dto,
+        };
+      }
     } catch (e) {
       throw new Error(`Cannot prepare dto for update status: ${e}`);
     }
 
-    const payload = {
-      action: 'status',
-      data: dto,
-    };
-
-    const result: any = await this.runPaymentRpc(transaction, payload, 'payment');
-
-    this.transactionsService.prepareTransactionForInsert(transaction);
-    await this.transactionsService.updateByUuid(transaction.uuid, transaction);
-    return transaction;
+    const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'payment');
+    this.logger.log({
+      message: 'RPC status update result',
+      transaction: transaction,
+      rpcResult: rpcResult,
+      context: 'MessagingService',
+    });
+    await this.transactionsService.applyRpcResult(transaction, rpcResult);
   }
 
-  async sendTransactionUpdate(transaction) {
-    this.transformTransactionForPhp(transaction);
-    const payload: any = { payment: transaction };
-    console.log(`SEND 'transactions_app.payment.updated', payload:`, payload );
-    const message = this.messageBusService.createMessage('transactions_app.payment.updated', payload);
-    this.rabbitClient.send({ channel: 'transactions_app.payment.updated', exchange: 'async_events' }, message).subscribe();
+  public async externalCapture(
+    paymentMethod: string,
+    payload: any,
+  ): Promise<any> {
+    return this.rabbitClient.callAsync(
+      {
+        channel: this.paymentMicroService.getChannelByPaymentType(paymentMethod, environment.stub),
+      },
+      this.paymentMicroService.createPaymentMicroMessage(
+        paymentMethod,
+        'external_capture',
+        payload,
+        environment.stub,
+      ),
+    );
   }
 
-  private async runPaymentRpc(transaction, payload, messageIdentifier) {
+  public async sendTransactionUpdate(transaction: TransactionUnpackedDetailsInterface): Promise<void> {
+    const converted: CheckoutTransactionInterface = TransactionConverter.toCheckoutTransaction(transaction);
+    const payload: { payment: CheckoutTransactionInterface } = { payment: converted };
+    this.logger.log({
+      message: 'SENDING "transactions_app.payment.updated" event',
+      payload: payload,
+      context: 'MessagingService',
+    });
+    const message: MessageInterface = this.messageBusService.createMessage(
+      'transactions_app.payment.updated',
+      payload,
+    );
+
+    await this.rabbitClient
+      .sendAsync(
+        { channel: 'transactions_app.payment.updated', exchange: 'async_events' },
+        message,
+      );
+  }
+
+  // public prepareUpdatedTransaction(
+  //   transaction: TransactionModel,
+  //   rpcResult: RpcResultDto,
+  // ): CheckoutTransactionInterface {
+  //   const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
+  //   updatedTransaction.payment_details = this.checkRPCResponsePropertyExists(rpcResult.payment_details)
+  //     ? rpcResult.payment_details
+  //     : transaction.payment_details
+  //   ;
+  //   updatedTransaction.items = rpcResult.payment_items && rpcResult.payment_items.length
+  //     ? rpcResult.payment_items
+  //     : transaction.items
+  //   ;
+  //
+  //   this.logger.log('Updated transaction: ', updatedTransaction);
+  //   delete updatedTransaction.history;
+  //
+  //   return updatedTransaction;
+  // }
+
+  // private checkRPCResponsePropertyExists(prop: any): boolean {
+  //   if (Array.isArray(prop)) {
+  //     return !!prop.length;
+  //   }
+  //   else {
+  //     return !!prop;
+  //   }
+  // }
+
+  private async runPaymentRpc(
+    transaction: TransactionUnpackedDetailsInterface,
+    payload: CheckoutRpcPayloadInterface,
+    messageIdentifier: string,
+  ): Promise<any> {
     return new Promise((resolve, reject) => {
       this.rabbitClient.send(
-        { channel: this.messageBusService.getChannelByPaymentType(transaction.type, environment.stub) },
-        this.messageBusService.createPaymentMicroMessage(transaction.type, messageIdentifier, payload, environment.stub),
+        { channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub) },
+        this.paymentMicroService.createPaymentMicroMessage(
+          transaction.type,
+          messageIdentifier,
+          payload,
+          environment.stub,
+        ),
       ).pipe(
         take(1),
         timeout(this.rpcTimeout),
         map((m) => this.messageBusService.unwrapRpcMessage(m)),
         catchError((e) => {
           reject(e);
+
           return of(null);
         }),
       ).subscribe((reply) => {
@@ -163,79 +284,76 @@ export class MessagingService {
     });
   }
 
-  private async createPayloadData(transaction: any, headers: any) {
-    transaction = Object.assign({}, transaction); // making clone before manipulations
-
-    if (typeof(transaction.payment_details) === 'string') {
-      try {
-        transaction.payment_details = JSON.parse(transaction.payment_details);
-      } catch(e) {
-        transaction.payment_details = {};
-        // just skipping payment_details
-      }
-    }
-
-    let dto: any = {};
-    let businessPaymentOption;
-    let paymentFlow;
-
-    this.fixDates(transaction);
-    this.fixId(transaction);
-    transaction.address = transaction.billing_address;
-    // @TODO this should be done on BE side
-    transaction.reference = transaction.uuid;
-
-    dto = {...dto,
-      payment: transaction,
+  private async createPayloadData(
+    transaction: TransactionUnpackedDetailsInterface,
+  ): Promise<CheckoutTransactionRpcActionInterface> {
+    const payload: CheckoutTransactionInterface = TransactionConverter.toCheckoutTransaction(transaction);
+    const dto: CheckoutTransactionRpcActionInterface = {
+      payment: payload,
       payment_details: transaction.payment_details,
       business: {
-        id: 1 // dummy id - php guys say it doesnot affect anything... but can we trust it?)
+        id: transaction.business_uuid,
       },
     };
 
     try {
-      businessPaymentOption = await this.getBusinessPaymentOption(transaction);
+      const businessPaymentOption: BusinessPaymentOptionModel = await this.getBusinessPaymentOption(transaction);
+      dto.credentials = businessPaymentOption.credentials;
+
+      this.logger.log(
+        {
+          message: `Transaction ${transaction.uuid} dto credentials`,
+          transaction: payload,
+          credentials: dto.credentials,
+          context: 'MessagingService',
+        },
+      );
     } catch (e) {
-      throw new Error(`Cannot resolve business payment option: ${e}`);
+      throw new Error(`Transaction:${transaction.uuid} -> Cannot resolve business payment option: ${e}`);
     }
 
     try {
-      paymentFlow = await this.getPaymentFlow(transaction.payment_flow_id);
+      const paymentFlow: PaymentFlowModel = await this.getPaymentFlow(transaction.payment_flow_id);
+      if (!paymentFlow) {
+        this.logger.error(
+          {
+            message: `Transaction ${transaction.uuid} -> Payment flow cannot be null`,
+            transaction: payload,
+            context: 'MessagingService',
+          },
+        );
+
+        return;
+      }
+
+      if (payload.payment_flow_id) {
+        dto.payment_flow = paymentFlow.toObject();
+        dto.payment_flow.business_payment_option = await this.getBusinessPaymentOption(transaction);
+      }
     } catch (e) {
-      throw new Error(`Cannot resolve payment flow: ${e}`);
-    }
+      this.logger.error(
+        {
+          message: `Transaction ${transaction.uuid} -> Cannot resolve payment flow`,
+          transaction: payload,
+          error: e,
+          context: 'MessagingService',
+        },
+      );
 
-    if (!paymentFlow) {
-      throw new Error(`Payment flow cannot be null.`);
-    }
-
-    dto.credentials = businessPaymentOption.credentials;
-
-    if (transaction.payment_flow_id) {
-      dto.payment_flow = paymentFlow;
-      dto.payment_flow.business_payment_option = businessPaymentOption;
+      return;
     }
 
     return dto;
   }
 
-  private fixDates(transaction) {
-    Object.keys(transaction).forEach((key) => {
-      if (transaction[key] instanceof Date) {
-        // @TODO fix time shift issues
-        transaction[key] = transaction[key].toISOString().split('.')[0] + '+00:00';
-      }
-    });
-  }
-
-  private fixId(transaction) {
-    transaction.id = transaction.original_id;
-  }
-
-  private prepareActionFields(transaction, action: string, fields: any) {
-    // @TODO ask FE to remove wrapper object
+  private prepareActionFields(
+    transaction: TransactionBasicInterface,
+    action: string,
+    fields: FieldsInterface & UnwrappedFieldsInterface,
+  ) {
+    // @TODO ask FE to remove wrapper object!
     if ((action === 'refund' || action === 'return') && fields.payment_return) {
-      fields.amount = fields.payment_return.amount || fields.amount || 0;
+      fields.amount = fields.payment_return.amount || fields.amount || 0.0;
       fields.reason = fields.payment_return.reason || fields.reason || null;
       fields.refunded_amount = transaction.amount_refunded;
       // php BE asked for camel case version of this field too
@@ -244,11 +362,21 @@ export class MessagingService {
     if (action === 'change_amount' && fields.payment_change_amount) {
       fields.amount = fields.payment_change_amount.amount || fields.amount || 0;
     }
+    if (action === 'edit' && fields.payment_update) {
+      fields = {
+        ...fields,
+        reason: fields.payment_update.reason,
+        payment_items: fields.payment_update.updateData
+          ? fields.payment_update.updateData.productLine
+          : []
+        ,
+        delivery_fee: fields.payment_update.updateData
+          ? parseFloat(fields.payment_update.updateData.deliveryFee)
+          : null
+        ,
+      };
+    }
+
     return fields;
   }
-
-  private transformTransactionForPhp(transaction) {
-    transaction.id = transaction.original_id;
-  }
-
 }

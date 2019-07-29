@@ -1,19 +1,30 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { RABBITMQ_SERVER } from '@pe/nest-kit';
+import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
+import * as APM from 'elastic-apm-node';
 
-import { RabbitmqServer } from '@pe/nest-kit/modules/rabbitmq';
-import * as cors from 'cors';
-import { ApplicationModule } from './app.module';
-
+import { AppModule } from './app.module';
 import { environment } from './environments';
 
 async function bootstrap() {
-  const app = await NestFactory.create(ApplicationModule);
+  const app = await NestFactory.create(
+    AppModule,
+    {
+      logger: false,
+    },
+  );
+
+  const logger = app.get(NestKitLogger);
+  app.useLogger(logger);
+
+  APM.isStarted() && logger.log('APM running');
 
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('/api');
-  app.use(cors());
+  app.enableCors({ maxAge: 600 });
+  app.enableShutdownHooks();
 
   const options = new DocumentBuilder()
     .setTitle('Transactions')
@@ -27,11 +38,14 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
 
   app.connectMicroservice({
-    strategy: new RabbitmqServer(environment.rabbitmq),
+    strategy: app.get(RABBITMQ_SERVER),
   });
 
   await app.startAllMicroservicesAsync();
-  await app.listen(environment.port, () => console.log('Transactions app started at port', environment.port));
+  await app.listen(
+    environment.port,
+    () => logger.log(`Transactions app started at port ${environment.port}`, 'NestApplication'),
+  );
 }
 
 bootstrap().then();
