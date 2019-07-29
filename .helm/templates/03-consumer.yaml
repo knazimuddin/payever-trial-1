@@ -66,7 +66,7 @@ spec:
           lifecycle:
             preStop:
               exec:
-                command: ["sleep", "15"]
+                command: ["sleep", "5"]
 
           livenessProbe:
             httpGet:
