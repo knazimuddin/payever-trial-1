@@ -3,7 +3,7 @@ ARG PROD_NODE_IMAGE
 FROM $PROD_NODE_IMAGE
 
 COPY package.json package-lock.json .npmrc /payever/
-RUN cd /payever && npm ci --only=prod
+RUN cd /payever && npm ci --only=prod && npm cache clear
 
 COPY . /payever
 RUN cd /payever && npm run build
