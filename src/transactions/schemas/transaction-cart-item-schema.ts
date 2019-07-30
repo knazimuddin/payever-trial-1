@@ -1,9 +1,10 @@
 import { Schema } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 
-export const TransactionCartItemSchema = new Schema({
+export const TransactionCartItemSchema: Schema = new Schema({
   _id: String,
   uuid: String,
+
   created_at: Date,
   description: String,
   fixed_shipping_price: Number,
@@ -25,6 +26,6 @@ export const TransactionCartItemSchema = new Schema({
   weight: Number,
 });
 
-TransactionCartItemSchema.post('init', function() {
+TransactionCartItemSchema.post('init', function(): void {
   this.uuid = this.uuid || this._id;
 });

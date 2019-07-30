@@ -26,7 +26,7 @@ export class TransactionHistoryService {
         this.logger.log('ADD HISTORY: process return items');
         const refundHistory: TransactionHistoryEntryInterface =
           TransactionHistoryEntryConverter.fromHistoryRefundCompletedMessage(transaction, type, createdAt, data);
-          await this.pushHistoryRecord(transaction, refundHistory);
+        await this.pushHistoryRecord(transaction, refundHistory);
         break;
       default:
         const actionHistory: TransactionHistoryEntryInterface =

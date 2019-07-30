@@ -1,8 +1,8 @@
 import { Schema } from 'mongoose';
 import { v4 as uuid } from 'uuid';
-import { AddressTypeEnum } from '../enum/address-type.enum';
+import { AddressTypeEnum } from '../enum';
 
-export const AddressSchema = new Schema({
+export const AddressSchema: Schema = new Schema({
   _id: { type: String, default: uuid },
   city: String,
   company: String,
@@ -16,7 +16,7 @@ export const AddressSchema = new Schema({
   phone: String,
   salutation: String,
   social_security_number: String,
-  type: { type: String, enum: [AddressTypeEnum.Billing, AddressTypeEnum.Shipping] },
   street: String,
+  type: { type: String, enum: [AddressTypeEnum.Billing, AddressTypeEnum.Shipping] },
   zip_code: String,
 });
