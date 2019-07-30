@@ -3,7 +3,6 @@ import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerBaseConfig, SwaggerDocument, SwaggerModule } from '@nestjs/swagger';
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
-import * as APM from 'elastic-apm-node';
 import * as jwt from 'fastify-jwt';
 import * as qs from 'qs';
 
@@ -24,8 +23,6 @@ async function bootstrap(): Promise<void> {
   app.register(jwt, {secret: environment.jwtOptions.secretOrPrivateKey});
   const logger: NestKitLogger = app.get(NestKitLogger);
   app.useLogger(logger);
-
-  APM.isStarted() && logger.log('APM running');
 
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('/api');
