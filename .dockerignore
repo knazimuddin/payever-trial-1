@@ -2,5 +2,6 @@
 .git
 .idea
 .helm
+dist
 dappfile.yaml
 .gitlab-ci.yml
