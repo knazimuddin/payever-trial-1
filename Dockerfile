@@ -7,6 +7,8 @@ RUN cd /payever && npm ci --only=prod
 
 COPY . /payever
 
+RUN cd /payever && tsc
+
 ARG CI_COMMIT_SHA
 
 RUN chmod 755 -R /payever/deploy
