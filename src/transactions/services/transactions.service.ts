@@ -209,6 +209,12 @@ export class TransactionsService {
       updating.payment_details = JSON.stringify(result.payment_details);
     }
 
+    this.logger.log({
+      text: `Applied RPC result payment properties for transaction ${transaction.uuid}`,
+      rpcResult: result,
+      updateResult: updating,
+    });
+
     await this.transactionModel.updateOne(
       {
         uuid: transaction.uuid,
