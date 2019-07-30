@@ -7,6 +7,7 @@ RUN cd /payever && npm ci --only=prod
 
 COPY . /payever
 
+ARG CI_COMMIT_SHA
 RUN ls /payever
 RUN cd /payever && npm run build
 RUN ls /payever/dist
