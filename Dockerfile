@@ -3,9 +3,9 @@ ARG PROD_NODE_IMAGE
 FROM $PROD_NODE_IMAGE
 
 COPY package.json package-lock.json .npmrc /payever/
+COPY . /payever
 RUN cd /payever && npm ci --only=prod
 
-COPY . /payever
 
 ARG CI_COMMIT_SHA
 RUN ls /payever
