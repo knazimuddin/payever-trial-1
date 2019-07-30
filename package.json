@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "tsc --noEmit",
+    "build": "tsc",
     "cli": "ts-node src/cli.ts",
     "cucumber": "./node_modules/.bin/cucumber-js",
     "cucumber:all": "./node_modules/.bin/cucumber-js features/tests/",
