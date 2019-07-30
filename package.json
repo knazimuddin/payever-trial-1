@@ -36,6 +36,7 @@
     "@types/dotenv": "^6.1.1",
     "@types/elasticsearch": "^5.0.32",
     "@types/mongoose": "^5.3.24",
+    "@types/node": "^11.11.6",
     "@types/uuid": "^3.4.4",
     "class-transformer": "^0.2.3",
     "class-validator": "^0.9.1",
@@ -43,7 +44,6 @@
     "db-migrate": "^0.11.5",
     "db-migrate-mongodb": "^1.5.0",
     "db-migrate-plugin-typescript": "^2.0.0",
-    "elastic-apm-node": "^2.6.0",
     "elasticsearch": "^15.4.1",
     "fastify": "^2.3.0",
     "fastify-jwt": "^0.10.0",
@@ -63,7 +63,9 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.4.0",
     "swagger-ui-express": "^4.0.2",
-    "typescript": "^3.4.1",
+    "ts-node": "^8.3.0",
+    "tsconfig-paths": "^3.8.0",
+    "typescript": "^3.5.3",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
@@ -82,7 +84,6 @@
     "@types/mongodb-memory-server": "^1.8.0",
     "@types/mongoose": "^5.3.26",
     "@types/mysql": "^2.15.5",
-    "@types/node": "^11.11.6",
     "@types/sinon": "^7.0.8",
     "@types/sinon-chai": "^3.2.2",
     "@types/superagent": "^4.1.1",
@@ -102,8 +103,6 @@
     "supertest": "^3.4.2",
     "ts-jest": "^24.0.1",
     "ts-loader": "^4.5.0",
-    "ts-node": "^6.2.0",
-    "tsconfig-paths": "^3.5.0",
     "tslint": "^5.14.0",
     "tslint-sonarts": "^1.9.0"
   }
