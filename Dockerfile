@@ -4,7 +4,7 @@ ARG PROD_NODE_IMAGE
 FROM $PROD_NODE_IMAGE
 
 COPY package.json package-lock.json .npmrc /payever/
-RUN --mount=type=cache,target=/root/.npm cd /payever && npm ci --only=prod && npm cache clear --force
+RUN --mount=type=cache,target=/root/.npm cd /payever && npm ci --only=prod
 
 COPY . /payever
 RUN cd /payever && npm run build
