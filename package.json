@@ -30,7 +30,6 @@
     "@nestjs/platform-fastify": "6.0.5",
     "@nestjs/swagger": "^3.1.0",
     "@nestjs/websockets": "6.0.5",
-    "@pe/dev-kit": "^0.1.4",
     "@pe/nest-kit": "^4.7.6",
     "@pe/notifications-sdk": "^3.0.1",
     "@types/dotenv": "^6.1.1",
@@ -54,8 +53,6 @@
     "lodash-es": "^4.17.11",
     "moment": "^2.24.0",
     "mongoose": "^5.6.3",
-    "mysql": "^2.16.0",
-    "nodemon": "^1.18.10",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
     "php-serialize": "^2.1.0",
@@ -63,12 +60,12 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.4.0",
     "swagger-ui-express": "^4.0.2",
-    "ts-node": "^8.3.0",
-    "tsconfig-paths": "^3.8.0",
     "typescript": "^3.5.3",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "nodemon": "^1.18.10",
+    "@pe/dev-kit": "^0.1.4",
     "@nestjs/testing": "6.0.5",
     "@pe/cucumber-sdk": "^0.1.25",
     "@types/chai": "^4.1.7",
@@ -82,14 +79,12 @@
     "@types/lodash-es": "^4.17.3",
     "@types/mocha": "^5.2.6",
     "@types/mongodb-memory-server": "^1.8.0",
-    "@types/mongoose": "^5.3.26",
     "@types/mysql": "^2.15.5",
     "@types/sinon": "^7.0.8",
     "@types/sinon-chai": "^3.2.2",
     "@types/superagent": "^4.1.1",
     "@types/supertest": "^2.0.7",
     "@types/swagger-ui-express": "^3.0.0",
-    "@types/uuid": "^3.4.4",
     "axios-mock-adapter": "^1.16.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
@@ -104,6 +99,7 @@
     "ts-jest": "^24.0.1",
     "ts-loader": "^4.5.0",
     "tslint": "^5.14.0",
-    "tslint-sonarts": "^1.9.0"
+    "tslint-sonarts": "^1.9.0",
+    "ts-node": "^8.3.0"
   }
 }
