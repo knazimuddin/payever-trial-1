@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -e
 
-pe-probe-mongo
-db-migrate up
+/usr/local/bin/npm run probe-mongo
+/usr/local/bin/npm run migrations up
