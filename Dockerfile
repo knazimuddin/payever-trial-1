@@ -6,10 +6,7 @@ COPY package.json package-lock.json .npmrc /payever/
 RUN cd /payever && npm ci --only=prod
 
 COPY . /payever
-
-RUN ls /payever
 RUN cd /payever && npm run build
-RUN ls /payever/dist
 
 ARG CI_COMMIT_SHA
 
