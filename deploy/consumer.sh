@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -e
 
-node dist/consumer.js
+node dist/src/consumer.js
