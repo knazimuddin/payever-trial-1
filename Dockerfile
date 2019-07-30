@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:experimental
 ARG PROD_NODE_IMAGE
 
 FROM $PROD_NODE_IMAGE
