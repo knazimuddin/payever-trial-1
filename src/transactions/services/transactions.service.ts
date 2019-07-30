@@ -204,10 +204,16 @@ export class TransactionsService {
     updating.reference = paymentResult.reference;
     updating.place = result.workflow_state;
 
-    if (paymentResult.payment_details) {
+    if (result.payment_details) {
       TransactionSantanderApplicationConverter.setSantanderApplication(updating, result);
-      updating.payment_details = JSON.stringify(result);
+      updating.payment_details = JSON.stringify(result.payment_details);
     }
+
+    this.logger.log({
+      text: `Applied RPC result payment properties for transaction ${transaction.uuid}`,
+      rpcResult: result,
+      updateResult: updating,
+    });
 
     await this.transactionModel.updateOne(
       {
