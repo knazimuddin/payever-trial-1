@@ -2,6 +2,8 @@
 .git
 .idea
 .helm
+features
+tests
 dappfile.yaml
 .gitlab-ci.yml
 Dockerfile
