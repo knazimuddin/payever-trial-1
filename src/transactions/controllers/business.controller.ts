@@ -73,6 +73,7 @@ export class BusinessController {
   ): Promise<any> {
     const separator = ',';
     const transactions = await this.transactionsService.findAll(businessId);
+    // remove non-ASCII chars (0-127 range)
     const fileBusinessName: string = query.businessName.replace(/[^\x00-\x7F]/g, '');
     const columns = JSON.parse(query.columns);
     let header = 'CHANNEL,ID,TOTAL';
