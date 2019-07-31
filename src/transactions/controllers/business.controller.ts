@@ -73,6 +73,7 @@ export class BusinessController {
   ): Promise<any> {
     const separator = ',';
     const transactions = await this.transactionsService.findAll(businessId);
+    const fileBusinessName: string = query.businessName.replace(/[^\x00-\x7F]/g, '');
     const columns = JSON.parse(query.columns);
     let header = 'CHANNEL,ID,TOTAL';
     columns.forEach(elem => {
@@ -90,7 +91,7 @@ export class BusinessController {
     });
     res.set('Content-Transfer-Encoding', `binary`);
     res.set('Access-Control-Expose-Headers', `Content-Disposition,X-Suggested-Filename`);
-    res.set('Content-disposition', `attachment;filename=${query.businessName}-${moment().format('DD-MM-YYYY')}.csv`);
+    res.set('Content-disposition', `attachment;filename=${fileBusinessName}-${moment().format('DD-MM-YYYY')}.csv`);
     res.send(csv);
   }
 
