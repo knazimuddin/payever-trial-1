@@ -3,6 +3,8 @@ import { MessageBusService, MessageInterface } from '@pe/nest-kit/modules/messag
 
 import { environment } from '../../environments';
 
+const ORIGINAL_TIMEOUT: number = 15;
+
 @Injectable()
 export class PaymentsMicroService {
   private readonly stubMessageName: string = 'payment_option.stub_proxy.sandbox';
@@ -22,24 +24,24 @@ export class PaymentsMicroService {
     messageData: any,
     stub: boolean = false,
   ): MessageInterface {
-    const messageName = `payment_option.${paymentType}.${messageIdentifier}`;
-    const message = this.messageBusService.createMessage(messageName, messageData);
+    const messageName: string = `payment_option.${paymentType}.${messageIdentifier}`;
+    const message: MessageInterface = this.messageBusService.createMessage(messageName, messageData);
 
     if (stub && this.getMicroName(paymentType)) {
       message.name = this.stubMessageName;
       message.payload.microservice_data = {
-        microservice_name: this.getMicroName(paymentType),
-        payment_method: paymentType,
-        message_name: messageName,
         message_identifier: messageIdentifier,
-        original_timeout: 15, // @TODO what magic is this 15?
+        message_name: messageName,
+        microservice_name: this.getMicroName(paymentType),
+        original_timeout: ORIGINAL_TIMEOUT,
+        payment_method: paymentType,
       };
     }
 
     return message;
   }
 
-  // @TODO add enum for payment type
+  // TODO add enum for payment type
   public getChannelByPaymentType(paymentType: string, stub: boolean = false): string {
     const microName: string = this.getMicroName(paymentType);
 
@@ -51,7 +53,7 @@ export class PaymentsMicroService {
   }
 
   public getMicroName(paymentType: string): string {
-    // @TODO - enums?
+    // TODO - enums?
     switch (paymentType) {
       case 'santander_installment':
       case 'santander_ccp_installment':
@@ -83,6 +85,8 @@ export class PaymentsMicroService {
       case 'payex_creditcard':
       case 'payex_faktura':
         return 'payment_payex';
+      case 'cash':
+        return 'payment_wiretransfer';
       default:
         return null;
     }

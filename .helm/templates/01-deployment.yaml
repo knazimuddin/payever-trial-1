@@ -16,6 +16,7 @@ metadata:
 
   annotations:
     {{ $appName }}/deploy-timestamp: {{ now }}
+    "werf.io/track": "true"
 
 spec:
   replicas: {{ $values.replicaCount }}

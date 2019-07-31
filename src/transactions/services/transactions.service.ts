@@ -10,7 +10,8 @@ import {
   TransactionSantanderApplicationConverter,
 } from '../converter';
 import { RpcResultDto } from '../dto';
-import { client } from '../es-temp/transactions-search';
+import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
+import { ElasticTransactionEnum } from '../enum';
 import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
 import {
   TransactionBasicInterface,
@@ -26,6 +27,7 @@ export class TransactionsService {
   constructor(
     @InjectModel('Transaction') private readonly transactionModel: Model<TransactionModel>,
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
+    private readonly elasticSearchClient: ElasticSearchClient,
     private readonly logger: Logger,
   ) {}
 
@@ -40,13 +42,17 @@ export class TransactionsService {
 
     try {
       const created: TransactionModel = await this.transactionModel.create(transactionDto);
-      await this.bulkIndex('transactions', 'transaction', created.toObject());
+      await this.elasticSearchClient.singleIndex(
+        ElasticTransactionEnum.index,
+        ElasticTransactionEnum.type,
+        created.toObject(),
+      );
 
       await this.notificationsEmitter.sendNotification(
         {
-          kind: 'business',
-          entity: transactionDto.business_uuid,
           app: 'transactions',
+          entity: transactionDto.business_uuid,
+          kind: 'business',
         },
         `notification.transactions.title.new_transaction`,
         {
@@ -62,37 +68,6 @@ export class TransactionsService {
         throw err;
       }
     }
-  }
-
-  public async bulkIndex(index, type, item, operation = 'index') {
-    const bulkBody = [];
-    item.mongoId = item._id;
-    delete item._id;
-    bulkBody.push({
-      [operation]: {
-        _index: index,
-        _type: type,
-        _id: item.mongoId,
-      },
-    });
-
-    if (operation === 'update') {
-      bulkBody.push({doc: item});
-    }
-    else {
-      bulkBody.push(item);
-    }
-
-    await client.bulk({ body: bulkBody })
-      .then(response => {
-        let errorCount = 0;
-        for (const responseItem of response.items) {
-          if (responseItem.index && responseItem.index.error) {
-            console.log(++errorCount, responseItem.index.error);
-          }
-        }
-      })
-      .catch(console.log);
   }
 
   public async updateByUuid(
@@ -112,7 +87,12 @@ export class TransactionsService {
       },
     );
 
-    await this.bulkIndex('transactions', 'transaction', updated.toObject(), 'update');
+    await this.elasticSearchClient.singleIndex(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      updated.toObject(),
+      'update',
+    );
 
     return updated;
   }
@@ -136,7 +116,12 @@ export class TransactionsService {
       },
     );
 
-    await this.bulkIndex('transactions', 'transaction', updated.toObject(), 'update');
+    await this.elasticSearchClient.singleIndex(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      updated.toObject(),
+      'update',
+    );
 
     return updated;
   }
@@ -145,7 +130,7 @@ export class TransactionsService {
     return this.findModelByParams({ uuid: transactionUuid });
   }
 
-  public async findModelByParams(params): Promise<TransactionModel> {
+  public async findModelByParams(params: any): Promise<TransactionModel> {
     return this.transactionModel.findOne(params);
   }
 
@@ -153,7 +138,7 @@ export class TransactionsService {
     return this.findUnpackedByParams({ uuid: transactionUuid });
   }
 
-  public async findUnpackedByParams(params): Promise<TransactionUnpackedDetailsInterface> {
+  public async findUnpackedByParams(params: any): Promise<TransactionUnpackedDetailsInterface> {
     const transaction: TransactionModel = await this.transactionModel.findOne(params);
 
     if (!transaction) {
@@ -163,7 +148,7 @@ export class TransactionsService {
     return TransactionPaymentDetailsConverter.convert(transaction.toObject({ virtuals: true }));
   }
 
-  public async findAll(businessId) {
+  public async findAll(businessId: string): Promise<TransactionModel[]> {
     return this.transactionModel.find({business_uuid: businessId});
   }
 
