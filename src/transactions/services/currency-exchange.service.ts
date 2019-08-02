@@ -1,20 +1,25 @@
-import { HttpService, Injectable } from '@nestjs/common';
-import { environment } from '../../environments';
+import { Injectable } from '@nestjs/common';
 import { CurrencyInterface } from '../interfaces';
+import { CurrencyModel, CurrencyService } from '@pe/common-sdk';
 
 @Injectable()
 export class CurrencyExchangeService {
   private currencies: CurrencyInterface[];
 
   constructor(
-    private readonly http: HttpService,
+    private readonly currencyService: CurrencyService,
   ) {}
 
   public async getCurrencyExchanges(): Promise<CurrencyInterface[]> {
     if (!this.currencies) {
-      const request: any = this.http.get<CurrencyInterface[]>(`${environment.connectMicroUrlBase}/api/currency`);
-      const response: { data: CurrencyInterface[] } = await request.toPromise();
-      this.currencies = response.data;
+      const dataList: CurrencyModel[] = await this.currencyService.findAll();
+      this.currencies = [];
+      for (const currency of dataList) {
+        this.currencies.push({
+          code: currency.id,
+          rate: currency.rate,
+        });
+      }
     }
 
     return this.currencies;

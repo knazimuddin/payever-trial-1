@@ -38,6 +38,7 @@ export class MongoSearchService {
           filters: {},
           pagination_data: {
             amount: res[2],
+            amount_currency: listDto.currency,
             page: listDto.page,
             total: res[1],
           },
@@ -103,7 +104,7 @@ export class MongoSearchService {
       const totalPerCurrency: number = res.reduce(
         (acc: number, currentVal: { _id: string, total: number }) => {
           const filteredRate: CurrencyInterface = rates.find(
-            (x: { code: string }) => x.code === currentVal._id,
+            (x: { code: string, rate: number }) => x.code === currentVal._id && x.rate,
           );
           const addition: number = filteredRate
             ? currentVal.total / filteredRate.rate
@@ -116,7 +117,9 @@ export class MongoSearchService {
       );
       const rate: CurrencyInterface = rates.find((x: { code: string }) => x.code === currency);
 
-      return totalPerCurrency * rate.rate;
+      return rate.rate
+        ? totalPerCurrency * rate.rate
+        : totalPerCurrency;
     }
 
     return res;

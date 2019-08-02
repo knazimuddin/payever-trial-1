@@ -10,6 +10,7 @@ import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import { ElasticSearchService, TransactionsService } from '../services';
 import { UserFilter } from '../tools';
+import { environment } from '../../environments';
 
 @Controller('user')
 @ApiUseTags('user')
@@ -19,11 +20,14 @@ import { UserFilter } from '../tools';
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class UserController {
+  private defaultCurrency: string;
 
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly searchService: ElasticSearchService,
-  ) {}
+  ) {
+    this.defaultCurrency = environment.defaultCurrency;
+  }
 
   @Get('list')
   @HttpCode(HttpStatus.OK)
@@ -32,6 +36,7 @@ export class UserController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = UserFilter.apply(user.id, listDto.filters);
+    listDto.currency = listDto.currency || this.defaultCurrency;
 
     return this.searchService.getResult(listDto);
   }

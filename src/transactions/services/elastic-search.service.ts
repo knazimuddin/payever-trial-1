@@ -37,6 +37,7 @@ export class ElasticSearchService {
           filters: {},
           pagination_data: {
             amount: res[1],
+            amount_currency: listDto.currency,
             page: listDto.page,
             total: res[0].total,
           },
@@ -146,7 +147,7 @@ export class ElasticSearchService {
     const totalPerCurrency: number = amounts.reduce(
       (total: number, currentVal: { key: string, total_amount: { value: number }}) => {
         const filteredRate: CurrencyInterface = rates.find(
-          (x: CurrencyInterface) => x.code.toUpperCase() === currentVal.key.toUpperCase(),
+          (x: CurrencyInterface) => x.code.toUpperCase() === currentVal.key.toUpperCase() && x.rate,
         );
         const addition: number = filteredRate
           ? currentVal.total_amount.value / filteredRate.rate
@@ -157,10 +158,11 @@ export class ElasticSearchService {
       },
       0,
     );
-
     const rate: CurrencyInterface = rates.find((x: CurrencyInterface) => x.code === currency);
 
-    return totalPerCurrency * rate.rate;
+    return rate.rate
+      ? totalPerCurrency * rate.rate
+      : totalPerCurrency;
   }
 
   private async distinctFieldValues(

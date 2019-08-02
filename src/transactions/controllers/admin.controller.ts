@@ -26,6 +26,7 @@ import {
   MessagingService,
   TransactionsService,
 } from '../services';
+import { environment } from '../../environments';
 
 @Controller('admin')
 @ApiUseTags('admin')
@@ -35,6 +36,7 @@ import {
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class AdminController {
+  private defaultCurrency: string;
 
   constructor(
     private readonly dtoValidation: DtoValidationService,
@@ -43,13 +45,16 @@ export class AdminController {
     private readonly messagingService: MessagingService,
     private readonly actionsRetriever: ActionsRetriever,
     private readonly logger: Logger,
-  ) {}
+  ) {
+    this.defaultCurrency = environment.defaultCurrency;
+  }
 
   @Get('list')
   @HttpCode(HttpStatus.OK)
   public async getList(
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
+    listDto.currency = listDto.currency || this.defaultCurrency;
     return this.searchService.getResult(listDto);
   }
 
