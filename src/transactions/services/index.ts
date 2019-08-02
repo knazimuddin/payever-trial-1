@@ -1,4 +1,5 @@
 export * from './actions.retriever';
+export * from './business-currency.service';
 export * from './business-payment-option.service';
 export * from './currency-exchange.service';
 export * from './dto-validation.service';

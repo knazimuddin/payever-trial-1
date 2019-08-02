@@ -1,4 +1,5 @@
 export * from './address.model';
+export * from './business-currency.model';
 export * from './business-payment-option.model';
 export * from './payment-flow.model';
 export * from './transaction.model';

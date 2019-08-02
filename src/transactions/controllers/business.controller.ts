@@ -21,16 +21,18 @@ import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '
 import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
-import { TransactionModel } from '../models';
+import { BusinessCurrencyModel, TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import {
   ActionsRetriever,
+  BusinessCurrencyService,
   DtoValidationService,
   ElasticSearchService,
   MessagingService,
   TransactionsService,
 } from '../services';
 import { BusinessFilter } from '../tools';
+import { environment } from '../../environments';
 
 const BusinessPlaceholder: string = ':businessId';
 const UuidPlaceholder: string = ':uuid';
@@ -42,6 +44,8 @@ const UuidPlaceholder: string = ':uuid';
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class BusinessController {
+  private defaultCurrency: string;
+
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly searchService: ElasticSearchService,
@@ -49,7 +53,10 @@ export class BusinessController {
     private readonly messagingService: MessagingService,
     private readonly actionsRetriever: ActionsRetriever,
     private readonly logger: Logger,
-  ) {}
+    private readonly businessCurrencyService: BusinessCurrencyService,
+  ) {
+    this.defaultCurrency = environment.defaultCurrency;
+  }
 
   @Get('detail/reference/:reference')
   @HttpCode(HttpStatus.OK)
@@ -180,6 +187,9 @@ export class BusinessController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
+    const currency: BusinessCurrencyModel = await this.businessCurrencyService.getBusinessCurrency(businessId);
+    const businessCurrencyCode: string = currency ? currency.currency : this.defaultCurrency;
+    listDto.currency = listDto.currency || businessCurrencyCode;
 
     return this.searchService.getResult(listDto);
   }

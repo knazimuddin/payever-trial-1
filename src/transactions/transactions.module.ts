@@ -7,6 +7,7 @@ import { TransactionsExportCommand } from './command/transactions-export.command
 import {
   AdminController,
   BpoEventsController,
+  BusinessBusMessagesController,
   BusinessController,
   FlowEventsController,
   HistoryEventsController,
@@ -18,6 +19,8 @@ import {
 import { ElasticSearchClient } from './elasticsearch/elastic-search.client';
 import { PaymentMailEventProducer } from './producer';
 import {
+  BusinessCurrencySchema,
+  BusinessCurrencySchemaName,
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,
   PaymentFlowSchema,
@@ -27,6 +30,7 @@ import {
 } from './schemas';
 import {
   ActionsRetriever,
+  BusinessCurrencyService,
   BusinessPaymentOptionService,
   CurrencyExchangeService,
   DtoValidationService,
@@ -39,12 +43,15 @@ import {
   TransactionHistoryService,
   TransactionsService,
 } from './services';
+import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
+import { environment } from '../environments';
 
 @Module({
   controllers: [
     AdminController,
     BpoEventsController,
     BusinessController,
+    BusinessBusMessagesController,
     FlowEventsController,
     HistoryEventsController,
     MigrateEventsController,
@@ -58,12 +65,20 @@ import {
       { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
       { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
       { name: TransactionSchemaName, schema: TransactionSchema },
+      { name: BusinessCurrencySchemaName, schema: BusinessCurrencySchema },
     ]),
     NotificationsSdkModule,
+    CommonSdkModule.forRoot({
+      consumerModels: [
+        CommonModelsNamesEnum.CurrencyModel,
+      ],
+      rsaPath: environment.rsa,
+    })
   ],
   providers: [
     ActionsRetriever,
     BusinessPaymentOptionService,
+    BusinessCurrencyService,
     CurrencyExchangeService,
     DtoValidationService,
     MessagingService,

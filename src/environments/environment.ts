@@ -21,6 +21,7 @@ export const environment: any = {
   },
   applicationName: env.APP_NAME,
   connectMicroUrlBase: env.MICRO_URL_CONNECT,
+  defaultCurrency: env.DEFAULT_CURRENCY,
   elasticSearch: env.ELASTIC_HOST,
   jwtOptions: {
     // this should be set to PEM encoded private key for RSA/ECDSA for production
