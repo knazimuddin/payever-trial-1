@@ -88,7 +88,6 @@ export class MongoSearchService {
         : null
       ;
     } else {
-      const rates: CurrencyInterface[] = await this.currencyExchangeService.getCurrencyExchanges();
       res = await this.transactionsModel
         .aggregate([
           { $match: filters },
@@ -101,24 +100,20 @@ export class MongoSearchService {
         ])
       ;
 
-      const totalPerCurrency: number = res.reduce(
-        (acc: number, currentVal: { _id: string, total: number }) => {
-          const filteredRate: CurrencyInterface = rates.find(
-            (x: { code: string, rate: number }) => x.code === currentVal._id && x.rate,
-          );
-          const addition: number = filteredRate
-            ? currentVal.total / filteredRate.rate
-            : currentVal.total
-          ;
+      let totalPerCurrency: number = 0;
 
-          return acc + addition;
-        },
-        0,
-      );
-      const rate: CurrencyInterface = rates.find((x: { code: string }) => x.code === currency);
+      for (const currentVal of res) {
+        const filteredRate: number = await this.currencyExchangeService.getCurrencyExchangeRate(currentVal._id);
 
-      return rate.rate
-        ? totalPerCurrency * rate.rate
+        totalPerCurrency += filteredRate
+          ? currentVal.total / filteredRate
+          : currentVal.total;
+      }
+
+      const rate: number = await this.currencyExchangeService.getCurrencyExchangeRate(currency);
+
+      return rate
+        ? totalPerCurrency * rate
         : totalPerCurrency;
     }
 
