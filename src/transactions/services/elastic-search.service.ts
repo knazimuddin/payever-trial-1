@@ -3,7 +3,6 @@ import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
 import { FiltersList } from '../elastic-filters/filters.list';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
 import { ElasticTransactionEnum } from '../enum';
-import { CurrencyInterface } from '../interfaces';
 import { TransactionBasicInterface } from '../interfaces/transaction';
 import { CurrencyExchangeService } from './currency-exchange.service';
 
@@ -138,30 +137,22 @@ export class ElasticSearchService {
       },
     };
 
-    const rates: CurrencyInterface[] = await this.currencyExchangeService.getCurrencyExchanges();
     const amounts: Array<{ key: string, total_amount: { value: number }}> =
       await this.elasticSearchClient
         .search(ElasticTransactionEnum.index, body)
         .then((results: any) => results.aggregations.total_amount.buckets)
     ;
-    const totalPerCurrency: number = amounts.reduce(
-      (total: number, currentVal: { key: string, total_amount: { value: number }}) => {
-        const filteredRate: CurrencyInterface = rates.find(
-          (x: CurrencyInterface) => x.code.toUpperCase() === currentVal.key.toUpperCase() && x.rate,
-        );
-        const addition: number = filteredRate
-          ? currentVal.total_amount.value / filteredRate.rate
-          : currentVal.total_amount.value
-        ;
+    let totalPerCurrency: number = 0;
+    for (const transaction of amounts) {
+      const currencyRate: number = await this.currencyExchangeService.getCurrencyExchangeRate(transaction.key);
+      totalPerCurrency += currencyRate
+        ? transaction.total_amount.value / currencyRate
+        : transaction.total_amount.value;
+    }
+    const rate: number = await this.currencyExchangeService.getCurrencyExchangeRate(currency);
 
-        return total + addition;
-      },
-      0,
-    );
-    const rate: CurrencyInterface = rates.find((x: CurrencyInterface) => x.code === currency);
-
-    return rate.rate
-      ? totalPerCurrency * rate.rate
+    return rate
+      ? totalPerCurrency * rate
       : totalPerCurrency;
   }
 
