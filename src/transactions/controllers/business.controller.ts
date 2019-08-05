@@ -189,7 +189,7 @@ export class BusinessController {
     listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
     const currency: BusinessCurrencyModel = await this.businessCurrencyService.getBusinessCurrency(businessId);
     const businessCurrencyCode: string = currency ? currency.currency : this.defaultCurrency;
-    listDto.currency = listDto.currency || businessCurrencyCode;
+    listDto.currency = businessCurrencyCode;
 
     return this.searchService.getResult(listDto);
   }

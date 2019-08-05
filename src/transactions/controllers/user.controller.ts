@@ -36,7 +36,7 @@ export class UserController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = UserFilter.apply(user.id, listDto.filters);
-    listDto.currency = listDto.currency || this.defaultCurrency;
+    listDto.currency = this.defaultCurrency;
 
     return this.searchService.getResult(listDto);
   }
