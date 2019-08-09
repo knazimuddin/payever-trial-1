@@ -1,6 +1,5 @@
 import * as XLSX from 'xlsx';
 import * as PdfMakePrinter from 'pdfmake/src/printer';
-import * as TableProcessor from 'pdfmake/src/TableProcessor';
 import * as path from 'path';
 import { FastifyReply } from 'fastify';
 import { TransactionModel } from '../models';
