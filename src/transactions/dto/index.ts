@@ -2,6 +2,7 @@ export * from './business-currency.dto';
 export * from './remove-business.dto';
 export * from './code-updated.dto';
 export * from './list-query.dto';
+export * from './export-query.dto';
 export * from './next-action.dto';
 export * from './paging.dto';
 export * from './paging-data.dto';
