@@ -6,7 +6,7 @@ import { BusinessCurrencyDto } from '../dto';
 
 export class BusinessCurrencyService {
   constructor(
-    @InjectModel(BusinessCurrencySchemaName) private readonly businessCurrencyModel: Model<BusinessCurrencyModel>
+    @InjectModel(BusinessCurrencySchemaName) private readonly businessCurrencyModel: Model<BusinessCurrencyModel>,
   ) {}
 
   public async save(currencyDto: BusinessCurrencyDto): Promise<BusinessCurrencyModel> {
@@ -14,10 +14,10 @@ export class BusinessCurrencyService {
       { _id: currencyDto._id },
       {
         $set: {
-          currency: currencyDto.currency
-        }
+          currency: currencyDto.currency,
+        },
       },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
   }
 
@@ -29,7 +29,7 @@ export class BusinessCurrencyService {
 
   public async deleteOneById(id: string): Promise<void> {
     this.businessCurrencyModel.deleteOne({
-      _id: id
+      _id: id,
     });
   }
 }

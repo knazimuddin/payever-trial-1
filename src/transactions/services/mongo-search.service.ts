@@ -71,7 +71,7 @@ export class MongoSearchService {
   public async total(filters: any = {}, currency?: string): Promise<number> {
     let res: any;
     if (!currency) {
-      res = await this.transactionsModel
+      res = this.transactionsModel
         .aggregate([
           { $match: filters },
           {
@@ -88,7 +88,7 @@ export class MongoSearchService {
         : null
       ;
     } else {
-      res = await this.transactionsModel
+      res = this.transactionsModel
         .aggregate([
           { $match: filters },
           {

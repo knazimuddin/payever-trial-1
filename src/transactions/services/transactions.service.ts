@@ -195,8 +195,8 @@ export class TransactionsService {
     }
 
     this.logger.log({
-      text: `Applied RPC result payment properties for transaction ${transaction.uuid}`,
       rpcResult: result,
+      text: `Applied RPC result payment properties for transaction ${transaction.uuid}`,
       updateResult: updating,
     });
 

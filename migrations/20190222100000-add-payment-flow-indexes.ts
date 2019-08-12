@@ -1,4 +1,4 @@
-async function up(db) {
+async function up(db: any): Promise<any> {
   db.addIndex('paymentflows', 'id_1', ['id'], true);
   db.addIndex('paymentflows', 'channel_set_uuid_1', ['channel_set_uuid']);
   db.addIndex('paymentflows', 'reference_1', ['reference']);
@@ -7,7 +7,7 @@ async function up(db) {
   return null;
 }
 
-async function down() {
+async function down(): Promise<any> {
   return null;
 }
 

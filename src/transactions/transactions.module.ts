@@ -73,7 +73,7 @@ import { environment } from '../environments';
         CommonModelsNamesEnum.CurrencyModel,
       ],
       rsaPath: environment.rsa,
-    })
+    }),
   ],
   providers: [
     ActionsRetriever,
