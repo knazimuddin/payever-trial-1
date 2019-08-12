@@ -15,8 +15,8 @@
     "test": "mocha -r ts-node/register --recursive ./tests/**/*.spec.ts",
     "test:coverage": "jest --config=jest.json --coverage --coverageDirectory=coverage",
     "test:watch": "jest --watch --config=jest.json",
-    "tslint": "tslint --project tsconfig.json",
-    "tslint:fix": "tslint --project tsconfig.json --fix"
+    "lint": "pe-lint",
+    "lint:fix": "pe-lint --fix"
   },
   "dependencies": {
     "@nestjs/common": "6.0.5",

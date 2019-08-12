@@ -6,6 +6,7 @@ import { TransactionModel } from '../models';
 import * as moment from 'moment';
 
 export type ExportFormat = 'xlsx' | 'xls' | 'csv' | 'ods' | 'pdf';
+
 export class Exporter {
 	public static export(
 		transactions: TransactionModel[],
