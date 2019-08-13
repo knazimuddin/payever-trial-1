@@ -20,7 +20,9 @@
     "test:coverage": "jest --config=jest.json --coverage --coverageDirectory=coverage",
     "test:watch": "jest --watch --config=jest.json",
     "lint": "pe-lint",
-    "lint:fix": "pe-lint --fix"
+    "lint:fix": "pe-lint --fix",
+    "test:integration": "cucumber-js features/tests/",
+    "test:unit": "mocha -r ts-node/register --recursive ./tests/**/*.spec.ts"
   },
   "dependencies": {
     "@nestjs/common": "6.0.5",
