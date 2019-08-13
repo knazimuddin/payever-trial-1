@@ -6,7 +6,7 @@ export const integrationsFixture: any[] = [
     createdAt: CREATED_AT,
     features: {},
     name: 'santander_installment_dk',
-    updatedAt: CREATED_AT,
+    updtedAt: CREATED_AT,
   },
   {
     _id: 'a58d24eb-271d-4c00-9793-73c0f746e6fa',

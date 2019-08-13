@@ -62,7 +62,7 @@ export class Exporter {
 		const cp: number = 100/(columns.length+2);
 		const docDefinition: any = {
 			content: [
-				{text: 'Transactions', fontSize: 14, bold: true, margin: [0, 10, 0, 8]},
+				{ text: 'Transactions', fontSize: 14, bold: true, margin: [0, 10, 0, 8] },
 				{
 					layout: {
 						defaultBorder: false, 
@@ -101,10 +101,10 @@ export class Exporter {
 		};
 		const fonts: any = {
 			Roboto: {
-				bold: path.join(__dirname, './fonts/Roboto-Medium.ttf'),
-				bolditalics: path.join(__dirname, './fonts/Roboto-MediumItalic.ttf'),
-				italics: path.join(__dirname, './fonts/Roboto-Italic.ttf'),
-				normal: path.join(__dirname, './fonts/Roboto-Regular.ttf'),
+				bold: path.join('./assets/fonts/Roboto-Medium.ttf'),
+				bolditalics: path.join('./assets/fonts/Roboto-MediumItalic.ttf'),
+				italics: path.join('./assets/fonts/Roboto-Italic.ttf'),
+				normal: path.join('./assets/fonts/Roboto-Regular.ttf'),
 			},
 		}
 		const printer: PdfMakePrinter = new PdfMakePrinter(fonts);
