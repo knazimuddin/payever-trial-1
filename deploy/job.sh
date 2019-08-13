@@ -2,4 +2,4 @@
 set -e
 
 npm run probe-mongo
-npm run migrations up
+npm run migrations:prod up

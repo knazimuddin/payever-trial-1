@@ -16,7 +16,7 @@ metadata:
 
   annotations:
     {{ $appName }}/deploy-timestamp: {{ now }}
-    "werf.io/track": "true"
+
 spec:
   replicas: {{ $values.replicaCount }}
 
@@ -63,11 +63,6 @@ spec:
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "-c", "/payever/deploy/consumer.sh" ]
 
-          lifecycle:
-            preStop:
-              exec:
-                command: ["sleep", "5"]
-
           livenessProbe:
             httpGet:
               path: /api/status
@@ -84,7 +79,9 @@ spec:
             failureThreshold: 15
 
           resources:
-{{ toYaml $values.resources | indent 12 }}
+            requests:
+              cpu: {{ $values.resources.requests.cpu }}
+              memory: {{ $values.resources.requests.memory }}
 
           envFrom:
             - configMapRef:

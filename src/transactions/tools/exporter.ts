@@ -20,7 +20,7 @@ export class Exporter {
     }
     const header: string[] = [
       ...['CHANNEL','ID','TOTAL'],
-      ...columns.map((c: {title: string, name: string }) => c.title )]
+      ...columns.map((c: {title: string, name: string }) => c.title )];
     const data: string[][] = transactions
       .map((t: TransactionModel) => [
         ...[t.channel, t.original_id, t.total],
@@ -101,12 +101,12 @@ export class Exporter {
     };
     const fonts: any = {
       Roboto: {
-        bold: path.join('./assets/fonts/Roboto-Medium.ttf'),
-        bolditalics: path.join('./assets/fonts/Roboto-MediumItalic.ttf'),
-        italics: path.join('./assets/fonts/Roboto-Italic.ttf'),
-        normal: path.join('./assets/fonts/Roboto-Regular.ttf'),
+        bold: path.resolve('./assets/fonts/Roboto-Medium.ttf'),
+        bolditalics: path.resolve('./assets/fonts/Roboto-MediumItalic.ttf'),
+        italics: path.resolve('./assets/fonts/Roboto-Italic.ttf'),
+        normal: path.resolve('./assets/fonts/Roboto-Regular.ttf'),
       },
-    }
+    };
     const printer: PdfMakePrinter = new PdfMakePrinter(fonts);
     const doc: any = printer.createPdfKitDocument(docDefinition);
     const chunks: any[] = [];
