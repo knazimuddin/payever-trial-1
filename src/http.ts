@@ -15,9 +15,6 @@ async function bootstrap(): Promise<void> {
     new FastifyAdapter({
       querystringParser: (str: string): any => qs.parse(str),
     }),
-    {
-      logger: false,
-    },
   );
 
   app.register(jwt, {secret: environment.jwtOptions.secretOrPrivateKey});

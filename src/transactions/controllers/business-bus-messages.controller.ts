@@ -23,10 +23,11 @@ export class BusinessBusMessagesController {
     name: '(users.event.business.export|users.event.business.(created|updated))',
     origin: 'rabbitmq',
   })
-  public async onBusinessCreate(message: { data: {} }) {
+  public async onBusinessCreate(message: { data: {} }): Promise<void> {
     this.logger.log('received a business export event');
 
-    const businessCurrencyDto: BusinessCurrencyDto = this.messageBusService.unwrapMessage<BusinessCurrencyDto>(message.data);
+    const businessCurrencyDto: BusinessCurrencyDto = this.messageBusService
+      .unwrapMessage<BusinessCurrencyDto>(message.data);
 
     await this.businessCurrencyService.save(businessCurrencyDto);
   }
@@ -35,7 +36,7 @@ export class BusinessBusMessagesController {
     name: 'users.event.business.removed',
     origin: 'rabbitmq',
   })
-  public async onBusinessRemovedEvent(msg: { data: {} }) {
+  public async onBusinessRemovedEvent(msg: { data: {} }): Promise<void> {
     const data: RemoveBusinessDto = this.messageBusService.unwrapMessage<RemoveBusinessDto>(msg.data);
 
     await this.businessCurrencyService.deleteOneById(data._id);

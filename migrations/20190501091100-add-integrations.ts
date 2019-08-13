@@ -1,8 +1,8 @@
 import { integrationsFixture } from '../fixtures/integrations.fixture';
 
-const integrationsCollection = 'integrations';
+const integrationsCollection: string = 'integrations';
 
-async function up(db) {
+async function up(db: any): Promise<any> {
   for (const fixture of integrationsFixture) {
     const existing: Array<{}> = await db._find(integrationsCollection, { _id: fixture._id });
 
@@ -14,7 +14,7 @@ async function up(db) {
   return null;
 }
 
-function down() {
+function down(): any {
   return null;
 }
 

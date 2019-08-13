@@ -16,9 +16,9 @@ import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
-import * as moment from 'moment';
+
 import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
-import { ListQueryDto, PagingResultDto } from '../dto';
+import { ListQueryDto, PagingResultDto, ExportQueryDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { BusinessCurrencyModel, TransactionModel } from '../models';
@@ -31,15 +31,16 @@ import {
   MessagingService,
   TransactionsService,
 } from '../services';
-import { BusinessFilter } from '../tools';
+import { BusinessFilter, Exporter, ExportFormat } from '../tools';
 import { environment } from '../../environments';
+import { FastifyReply } from 'fastify';
 
 const BusinessPlaceholder: string = ':businessId';
 const UuidPlaceholder: string = ':uuid';
 
 @Controller('business/:businessId')
 @ApiUseTags('business')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
@@ -194,37 +195,26 @@ export class BusinessController {
     return this.searchService.getResult(listDto);
   }
 
-  @Get('csv')
+  @Get('export')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
-  public async getCsv(
+  public async export(
     @Param('businessId') businessId: string,
-    @Query() query: any,
-    @Res() res: any,
-  ): Promise<any> {
-    const separator: string = ',';
-    const transactions: TransactionModel[] = await this.transactionsService.findAll(businessId);
-    // remove non-ASCII chars (0-127 range)
-    const fileBusinessName: string = query.businessName.replace(/[^\x00-\x7F]/g, '');
-    const columns: Array<{ title: string, name: string }> = JSON.parse(query.columns);
-    let header: string = 'CHANNEL,ID,TOTAL';
-    for (const column of columns) {
-      header = `${header}${separator}${column.title}`;
-    }
-    let csv: string = `${header}`;
-    for (const transaction of transactions) {
-      csv = `${csv}\n`;
-      csv = `${csv}${transaction.channel}`;
-      csv = `${csv}${separator}${transaction.original_id}`;
-      csv = `${csv}${separator}${transaction.total}`;
-      for (const column of columns) {
-        csv = `${csv}${separator}${transaction[column.name] || ''}`;
-      }
-    }
-    res.set('Content-Transfer-Encoding', `binary`);
-    res.set('Access-Control-Expose-Headers', `Content-Disposition,X-Suggested-Filename`);
-    res.set('Content-disposition', `attachment;filename=${fileBusinessName}-${moment().format('DD-MM-YYYY')}.csv`);
-    res.send(csv);
+    @QueryDto() exportDto: ExportQueryDto,
+    @Res() res: FastifyReply<any>,
+  ): Promise<void> {
+    // override the page and limit (max: 10000)
+    exportDto.limit = 10000;
+    exportDto.page = 1;
+    exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
+    const currency: BusinessCurrencyModel = await this.businessCurrencyService.getBusinessCurrency(businessId);
+    const businessCurrencyCode: string = currency ? currency.currency : this.defaultCurrency;
+    exportDto.currency = businessCurrencyCode;
+    const result: PagingResultDto =  await this.searchService.getResult(exportDto);
+    const format: ExportFormat = exportDto.format;
+    const fileName: string = exportDto.businessName.replace(/[^\x00-\x7F]/g, '');
+    const columns: Array<{ title: string, name: string }> = JSON.parse(exportDto.columns);
+    Exporter.export(result.collection as TransactionModel[] , res, fileName, columns, format);
   }
 
   @Get('settings')

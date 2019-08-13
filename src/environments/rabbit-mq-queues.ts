@@ -72,20 +72,24 @@ export const rabbitMqQueues: RabbitMqQueueConfigInterface[] = [
         source: 'async_events',
       },
       {
-        source: 'async_events',
         routingKey: 'users.event.business.export',
+        source: 'async_events',
+
       },
       {
-        source: 'async_events',
         routingKey: 'users.event.business.updated',
+        source: 'async_events',
+
       },
       {
-        source: 'async_events',
         routingKey: 'users.event.business.created',
+        source: 'async_events',
+
       },
       {
-        source: 'async_events',
         routingKey: 'users.event.business.removed',
+        source: 'async_events',
+
       },
       commonSdkRabbitMqBindings.get(CommonModelsNamesEnum.CurrencyModel),
     ],

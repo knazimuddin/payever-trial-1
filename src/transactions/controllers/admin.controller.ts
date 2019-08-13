@@ -55,6 +55,7 @@ export class AdminController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.currency = this.defaultCurrency;
+
     return this.searchService.getResult(listDto);
   }
 

@@ -9,7 +9,7 @@ export class CurrencyExchangeService {
     private readonly currencyService: CurrencyService,
   ) {}
 
-  public async getCurrencyExchangeRate(currencyCode): Promise<number>  {
+  public async getCurrencyExchangeRate(currencyCode: string): Promise<number>  {
     if (!this.currenciesRates) {
       await this.initializeCurrenciesRatesMap();
     }
@@ -17,7 +17,7 @@ export class CurrencyExchangeService {
     return this.currenciesRates.get(currencyCode.toUpperCase());
   }
 
-  private async initializeCurrenciesRatesMap() {
+  private async initializeCurrenciesRatesMap(): Promise<void> {
     this.currenciesRates = new Map();
     const dataList: CurrencyModel[] = await this.currencyService.findAll();
     for (const currency of dataList) {
