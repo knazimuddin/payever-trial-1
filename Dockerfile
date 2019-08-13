@@ -1,9 +1,14 @@
+ARG BUILD_NODE_IMAGE
 ARG PROD_NODE_IMAGE
+
+FROM $BUILD_NODE_IMAGE AS build
+
+COPY package.json package-lock.json .npmrc /payever/
+RUN cd /payever && npm ci --only=prod
 
 FROM $PROD_NODE_IMAGE
 
-COPY package.json package-lock.json .npmrc /payever/
-RUN cd /payever && npm ci --only=prod && npm cache clear --force
+COPY --from=build /payever /payever
 
 COPY . /payever
 RUN cd /payever && npm run build
