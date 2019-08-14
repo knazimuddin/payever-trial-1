@@ -219,7 +219,7 @@ export class ElasticSearchService {
     if (field === 'channel_set_uuid') {
       elasticFilters.must.push({
         match_phrase: {
-          channel_set_uuid: filter.value,
+          channel_set_uuid: filter.value[0],
         },
       });
 
