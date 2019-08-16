@@ -12,8 +12,7 @@ export class PaymentFlowService {
   ) {}
 
   public async createOrUpdate(flowDto: PaymentFlowInterface): Promise<PaymentFlowModel> {
-    const dto = {
-      // _id: flowDto.id,
+    const dto: PaymentFlowInterface = {
       ...flowDto,
     };
 

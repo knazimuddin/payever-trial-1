@@ -1,25 +1,26 @@
-import { MongoClient } from 'mongodb';
+// tslint:disable-next-line: file-name-casing
+import { MongoClient, Db } from 'mongodb';
 
-async function up(db) {
-  const transactionsConnectionString = db.connectionString;
-  const client = new MongoClient(transactionsConnectionString);
+async function up(db: any): Promise<any> {
+  const transactionsConnectionString: string = db.connectionString;
+  const client: MongoClient = new MongoClient(transactionsConnectionString);
   await client.connect();
 
-  const transactionsDb = await client.db();
+  const transactionsDb: Db =  client.db();
 
-  const now = Date.now();
-  const dupTransactions = await transactionsDb.collection('transactions').aggregate(
+  const now: number = Date.now();
+  const dupTransactions: any =  transactionsDb.collection('transactions').aggregate(
     [
       {
         $group: {
           _id: {
             uuid: '$uuid',
           },
-          uniqueIds: {
-            $addToSet: '$_id',
-          },
           count: {
             $sum: 1.0,
+          },
+          uniqueIds: {
+            $addToSet: '$_id',
           },
         },
       },
@@ -38,11 +39,11 @@ async function up(db) {
     ],
   );
 
-  const deletes = [];
+  const deletes: any[] = [];
 
   while (await dupTransactions.hasNext()) {
-    const doc = await dupTransactions.next();
-    let index = 1;
+    const doc: any = await dupTransactions.next();
+    let index: number = 1;
     while (index < doc.uniqueIds.length) {
       deletes.push(doc.uniqueIds[index]);
       index = index + 1;
@@ -60,12 +61,13 @@ async function up(db) {
   await transactionsDb.collection('transactions').createIndex({ uuid: 1 }, { unique: true });
 
   await client.close();
+  // tslint:disable-next-line: no-console
   console.log(`Deleted ${deletes.length} entries. Completed in ${Date.now() - now}ms`);
 
   return null;
 }
 
-async function down() {
+async function down(): Promise<any> {
   return null;
 }
 

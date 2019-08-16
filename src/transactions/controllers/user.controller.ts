@@ -1,16 +1,16 @@
-import { Controller, Get, HttpCode, HttpStatus, NotFoundException, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, NotFoundException, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
-import { ParamModel } from '@pe/nest-kit';
+import { ParamModel, QueryDto } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum, User, UserTokenInterface } from '@pe/nest-kit/modules/auth';
-import { PagingResultDto } from '../dto';
+import { TransactionOutputConverter } from '../converter';
+import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionItemInterface } from '../interfaces';
-import {
-  TransactionUnpackedDetailsInterface,
-  TransactionWithAvailableActionsInterface,
-} from '../interfaces/transaction';
+import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
-import { TransactionsGridService, TransactionsService } from '../services';
+import { ElasticSearchService, TransactionsService } from '../services';
+import { UserFilter } from '../tools';
+import { environment } from '../../environments';
 
 @Controller('user')
 @ApiUseTags('user')
@@ -20,29 +20,25 @@ import { TransactionsGridService, TransactionsService } from '../services';
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class UserController {
+  private defaultCurrency: string;
 
   constructor(
     private readonly transactionsService: TransactionsService,
-    private readonly transactionsGridService: TransactionsGridService,
-  ) {}
+    private readonly searchService: ElasticSearchService,
+  ) {
+    this.defaultCurrency = environment.defaultCurrency;
+  }
 
   @Get('list')
   @HttpCode(HttpStatus.OK)
   public async getList(
     @User() user: UserTokenInterface,
-    @Query('orderBy') orderBy: string = 'created_at',
-    @Query('direction') direction: string = 'asc',
-    @Query('limit') limit: number = 3,
-    @Query('page') page: number = 1,
-    @Query('query') search: string,
-    @Query('filters') filters: any = {},
+    @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
-    filters.user_uuid = {
-      condition: 'is',
-      value: user.id,
-    };
+    listDto.filters = UserFilter.apply(user.id, listDto.filters);
+    listDto.currency = this.defaultCurrency;
 
-    return this.transactionsGridService.getList(filters, orderBy, direction, search, +page, +limit);
+    return this.searchService.getResult(listDto);
   }
 
   @Get('detail/:uuid')
@@ -55,7 +51,7 @@ export class UserController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface> {
+  ): Promise<TransactionOutputInterface> {
     const actions: ActionItemInterface[] = [];
     const found: TransactionUnpackedDetailsInterface =
       await this.transactionsService.findUnpackedByParams({ uuid: transaction.uuid, user_uuid: user.id });
@@ -64,7 +60,7 @@ export class UserController {
       throw new NotFoundException(`Transaction not found.`);
     }
 
-    return { ...found, actions };
+    return TransactionOutputConverter.convert(found, actions);
   }
 
   @Get('settings')

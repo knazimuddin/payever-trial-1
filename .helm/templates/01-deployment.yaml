@@ -89,7 +89,9 @@ spec:
             failureThreshold: 15
 
           resources:
-{{ toYaml $values.resources | indent 12 }}
+            requests:
+              cpu: {{ $values.resources.requests.cpu }}
+              memory: {{ $values.resources.requests.memory }}
 
           envFrom:
             - configMapRef:

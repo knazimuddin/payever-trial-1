@@ -1,5 +1,6 @@
 export class PagingData {
-  public totalCount: number;
   public total: number;
-  public current: number;
+  public page: number;
+  public amount: number;
+  public amount_currency: string;
 }

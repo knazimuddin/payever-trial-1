@@ -15,85 +15,48 @@ import {
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-import * as moment from 'moment';
-import { TransactionPaymentDetailsConverter } from '../converter';
-import { PagingResultDto } from '../dto';
+import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
+
+import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
+import { ListQueryDto, PagingResultDto, ExportQueryDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { ActionItemInterface } from '../interfaces';
-import {
-  TransactionUnpackedDetailsInterface,
-  TransactionWithAvailableActionsInterface,
-} from '../interfaces/transaction';
-import { TransactionModel } from '../models';
+import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import { BusinessCurrencyModel, TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
-import { DtoValidationService, MessagingService, TransactionsGridService, TransactionsService } from '../services';
+import {
+  ActionsRetriever,
+  BusinessCurrencyService,
+  DtoValidationService,
+  ElasticSearchService,
+  MessagingService,
+  TransactionsService,
+} from '../services';
+import { BusinessFilter, Exporter, ExportFormat } from '../tools';
+import { environment } from '../../environments';
+import { FastifyReply } from 'fastify';
+
+const BusinessPlaceholder: string = ':businessId';
+const UuidPlaceholder: string = ':uuid';
 
 @Controller('business/:businessId')
 @ApiUseTags('business')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class BusinessController {
+  private defaultCurrency: string;
+
   constructor(
     private readonly transactionsService: TransactionsService,
-    private readonly transactionsGridService: TransactionsGridService,
+    private readonly searchService: ElasticSearchService,
     private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
+    private readonly actionsRetriever: ActionsRetriever,
     private readonly logger: Logger,
-  ) {}
-
-  @Get('list')
-  @HttpCode(HttpStatus.OK)
-  @Roles(RolesEnum.merchant)
-  public async getList(
-    @Param('businessId') businessId: string,
-    @Query('orderBy') orderBy: string = 'created_at',
-    @Query('direction') direction: string = 'asc',
-    @Query('limit') limit: number = 3,
-    @Query('page') page: number = 1,
-    @Query('query') search: string,
-    @Query('filters') filters: any = {},
-  ): Promise<PagingResultDto> {
-    filters.business_uuid = {
-      condition: 'is',
-      value: businessId,
-    };
-
-    return this.transactionsGridService.getList(filters, orderBy, direction, search, +page, +limit);
-  }
-
-  @Get('csv')
-  @HttpCode(HttpStatus.OK)
-  @Roles(RolesEnum.merchant)
-  public async getCsv(
-    @Param('businessId') businessId: string,
-    @Query() query,
-    @Res() res: any,
-  ): Promise<any> {
-    const separator = ',';
-    const transactions = await this.transactionsService.findAll(businessId);
-    // remove non-ASCII chars (0-127 range)
-    const fileBusinessName: string = query.businessName.replace(/[^\x00-\x7F]/g, '');
-    const columns = JSON.parse(query.columns);
-    let header = 'CHANNEL,ID,TOTAL';
-    columns.forEach(elem => {
-      header = `${header}${separator}${elem.title}`;
-    });
-    let csv =  `${header}`;
-    transactions.forEach(transaction => {
-      csv = `${csv}\n`;
-      csv = `${csv}${transaction.channel}`;
-      csv = `${csv}${separator}${transaction.original_id}`;
-      csv = `${csv}${separator}${transaction.total}`;
-      columns.forEach(column => {
-        csv = `${csv}${separator}${transaction[column.name] || ''}`;
-      });
-    });
-    res.set('Content-Transfer-Encoding', `binary`);
-    res.set('Access-Control-Expose-Headers', `Content-Disposition,X-Suggested-Filename`);
-    res.set('Content-disposition', `attachment;filename=${fileBusinessName}-${moment().format('DD-MM-YYYY')}.csv`);
-    res.send(csv);
+    private readonly businessCurrencyService: BusinessCurrencyService,
+  ) {
+    this.defaultCurrency = environment.defaultCurrency;
   }
 
   @Get('detail/reference/:reference')
@@ -102,31 +65,13 @@ export class BusinessController {
   public async getDetailByReference(
     @ParamModel(
       {
+        business_uuid: BusinessPlaceholder,
         reference: ':reference',
-        business_uuid: ':businessId',
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface>  {
-    let actions: ActionItemInterface[];
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
-    );
-
-    try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(
-        {
-          message: `Error occured while getting transaction actions`,
-          error: e.message,
-          context: 'BusinessController',
-        },
-      );
-      actions = [];
-    }
-
-    return { ...unpackedTransaction, actions };
+  ): Promise<TransactionOutputInterface>  {
+    return this.getDetails(transaction);
   }
 
   @Get('detail/:uuid')
@@ -135,31 +80,13 @@ export class BusinessController {
   public async getDetail(
     @ParamModel(
       {
-        uuid: ':uuid',
-        business_uuid: ':businessId',
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface> {
-    let actions: ActionItemInterface[];
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
-    );
-
-    try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(
-        {
-          message: `Error occured while getting transaction actions`,
-          error: e.message,
-          context: 'BusinessController',
-        },
-      );
-      actions = [];
-    }
-
-    return { ...unpackedTransaction, actions };
+  ): Promise<TransactionOutputInterface> {
+    return this.getDetails(transaction);
   }
 
   @Post(':uuid/action/:action')
@@ -169,56 +96,44 @@ export class BusinessController {
     @Param('action') action: string,
     @ParamModel(
       {
-        uuid: ':uuid',
-        business_uuid: ':businessId',
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
-  ): Promise<TransactionWithAvailableActionsInterface> {
-    let actions: ActionItemInterface[];
-    this.dtoValidation.checkFileUploadDto(actionPayload);
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
+  ): Promise<TransactionOutputInterface> {
+    const updatedTransaction: TransactionUnpackedDetailsInterface = await this.doAction(
+      transaction,
+      actionPayload,
+      action,
     );
 
-    try {
-      await this.messagingService.runAction(unpackedTransaction, action, actionPayload);
-    } catch (e) {
-      this.logger.log(
-        {
-          message: `Error occured during running action`,
-          error: e.message,
-          context: 'BusinessController',
-        },
-      );
+    return TransactionOutputConverter.convert(
+      updatedTransaction,
+      await this.actionsRetriever.retrieve(updatedTransaction),
+    );
+  }
 
-      throw new BadRequestException(e.message);
-    }
-
-    const updatedTransaction: TransactionUnpackedDetailsInterface =
-      await this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
-    // Send update to checkout-php
-    try {
-      await this.messagingService.sendTransactionUpdate(updatedTransaction);
-    } catch (e) {
-      throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
-    }
-
-    try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(
-        {
-          message: `Error occurred while getting transaction actions`,
-          error: e.message,
-          context: 'BusinessController',
-        },
-      );
-      actions = [];
-    }
-
-    return { ...updatedTransaction, actions };
+  @Post(':uuid/legacy-api-action/:action')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.oauth)
+  public async runLegacyApiAction(
+    @Param('action') action: string,
+    @ParamModel(
+      {
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+    @Body() actionPayload: ActionPayloadDto,
+  ): Promise<TransactionUnpackedDetailsInterface> {
+    return this.doAction(
+      transaction,
+      actionPayload,
+      action,
+    );
   }
 
   @Get(':uuid/update-status')
@@ -227,53 +142,79 @@ export class BusinessController {
   public async updateStatus(
     @ParamModel(
       {
-        uuid: ':uuid',
-        business_uuid: ':businessId',
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionWithAvailableActionsInterface> {
-    let actions: ActionItemInterface[];
-    const outputTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+  ): Promise<TransactionOutputInterface> {
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
 
     try {
-      await this.messagingService.updateStatus(outputTransaction);
+      await this.messagingService.updateStatus(unpackedTransaction);
     } catch (e) {
       this.logger.error(
         {
-          message: `Error occurred during status update`,
-          error: e.message,
           context: 'BusinessController',
+          error: e.message,
+          message: `Error occurred during status update`,
         },
       );
       throw new BadRequestException(`Error occured during status update. Please try again later. ${e.message}`);
     }
 
-    const updated: TransactionUnpackedDetailsInterface =
+    const updatedTransaction: TransactionUnpackedDetailsInterface =
       await this.transactionsService.findUnpackedByUuid(transaction.uuid);
-    // Send update to checkout-php
+    /** Send update to checkout-php */
     try {
-      await this.messagingService.sendTransactionUpdate(updated);
+      await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
       throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
     }
 
-    try {
-      actions = await this.messagingService.getActionsList(outputTransaction);
-    } catch (e) {
-      this.logger.error(
-        {
-          message: `Error occurred while getting transaction actions`,
-          error: e.message,
-          context: 'BusinessController',
-        },
-      );
-      actions = [];
-    }
+    return TransactionOutputConverter.convert(
+      updatedTransaction,
+      await this.actionsRetriever.retrieve(updatedTransaction),
+    );
+  }
 
-    return { ...updated, actions };
+  @Get('list')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant)
+  public async getList(
+    @Param('businessId') businessId: string,
+    @QueryDto() listDto: ListQueryDto,
+  ): Promise<PagingResultDto> {
+    listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
+    const currency: BusinessCurrencyModel = await this.businessCurrencyService.getBusinessCurrency(businessId);
+    const businessCurrencyCode: string = currency ? currency.currency : this.defaultCurrency;
+    listDto.currency = businessCurrencyCode;
+
+    return this.searchService.getResult(listDto);
+  }
+
+  @Get('export')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant)
+  public async export(
+    @Param('businessId') businessId: string,
+    @QueryDto() exportDto: ExportQueryDto,
+    @Res() res: FastifyReply<any>,
+  ): Promise<void> {
+    // override the page and limit (max: 10000)
+    exportDto.limit = 10000;
+    exportDto.page = 1;
+    exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
+    const currency: BusinessCurrencyModel = await this.businessCurrencyService.getBusinessCurrency(businessId);
+    const businessCurrencyCode: string = currency ? currency.currency : this.defaultCurrency;
+    exportDto.currency = businessCurrencyCode;
+    const result: PagingResultDto =  await this.searchService.getResult(exportDto);
+    const format: ExportFormat = exportDto.format;
+    const fileName: string = exportDto.businessName.replace(/[^\x00-\x7F]/g, '');
+    const columns: Array<{ title: string, name: string }> = JSON.parse(exportDto.columns);
+    Exporter.export(result.collection as TransactionModel[] , res, fileName, columns, format);
   }
 
   @Get('settings')
@@ -293,9 +234,56 @@ export class BusinessController {
       ],
       direction: '',
       filters: null,
-      id: null, // 9???
+      id: null,
       limit: '',
       order_by: '',
     };
+  }
+
+  private async doAction(
+    transaction: TransactionModel,
+    actionPayload: ActionPayloadDto,
+    action: string,
+  ): Promise<TransactionUnpackedDetailsInterface> {
+    this.dtoValidation.checkFileUploadDto(actionPayload);
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
+
+    try {
+      await this.messagingService.runAction(unpackedTransaction, action, actionPayload);
+    } catch (e) {
+      this.logger.log(
+        {
+          context: 'BusinessController',
+          error: e.message,
+          message: `Error occurred during running action`,
+        },
+      );
+
+      throw new BadRequestException(e.message);
+    }
+
+    const updatedTransaction: TransactionUnpackedDetailsInterface =
+      await this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
+    /** Send update to checkout-php */
+    try {
+      await this.messagingService.sendTransactionUpdate(updatedTransaction);
+    } catch (e) {
+      throw new BadRequestException(`Error occurred while sending transaction update: ${e.message}`);
+    }
+
+    return updatedTransaction;
+  }
+
+  private async getDetails(transaction: TransactionModel): Promise<TransactionOutputInterface>  {
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
+
+    return TransactionOutputConverter.convert(
+      unpackedTransaction,
+      await this.actionsRetriever.retrieve(unpackedTransaction),
+    );
   }
 }

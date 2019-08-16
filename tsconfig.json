@@ -7,14 +7,14 @@
     "noLib": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "target": "es2016",
+    "target": "es2017",
     "sourceMap": true,
     "allowJs": true,
     "outDir": "./dist",
     "baseUrl": "./",
     "types": [
       "node",
-      "mongoose"
+      "mongoose",
     ]
   },
   "include": [

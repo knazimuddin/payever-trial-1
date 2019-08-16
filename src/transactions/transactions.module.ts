@@ -7,6 +7,7 @@ import { TransactionsExportCommand } from './command/transactions-export.command
 import {
   AdminController,
   BpoEventsController,
+  BusinessBusMessagesController,
   BusinessController,
   FlowEventsController,
   HistoryEventsController,
@@ -15,7 +16,11 @@ import {
   TransactionEventsController,
   UserController,
 } from './controllers';
+import { ElasticSearchClient } from './elasticsearch/elastic-search.client';
+import { PaymentMailEventProducer } from './producer';
 import {
+  BusinessCurrencySchema,
+  BusinessCurrencySchemaName,
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,
   PaymentFlowSchema,
@@ -24,33 +29,29 @@ import {
   TransactionSchemaName,
 } from './schemas';
 import {
+  ActionsRetriever,
+  BusinessCurrencyService,
   BusinessPaymentOptionService,
   CurrencyExchangeService,
   DtoValidationService,
+  ElasticSearchService,
   MessagingService,
+  MongoSearchService,
   PaymentFlowService,
   PaymentsMicroService,
   StatisticsService,
-  StubService,
   TransactionHistoryService,
-  TransactionsGridService,
   TransactionsService,
 } from './services';
+import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
+import { environment } from '../environments';
 
 @Module({
-  imports: [
-    HttpModule,
-    MongooseModule.forFeature([
-      { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
-      { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
-      { name: TransactionSchemaName, schema: TransactionSchema },
-    ]),
-    NotificationsSdkModule,
-  ],
   controllers: [
     AdminController,
     BpoEventsController,
     BusinessController,
+    BusinessBusMessagesController,
     FlowEventsController,
     HistoryEventsController,
     MigrateEventsController,
@@ -58,20 +59,40 @@ import {
     UserController,
     ThirdPartyEventsController,
   ],
+  imports: [
+    HttpModule,
+    MongooseModule.forFeature([
+      { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
+      { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
+      { name: TransactionSchemaName, schema: TransactionSchema },
+      { name: BusinessCurrencySchemaName, schema: BusinessCurrencySchema },
+    ]),
+    NotificationsSdkModule,
+    CommonSdkModule.forRoot({
+      consumerModels: [
+        CommonModelsNamesEnum.CurrencyModel,
+      ],
+      rsaPath: environment.rsa,
+    }),
+  ],
   providers: [
+    ActionsRetriever,
     BusinessPaymentOptionService,
+    BusinessCurrencyService,
     CurrencyExchangeService,
     DtoValidationService,
     MessagingService,
+    MongoSearchService,
+    ElasticSearchClient,
+    ElasticSearchService,
     PaymentFlowService,
     PaymentsMicroService,
     StatisticsService,
-    StubService,
     TransactionHistoryService,
     TransactionsEsExportCommand,
     TransactionsExportCommand,
-    TransactionsGridService,
     TransactionsService,
+    PaymentMailEventProducer,
   ],
 })
 export class TransactionsModule {}

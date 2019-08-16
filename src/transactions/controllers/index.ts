@@ -1,6 +1,7 @@
 export * from './admin.controller';
 export * from './bpo-events.controller';
 export * from './business.controller';
+export * from './business-bus-messages.controller';
 export * from './flow-events.controller';
 export * from './history-events.controller';
 export * from './migrate-events.controller';
