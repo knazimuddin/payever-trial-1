@@ -10,6 +10,10 @@ export class ElasticSearchClient {
     log: 'error',
   });
 
+  constructor(
+    private readonly logger: Logger,
+  ) {}
+
   public async singleIndex(index: string, type: string, item: any, operation: string = 'index'): Promise<void> {
     const bulkBody: any = [];
     item.mongoId = item._id;
@@ -31,16 +35,30 @@ export class ElasticSearchClient {
     await this.client
       .bulk({ body: bulkBody })
       .then((response: any) => {
-        Logger.log(JSON.stringify(response, null, 2));
+        this.logger.log({
+          context: 'ElasticSearchClient',
+          response: JSON.stringify(response, null, 2),
+        });
 
         let errorCount: number = 0;
         for (const responseItem of response.items) {
           if (responseItem.index && responseItem.index.error) {
-            Logger.log(++errorCount, responseItem.index.error);
+            this.logger.log({
+              context: 'ElasticSearchClient',
+              response: {
+                error: responseItem.index.error,
+                errorCount: ++errorCount,
+              },
+            });
           }
         }
       })
-      .catch(Logger.log);
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e.message,
+        message: `Error on ElasticSearch request`,
+      }))
+    ;
   }
 
   public async bulkIndex(index: string, type: string, data: any, operation: string = 'index'): Promise<void> {
@@ -71,15 +89,28 @@ export class ElasticSearchClient {
         let errorCount: number = 0;
         for (const item of response.items) {
           if (item.index && item.index.error) {
-            Logger.log(++errorCount, item.index.error);
+            this.logger.log({
+              context: 'ElasticSearchClient',
+              response: {
+                error: item.index.error,
+                errorCount: ++errorCount,
+              },
+            });
           }
         }
 
-        Logger.log(
-          `Successfully indexed ${data.length - errorCount} out of ${data.length} items`,
-        );
+        this.logger.log({
+          context: 'ElasticSearchClient',
+          message: `Successfully indexed ${data.length - errorCount} out of ${data.length} items`,
+        });
       })
-      .catch(Logger.log)
+      .catch((e: any) => this.logger.error(
+        {
+          context: 'ElasticSearchClient',
+          error: e.message,
+          message: `Error on ElasticSearch request`,
+        },
+      ))
     ;
   }
 
@@ -98,8 +129,17 @@ export class ElasticSearchClient {
           },
         },
       })
-      .then((response: any) => Logger.log(response))
-      .catch(Logger.log)
+      .then((response: any) => this.logger.log({
+        context: 'ElasticSearchClient',
+        response: response,
+      }))
+      .catch((e: any) => this.logger.error(
+        {
+          context: 'ElasticSearchClient',
+          error: e.message,
+          message: `Error on ElasticSearch request`,
+        },
+      ))
     ;
   }
 
@@ -109,7 +149,13 @@ export class ElasticSearchClient {
         body: search,
         index: index,
       })
-      .catch(Logger.log)
+      .catch((e: any) => this.logger.error(
+        {
+          context: 'ElasticSearchClient',
+          error: e.message,
+          message: `Error on ElasticSearch request`,
+        },
+      ))
     ;
   }
 }
