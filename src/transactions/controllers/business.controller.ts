@@ -40,7 +40,7 @@ const UuidPlaceholder: string = ':uuid';
 
 @Controller('business/:businessId')
 @ApiUseTags('business')
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
