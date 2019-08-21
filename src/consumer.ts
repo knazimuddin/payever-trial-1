@@ -18,8 +18,6 @@ async function bootstrap(): Promise<void> {
   const logger: NestKitLogger = app.get(NestKitLogger);
   app.useLogger(logger);
 
-  app.useGlobalPipes(new ValidationPipe());
-
   app.listen(() => logger.log(`Transactions consumer started`, 'NestApplication'));
 }
 
