@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@pe/common-sdk": "^0.2.0",
-    "@pe/nest-kit": "^4.8.7",
+    "@pe/nest-kit": "^4.8.8",
     "@pe/notifications-sdk": "^3.1.0",
     "@types/dotenv": "^6.1.1",
     "@types/elasticsearch": "^5.0.34",

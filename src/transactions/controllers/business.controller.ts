@@ -105,11 +105,7 @@ export class BusinessController {
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionOutputInterface> {
-    if (
-      user.roles.filter((role: UserRoleInterface): boolean => role.name === 'merchant') &&
-      !user.isAdmin() &&
-      !user.secondFactorAllowed
-    ) {
+    if (user.hasRole(RolesEnum.merchant) && !user.isAdmin() && !user.secondFactorAllowed) {
       throw new UnauthorizedException('Second factor authentication is required for merchant to access this endpoint');
     }
 
