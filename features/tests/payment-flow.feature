@@ -559,7 +559,6 @@ Feature: Full real payment flow
         "payload": {
           "id": "f61e09b6-61ca-426b-8ee6-e8ce3118e932",
           "amount": 650,
-          "date": "Mon, 15 Apr 2019 04:33:20 GMT",
           "items": [],
           "channel_set": {
             "id": "42debf61-e648-48cd-a1bb-5f7155ad9670"
