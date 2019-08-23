@@ -10,10 +10,11 @@ import {
   Post,
   Query,
   Res,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
-import { ParamModel } from '@pe/nest-kit';
+import { AccessTokenPayload, ParamModel, User, UserRoleInterface, UserTokenInterface } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 
@@ -93,6 +94,7 @@ export class BusinessController {
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
   public async runAction(
+    @User() user: AccessTokenPayload,
     @Param('action') action: string,
     @ParamModel(
       {
@@ -103,6 +105,14 @@ export class BusinessController {
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionOutputInterface> {
+    if (
+      user.roles.filter((role: UserRoleInterface): boolean => role.name === 'merchant') &&
+      !user.isAdmin() &&
+      !user.secondFactorAllowed
+    ) {
+      throw new UnauthorizedException('Second factor authentication is required for merchant to access this endpoint');
+    }
+
     const updatedTransaction: TransactionUnpackedDetailsInterface = await this.doAction(
       transaction,
       actionPayload,
