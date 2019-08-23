@@ -13,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
-import { ParamModel, SecondFactor } from '@pe/nest-kit';
+import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 
@@ -92,7 +92,6 @@ export class BusinessController {
   @Post(':uuid/action/:action')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
-  @SecondFactor()
   public async runAction(
     @Param('action') action: string,
     @ParamModel(
@@ -119,7 +118,6 @@ export class BusinessController {
   @Post(':uuid/legacy-api-action/:action')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.oauth)
-  @SecondFactor()
   public async runLegacyApiAction(
     @Param('action') action: string,
     @ParamModel(
