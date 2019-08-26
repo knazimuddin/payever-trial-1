@@ -13,7 +13,7 @@ export class TransactionsEsExportCommand {
     private readonly elasticSearchClient: ElasticSearchClient,
   ) {}
 
-  @Command({ command: 'transactions:export:es', describe: 'Export transactions for widgets' })
+  @Command({ command: 'transactions:export:es', describe: 'Export transactions for ElasticSearch' })
   public async transactionsEsExport(
     @Positional({
       name: 'after',
