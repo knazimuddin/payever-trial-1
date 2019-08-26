@@ -17,11 +17,9 @@ export class TransactionsEsExportCommand {
   public async transactionsEsExport(
     @Positional({
       name: 'after',
-      type: 'string',
     }) after: string,
     @Positional({
       name: 'before',
-      type: 'string',
     }) before: string,
   ): Promise<void> {
     const criteria: any = {};
@@ -34,6 +32,8 @@ export class TransactionsEsExportCommand {
     if (after) {
       criteria.created_at.$gte = new Date(after);
     }
+
+    Logger.log(`Criteria is ${JSON.stringify(criteria, null, 2)}.`);
 
     const count: number = await this.transactionsModel.countDocuments(criteria);
     Logger.log(`Found ${count} records.`);
