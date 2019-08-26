@@ -158,4 +158,21 @@ export class ElasticSearchClient {
       ))
     ;
   }
+
+  public async deleteByQuery(index: string, type: string, search: any): Promise<any> {
+    return this.client
+      .deleteByQuery({
+        body: search,
+        index: index,
+        type: type,
+      })
+      .catch((e: any) => this.logger.error(
+        {
+          context: 'ElasticSearchClient',
+          error: e.message,
+          message: `Error on ElasticSearch request`,
+        },
+      ))
+    ;
+  }
 }
