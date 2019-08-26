@@ -1,6 +1,6 @@
+import { CommonModelsNamesEnum, commonSdkRabbitMqBindings } from '@pe/common-sdk';
 import { RabbitMqQueueConfigInterface } from '@pe/nest-kit';
 import { RabbitRoutingKeys } from '../enums';
-import { CommonModelsNamesEnum, commonSdkRabbitMqBindings } from '@pe/common-sdk';
 
 export const rabbitMqQueues: RabbitMqQueueConfigInterface[] = [
   {
@@ -74,17 +74,14 @@ export const rabbitMqQueues: RabbitMqQueueConfigInterface[] = [
       {
         routingKey: 'users.event.business.export',
         source: 'async_events',
-
       },
       {
         routingKey: 'users.event.business.updated',
         source: 'async_events',
-
       },
       {
         routingKey: 'users.event.business.created',
         source: 'async_events',
-
       },
       {
         routingKey: 'users.event.business.removed',

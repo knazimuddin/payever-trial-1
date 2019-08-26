@@ -3,7 +3,7 @@ namespace: default
 replicaCount: 1
 
 image:
-  nodejs: registry.devpayever.com/nodejs-backend/transactions/master
+  nodejs: payeverk8sregistry.azurecr.io/nodejs-backend/transactions/master
   pullSecretName: regsecret
 
 service:

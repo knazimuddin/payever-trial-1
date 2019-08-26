@@ -15,7 +15,7 @@
     "probe-mongo": "pe-probe-mongo",
     "server": "nodemon",
     "start": "ts-node src/http.ts",
-    "consume": "ts-node src/consumer.ts",
+    "consumer": "ts-node src/consumer.ts",
     "test": "mocha -r ts-node/register --recursive ./tests/**/*.spec.ts",
     "test:coverage": "jest --config=jest.json --coverage --coverageDirectory=coverage",
     "test:watch": "jest --watch --config=jest.json",
