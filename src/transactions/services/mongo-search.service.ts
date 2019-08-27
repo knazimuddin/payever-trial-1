@@ -22,6 +22,9 @@ export class MongoSearchService {
     if (listDto.search) {
       this.addSearchFilters(mongoFilters, listDto.search);
     }
+    if (!mongoFilters.$and.length) {
+      delete mongoFilters.$and;
+    }
 
     return Promise
       .all([
@@ -170,10 +173,6 @@ export class MongoSearchService {
           break;
         }
       }
-    }
-
-    if (!mongoFilters.$and.length) {
-      delete mongoFilters.$and;
     }
   }
 }
