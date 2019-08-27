@@ -4,7 +4,7 @@ import * as chai from 'chai';
 import 'mocha';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
-import { PaymentMailDtoConverter } from '../../../src/transactions/converter';
+import { OderInvoiceMailDtoConverter } from '../../../src/transactions/converter';
 import { PaymentSubmittedDto } from '../../../src/transactions/dto';
 import { PaymentStatusesEnum } from '../../../src/transactions/enum';
 import { PaymentMailEventProducer } from '../../../src/transactions/producer';
@@ -76,7 +76,7 @@ describe('PaymentMailEventProducer ', () => {
           },
           {
             name: eventName,
-            payload: PaymentMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto),
+            payload: OderInvoiceMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto),
           },
         );
       });

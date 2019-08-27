@@ -12,6 +12,7 @@ import {
   FlowEventsController,
   HistoryEventsController,
   MigrateEventsController,
+  ShippingBusMessagesController,
   ThirdPartyEventsController,
   TransactionEventsController,
   UserController,
@@ -58,6 +59,7 @@ import { environment } from '../environments';
     TransactionEventsController,
     UserController,
     ThirdPartyEventsController,
+    ShippingBusMessagesController,
   ],
   imports: [
     HttpModule,

@@ -1,3 +1,4 @@
+export * from './mailer/';
 export * from './atom.date.converter';
 export * from './checkout-transaction-history-entry.converter';
 export * from './date-string.helper';
@@ -7,4 +8,3 @@ export * from './transaction-history-entry.converter';
 export * from './transaction-output.converter';
 export * from './transaction-payment-details.converter';
 export * from './transaction-santander-application.converter';
-export * from './payment-mail-dto.converter';

@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PaymentItemDto, PaymentMailDto, PaymentSubmittedDto, TransactionCartItemDto } from '../dto';
+import { PaymentItemDto, PaymentMailDto, PaymentSubmittedDto, TransactionCartItemDto } from '../../dto';
+import { AbstractPaymentMailDtoConverter } from './abstract-payment-mail-dto.converter';
 
 @Injectable()
-export class PaymentMailDtoConverter {
+export class OderInvoiceMailDtoConverter extends AbstractPaymentMailDtoConverter{
   public static fromPaymentSubmittedDto(paymentSubmittedDto: PaymentSubmittedDto): PaymentMailDto {
     return {
       cc: [],
@@ -23,7 +24,7 @@ export class PaymentMailDtoConverter {
         currency: paymentSubmittedDto.payment.currency,
         reference: paymentSubmittedDto.payment.reference,
         total: paymentSubmittedDto.payment.total,
-        vat_rate: PaymentMailDtoConverter.calculateTaxAmount(paymentSubmittedDto),
+        vat_rate: OderInvoiceMailDtoConverter.calculateTaxAmount(paymentSubmittedDto.payment.items),
 
         customer_email: paymentSubmittedDto.payment.customer_email,
         customer_name: paymentSubmittedDto.payment.customer_name,
@@ -41,14 +42,5 @@ export class PaymentMailDtoConverter {
         vat_rate: item.vat_rate,
       })),
     };
-  }
-
-  private static calculateTaxAmount(paymentSubmittedDto: PaymentSubmittedDto): number {
-    let taxAmount: number = 0;
-    for (const item of paymentSubmittedDto.payment.items) {
-      taxAmount += item.vat_rate;
-    }
-
-    return taxAmount;
   }
 }

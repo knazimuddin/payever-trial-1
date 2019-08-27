@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { RabbitMqClient } from '@pe/nest-kit';
-import { PaymentMailDtoConverter } from '../converter';
+import { OderInvoiceMailDtoConverter } from '../converter';
 import { PaymentMailDto, PaymentSubmittedDto, TransactionPaymentDto } from '../dto';
 import { PaymentStatusesEnum } from '../enum';
+import { ShippingMailDto } from '../dto/mail';
 
 @Injectable()
 export class PaymentMailEventProducer {
@@ -19,18 +20,13 @@ export class PaymentMailEventProducer {
       return ;
     }
 
-    const mailDto: PaymentMailDto = PaymentMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto);
+    const mailDto: PaymentMailDto = OderInvoiceMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto);
 
-    return this.rabbitMqClient.send(
-      {
-        channel: 'payever.event.payment.email',
-        exchange: 'async_events',
-      },
-      {
-        name: 'payever.event.payment.email',
-        payload: mailDto,
-      },
-    );
+    return this.sendMailEvent(mailDto);
+  }
+
+  public async produceShippingEvent(mailDto: ShippingMailDto): Promise<void> {
+    return this.sendMailEvent(mailDto);
   }
 
   private isInvoiceSupportedChannel(paymentSubmittedDto: PaymentSubmittedDto): boolean {
@@ -44,5 +40,18 @@ export class PaymentMailEventProducer {
       PaymentStatusesEnum.Failed,
       PaymentStatusesEnum.Refunded,
     ].indexOf(payment.status) === -1;
+  }
+
+  private sendMailEvent(mailDto: PaymentMailDto): Promise<void> {
+    return this.rabbitMqClient.send(
+      {
+        channel: 'payever.event.payment.email',
+        exchange: 'async_events',
+      },
+      {
+        name: 'payever.event.payment.email',
+        payload: mailDto,
+      },
+    );
   }
 }

@@ -1,7 +1,7 @@
 import * as chai from 'chai';
 import 'mocha';
 import * as sinonChai from 'sinon-chai';
-import { PaymentMailDtoConverter } from '../../../src/transactions/converter';
+import { OderInvoiceMailDtoConverter } from '../../../src/transactions/converter';
 import { PaymentSubmittedDto } from '../../../src/transactions/dto';
 import { TransactionCartItemDto } from '../../../src/transactions/dto/transaction-cart-item.dto';
 chai.use(sinonChai);
@@ -60,7 +60,7 @@ describe('PaymentMailDtoConverter ', () => {
       };
 
       expect(
-        PaymentMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto),
+        OderInvoiceMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto),
       ).to.eql(
         expectedResult,
       );
@@ -91,7 +91,7 @@ describe('PaymentMailDtoConverter ', () => {
       } as PaymentSubmittedDto;
 
       expect(
-        PaymentMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto).template_name,
+        OderInvoiceMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto).template_name,
       ).to.eql(
         templateName,
       );
@@ -122,7 +122,7 @@ describe('PaymentMailDtoConverter ', () => {
       ).reduce((a, b) => a + b, 0);
 
       expect(
-        PaymentMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto).payment.vat_rate,
+        OderInvoiceMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto).payment.vat_rate,
       ).to.eql(
         expectedVatRate,
       );

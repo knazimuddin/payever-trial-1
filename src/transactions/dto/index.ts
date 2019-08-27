@@ -14,3 +14,4 @@ export * from './transaction-cart-item.dto';
 export * from './payment-submitted.dto';
 export * from './mail';
 export * from './transaction-payment.dto';
+export * from './shipping-order-processed-message.dto';
