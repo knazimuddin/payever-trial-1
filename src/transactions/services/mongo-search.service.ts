@@ -22,7 +22,7 @@ export class MongoSearchService {
     if (listDto.search) {
       this.addSearchFilters(mongoFilters, listDto.search);
     }
-    if (!mongoFilters.$and.length) {
+    if (mongoFilters.$and && !mongoFilters.$and.length) {
       delete mongoFilters.$and;
     }
 
