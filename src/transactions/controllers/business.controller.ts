@@ -8,7 +8,6 @@ import {
   Logger,
   Param,
   Post,
-  Query,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -16,9 +15,11 @@ import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
+import { FastifyReply } from 'fastify';
+import { environment } from '../../environments';
 
 import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
-import { ListQueryDto, PagingResultDto, ExportQueryDto } from '../dto';
+import { ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { BusinessCurrencyModel, TransactionModel } from '../models';
@@ -29,11 +30,10 @@ import {
   DtoValidationService,
   ElasticSearchService,
   MessagingService,
+  MongoSearchService,
   TransactionsService,
 } from '../services';
 import { BusinessFilter, Exporter, ExportFormat } from '../tools';
-import { environment } from '../../environments';
-import { FastifyReply } from 'fastify';
 
 const BusinessPlaceholder: string = ':businessId';
 const UuidPlaceholder: string = ':uuid';
@@ -49,7 +49,8 @@ export class BusinessController {
 
   constructor(
     private readonly transactionsService: TransactionsService,
-    private readonly searchService: ElasticSearchService,
+    private readonly searchService: MongoSearchService,
+    private readonly elasticSearchService: ElasticSearchService,
     private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
     private readonly actionsRetriever: ActionsRetriever,
@@ -193,6 +194,21 @@ export class BusinessController {
     listDto.currency = businessCurrencyCode;
 
     return this.searchService.getResult(listDto);
+  }
+
+  @Get('elastic')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant)
+  public async getElastic(
+    @Param('businessId') businessId: string,
+    @QueryDto() listDto: ListQueryDto,
+  ): Promise<PagingResultDto> {
+    listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
+    const currency: BusinessCurrencyModel = await this.businessCurrencyService.getBusinessCurrency(businessId);
+    const businessCurrencyCode: string = currency ? currency.currency : this.defaultCurrency;
+    listDto.currency = businessCurrencyCode;
+
+    return this.elasticSearchService.getResult(listDto);
   }
 
   @Get('export')
