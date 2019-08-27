@@ -13,6 +13,7 @@ import {
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel, QueryDto } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
+import { environment } from '../../environments';
 import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
 import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
@@ -24,9 +25,9 @@ import {
   DtoValidationService,
   ElasticSearchService,
   MessagingService,
+  MongoSearchService,
   TransactionsService,
 } from '../services';
-import { environment } from '../../environments';
 
 @Controller('admin')
 @ApiUseTags('admin')
@@ -41,7 +42,8 @@ export class AdminController {
   constructor(
     private readonly dtoValidation: DtoValidationService,
     private readonly transactionsService: TransactionsService,
-    private readonly searchService: ElasticSearchService,
+    private readonly searchService: MongoSearchService,
+    private readonly elasticSearchService: ElasticSearchService,
     private readonly messagingService: MessagingService,
     private readonly actionsRetriever: ActionsRetriever,
     private readonly logger: Logger,
@@ -57,6 +59,16 @@ export class AdminController {
     listDto.currency = this.defaultCurrency;
 
     return this.searchService.getResult(listDto);
+  }
+
+  @Get('elastic')
+  @HttpCode(HttpStatus.OK)
+  public async getElastic(
+    @QueryDto() listDto: ListQueryDto,
+  ): Promise<PagingResultDto> {
+    listDto.currency = this.defaultCurrency;
+
+    return this.elasticSearchService.getResult(listDto);
   }
 
   @Get('detail/reference/:reference')
