@@ -1,6 +1,6 @@
+import { CommonModelsNamesEnum, commonSdkRabbitMqBindings } from '@pe/common-sdk';
 import { RabbitMqQueueConfigInterface } from '@pe/nest-kit';
 import { RabbitRoutingKeys } from '../enums';
-import { CommonModelsNamesEnum, commonSdkRabbitMqBindings } from '@pe/common-sdk';
 
 export const rabbitMqQueues: RabbitMqQueueConfigInterface[] = [
   {

@@ -153,6 +153,18 @@ export class TransactionsService {
   }
 
   public async removeByUuid(transactionUuid: string): Promise<void> {
+    await this.elasticSearchClient.deleteByQuery(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      {
+        query: {
+          match: {
+            uuid: transactionUuid,
+          },
+        },
+      },
+    );
+
     await this.transactionModel.findOneAndRemove({ uuid: transactionUuid });
   }
 

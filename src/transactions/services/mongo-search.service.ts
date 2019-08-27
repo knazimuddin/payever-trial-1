@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
-import { CurrencyInterface } from '../interfaces';
 import { TransactionModel } from '../models';
 import { FiltersList } from '../mongo-filters/filters.list';
 import { CurrencyExchangeService } from './currency-exchange.service';
@@ -22,6 +21,9 @@ export class MongoSearchService {
     }
     if (listDto.search) {
       this.addSearchFilters(mongoFilters, listDto.search);
+    }
+    if (mongoFilters.$and && !mongoFilters.$and.length) {
+      delete mongoFilters.$and;
     }
 
     return Promise
@@ -71,7 +73,7 @@ export class MongoSearchService {
   public async total(filters: any = {}, currency?: string): Promise<number> {
     let res: any;
     if (!currency) {
-      res = this.transactionsModel
+      res = await this.transactionsModel
         .aggregate([
           { $match: filters },
           {
@@ -88,7 +90,7 @@ export class MongoSearchService {
         : null
       ;
     } else {
-      res = this.transactionsModel
+      res = await this.transactionsModel
         .aggregate([
           { $match: filters },
           {
@@ -171,10 +173,6 @@ export class MongoSearchService {
           break;
         }
       }
-    }
-
-    if (!mongoFilters.$and.length) {
-      delete mongoFilters.$and;
     }
   }
 }

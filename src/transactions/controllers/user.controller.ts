@@ -2,15 +2,15 @@ import { Controller, Get, HttpCode, HttpStatus, NotFoundException, UseGuards } f
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel, QueryDto } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum, User, UserTokenInterface } from '@pe/nest-kit/modules/auth';
+import { environment } from '../../environments';
 import { TransactionOutputConverter } from '../converter';
 import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionItemInterface } from '../interfaces';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
-import { ElasticSearchService, TransactionsService } from '../services';
+import { ElasticSearchService, MongoSearchService, TransactionsService } from '../services';
 import { UserFilter } from '../tools';
-import { environment } from '../../environments';
 
 @Controller('user')
 @ApiUseTags('user')
@@ -24,7 +24,8 @@ export class UserController {
 
   constructor(
     private readonly transactionsService: TransactionsService,
-    private readonly searchService: ElasticSearchService,
+    private readonly searchService: MongoSearchService,
+    private readonly elasticSearchService: ElasticSearchService,
   ) {
     this.defaultCurrency = environment.defaultCurrency;
   }
@@ -39,6 +40,18 @@ export class UserController {
     listDto.currency = this.defaultCurrency;
 
     return this.searchService.getResult(listDto);
+  }
+
+  @Get('elastic')
+  @HttpCode(HttpStatus.OK)
+  public async getElastic(
+    @User() user: UserTokenInterface,
+    @QueryDto() listDto: ListQueryDto,
+  ): Promise<PagingResultDto> {
+    listDto.filters = UserFilter.apply(user.id, listDto.filters);
+    listDto.currency = this.defaultCurrency;
+
+    return this.elasticSearchService.getResult(listDto);
   }
 
   @Get('detail/:uuid')
