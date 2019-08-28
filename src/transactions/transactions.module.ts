@@ -3,9 +3,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
-import { TransactionsEsExportCommand } from './command/transactions-export-to-es.command';
-import { TransactionsExportCommand } from './command/transactions-export.command';
-import { TransactionsFieldMappingSetupCommand } from './command/transactions-field-mapping-setup.command';
+import {
+  BpoFixCommand,
+  TransactionsEsExportCommand,
+  TransactionsExportCommand,
+  TransactionsFieldMappingSetupCommand,
+} from './commands';
 import {
   AdminController,
   BpoEventsController,
@@ -77,6 +80,7 @@ import {
   ],
   providers: [
     ActionsRetriever,
+    BpoFixCommand,
     BusinessPaymentOptionService,
     BusinessCurrencyService,
     CurrencyExchangeService,
