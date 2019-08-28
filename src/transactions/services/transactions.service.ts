@@ -74,6 +74,9 @@ export class TransactionsService {
     transactionUuid: string,
     transactionDto: TransactionPackedDetailsInterface,
   ): Promise<TransactionModel> {
+    if (transactionDto.id) {
+      transactionDto.original_id = transactionDto.id;
+    }
     transactionDto.uuid = transactionUuid;
 
     const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
@@ -101,7 +104,6 @@ export class TransactionsService {
     transactionUuid: string,
     transactionHistory: TransactionHistoryEntryModel[],
   ): Promise<TransactionModel> {
-
     const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
       {
         uuid: transactionUuid,

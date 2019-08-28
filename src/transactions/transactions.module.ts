@@ -1,9 +1,11 @@
 import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
+import { environment } from '../environments';
 import { TransactionsEsExportCommand } from './command/transactions-export-to-es.command';
 import { TransactionsExportCommand } from './command/transactions-export.command';
-
+import { TransactionsFieldMappingSetupCommand } from './command/transactions-field-mapping-setup.command';
 import {
   AdminController,
   BpoEventsController,
@@ -43,8 +45,6 @@ import {
   TransactionHistoryService,
   TransactionsService,
 } from './services';
-import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
-import { environment } from '../environments';
 
 @Module({
   controllers: [
@@ -91,6 +91,7 @@ import { environment } from '../environments';
     TransactionHistoryService,
     TransactionsEsExportCommand,
     TransactionsExportCommand,
+    TransactionsFieldMappingSetupCommand,
     TransactionsService,
     PaymentMailEventProducer,
   ],
