@@ -24,19 +24,20 @@ import {
 import { ElasticSearchClient } from './elasticsearch/elastic-search.client';
 import { PaymentMailEventProducer } from './producer';
 import {
-  BusinessCurrencySchema,
-  BusinessCurrencySchemaName,
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,
+  BusinessSchema,
+  BusinessSchemaName,
   PaymentFlowSchema,
   PaymentFlowSchemaName,
+  TransactionExampleSchemaName,
   TransactionSchema,
   TransactionSchemaName,
 } from './schemas';
 import {
   ActionsRetriever,
-  BusinessCurrencyService,
   BusinessPaymentOptionService,
+  BusinessService,
   CurrencyExchangeService,
   DtoValidationService,
   ElasticSearchService,
@@ -68,7 +69,7 @@ import {
       { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
       { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
       { name: TransactionSchemaName, schema: TransactionSchema },
-      { name: BusinessCurrencySchemaName, schema: BusinessCurrencySchema },
+      { name: BusinessSchemaName, schema: BusinessSchema },
     ]),
     NotificationsSdkModule,
     CommonSdkModule.forRoot({
@@ -82,7 +83,7 @@ import {
     ActionsRetriever,
     BpoFixCommand,
     BusinessPaymentOptionService,
-    BusinessCurrencyService,
+    BusinessService,
     CurrencyExchangeService,
     DtoValidationService,
     MessagingService,

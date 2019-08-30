@@ -1,8 +1,8 @@
 import { AddressInterface } from '../address.interface';
 import { UnpackedDetailsAwareInterface } from '../awareness';
-import { BusinessInterface } from '../business.interface';
 import { ChannelSetInterface } from '../channel-set.interface';
 import { PaymentFlowInterface } from '../payment-flow.interface';
+import { TransactionBusinessInterface } from '../transaction-business.interface';
 import { CheckoutTransactionCartItemInterface } from './checkout-transaction-cart-item.interface';
 import { CheckoutTransactionHistoryItemInterface } from './checkout-transaction-history-item.interface';
 
@@ -11,7 +11,7 @@ export interface CheckoutTransactionInterface extends UnpackedDetailsAwareInterf
   uuid: string;
 
   address?: AddressInterface;
-  business?: BusinessInterface;
+  business?: TransactionBusinessInterface;
   channel_set?: ChannelSetInterface;
   payment_flow?: PaymentFlowInterface;
 

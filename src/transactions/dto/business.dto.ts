@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class BusinessCurrencyDto {
+export class BusinessDto {
   @IsString()
   @IsNotEmpty()
   public _id: string;

@@ -1,5 +1,5 @@
 export * from './address.schema';
-export * from './business-currency.schema';
+export * from './business-schema';
 export * from './business-payment-option.schema';
 export * from './payment-flow.schema';
 export * from './transaction.schema';

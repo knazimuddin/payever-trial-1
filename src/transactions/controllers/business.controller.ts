@@ -22,11 +22,11 @@ import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '
 import { ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
-import { BusinessCurrencyModel, TransactionModel } from '../models';
+import { BusinessModel, TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import {
   ActionsRetriever,
-  BusinessCurrencyService,
+  BusinessService,
   DtoValidationService,
   ElasticSearchService,
   MessagingService,
@@ -55,7 +55,7 @@ export class BusinessController {
     private readonly messagingService: MessagingService,
     private readonly actionsRetriever: ActionsRetriever,
     private readonly logger: Logger,
-    private readonly businessCurrencyService: BusinessCurrencyService,
+    private readonly businessService: BusinessService,
   ) {
     this.defaultCurrency = environment.defaultCurrency;
   }
@@ -189,9 +189,8 @@ export class BusinessController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
-    const currency: BusinessCurrencyModel = await this.businessCurrencyService.getBusinessCurrency(businessId);
-    const businessCurrencyCode: string = currency ? currency.currency : this.defaultCurrency;
-    listDto.currency = businessCurrencyCode;
+    const business: BusinessModel = await this.businessService.getBusinessCurrency(businessId);
+    listDto.currency = business ? business.currency : this.defaultCurrency;
 
     return this.searchService.getResult(listDto);
   }
@@ -204,9 +203,8 @@ export class BusinessController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
-    const currency: BusinessCurrencyModel = await this.businessCurrencyService.getBusinessCurrency(businessId);
-    const businessCurrencyCode: string = currency ? currency.currency : this.defaultCurrency;
-    listDto.currency = businessCurrencyCode;
+    const currency: BusinessModel = await this.businessService.getBusinessCurrency(businessId);
+    listDto.currency = currency ? currency.currency : this.defaultCurrency;
 
     return this.elasticSearchService.getResult(listDto);
   }
@@ -223,9 +221,8 @@ export class BusinessController {
     exportDto.limit = 10000;
     exportDto.page = 1;
     exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
-    const currency: BusinessCurrencyModel = await this.businessCurrencyService.getBusinessCurrency(businessId);
-    const businessCurrencyCode: string = currency ? currency.currency : this.defaultCurrency;
-    exportDto.currency = businessCurrencyCode;
+    const business: BusinessModel = await this.businessService.getBusinessCurrency(businessId);
+    exportDto.currency = business ? business.currency : this.defaultCurrency;
     const result: PagingResultDto =  await this.searchService.getResult(exportDto);
     const format: ExportFormat = exportDto.format;
     const fileName: string = exportDto.businessName.replace(/[^\x00-\x7F]/g, '');
