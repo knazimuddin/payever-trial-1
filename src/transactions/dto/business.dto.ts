@@ -8,4 +8,14 @@ export class BusinessDto {
   @IsString()
   @IsNotEmpty()
   public currency: string;
+
+  public companyAddress: {
+    country: string;
+  };
+
+  @IsString()
+  @IsNotEmpty()
+  public name: string;
+
+  public contactEmails: string[];
 }

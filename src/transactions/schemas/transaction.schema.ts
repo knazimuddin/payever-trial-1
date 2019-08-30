@@ -60,6 +60,8 @@ export const TransactionSchema: Schema = new Schema({
   type: { type: String, required: true },
   updated_at: Date,
   user_uuid: String,
+
+  example: Boolean,
 });
 
 TransactionSchema.index({ uuid: 1});

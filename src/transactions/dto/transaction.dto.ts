@@ -47,4 +47,5 @@ export class TransactionDto implements TransactionPackedDetailsInterface {
   public type: string;
   public updated_at: Date;
   public user_uuid: string;
+  public example?: boolean;
 }

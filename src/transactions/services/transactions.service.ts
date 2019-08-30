@@ -137,6 +137,10 @@ export class TransactionsService {
     return this.transactionModel.findOne(params);
   }
 
+  public async findCollectionByParams(params: any): Promise<TransactionModel[]> {
+    return this.transactionModel.find(params);
+  }
+
   public async findUnpackedByUuid(transactionUuid: string): Promise<TransactionUnpackedDetailsInterface> {
     return this.findUnpackedByParams({ uuid: transactionUuid });
   }

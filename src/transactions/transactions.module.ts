@@ -30,6 +30,7 @@ import {
   BusinessSchemaName,
   PaymentFlowSchema,
   PaymentFlowSchemaName,
+  TransactionExampleSchema,
   TransactionExampleSchemaName,
   TransactionSchema,
   TransactionSchemaName,
@@ -47,6 +48,7 @@ import {
   PaymentsMicroService,
   StatisticsService,
   TransactionHistoryService,
+  TransactionsExampleService,
   TransactionsService,
 } from './services';
 
@@ -67,6 +69,7 @@ import {
     HttpModule,
     MongooseModule.forFeature([
       { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
+      { name: TransactionExampleSchemaName, schema: TransactionExampleSchema },
       { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
       { name: TransactionSchemaName, schema: TransactionSchema },
       { name: BusinessSchemaName, schema: BusinessSchema },
@@ -95,6 +98,7 @@ import {
     StatisticsService,
     TransactionHistoryService,
     TransactionsEsExportCommand,
+    TransactionsExampleService,
     TransactionsExportCommand,
     TransactionsFieldMappingSetupCommand,
     TransactionsService,

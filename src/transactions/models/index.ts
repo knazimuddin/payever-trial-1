@@ -3,6 +3,7 @@ export * from './business.model';
 export * from './business-payment-option.model';
 export * from './payment-flow.model';
 export * from './transaction.model';
+export * from './transaction-example.model';
 export * from './transaction-history-entry.model';
 export * from './transaction-cart-item.model';
 export * from './transaction-refund-item.model';
