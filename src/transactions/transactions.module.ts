@@ -46,6 +46,10 @@ import {
 } from './services';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
 import { environment } from '../environments';
+import { HistoryRecordEmitterConsumer } from './emitter/history-record-emitter.consumer';
+import { NestEmitterModule } from '@pe/nest-kit';
+import { AbstractConsumer, EmitterConsumerInitializer } from './emitter';
+import { EventEmiterConsumers } from './enum';
 
 @Module({
   controllers: [
@@ -76,6 +80,7 @@ import { environment } from '../environments';
       ],
       rsaPath: environment.rsa,
     }),
+    NestEmitterModule,
   ],
   providers: [
     ActionsRetriever,
@@ -95,6 +100,18 @@ import { environment } from '../environments';
     TransactionsExportCommand,
     TransactionsService,
     PaymentMailEventProducer,
+    ...EventEmiterConsumers,
+    EmitterConsumerInitializer,
+    {
+      inject: [...EventEmiterConsumers],
+      provide: EmitterConsumerInitializer,
+      useFactory: (...emitterConsumers: AbstractConsumer[]): EmitterConsumerInitializer => {
+        const initializer: EmitterConsumerInitializer = new EmitterConsumerInitializer();
+        emitterConsumers.forEach((consumer: AbstractConsumer) => initializer.addConsumer(consumer));
+
+        return initializer;
+      },
+    },
   ],
 })
 export class TransactionsModule {}

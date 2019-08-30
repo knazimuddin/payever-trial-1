@@ -31,4 +31,6 @@ export enum RabbitRoutingKeys {
   BusinessUpdated = 'users.event.business.updated',
   BusinessCreated = 'users.event.business.created',
   BusinessRemoved = 'users.event.business.removed',
+
+  TransactionsActionShippingGoods = 'transactions.event.action.shipping-goods',
 }
