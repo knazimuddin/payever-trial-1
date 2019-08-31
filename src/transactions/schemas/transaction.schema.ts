@@ -32,6 +32,7 @@ export const TransactionSchema: Schema = new Schema({
   shipping_category: String,
   shipping_method_name: String,
   shipping_option_name: String,
+  shipping_order_id: String,
   specific_status: String,
 
   created_at: { type: Date, required: true },

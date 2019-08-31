@@ -38,6 +38,7 @@ export class TransactionDto implements TransactionPackedDetailsInterface {
   public shipping_category: string;
   public shipping_method_name: string;
   public shipping_option_name: string;
+  public shipping_order_id: string;
   public specific_status: string;
   public status: string;
   public status_color: string;

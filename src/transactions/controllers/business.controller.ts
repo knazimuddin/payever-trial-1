@@ -104,11 +104,22 @@ export class BusinessController {
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionOutputInterface> {
-    const updatedTransaction: TransactionUnpackedDetailsInterface = await this.doAction(
-      transaction,
-      actionPayload,
-      action,
-    );
+    if (transaction.example) {
+
+    }
+
+    const updatedTransaction: TransactionUnpackedDetailsInterface = !transaction.example
+      ? await this.doAction(
+        transaction,
+        actionPayload,
+        action,
+      )
+      : await this.doFakeAction(
+        transaction,
+        actionPayload,
+        action,
+      )
+    ;
 
     return TransactionOutputConverter.convert(
       updatedTransaction,
@@ -287,6 +298,29 @@ export class BusinessController {
     }
 
     return updatedTransaction;
+  }
+
+  private async doFakeAction(
+    transaction: TransactionModel,
+    actionPayload: ActionPayloadDto,
+    action: string,
+  ): Promise<TransactionUnpackedDetailsInterface> {
+    switch (action) {
+      case 'shipping_goods':
+        transaction.status = 'STATUS_PAID';
+        transaction.place = 'paid';
+        transaction.shipping_order_id = '507f639c-048d-4d1c-b4ab-135bc9e140d0';
+
+        break;
+      case 'refund':
+        transaction.status = 'STATUS_REFUNDED';
+        transaction.place = 'refunded';
+
+        break;
+      default:
+    }
+
+    return this.transactionsService.findUnpackedByUuid(transaction.uuid);
   }
 
   private async getDetails(transaction: TransactionModel): Promise<TransactionOutputInterface>  {
