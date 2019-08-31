@@ -104,10 +104,6 @@ export class BusinessController {
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionOutputInterface> {
-    if (transaction.example) {
-
-    }
-
     const updatedTransaction: TransactionUnpackedDetailsInterface = !transaction.example
       ? await this.doAction(
         transaction,
@@ -123,7 +119,15 @@ export class BusinessController {
 
     return TransactionOutputConverter.convert(
       updatedTransaction,
-      await this.actionsRetriever.retrieve(updatedTransaction),
+      !transaction.example
+        ? await this.actionsRetriever.retrieve(updatedTransaction)
+        : [
+          {
+            action: 'refund',
+            enabled: true,
+          },
+        ]
+      ,
     );
   }
 
@@ -319,6 +323,8 @@ export class BusinessController {
         break;
       default:
     }
+
+    await transaction.save();
 
     return this.transactionsService.findUnpackedByUuid(transaction.uuid);
   }
