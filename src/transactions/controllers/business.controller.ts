@@ -147,7 +147,7 @@ export class BusinessController {
     const pdfStream: ReadStream = createReadStream(pdfPath);
     const stats: Stats = statSync(pdfPath);
 
-    res.header('Content-Disposition', `attachment; filename="${transaction.uuid}.pdf"`);
+    res.header('Content-Disposition', `inline; filename="${transaction.uuid}.pdf"`);
     res.header('Content-Length', stats.size);
     res.header('Content-Type', 'application/pdf');
     res.send(pdfStream)
