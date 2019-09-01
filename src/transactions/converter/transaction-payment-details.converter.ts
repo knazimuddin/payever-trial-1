@@ -54,6 +54,9 @@ export class TransactionPaymentDetailsConverter {
       type: transaction.type,
       updated_at: transaction.updated_at,
       user_uuid: transaction.user_uuid,
+
+      example: transaction.example,
+      example_shipping_label: transaction.example_shipping_label,
     };
 
     try {
