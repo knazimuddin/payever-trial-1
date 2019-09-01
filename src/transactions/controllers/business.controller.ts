@@ -370,6 +370,8 @@ export class BusinessController {
         ];
       case 'STATUS_CANCELLED':
         return [];
+      default:
+        return [];
     }
   }
 
