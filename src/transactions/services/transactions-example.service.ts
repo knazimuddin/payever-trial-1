@@ -7,7 +7,6 @@ import { BusinessDto } from '../dto';
 import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionExampleModel, TransactionModel } from '../models';
 import { TransactionExampleSchemaName } from '../schemas';
-import { Uniqid } from '../tools';
 import { TransactionsService } from './transactions.service';
 
 @Injectable()
@@ -25,7 +24,7 @@ export class TransactionsExampleService {
     for (const example of examples) {
       const transactionDto: TransactionPackedDetailsInterface = {
         ...example.toObject(),
-        original_id: Uniqid.generate(),
+        original_id: uuid().replace('-', ''),
         uuid: uuid(),
 
         business_uuid: business._id,
