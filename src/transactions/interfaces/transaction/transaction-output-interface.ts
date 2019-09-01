@@ -20,6 +20,7 @@ export interface TransactionOutputInterface {
     total: number;
     created_at: Date;
     updated_at: Date;
+    example: boolean;
   };
   details: OutputDetailsInterface;
   payment_option: {
@@ -71,6 +72,8 @@ export interface TransactionOutputInterface {
     method_name: string;
     option_name: string;
     delivery_fee: number;
+    order_id: string;
+    example_label: string;
   };
   store: {
     id: string;

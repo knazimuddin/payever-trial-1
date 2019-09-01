@@ -50,4 +50,5 @@ export interface TransactionBasicInterface extends SantanderApplicationAwareInte
   user_uuid: string;
 
   example?: boolean;
+  example_shipping_label?: string;
 }

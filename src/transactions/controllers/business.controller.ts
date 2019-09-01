@@ -21,6 +21,7 @@ import { environment } from '../../environments';
 import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
 import { ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
+import { ActionItemInterface } from '../interfaces';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { BusinessModel, TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
@@ -121,12 +122,7 @@ export class BusinessController {
       updatedTransaction,
       !transaction.example
         ? await this.actionsRetriever.retrieve(updatedTransaction)
-        : [
-          {
-            action: 'refund',
-            enabled: true,
-          },
-        ]
+        : this.retrieveFakeActions(updatedTransaction)
       ,
     );
   }
@@ -313,12 +309,30 @@ export class BusinessController {
       case 'shipping_goods':
         transaction.status = 'STATUS_PAID';
         transaction.place = 'paid';
-        transaction.shipping_order_id = '507f639c-048d-4d1c-b4ab-135bc9e140d0';
+        transaction.shipping_order_id = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
+        switch (transaction.billing_address.id) {
+          case 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa':
+            transaction.example_shipping_label =
+              `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
+                + `label/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa.pdf`;
+            break;
+          case 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb':
+            transaction.example_shipping_label =
+              `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
+              + `label/bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb.pdf`;
+
+            break;
+        }
 
         break;
       case 'refund':
         transaction.status = 'STATUS_REFUNDED';
         transaction.place = 'refunded';
+
+        break;
+      case 'cancel':
+        transaction.status = 'STATUS_CANCELLED';
+        transaction.place = 'cancelled';
 
         break;
       default:
@@ -327,6 +341,36 @@ export class BusinessController {
     await transaction.save();
 
     return this.transactionsService.findUnpackedByUuid(transaction.uuid);
+  }
+
+  private retrieveFakeActions(unpackedTransaction: TransactionUnpackedDetailsInterface): ActionItemInterface[] {
+    switch (unpackedTransaction.status) {
+      case 'STATUS_ACCEPTED':
+        return [
+          {
+            action: 'refund',
+            enabled: true,
+          },
+          {
+            action: 'cancel',
+            enabled: true,
+          },
+          {
+            action: 'shipping_goods',
+            enabled: true,
+          },
+        ];
+      case 'STATUS_PAID':
+      case 'STATUS_REFUNDED':
+        return [
+          {
+            action: 'refund',
+            enabled: true,
+          },
+        ];
+      case 'STATUS_CANCELLED':
+        return [];
+    }
   }
 
   private async getDetails(transaction: TransactionModel): Promise<TransactionOutputInterface>  {
