@@ -16,6 +16,8 @@ import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
+import { createReadStream, ReadStream, Stats, statSync } from 'fs';
+import * as path from 'path';
 import { environment } from '../../environments';
 
 import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
@@ -125,6 +127,30 @@ export class BusinessController {
         : this.retrieveFakeActions(updatedTransaction)
       ,
     );
+  }
+
+  @Get(':uuid/label/:pdf')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.anonymous)
+  public async label(
+    @Param('pdf') pdf: string,
+    @ParamModel(
+      {
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+    @Res() res: FastifyReply<any>,
+  ): Promise<any> {
+    const pdfPath: string = path.resolve(`./example_labels/${pdf}`);
+    const pdfStream: ReadStream = createReadStream(pdfPath);
+    const stats: Stats = statSync(pdfPath);
+
+    res.header('Content-Disposition', `attachment; filename="${transaction.uuid}.pdf"`);
+    res.header('Content-Length', stats.size);
+    res.header('Content-Type', 'application/pdf');
+    res.send(pdfStream)
   }
 
   @Post(':uuid/legacy-api-action/:action')
