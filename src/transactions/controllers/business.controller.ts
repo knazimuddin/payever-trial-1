@@ -380,7 +380,10 @@ export class BusinessController {
 
     return TransactionOutputConverter.convert(
       unpackedTransaction,
-      await this.actionsRetriever.retrieve(unpackedTransaction),
+      !transaction.example
+        ? await this.actionsRetriever.retrieve(unpackedTransaction)
+        : this.retrieveFakeActions(unpackedTransaction)
+      ,
     );
   }
 }
