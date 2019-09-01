@@ -24,7 +24,7 @@ export class TransactionsExampleService {
     for (const example of examples) {
       const transactionDto: TransactionPackedDetailsInterface = {
         ...example.toObject(),
-        original_id: uuid().replace('-', ''),
+        original_id: uuid().split('-').join(''),
         uuid: uuid(),
 
         business_uuid: business._id,
