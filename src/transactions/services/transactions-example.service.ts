@@ -22,8 +22,10 @@ export class TransactionsExampleService {
     const examples: TransactionExampleModel[] = await this.transactionExampleModel.find({ country });
 
     for (const example of examples) {
+      const raw: any = example.toObject();
+      delete raw._id;
       const transactionDto: TransactionPackedDetailsInterface = {
-        ...example.toObject(),
+        ...raw,
         original_id: uuid().split('-').join(''),
         uuid: uuid(),
 
