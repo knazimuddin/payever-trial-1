@@ -37,6 +37,8 @@ export class TransactionOutputConverter {
 
         created_at: transaction.created_at,
         updated_at: transaction.updated_at,
+
+        example: transaction.example,
       },
 
       billing_address: transaction.billing_address,
@@ -90,6 +92,9 @@ export class TransactionOutputConverter {
         delivery_fee: transaction.delivery_fee,
         method_name: transaction.shipping_method_name,
         option_name: transaction.shipping_option_name,
+
+        example_label: transaction.example_shipping_label,
+        order_id: transaction.shipping_order_id,
       },
       status: {
         color: transaction.status_color,

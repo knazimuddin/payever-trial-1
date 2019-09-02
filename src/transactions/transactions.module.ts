@@ -24,19 +24,21 @@ import {
 import { ElasticSearchClient } from './elasticsearch/elastic-search.client';
 import { PaymentMailEventProducer } from './producer';
 import {
-  BusinessCurrencySchema,
-  BusinessCurrencySchemaName,
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,
+  BusinessSchema,
+  BusinessSchemaName,
   PaymentFlowSchema,
   PaymentFlowSchemaName,
+  TransactionExampleSchema,
+  TransactionExampleSchemaName,
   TransactionSchema,
   TransactionSchemaName,
 } from './schemas';
 import {
   ActionsRetriever,
-  BusinessCurrencyService,
   BusinessPaymentOptionService,
+  BusinessService,
   CurrencyExchangeService,
   DtoValidationService,
   ElasticSearchService,
@@ -46,6 +48,7 @@ import {
   PaymentsMicroService,
   StatisticsService,
   TransactionHistoryService,
+  TransactionsExampleService,
   TransactionsService,
 } from './services';
 
@@ -66,9 +69,10 @@ import {
     HttpModule,
     MongooseModule.forFeature([
       { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
+      { name: TransactionExampleSchemaName, schema: TransactionExampleSchema },
       { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
       { name: TransactionSchemaName, schema: TransactionSchema },
-      { name: BusinessCurrencySchemaName, schema: BusinessCurrencySchema },
+      { name: BusinessSchemaName, schema: BusinessSchema },
     ]),
     NotificationsSdkModule,
     CommonSdkModule.forRoot({
@@ -82,7 +86,7 @@ import {
     ActionsRetriever,
     BpoFixCommand,
     BusinessPaymentOptionService,
-    BusinessCurrencyService,
+    BusinessService,
     CurrencyExchangeService,
     DtoValidationService,
     MessagingService,
@@ -94,6 +98,7 @@ import {
     StatisticsService,
     TransactionHistoryService,
     TransactionsEsExportCommand,
+    TransactionsExampleService,
     TransactionsExportCommand,
     TransactionsFieldMappingSetupCommand,
     TransactionsService,
