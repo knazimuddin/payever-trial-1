@@ -9,7 +9,7 @@ import { CheckoutTransactionInterface } from '../interfaces/checkout';
 import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { PaymentMailEventProducer } from '../producer';
-import { StatisticsService, TransactionsService } from '../services';
+import { StatisticsService, TransactionsExampleService, TransactionsService } from '../services';
 
 @Controller()
 export class TransactionEventsController {
@@ -23,8 +23,9 @@ export class TransactionEventsController {
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly statisticsService: StatisticsService,
-    private readonly logger: Logger,
     private readonly paymentMailEventProducer: PaymentMailEventProducer,
+    private readonly exampleService: TransactionsExampleService,
+    private readonly logger: Logger,
   ) { }
 
   @MessagePattern({
@@ -44,6 +45,8 @@ export class TransactionEventsController {
     this.logger.log({ text: 'PAYMENT.CREATE: Prepared transaction', transaction });
     const created: TransactionModel = await this.transactionsService.create(transaction);
     this.logger.log({ text: 'PAYMENT.CREATE: Created transaction', transaction: created.toObject() });
+
+    await this.exampleService.removeBusinessExamples(created.business_uuid);
   }
 
   @MessagePattern({

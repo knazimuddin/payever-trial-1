@@ -1,5 +1,5 @@
 export * from './actions.retriever';
-export * from './business-currency.service';
+export * from './business.service';
 export * from './business-payment-option.service';
 export * from './currency-exchange.service';
 export * from './dto-validation.service';
@@ -11,3 +11,4 @@ export * from './payments-micro.service';
 export * from './statistics.service';
 export * from './transaction-history.service';
 export * from './transactions.service';
+export * from './transactions-example.service';

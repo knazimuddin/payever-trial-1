@@ -20,12 +20,13 @@ import {
   TransactionUnpackedDetailsInterface,
 } from '../interfaces/transaction';
 import { TransactionHistoryEntryModel, TransactionModel } from '../models';
+import { TransactionSchemaName } from '../schemas';
 
 @Injectable()
 export class TransactionsService {
 
   constructor(
-    @InjectModel('Transaction') private readonly transactionModel: Model<TransactionModel>,
+    @InjectModel(TransactionSchemaName) private readonly transactionModel: Model<TransactionModel>,
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
     private readonly elasticSearchClient: ElasticSearchClient,
     private readonly logger: Logger,
@@ -74,6 +75,9 @@ export class TransactionsService {
     transactionUuid: string,
     transactionDto: TransactionPackedDetailsInterface,
   ): Promise<TransactionModel> {
+    if (transactionDto.id) {
+      transactionDto.original_id = transactionDto.id;
+    }
     transactionDto.uuid = transactionUuid;
 
     const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
@@ -101,7 +105,6 @@ export class TransactionsService {
     transactionUuid: string,
     transactionHistory: TransactionHistoryEntryModel[],
   ): Promise<TransactionModel> {
-
     const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
       {
         uuid: transactionUuid,
@@ -132,6 +135,10 @@ export class TransactionsService {
 
   public async findModelByParams(params: any): Promise<TransactionModel> {
     return this.transactionModel.findOne(params);
+  }
+
+  public async findCollectionByParams(params: any): Promise<TransactionModel[]> {
+    return this.transactionModel.find(params);
   }
 
   public async findUnpackedByUuid(transactionUuid: string): Promise<TransactionUnpackedDetailsInterface> {

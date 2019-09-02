@@ -16,21 +16,25 @@ import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
+import { createReadStream, ReadStream, Stats, statSync } from 'fs';
+import * as path from 'path';
 import { environment } from '../../environments';
 
 import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
-import { ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
+import { BusinessDto, ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
+import { ActionItemInterface } from '../interfaces';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
-import { BusinessCurrencyModel, TransactionModel } from '../models';
+import { BusinessModel, TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import {
   ActionsRetriever,
-  BusinessCurrencyService,
+  BusinessService,
   DtoValidationService,
   ElasticSearchService,
   MessagingService,
   MongoSearchService,
+  TransactionsExampleService,
   TransactionsService,
 } from '../services';
 import { BusinessFilter, Exporter, ExportFormat } from '../tools';
@@ -55,7 +59,8 @@ export class BusinessController {
     private readonly messagingService: MessagingService,
     private readonly actionsRetriever: ActionsRetriever,
     private readonly logger: Logger,
-    private readonly businessCurrencyService: BusinessCurrencyService,
+    private readonly businessService: BusinessService,
+    private readonly exampleService: TransactionsExampleService,
   ) {
     this.defaultCurrency = environment.defaultCurrency;
   }
@@ -104,16 +109,50 @@ export class BusinessController {
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionOutputInterface> {
-    const updatedTransaction: TransactionUnpackedDetailsInterface = await this.doAction(
-      transaction,
-      actionPayload,
-      action,
-    );
+    const updatedTransaction: TransactionUnpackedDetailsInterface = !transaction.example
+      ? await this.doAction(
+        transaction,
+        actionPayload,
+        action,
+      )
+      : await this.doFakeAction(
+        transaction,
+        actionPayload,
+        action,
+      )
+    ;
 
     return TransactionOutputConverter.convert(
       updatedTransaction,
-      await this.actionsRetriever.retrieve(updatedTransaction),
+      !transaction.example
+        ? await this.actionsRetriever.retrieve(updatedTransaction)
+        : this.retrieveFakeActions(updatedTransaction)
+      ,
     );
+  }
+
+  @Get(':uuid/label/:pdf')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.anonymous)
+  public async label(
+    @Param('pdf') pdf: string,
+    @ParamModel(
+      {
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+    @Res() res: FastifyReply<any>,
+  ): Promise<any> {
+    const pdfPath: string = path.resolve(`./example_labels/${pdf}`);
+    const pdfStream: ReadStream = createReadStream(pdfPath);
+    const stats: Stats = statSync(pdfPath);
+
+    res.header('Content-Disposition', `inline; filename="${transaction.uuid}.pdf"`);
+    res.header('Content-Length', stats.size);
+    res.header('Content-Type', 'application/pdf');
+    res.send(pdfStream)
   }
 
   @Post(':uuid/legacy-api-action/:action')
@@ -189,9 +228,8 @@ export class BusinessController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
-    const currency: BusinessCurrencyModel = await this.businessCurrencyService.getBusinessCurrency(businessId);
-    const businessCurrencyCode: string = currency ? currency.currency : this.defaultCurrency;
-    listDto.currency = businessCurrencyCode;
+    const business: BusinessModel = await this.businessService.getBusinessCurrency(businessId);
+    listDto.currency = business ? business.currency : this.defaultCurrency;
 
     return this.searchService.getResult(listDto);
   }
@@ -204,9 +242,8 @@ export class BusinessController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
-    const currency: BusinessCurrencyModel = await this.businessCurrencyService.getBusinessCurrency(businessId);
-    const businessCurrencyCode: string = currency ? currency.currency : this.defaultCurrency;
-    listDto.currency = businessCurrencyCode;
+    const currency: BusinessModel = await this.businessService.getBusinessCurrency(businessId);
+    listDto.currency = currency ? currency.currency : this.defaultCurrency;
 
     return this.elasticSearchService.getResult(listDto);
   }
@@ -223,9 +260,8 @@ export class BusinessController {
     exportDto.limit = 10000;
     exportDto.page = 1;
     exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
-    const currency: BusinessCurrencyModel = await this.businessCurrencyService.getBusinessCurrency(businessId);
-    const businessCurrencyCode: string = currency ? currency.currency : this.defaultCurrency;
-    exportDto.currency = businessCurrencyCode;
+    const business: BusinessModel = await this.businessService.getBusinessCurrency(businessId);
+    exportDto.currency = business ? business.currency : this.defaultCurrency;
     const result: PagingResultDto =  await this.searchService.getResult(exportDto);
     const format: ExportFormat = exportDto.format;
     const fileName: string = exportDto.businessName.replace(/[^\x00-\x7F]/g, '');
@@ -254,6 +290,15 @@ export class BusinessController {
       limit: '',
       order_by: '',
     };
+  }
+
+  @Post('trigger-example')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.anonymous)
+  public async triggerExample(
+    @Body() businessDto: BusinessDto,
+  ): Promise<any> {
+    return this.exampleService.createBusinessExamples(businessDto);
   }
 
   private async doAction(
@@ -292,6 +337,81 @@ export class BusinessController {
     return updatedTransaction;
   }
 
+  private async doFakeAction(
+    transaction: TransactionModel,
+    actionPayload: ActionPayloadDto,
+    action: string,
+  ): Promise<TransactionUnpackedDetailsInterface> {
+    switch (action) {
+      case 'shipping_goods':
+        transaction.status = 'STATUS_PAID';
+        transaction.place = 'paid';
+        transaction.shipping_order_id = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
+        switch (transaction.billing_address.id) {
+          case 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa':
+            transaction.example_shipping_label =
+              `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
+                + `label/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa.pdf`;
+            break;
+          case 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb':
+            transaction.example_shipping_label =
+              `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
+              + `label/bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb.pdf`;
+
+            break;
+        }
+
+        break;
+      case 'refund':
+        transaction.status = 'STATUS_REFUNDED';
+        transaction.place = 'refunded';
+
+        break;
+      case 'cancel':
+        transaction.status = 'STATUS_CANCELLED';
+        transaction.place = 'cancelled';
+
+        break;
+      default:
+    }
+
+    await transaction.save();
+
+    return this.transactionsService.findUnpackedByUuid(transaction.uuid);
+  }
+
+  private retrieveFakeActions(unpackedTransaction: TransactionUnpackedDetailsInterface): ActionItemInterface[] {
+    switch (unpackedTransaction.status) {
+      case 'STATUS_ACCEPTED':
+        return [
+          {
+            action: 'refund',
+            enabled: true,
+          },
+          {
+            action: 'cancel',
+            enabled: true,
+          },
+          {
+            action: 'shipping_goods',
+            enabled: true,
+          },
+        ];
+      case 'STATUS_PAID':
+      case 'STATUS_REFUNDED':
+        return [
+          {
+            action: 'refund',
+            enabled: true,
+          },
+        ];
+      case 'STATUS_CANCELLED':
+        return [];
+      default:
+        return [];
+    }
+  }
+
   private async getDetails(transaction: TransactionModel): Promise<TransactionOutputInterface>  {
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
@@ -299,7 +419,10 @@ export class BusinessController {
 
     return TransactionOutputConverter.convert(
       unpackedTransaction,
-      await this.actionsRetriever.retrieve(unpackedTransaction),
+      !transaction.example
+        ? await this.actionsRetriever.retrieve(unpackedTransaction)
+        : this.retrieveFakeActions(unpackedTransaction)
+      ,
     );
   }
 }

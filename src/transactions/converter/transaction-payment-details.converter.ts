@@ -44,6 +44,7 @@ export class TransactionPaymentDetailsConverter {
       shipping_category: transaction.shipping_category,
       shipping_method_name: transaction.shipping_method_name,
       shipping_option_name: transaction.shipping_option_name,
+      shipping_order_id: transaction.shipping_order_id,
       specific_status: transaction.specific_status,
       status: transaction.status,
       status_color: transaction.status_color,
@@ -53,6 +54,9 @@ export class TransactionPaymentDetailsConverter {
       type: transaction.type,
       updated_at: transaction.updated_at,
       user_uuid: transaction.user_uuid,
+
+      example: transaction.example,
+      example_shipping_label: transaction.example_shipping_label,
     };
 
     try {
