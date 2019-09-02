@@ -21,7 +21,7 @@ import * as path from 'path';
 import { environment } from '../../environments';
 
 import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
-import { ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
+import { BusinessDto, ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { ActionItemInterface } from '../interfaces';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
@@ -34,6 +34,7 @@ import {
   ElasticSearchService,
   MessagingService,
   MongoSearchService,
+  TransactionsExampleService,
   TransactionsService,
 } from '../services';
 import { BusinessFilter, Exporter, ExportFormat } from '../tools';
@@ -59,6 +60,7 @@ export class BusinessController {
     private readonly actionsRetriever: ActionsRetriever,
     private readonly logger: Logger,
     private readonly businessService: BusinessService,
+    private readonly exampleService: TransactionsExampleService,
   ) {
     this.defaultCurrency = environment.defaultCurrency;
   }
@@ -288,6 +290,15 @@ export class BusinessController {
       limit: '',
       order_by: '',
     };
+  }
+
+  @Post('trigger-example')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.anonymous)
+  public async triggerExample(
+    @Body() businessDto: BusinessDto,
+  ): Promise<any> {
+    return this.exampleService.createBusinessExamples(businessDto);
   }
 
   private async doAction(
