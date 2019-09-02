@@ -359,6 +359,12 @@ export class BusinessController {
               + `label/bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb.pdf`;
 
             break;
+          case 'cccccccc-cccc-cccc-cccc-cccccccccccc':
+            transaction.example_shipping_label =
+              `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
+              + `label/cccccccc-cccc-cccc-cccc-cccccccccccc.pdf`;
+
+            break;
         }
 
         break;
