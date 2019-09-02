@@ -294,7 +294,7 @@ export class BusinessController {
 
   @Post('trigger-example')
   @HttpCode(HttpStatus.OK)
-  @Roles(RolesEnum.admin)
+  @Roles(RolesEnum.anonymous)
   public async triggerExample(
     @Body() businessDto: BusinessDto,
   ): Promise<any> {
