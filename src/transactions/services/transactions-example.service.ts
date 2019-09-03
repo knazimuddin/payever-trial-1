@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { RabbitMqClient } from '@pe/nest-kit';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
+import { RabbitRoutingKeys } from '../../enums';
 import { BusinessDto } from '../dto';
 import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionExampleModel, TransactionModel } from '../models';
@@ -15,6 +17,7 @@ export class TransactionsExampleService {
     @InjectModel(TransactionExampleSchemaName) private readonly transactionExampleModel: Model<TransactionExampleModel>,
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
     private readonly transactionsService: TransactionsService,
+    private readonly rabbitClient: RabbitMqClient,
   ) {}
 
   public async createBusinessExamples(business: BusinessDto): Promise<void> {
@@ -40,7 +43,31 @@ export class TransactionsExampleService {
         example: true,
       };
 
-      await this.transactionsService.create(transactionDto);
+      const created: TransactionModel = await this.transactionsService.create(transactionDto);
+
+      await this.rabbitClient
+        .send(
+          {
+            channel: RabbitRoutingKeys.TransactionsPaymentAdd,
+            exchange: 'async_events',
+          },
+          {
+            name: RabbitRoutingKeys.TransactionsPaymentAdd,
+            payload: {
+              amount: created.amount,
+              business: {
+                id: created.business_uuid,
+              },
+              channel_set: {
+                id: created.channel_set_uuid,
+              },
+              date: created.updated_at,
+              id: created.uuid,
+              items: created.items,
+            },
+          },
+        )
+      ;
     }
   }
 
@@ -52,6 +79,30 @@ export class TransactionsExampleService {
 
     for (const transaction of transactions) {
       await this.transactionsService.removeByUuid(transaction.uuid);
+
+      await this.rabbitClient
+        .send(
+          {
+            channel: RabbitRoutingKeys.TransactionsPaymentRemoved,
+            exchange: 'async_events',
+          },
+          {
+            name: RabbitRoutingKeys.TransactionsPaymentRemoved,
+            payload: {
+              amount: transaction.amount,
+              business: {
+                id: transaction.business_uuid,
+              },
+              channel_set: {
+                id: transaction.channel_set_uuid,
+              },
+              date: transaction.updated_at,
+              id: transaction.uuid,
+              items: transaction.items,
+            },
+          },
+        )
+      ;
     }
   }
 }

@@ -6,12 +6,13 @@ import { RabbitRoutingKeys } from '../../enums';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
+import { TransactionSchemaName } from '../schemas';
 
 @Injectable()
 export class StatisticsService {
 
   constructor(
-    @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
+    @InjectModel(TransactionSchemaName) private readonly transactionsModel: Model<TransactionModel>,
     private readonly rabbitClient: RabbitMqClient,
   ) {}
 
