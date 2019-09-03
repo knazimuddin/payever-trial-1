@@ -105,4 +105,30 @@ export class TransactionsExampleService {
       ;
     }
   }
+
+  public async refundExample(transaction: TransactionModel, refund: number): Promise<void> {
+    await this.rabbitClient
+      .send(
+        {
+          channel: RabbitRoutingKeys.TransactionsPaymentSubtract,
+          exchange: 'async_events',
+        },
+        {
+          name: RabbitRoutingKeys.TransactionsPaymentSubtract,
+          payload: {
+            amount: refund,
+            business: {
+              id: transaction.business_uuid,
+            },
+            channel_set: {
+              id: transaction.channel_set_uuid,
+            },
+            date: transaction.updated_at,
+            id: transaction.uuid,
+            items: transaction.items,
+          },
+        },
+      )
+    ;
+  }
 }
