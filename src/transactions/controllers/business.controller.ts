@@ -406,12 +406,6 @@ export class BusinessController {
         ];
       case 'STATUS_PAID':
       case 'STATUS_REFUNDED':
-        return [
-          {
-            action: 'refund',
-            enabled: true,
-          },
-        ];
       case 'STATUS_CANCELLED':
         return [];
       default:
