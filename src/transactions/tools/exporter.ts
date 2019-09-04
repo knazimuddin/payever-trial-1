@@ -29,7 +29,7 @@ export class Exporter {
       ]);
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([header, ...data]);
-    XLSX.utils.book_append_sheet(wb, ws,`${fileName} Transactions`);
+    XLSX.utils.book_append_sheet(wb, ws,`${fileName}`.slice(0, 30));
     const file: any = XLSX.write(wb, { bookType: format, bookSST:true, type: 'buffer' });
     res.header('Content-Transfer-Encoding', `binary`);
     res.header('Access-Control-Expose-Headers', `Content-Disposition,X-Suggested-Filename`);
