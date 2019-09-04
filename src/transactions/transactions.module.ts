@@ -52,9 +52,6 @@ import {
   TransactionsExampleService,
   TransactionsService,
 } from './services';
-import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
-import { environment } from '../environments';
-import { HistoryRecordEmitterConsumer } from './emitter/history-record-emitter.consumer';
 import { NestEmitterModule } from '@pe/nest-kit';
 import { AbstractConsumer, EmitterConsumerInitializer } from './emitter';
 import { EventEmiterConsumers } from './enum';
