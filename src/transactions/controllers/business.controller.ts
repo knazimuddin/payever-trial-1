@@ -371,6 +371,7 @@ export class BusinessController {
       case 'refund':
         transaction.status = 'STATUS_REFUNDED';
         transaction.place = 'refunded';
+        await this.exampleService.refundExample(transaction, actionPayload.fields.payment_return.amount);
 
         break;
       case 'cancel':
@@ -405,12 +406,6 @@ export class BusinessController {
         ];
       case 'STATUS_PAID':
       case 'STATUS_REFUNDED':
-        return [
-          {
-            action: 'refund',
-            enabled: true,
-          },
-        ];
       case 'STATUS_CANCELLED':
         return [];
       default:
