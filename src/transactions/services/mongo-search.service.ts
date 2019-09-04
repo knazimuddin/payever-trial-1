@@ -39,7 +39,7 @@ export class MongoSearchService {
           collection: res[0],
           filters: {},
           pagination_data: {
-            amount: res[2],
+            amount: res[2] ? res[2] : 0,
             amount_currency: listDto.currency,
             page: listDto.page,
             total: res[1],
