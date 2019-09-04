@@ -3,6 +3,7 @@ import { setWorldConstructor } from 'cucumber';
 import { AppModule } from '../../src/app.module';
 import { options } from './options';
 import { EmitterConsumerInitializer } from '../../src/transactions/emitter';
+import { INestApplication } from '@nestjs/common';
 
 export class CustomWorld extends AbstractWorld {
   protected application: INestApplication;
