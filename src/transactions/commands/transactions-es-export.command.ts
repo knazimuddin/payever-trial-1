@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Command, Positional } from '@pe/nest-kit';
 import { Model } from 'mongoose';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
-import { ElasticIndexingTextFieldsEnum, ElasticTransactionEnum } from '../enum';
+import { ElasticTransactionEnum } from '../enum';
 import { TransactionModel } from '../models';
 
 @Injectable()
@@ -13,24 +13,30 @@ export class TransactionsEsExportCommand {
     private readonly elasticSearchClient: ElasticSearchClient,
   ) {}
 
-  @Command({ command: 'transactions:export:es', describe: 'Export transactions for ElasticSearch' })
-  public async transactionsEsExport(
+  @Command({ command: 'transactions:es:export', describe: 'Export transactions for ElasticSearch' })
+  public async export(
     @Positional({
       name: 'after',
     }) after: string,
     @Positional({
       name: 'before',
     }) before: string,
+    @Positional({
+      name: 'business',
+    }) business_uuid: string,
   ): Promise<void> {
     const criteria: any = {};
     if (before || after) {
-      criteria.created_at = {};
+      criteria.updated_at = {};
     }
     if (before) {
-      criteria.created_at.$lte = new Date(before);
+      criteria.updated_at.$lte = new Date(before);
     }
     if (after) {
-      criteria.created_at.$gte = new Date(after);
+      criteria.updated_at.$gte = new Date(after);
+    }
+    if (business_uuid) {
+      criteria.business_uuid = business_uuid;
     }
 
     Logger.log(`Criteria is ${JSON.stringify(criteria, null, 2)}.`);
@@ -38,30 +44,21 @@ export class TransactionsEsExportCommand {
     const count: number = await this.transactionsModel.countDocuments(criteria);
     Logger.log(`Found ${count} records.`);
 
-    const limit: number = 200;
+    const limit: number = 100;
     let start: number = 0;
 
     while (start < count) {
       const transactions: TransactionModel[] = await this.getWithLimit(start, limit, criteria);
-      start += limit;
       Logger.log(`${transactions.length} items parsed`);
+
       await this.elasticSearchClient.bulkIndex(
         ElasticTransactionEnum.index,
         ElasticTransactionEnum.type,
         transactions,
       );
 
+      start += limit;
       Logger.log(`Exported ${start} of ${count}`);
-    }
-
-    for (const item in ElasticIndexingTextFieldsEnum) {
-      if (ElasticIndexingTextFieldsEnum[item]) {
-        await this.elasticSearchClient.setupFieldMapping(
-          ElasticTransactionEnum.index,
-          ElasticTransactionEnum.type,
-          ElasticIndexingTextFieldsEnum[item],
-        );
-      }
     }
   }
 
