@@ -1,7 +1,21 @@
-import { IsNotEmpty, IsString} from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class BusinessDto {
-  @IsNotEmpty()
   @IsString()
-  public uuid: string;
+  @IsNotEmpty()
+  public _id: string;
+
+  @IsString()
+  @IsNotEmpty()
+  public currency: string;
+
+  public companyAddress: {
+    country: string;
+  };
+
+  @IsString()
+  @IsNotEmpty()
+  public name: string;
+
+  public contactEmails: string[];
 }

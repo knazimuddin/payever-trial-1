@@ -9,7 +9,7 @@ import { TransactionModel } from '../models';
 @Injectable()
 export class TransactionsEsExportCommand {
   constructor(
-    @InjectModel('Transaction') private readonly transactionsModel: Model<any>,
+    @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly elasticSearchClient: ElasticSearchClient,
   ) {}
 

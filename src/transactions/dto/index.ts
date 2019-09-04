@@ -1,4 +1,4 @@
-export * from './business-currency.dto';
+export * from './business.dto';
 export * from './remove-business.dto';
 export * from './code-updated.dto';
 export * from './list-query.dto';

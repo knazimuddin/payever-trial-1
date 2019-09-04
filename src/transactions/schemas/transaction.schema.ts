@@ -57,10 +57,13 @@ export const TransactionSchema: Schema = new Schema({
   status_color: {type: String},
   store_id: String,
   store_name: String,
-  total: { type: Number, required: true} ,
+  total: { type: Number, required: true},
   type: { type: String, required: true },
   updated_at: Date,
   user_uuid: String,
+
+  example: Boolean,
+  example_shipping_label: String,
 });
 
 TransactionSchema.index({ uuid: 1});

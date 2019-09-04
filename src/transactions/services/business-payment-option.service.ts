@@ -15,16 +15,12 @@ export class BusinessPaymentOptionService {
   public async createOrUpdate(
     businessPaymentOptionDto: BusinessPaymentOptionInterface,
   ): Promise<BusinessPaymentOptionModel> {
-    const dto: BusinessPaymentOptionInterface = {
-      ...businessPaymentOptionDto,
-    };
-
     await this.model.updateOne(
       {
         id: businessPaymentOptionDto.id,
       },
       {
-        $set: this.wrap(dto),
+        $set: this.wrap(businessPaymentOptionDto),
       },
       {
         new: true,
@@ -36,7 +32,7 @@ export class BusinessPaymentOptionService {
   }
 
   public async findOneById(id: number): Promise<BusinessPaymentOptionModel> {
-    const bpo: BusinessPaymentOptionModel = await this.model.findOne({id});
+    const bpo: BusinessPaymentOptionModel = await this.model.findOne({ id });
 
     return bpo
       ? this.unwrap(bpo.toObject({ virtuals: true }))

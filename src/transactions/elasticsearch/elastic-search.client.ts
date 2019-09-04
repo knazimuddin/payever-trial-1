@@ -131,7 +131,10 @@ export class ElasticSearchClient {
       })
       .then((response: any) => this.logger.log({
         context: 'ElasticSearchClient',
+        field: field,
+        index: index,
         response: response,
+        type: type,
       }))
       .catch((e: any) => this.logger.error(
         {

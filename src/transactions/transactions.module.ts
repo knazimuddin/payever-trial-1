@@ -1,9 +1,14 @@
 import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
-import { TransactionsEsExportCommand } from './command/transactions-export-to-es.command';
-import { TransactionsExportCommand } from './command/transactions-export.command';
-
+import { environment } from '../environments';
+import {
+  BpoFixCommand,
+  TransactionsEsExportCommand,
+  TransactionsExportCommand,
+  TransactionsFieldMappingSetupCommand,
+} from './commands';
 import {
   AdminController,
   BpoEventsController,
@@ -20,19 +25,21 @@ import {
 import { ElasticSearchClient } from './elasticsearch/elastic-search.client';
 import { PaymentMailEventProducer } from './producer';
 import {
-  BusinessCurrencySchema,
-  BusinessCurrencySchemaName,
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,
+  BusinessSchema,
+  BusinessSchemaName,
   PaymentFlowSchema,
   PaymentFlowSchemaName,
+  TransactionExampleSchema,
+  TransactionExampleSchemaName,
   TransactionSchema,
   TransactionSchemaName,
 } from './schemas';
 import {
   ActionsRetriever,
-  BusinessCurrencyService,
   BusinessPaymentOptionService,
+  BusinessService,
   CurrencyExchangeService,
   DtoValidationService,
   ElasticSearchService,
@@ -42,6 +49,7 @@ import {
   PaymentsMicroService,
   StatisticsService,
   TransactionHistoryService,
+  TransactionsExampleService,
   TransactionsService,
 } from './services';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
@@ -69,9 +77,10 @@ import { EventEmiterConsumers } from './enum';
     HttpModule,
     MongooseModule.forFeature([
       { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
+      { name: TransactionExampleSchemaName, schema: TransactionExampleSchema },
       { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
       { name: TransactionSchemaName, schema: TransactionSchema },
-      { name: BusinessCurrencySchemaName, schema: BusinessCurrencySchema },
+      { name: BusinessSchemaName, schema: BusinessSchema },
     ]),
     NotificationsSdkModule,
     CommonSdkModule.forRoot({
@@ -84,8 +93,9 @@ import { EventEmiterConsumers } from './enum';
   ],
   providers: [
     ActionsRetriever,
+    BpoFixCommand,
     BusinessPaymentOptionService,
-    BusinessCurrencyService,
+    BusinessService,
     CurrencyExchangeService,
     DtoValidationService,
     MessagingService,
@@ -97,7 +107,9 @@ import { EventEmiterConsumers } from './enum';
     StatisticsService,
     TransactionHistoryService,
     TransactionsEsExportCommand,
+    TransactionsExampleService,
     TransactionsExportCommand,
+    TransactionsFieldMappingSetupCommand,
     TransactionsService,
     PaymentMailEventProducer,
     ...EventEmiterConsumers,

@@ -26,14 +26,11 @@ export class BpoEventsController {
     origin: 'rabbitmq',
   })
   public async onBpoCreatedEvent(msg: any): Promise<void> {
-    const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
-    const business_payment_option: BusinessPaymentOptionInterface = data.business_payment_option;
+    const data: { business_payment_option: BusinessPaymentOptionInterface } =
+      this.messageBusService.unwrapMessage<{ business_payment_option: BusinessPaymentOptionInterface }>(msg.data);
     this.logger.log({ text: 'BPO.CREATE', data });
-    const bpo: any = {
-      _id: data.business_payment_option.uuid,
-      ...business_payment_option,
-    };
-    await this.bpoService.createOrUpdate(bpo);
+    await this.bpoService.createOrUpdate(data.business_payment_option);
+    this.logger.log('BPO.CREATE COMPLETED');
   }
 
   @MessagePattern({
@@ -42,10 +39,10 @@ export class BpoEventsController {
     origin: 'rabbitmq',
   })
   public async onBpoUpdatedEvent(msg: any): Promise<void> {
-    const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
+    const data: { business_payment_option: BusinessPaymentOptionInterface } =
+      this.messageBusService.unwrapMessage<{ business_payment_option: BusinessPaymentOptionInterface }>(msg.data);
     this.logger.log({ text: 'BPO.UPDATE', data });
-    const bpo: any = data.business_payment_option;
-    await this.bpoService.createOrUpdate(bpo);
+    await this.bpoService.createOrUpdate(data.business_payment_option);
     this.logger.log('BPO.UPDATE COMPLETED');
   }
 }
