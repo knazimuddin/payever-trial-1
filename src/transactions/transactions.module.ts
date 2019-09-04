@@ -5,9 +5,10 @@ import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
 import {
   BpoFixCommand,
+  TransactionsEsCompareCommand,
   TransactionsEsExportCommand,
+  TransactionsEsSetupCommand,
   TransactionsExportCommand,
-  TransactionsFieldMappingSetupCommand,
 } from './commands';
 import {
   AdminController,
@@ -56,14 +57,14 @@ import {
   controllers: [
     AdminController,
     BpoEventsController,
-    BusinessController,
     BusinessBusMessagesController,
+    BusinessController,
     FlowEventsController,
     HistoryEventsController,
     MigrateEventsController,
+    ThirdPartyEventsController,
     TransactionEventsController,
     UserController,
-    ThirdPartyEventsController,
   ],
   imports: [
     HttpModule,
@@ -89,20 +90,21 @@ import {
     BusinessService,
     CurrencyExchangeService,
     DtoValidationService,
-    MessagingService,
-    MongoSearchService,
     ElasticSearchClient,
     ElasticSearchService,
+    MessagingService,
+    MongoSearchService,
     PaymentFlowService,
+    PaymentMailEventProducer,
     PaymentsMicroService,
     StatisticsService,
     TransactionHistoryService,
+    TransactionsEsCompareCommand,
     TransactionsEsExportCommand,
+    TransactionsEsSetupCommand,
     TransactionsExampleService,
     TransactionsExportCommand,
-    TransactionsFieldMappingSetupCommand,
     TransactionsService,
-    PaymentMailEventProducer,
   ],
 })
 export class TransactionsModule {}

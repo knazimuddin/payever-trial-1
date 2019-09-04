@@ -114,38 +114,6 @@ export class ElasticSearchClient {
     ;
   }
 
-  public async setupFieldMapping(index: string, type: string, field: string): Promise<void> {
-    return this.client.indices
-      .putMapping({
-        index: index,
-        type: type,
-
-        body: {
-          properties: {
-            [field]: {
-              fielddata: true,
-              type: 'text',
-            },
-          },
-        },
-      })
-      .then((response: any) => this.logger.log({
-        context: 'ElasticSearchClient',
-        field: field,
-        index: index,
-        response: response,
-        type: type,
-      }))
-      .catch((e: any) => this.logger.error(
-        {
-          context: 'ElasticSearchClient',
-          error: e.message,
-          message: `Error on ElasticSearch request`,
-        },
-      ))
-    ;
-  }
-
   public async search(index: string, search: any): Promise<any> {
     return this.client
       .search({
@@ -177,5 +145,59 @@ export class ElasticSearchClient {
         },
       ))
     ;
+  }
+
+  public async createIndex(index: string): Promise<any> {
+    return this.client.indices
+      .create({
+        index: index,
+      })
+      .catch((e: any) => this.logger.error(
+        {
+          context: 'ElasticSearchClient',
+          error: e.message,
+          message: `Error on ElasticSearch request`,
+        },
+      ));
+  }
+
+  public async isIndexExists(index: string): Promise<any> {
+    return this.client.indices
+      .exists({
+        index: index,
+      })
+      .catch((e: any) => this.logger.error(
+        {
+          context: 'ElasticSearchClient',
+          error: e.message,
+          message: `Error on ElasticSearch request`,
+        },
+      ));
+  }
+
+  public async setupFieldMapping(index: string, type: string, field: string, config: {}): Promise<void> {
+    return this.client.indices
+      .putMapping({
+        index: index,
+        type: type,
+
+        body: {
+          properties: {
+            [field]: config,
+          },
+        },
+      })
+      .then((response: any) => this.logger.log({
+        context: 'ElasticSearchClient',
+        field: field,
+        index: index,
+        response: response,
+        type: type,
+      }))
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e.message,
+        message: `Error on ElasticSearch request`,
+      }));
   }
 }
