@@ -36,7 +36,6 @@ export class TransactionsEsCompareCommand {
 
     while (start < count) {
       for (const business of await this.getWithLimit(start, limit, criteria)) {
-        Logger.log(business.id);
         const listDto: ListQueryDto = new ListQueryDto();
 
         listDto.filters = BusinessFilter.apply(business.id, listDto.filters);
@@ -46,8 +45,19 @@ export class TransactionsEsCompareCommand {
         const elasticResult: PagingResultDto = await this.elastic.getResult(listDto);
 
         if (mongoResult.pagination_data.amount !== elasticResult.pagination_data.amount) {
-          Logger.log(mongoResult);
-          Logger.log(elasticResult);
+          Logger.log(
+            `Business "${business.id}" has differences `
+              + `between elastic (${elasticResult.pagination_data.amount}) `
+              + `and mongo(${mongoResult.pagination_data.amount}) transactions amount.`,
+          );
+          Logger.log({
+            result: mongoResult,
+            type: 'mongo',
+          });
+          Logger.log({
+            result: elasticResult,
+            type: 'elastic',
+          });
         }
 
         start += limit;
