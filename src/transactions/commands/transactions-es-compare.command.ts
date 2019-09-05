@@ -42,26 +42,21 @@ export class TransactionsEsCompareCommand {
         listDto.currency = business.currency;
 
         const mongoResult: PagingResultDto = await this.mongo.getResult(listDto);
-        const elasticResult: PagingResultDto = await this.elastic.getResult(listDto);
+        const mongoAmount: number = mongoResult.pagination_data.amount;
 
-        if (mongoResult.pagination_data.amount !== elasticResult.pagination_data.amount) {
+        const elasticResult: PagingResultDto = await this.elastic.getResult(listDto);
+        const elasticAmount: number = elasticResult.pagination_data.amount;
+
+        if (Math.ceil(mongoAmount) !== Math.ceil(elasticAmount)) {
           Logger.log(
             `Business "${business.id}" has differences `
-              + `between elastic (${elasticResult.pagination_data.amount}) `
-              + `and mongo(${mongoResult.pagination_data.amount}) transactions amount.`,
+              + `between elastic (${elasticAmount}) `
+              + `and mongo(${mongoAmount}) transactions amount.`,
           );
-          Logger.log({
-            result: mongoResult,
-            type: 'mongo',
-          });
-          Logger.log({
-            result: elasticResult,
-            type: 'elastic',
-          });
         }
-
-        start += limit;
       }
+
+      start += limit;
     }
   }
 
