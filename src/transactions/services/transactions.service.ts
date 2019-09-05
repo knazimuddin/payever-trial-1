@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 import {
   TransactionCartConverter,
+  TransactionDoubleConverter,
   TransactionPaymentDetailsConverter,
   TransactionSantanderApplicationConverter,
 } from '../converter';
@@ -46,7 +47,7 @@ export class TransactionsService {
       await this.elasticSearchClient.singleIndex(
         ElasticTransactionEnum.index,
         ElasticTransactionEnum.type,
-        created.toObject(),
+        TransactionDoubleConverter.pack(created.toObject()),
       );
 
       await this.notificationsEmitter.sendNotification(
@@ -94,7 +95,7 @@ export class TransactionsService {
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
       ElasticTransactionEnum.type,
-      updated.toObject(),
+      TransactionDoubleConverter.pack(updated.toObject()),
       'update',
     );
 
@@ -122,7 +123,7 @@ export class TransactionsService {
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
       ElasticTransactionEnum.type,
-      updated.toObject(),
+      TransactionDoubleConverter.pack(updated.toObject()),
       'update',
     );
 

@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Client } from 'elasticsearch';
 import { environment } from '../../environments';
-import { TransactionBasicInterface } from '../interfaces/transaction';
 
 @Injectable()
 export class ElasticSearchClient {
@@ -61,10 +60,10 @@ export class ElasticSearchClient {
     ;
   }
 
-  public async bulkIndex(index: string, type: string, data: any, operation: string = 'index'): Promise<void> {
+  public async bulkIndex(index: string, type: string, data: any[], operation: string = 'index'): Promise<void> {
     const bulkBody: any = [];
     for (const item of data) {
-      const plain: TransactionBasicInterface & { _id: string, mongoId: string } = item.toObject();
+      const plain: any = item;
       plain.mongoId = item._id;
       delete plain._id;
 
@@ -76,7 +75,7 @@ export class ElasticSearchClient {
         },
       });
 
-      bulkBody.push(plain);
+      bulkBody.push(item);
     }
 
     if (!bulkBody.length) {

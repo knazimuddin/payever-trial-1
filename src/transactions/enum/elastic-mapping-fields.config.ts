@@ -1,7 +1,6 @@
 export const ElasticMappingFieldsConfig: { [field: string]: {} } = {
   amount: {
-    scaling_factor: 100,
-    type: 'scaled_float',
+    type: 'long',
   },
   channel: {
     fielddata: true,
@@ -14,6 +13,12 @@ export const ElasticMappingFieldsConfig: { [field: string]: {} } = {
   customer_name: {
     fielddata: true,
     type: 'text',
+  },
+  delivery_fee: {
+    type: 'long',
+  },
+  down_payment: {
+    type: 'long',
   },
   example: {
     type: 'boolean',
@@ -30,6 +35,9 @@ export const ElasticMappingFieldsConfig: { [field: string]: {} } = {
     fielddata: true,
     type: 'text',
   },
+  payment_fee: {
+    type: 'long',
+  },
   specific_status: {
     fielddata: true,
     type: 'text',
@@ -39,16 +47,33 @@ export const ElasticMappingFieldsConfig: { [field: string]: {} } = {
     type: 'text',
   },
   total: {
-    scaling_factor: 100,
-    type: 'scaled_float',
+    type: 'long',
   },
   type: {
     fielddata: true,
     type: 'text',
   },
 
+
+  'items.fixed_shipping_price' : {
+    type: 'long',
+  },
   'items.price' : {
-    fielddata: true,
-    type: 'text',
+    type: 'long',
+  },
+  'items.price_net' : {
+    type: 'long',
+  },
+  'items.shipping_price' : {
+    type: 'long',
+  },
+  'items.shipping_settings_rate' : {
+    type: 'long',
+  },
+  'items.vat_rate' : {
+    type: 'long',
+  },
+  'items.weight' : {
+    type: 'long',
   },
 };

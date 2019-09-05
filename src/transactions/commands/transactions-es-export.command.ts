@@ -2,8 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Command, Positional } from '@pe/nest-kit';
 import { Model } from 'mongoose';
+import { TransactionDoubleConverter } from '../converter';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
 import { ElasticTransactionEnum } from '../enum';
+import { TransactionBasicInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 
 @Injectable()
@@ -50,11 +52,16 @@ export class TransactionsEsExportCommand {
     while (start < count) {
       const transactions: TransactionModel[] = await this.getWithLimit(start, limit, criteria);
       Logger.log(`${transactions.length} items parsed`);
+      const processed: TransactionBasicInterface[] = [];
+
+      for (const transaction of transactions) {
+        processed.push(TransactionDoubleConverter.pack(transaction.toObject()));
+      }
 
       await this.elasticSearchClient.bulkIndex(
         ElasticTransactionEnum.index,
         ElasticTransactionEnum.type,
-        transactions,
+        processed,
       );
 
       start += limit;
