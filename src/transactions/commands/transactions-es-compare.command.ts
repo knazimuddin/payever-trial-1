@@ -50,18 +50,15 @@ export class TransactionsEsCompareCommand {
               + `between elastic (${elasticResult.pagination_data.amount}) `
               + `and mongo(${mongoResult.pagination_data.amount}) transactions amount.`,
           );
-          Logger.log({
-            result: mongoResult,
-            type: 'mongo',
-          });
+
           Logger.log({
             result: elasticResult,
             type: 'elastic',
           });
         }
-
-        start += limit;
       }
+
+      start += limit;
     }
   }
 

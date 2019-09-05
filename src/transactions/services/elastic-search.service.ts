@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { TransactionDoubleConverter } from '../converter/transaction-double.converter';
 import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
 import { FiltersList } from '../elastic-filters/filters.list';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
@@ -73,6 +74,8 @@ export class ElasticSearchService {
               elem._source._id = elem._source.mongoId;
               delete elem._source.mongoId;
 
+              elem._source = TransactionDoubleConverter.unpack(elem._source);
+
               return elem._source;
             },
           ),
@@ -108,7 +111,7 @@ export class ElasticSearchService {
 
     return this.elasticSearchClient.search(ElasticTransactionEnum.index, body)
       .then((results: any) => {
-        return results.aggregations.total_amount.value;
+        return results.aggregations.total_amount.value / 100;
       });
   }
 
@@ -147,13 +150,14 @@ export class ElasticSearchService {
       const currencyRate: number = await this.currencyExchangeService.getCurrencyExchangeRate(transaction.key);
       totalPerCurrency += currencyRate
         ? transaction.total_amount.value / currencyRate
-        : transaction.total_amount.value;
+        : transaction.total_amount.value
+      ;
     }
     const rate: number = await this.currencyExchangeService.getCurrencyExchangeRate(currency);
 
     return rate
-      ? totalPerCurrency * rate
-      : totalPerCurrency;
+      ? Number(((totalPerCurrency * rate) / 100).toFixed(2))
+      : Number((totalPerCurrency / 100).toFixed(2));
   }
 
   private async distinctFieldValues(
