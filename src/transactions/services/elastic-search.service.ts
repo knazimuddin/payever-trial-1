@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { TransactionDoubleConverter } from '../converter/transaction-double.converter';
+import { TransactionDoubleConverter } from '../converter';
 import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
 import { FiltersList } from '../elastic-filters/filters.list';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
