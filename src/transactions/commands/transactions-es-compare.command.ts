@@ -53,6 +53,8 @@ export class TransactionsEsCompareCommand {
               + `between elastic (${elasticAmount}) `
               + `and mongo(${mongoAmount}) transactions amount.`,
           );
+        } else if (business_uuid) {
+          Logger.log(`Business "${business_uuid}" is equal.`);
         }
       }
 

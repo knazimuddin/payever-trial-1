@@ -96,7 +96,6 @@ export class TransactionsService {
       ElasticTransactionEnum.index,
       ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
-      'update',
     );
 
     return updated;
@@ -124,7 +123,6 @@ export class TransactionsService {
       ElasticTransactionEnum.index,
       ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
-      'update',
     );
 
     return updated;
