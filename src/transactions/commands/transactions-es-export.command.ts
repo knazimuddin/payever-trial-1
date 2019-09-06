@@ -46,7 +46,7 @@ export class TransactionsEsExportCommand {
     const count: number = await this.transactionsModel.countDocuments(criteria);
     Logger.log(`Found ${count} records.`);
 
-    const limit: number = 100;
+    const limit: number = 1000;
     let start: number = 0;
 
     while (start < count) {

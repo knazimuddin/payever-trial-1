@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Command } from '@pe/nest-kit';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
 import { ElasticMappingFieldsConfig, ElasticTransactionEnum } from '../enum';
@@ -15,6 +15,7 @@ export class TransactionsEsSetupCommand {
   })
   public async setup(): Promise<void> {
     if (!await this.elasticSearchClient.isIndexExists(ElasticTransactionEnum.index)) {
+      Logger.log(`Creating index.`);
       await this.elasticSearchClient.createIndex(ElasticTransactionEnum.index);
     }
 
