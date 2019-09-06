@@ -5,6 +5,7 @@ import { environment } from '../../environments';
 @Injectable()
 export class ElasticSearchClient {
   private client: Client = new Client({
+    deadTimeout: 60000,
     host: environment.elasticSearch,
     log: 'error',
   });
@@ -13,23 +14,22 @@ export class ElasticSearchClient {
     private readonly logger: Logger,
   ) {}
 
-  public async singleIndex(index: string, type: string, item: any, operation: string = 'index'): Promise<void> {
+  public async singleIndex(index: string, type: string, item: any): Promise<void> {
     const bulkBody: any = [];
     item.mongoId = item._id;
     delete item._id;
     bulkBody.push({
-      [operation]: {
+      update: {
         _id: item.mongoId,
         _index: index,
         _type: type,
       },
     });
 
-    if (operation === 'update') {
-      bulkBody.push({doc: item});
-    } else {
-      bulkBody.push(item);
-    }
+    bulkBody.push({
+      doc: item,
+      doc_as_upsert : true,
+    });
 
     await this.client
       .bulk({ body: bulkBody })
@@ -54,28 +54,31 @@ export class ElasticSearchClient {
       })
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
-        error: e.message,
+        error: e,
         message: `Error on ElasticSearch request`,
       }))
     ;
   }
 
-  public async bulkIndex(index: string, type: string, data: any[], operation: string = 'index'): Promise<void> {
+  public async bulkIndex(index: string, type: string, data: any[]): Promise<void> {
     const bulkBody: any = [];
     for (const item of data) {
-      const plain: any = item;
-      plain.mongoId = item._id;
-      delete plain._id;
+      const itemId: string = item._id;
+      item.mongoId = item._id;
+      delete item._id;
 
       bulkBody.push({
-        [operation]: {
-          _id: item._id,
+        update: {
+          _id: itemId,
           _index: index,
           _type: type,
         },
       });
 
-      bulkBody.push(item);
+      bulkBody.push({
+        doc: item,
+        doc_as_upsert : true,
+      });
     }
 
     if (!bulkBody.length) {
@@ -106,7 +109,7 @@ export class ElasticSearchClient {
       .catch((e: any) => this.logger.error(
         {
           context: 'ElasticSearchClient',
-          error: e.message,
+          error: e,
           message: `Error on ElasticSearch request`,
         },
       ))
@@ -122,7 +125,7 @@ export class ElasticSearchClient {
       .catch((e: any) => this.logger.error(
         {
           context: 'ElasticSearchClient',
-          error: e.message,
+          error: e,
           message: `Error on ElasticSearch request`,
         },
       ))
@@ -139,7 +142,7 @@ export class ElasticSearchClient {
       .catch((e: any) => this.logger.error(
         {
           context: 'ElasticSearchClient',
-          error: e.message,
+          error: e,
           message: `Error on ElasticSearch request`,
         },
       ))
@@ -154,7 +157,7 @@ export class ElasticSearchClient {
       .catch((e: any) => this.logger.error(
         {
           context: 'ElasticSearchClient',
-          error: e.message,
+          error: e,
           message: `Error on ElasticSearch request`,
         },
       ));
@@ -168,7 +171,7 @@ export class ElasticSearchClient {
       .catch((e: any) => this.logger.error(
         {
           context: 'ElasticSearchClient',
-          error: e.message,
+          error: e,
           message: `Error on ElasticSearch request`,
         },
       ));
@@ -195,7 +198,7 @@ export class ElasticSearchClient {
       }))
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
-        error: e.message,
+        error: e,
         message: `Error on ElasticSearch request`,
       }));
   }

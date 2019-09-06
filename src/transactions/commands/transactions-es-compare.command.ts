@@ -31,7 +31,7 @@ export class TransactionsEsCompareCommand {
     }
 
     const count: number = await this.businessModel.countDocuments(criteria);
-    const limit: number = 100;
+    const limit: number = 1000;
     let start: number = 0;
 
     while (start < count) {
@@ -53,6 +53,8 @@ export class TransactionsEsCompareCommand {
               + `between elastic (${elasticAmount}) `
               + `and mongo(${mongoAmount}) transactions amount.`,
           );
+        } else if (business_uuid) {
+          Logger.log(`Business "${business_uuid}" is equal.`);
         }
       }
 
