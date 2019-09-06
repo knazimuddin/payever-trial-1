@@ -5,6 +5,7 @@ import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
 import {
   BpoFixCommand,
+  TransactionsEsBusinessUpdateCommand,
   TransactionsEsCompareCommand,
   TransactionsEsExportCommand,
   TransactionsEsSetupCommand,
@@ -102,6 +103,7 @@ import {
     TransactionsEsCompareCommand,
     TransactionsEsExportCommand,
     TransactionsEsSetupCommand,
+    TransactionsEsBusinessUpdateCommand,
     TransactionsExampleService,
     TransactionsExportCommand,
     TransactionsService,

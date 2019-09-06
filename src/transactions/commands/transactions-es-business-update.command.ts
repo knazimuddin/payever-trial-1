@@ -9,39 +9,41 @@ import { TransactionBasicInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 
 @Injectable()
-export class TransactionsEsExportCommand {
+export class TransactionsEsBusinessUpdateCommand {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly elasticSearchClient: ElasticSearchClient,
   ) {}
 
-  @Command({ command: 'transactions:es:export', describe: 'Export transactions for ElasticSearch' })
-  public async export(
-    @Positional({
-      name: 'after',
-    }) after: string,
-    @Positional({
-      name: 'before',
-    }) before: string,
+  @Command({
+    command: 'transactions:es:business-update',
+    describe: 'Update transactions ElasticSearch index for business.',
+  })
+  public async update(
     @Positional({
       name: 'business',
     }) business_uuid: string,
   ): Promise<void> {
-    const criteria: any = {};
-    if (before || after) {
-      criteria.updated_at = {};
-    }
-    if (before) {
-      criteria.updated_at.$lte = new Date(before);
-    }
-    if (after) {
-      criteria.updated_at.$gte = new Date(after);
-    }
-    if (business_uuid) {
-      criteria.business_uuid = business_uuid;
+    if (!business_uuid) {
+      throw new Error('This command should run only with "business" option.');
     }
 
-    Logger.log(`Criteria is ${JSON.stringify(criteria, null, 2)}.`);
+    const criteria: any = {};
+    criteria.business_uuid = business_uuid;
+
+    Logger.log(`Clearing "${business_uuid}" transactions from ElasticSearch.`);
+    await this.elasticSearchClient.deleteByQuery(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      {
+        query: {
+          match: {
+            business_uuid: business_uuid,
+          },
+        },
+      },
+    );
+    Logger.log(`Clearing done.`);
 
     const count: number = await this.transactionsModel.countDocuments(criteria);
     Logger.log(`Found ${count} records.`);
