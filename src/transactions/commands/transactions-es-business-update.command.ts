@@ -37,7 +37,7 @@ export class TransactionsEsBusinessUpdateCommand {
       ElasticTransactionEnum.type,
       {
         query: {
-          match: {
+          match_phrase: {
             business_uuid: business_uuid,
           },
         },
