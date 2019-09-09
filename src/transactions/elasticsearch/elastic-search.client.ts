@@ -1,18 +1,22 @@
+import { ApiResponse, Client } from '@elastic/elasticsearch';
 import { Injectable, Logger } from '@nestjs/common';
-import { Client } from 'elasticsearch';
 import { environment } from '../../environments';
 
 @Injectable()
 export class ElasticSearchClient {
-  private client: Client = new Client({
-    deadTimeout: 60000,
-    host: environment.elasticSearch,
-    log: 'error',
-  });
+  private client: Client;
 
   constructor(
     private readonly logger: Logger,
-  ) {}
+  ) {
+    this.client = new Client({
+      node: environment.elasticSearch,
+
+      maxRetries: 10,
+      requestTimeout: 60000,
+      suggestCompression: true,
+    });
+  }
 
   public async singleIndex(index: string, type: string, record: any): Promise<void> {
     const bulkBody: any = [];
@@ -34,9 +38,9 @@ export class ElasticSearchClient {
 
     await this.client
       .bulk({ body: bulkBody })
-      .then((response: any) => {
-        if (response.errors) {
-          const item: any = response.items.shift();
+      .then((response: ApiResponse<any>) => {
+        if (response.body.errors) {
+          const item: any = response.body.items.shift();
           if (item.update && item.update.error) {
             this.logger.error({
               context: 'ElasticSearchClient',
@@ -94,10 +98,10 @@ export class ElasticSearchClient {
 
     await this.client
       .bulk({ body: bulkBody })
-      .then((response: any) => {
+      .then((response: ApiResponse<any>) => {
         let errorCount: number = 0;
-        if (response.errors) {
-          for (const item of response.items) {
+        if (response.body.errors) {
+          for (const item of response.body.items) {
             if (item.update && item.update.error) {
               this.logger.error({
                 context: 'ElasticSearchClient',
@@ -116,7 +120,8 @@ export class ElasticSearchClient {
 
         this.logger.log({
           context: 'ElasticSearchClient',
-          message: `Successfully indexed ${response.items.length - errorCount} out of ${response.items.length} items`,
+          message: `Successfully indexed ${response.body.items.length - errorCount} `
+           + `out of ${response.body.items.length} items`,
         });
       })
       .catch((e: any) => this.logger.error({
@@ -148,16 +153,20 @@ export class ElasticSearchClient {
         index: index,
         type: type,
       })
-      .then((response: any) => this.logger.log({
-        context: 'ElasticSearchClient',
-        index: index,
-        message: 'Result of ElasticSearch deleteByQuery request',
-        query: search,
-        result: {
-          deleted: response.deleted,
-          total: response.total,
-        },
-      }))
+      .then((response: ApiResponse<any>) => {
+        this.logger.log({
+          context: 'ElasticSearchClient',
+          index: index,
+          message: 'Result of ElasticSearch deleteByQuery request',
+          query: search,
+          result: {
+            deleted: response.body.deleted,
+            total: response.body.total,
+          },
+        });
+
+        this.client.close();
+      })
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
         error: e,
@@ -187,7 +196,7 @@ export class ElasticSearchClient {
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
         error: e,
-        message: `Error on ElasticSearch request`,
+        message: `Error on ElasticSearch isIndexExists request`,
       }));
   }
 
@@ -203,7 +212,7 @@ export class ElasticSearchClient {
           },
         },
       })
-      .then((response: any) => this.logger.log({
+      .then((response: ApiResponse<any>) => this.logger.log({
         context: 'ElasticSearchClient',
         field: field,
         index: index,
@@ -213,7 +222,7 @@ export class ElasticSearchClient {
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
         error: e,
-        message: `Error on ElasticSearch request`,
+        message: `Error on ElasticSearch setupFieldMapping request`,
       }));
   }
 }

@@ -69,7 +69,7 @@ export class ElasticSearchService {
     return this.elasticSearchClient.search(ElasticTransactionEnum.index, body)
       .then((results: any) => {
         return {
-          collection: results.hits.hits.map(
+          collection: results.body.hits.hits.map(
             (elem: any) => {
               elem._source._id = elem._source.mongoId;
               delete elem._source.mongoId;
@@ -79,7 +79,7 @@ export class ElasticSearchService {
               return elem._source;
             },
           ),
-          total: results.hits.total,
+          total: results.body.hits.total,
         };
       });
   }
@@ -111,7 +111,7 @@ export class ElasticSearchService {
 
     return this.elasticSearchClient.search(ElasticTransactionEnum.index, body)
       .then((results: any) => {
-        return results.aggregations.total_amount.value / 100;
+        return results.body.aggregations.total_amount.value / 100;
       });
   }
 
@@ -143,7 +143,7 @@ export class ElasticSearchService {
     const amounts: Array<{ key: string, total_amount: { value: number }}> =
       await this.elasticSearchClient
         .search(ElasticTransactionEnum.index, body)
-        .then((results: any) => results.aggregations.total_amount.buckets)
+        .then((results: any) => results.body.aggregations.total_amount.buckets)
     ;
     let totalPerCurrency: number = 0;
     for (const transaction of amounts) {
@@ -181,6 +181,7 @@ export class ElasticSearchService {
     return this.elasticSearchClient.search(ElasticTransactionEnum.index, body)
       .then(
         (result: any) => result
+          .body
           .aggregations[field]
           .buckets
         ,
