@@ -106,14 +106,11 @@ export class ElasticSearchClient {
           message: `Successfully indexed ${data.length - errorCount} out of ${data.length} items`,
         });
       })
-      .catch((e: any) => this.logger.error(
-        {
-          context: 'ElasticSearchClient',
-          error: e,
-          message: `Error on ElasticSearch request`,
-        },
-      ))
-    ;
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e,
+        message: `Error on ElasticSearch request`,
+      }));
   }
 
   public async search(index: string, search: any): Promise<any> {
@@ -122,14 +119,11 @@ export class ElasticSearchClient {
         body: search,
         index: index,
       })
-      .catch((e: any) => this.logger.error(
-        {
-          context: 'ElasticSearchClient',
-          error: e,
-          message: `Error on ElasticSearch request`,
-        },
-      ))
-    ;
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e,
+        message: `Error on ElasticSearch request`,
+      }));
   }
 
   public async deleteByQuery(index: string, type: string, search: any): Promise<any> {
@@ -139,14 +133,11 @@ export class ElasticSearchClient {
         index: index,
         type: type,
       })
-      .catch((e: any) => this.logger.error(
-        {
-          context: 'ElasticSearchClient',
-          error: e,
-          message: `Error on ElasticSearch request`,
-        },
-      ))
-    ;
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e,
+        message: `Error on ElasticSearch request`,
+      }));
   }
 
   public async createIndex(index: string): Promise<any> {
@@ -154,13 +145,11 @@ export class ElasticSearchClient {
       .create({
         index: index,
       })
-      .catch((e: any) => this.logger.error(
-        {
-          context: 'ElasticSearchClient',
-          error: e,
-          message: `Error on ElasticSearch request`,
-        },
-      ));
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e,
+        message: `Error on ElasticSearch request`,
+      }));
   }
 
   public async isIndexExists(index: string): Promise<any> {
@@ -168,13 +157,11 @@ export class ElasticSearchClient {
       .exists({
         index: index,
       })
-      .catch((e: any) => this.logger.error(
-        {
-          context: 'ElasticSearchClient',
-          error: e,
-          message: `Error on ElasticSearch request`,
-        },
-      ));
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e,
+        message: `Error on ElasticSearch request`,
+      }));
   }
 
   public async setupFieldMapping(index: string, type: string, field: string, config: {}): Promise<void> {
