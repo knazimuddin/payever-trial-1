@@ -30,12 +30,14 @@ export class TransactionsEsCompareCommand {
       criteria._id = business_uuid;
     }
 
-    const count: number = await this.businessModel.countDocuments(criteria);
+    const total: number = await this.businessModel.countDocuments(criteria);
     const limit: number = 1000;
-    let start: number = 0;
+    let processed: number = 0;
 
-    while (start < count) {
-      for (const business of await this.getWithLimit(start, limit, criteria)) {
+    while (processed < total) {
+      const businesses: BusinessModel[] = await this.getWithLimit(processed, limit, criteria);
+      Logger.log(`Starting next ${businesses.length} businesses.`);
+      for (const business of businesses) {
         const listDto: ListQueryDto = new ListQueryDto();
 
         listDto.filters = BusinessFilter.apply(business.id, listDto.filters);
@@ -58,8 +60,10 @@ export class TransactionsEsCompareCommand {
         }
       }
 
-      start += limit;
+      processed += businesses.length;
     }
+
+    Logger.log(`Compared ${processed} of ${total}.`);
   }
 
   private async getWithLimit(start: number, limit: number, criteria: any = {}): Promise<BusinessModel[]> {
