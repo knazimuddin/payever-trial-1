@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Client } from 'elasticsearch';
 import { environment } from '../../environments';
-import { TransactionBasicInterface } from '../interfaces/transaction';
 
 @Injectable()
 export class ElasticSearchClient {
   private client: Client = new Client({
+    deadTimeout: 60000,
     host: environment.elasticSearch,
     log: 'error',
   });
@@ -14,23 +14,22 @@ export class ElasticSearchClient {
     private readonly logger: Logger,
   ) {}
 
-  public async singleIndex(index: string, type: string, item: any, operation: string = 'index'): Promise<void> {
+  public async singleIndex(index: string, type: string, item: any): Promise<void> {
     const bulkBody: any = [];
     item.mongoId = item._id;
     delete item._id;
     bulkBody.push({
-      [operation]: {
+      update: {
         _id: item.mongoId,
         _index: index,
         _type: type,
       },
     });
 
-    if (operation === 'update') {
-      bulkBody.push({doc: item});
-    } else {
-      bulkBody.push(item);
-    }
+    bulkBody.push({
+      doc: item,
+      doc_as_upsert : true,
+    });
 
     await this.client
       .bulk({ body: bulkBody })
@@ -55,28 +54,31 @@ export class ElasticSearchClient {
       })
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
-        error: e.message,
+        error: e,
         message: `Error on ElasticSearch request`,
       }))
     ;
   }
 
-  public async bulkIndex(index: string, type: string, data: any, operation: string = 'index'): Promise<void> {
+  public async bulkIndex(index: string, type: string, data: any[]): Promise<void> {
     const bulkBody: any = [];
     for (const item of data) {
-      const plain: TransactionBasicInterface & { _id: string, mongoId: string } = item.toObject();
-      plain.mongoId = item._id;
-      delete plain._id;
+      const itemId: string = item._id;
+      item.mongoId = item._id;
+      delete item._id;
 
       bulkBody.push({
-        [operation]: {
-          _id: item._id,
+        update: {
+          _id: itemId,
           _index: index,
           _type: type,
         },
       });
 
-      bulkBody.push(plain);
+      bulkBody.push({
+        doc: item,
+        doc_as_upsert : true,
+      });
     }
 
     if (!bulkBody.length) {
@@ -107,39 +109,7 @@ export class ElasticSearchClient {
       .catch((e: any) => this.logger.error(
         {
           context: 'ElasticSearchClient',
-          error: e.message,
-          message: `Error on ElasticSearch request`,
-        },
-      ))
-    ;
-  }
-
-  public async setupFieldMapping(index: string, type: string, field: string): Promise<void> {
-    return this.client.indices
-      .putMapping({
-        index: index,
-        type: type,
-
-        body: {
-          properties: {
-            [field]: {
-              fielddata: true,
-              type: 'text',
-            },
-          },
-        },
-      })
-      .then((response: any) => this.logger.log({
-        context: 'ElasticSearchClient',
-        field: field,
-        index: index,
-        response: response,
-        type: type,
-      }))
-      .catch((e: any) => this.logger.error(
-        {
-          context: 'ElasticSearchClient',
-          error: e.message,
+          error: e,
           message: `Error on ElasticSearch request`,
         },
       ))
@@ -155,7 +125,7 @@ export class ElasticSearchClient {
       .catch((e: any) => this.logger.error(
         {
           context: 'ElasticSearchClient',
-          error: e.message,
+          error: e,
           message: `Error on ElasticSearch request`,
         },
       ))
@@ -172,10 +142,64 @@ export class ElasticSearchClient {
       .catch((e: any) => this.logger.error(
         {
           context: 'ElasticSearchClient',
-          error: e.message,
+          error: e,
           message: `Error on ElasticSearch request`,
         },
       ))
     ;
+  }
+
+  public async createIndex(index: string): Promise<any> {
+    return this.client.indices
+      .create({
+        index: index,
+      })
+      .catch((e: any) => this.logger.error(
+        {
+          context: 'ElasticSearchClient',
+          error: e,
+          message: `Error on ElasticSearch request`,
+        },
+      ));
+  }
+
+  public async isIndexExists(index: string): Promise<any> {
+    return this.client.indices
+      .exists({
+        index: index,
+      })
+      .catch((e: any) => this.logger.error(
+        {
+          context: 'ElasticSearchClient',
+          error: e,
+          message: `Error on ElasticSearch request`,
+        },
+      ));
+  }
+
+  public async setupFieldMapping(index: string, type: string, field: string, config: {}): Promise<void> {
+    return this.client.indices
+      .putMapping({
+        index: index,
+        type: type,
+
+        body: {
+          properties: {
+            [field]: config,
+          },
+        },
+      })
+      .then((response: any) => this.logger.log({
+        context: 'ElasticSearchClient',
+        field: field,
+        index: index,
+        response: response,
+        type: type,
+      }))
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e,
+        message: `Error on ElasticSearch request`,
+      }));
   }
 }

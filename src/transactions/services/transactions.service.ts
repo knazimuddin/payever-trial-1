@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 import {
   TransactionCartConverter,
+  TransactionDoubleConverter,
   TransactionPaymentDetailsConverter,
   TransactionSantanderApplicationConverter,
 } from '../converter';
@@ -16,6 +17,7 @@ import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } f
 import {
   TransactionBasicInterface,
   TransactionCartItemInterface,
+  TransactionHistoryEntryInterface,
   TransactionPackedDetailsInterface,
   TransactionUnpackedDetailsInterface,
 } from '../interfaces/transaction';
@@ -46,7 +48,7 @@ export class TransactionsService {
       await this.elasticSearchClient.singleIndex(
         ElasticTransactionEnum.index,
         ElasticTransactionEnum.type,
-        created.toObject(),
+        TransactionDoubleConverter.pack(created.toObject()),
       );
 
       await this.notificationsEmitter.sendNotification(
@@ -94,8 +96,7 @@ export class TransactionsService {
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
       ElasticTransactionEnum.type,
-      updated.toObject(),
-      'update',
+      TransactionDoubleConverter.pack(updated.toObject()),
     );
 
     return updated;
@@ -122,8 +123,7 @@ export class TransactionsService {
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
       ElasticTransactionEnum.type,
-      updated.toObject(),
-      'update',
+      TransactionDoubleConverter.pack(updated.toObject()),
     );
 
     return updated;
@@ -175,6 +175,29 @@ export class TransactionsService {
     await this.transactionModel.findOneAndRemove({ uuid: transactionUuid });
   }
 
+  public async pushHistoryRecord(
+    transaction: TransactionModel,
+    history: TransactionHistoryEntryInterface,
+  ): Promise<void> {
+    const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
+      { uuid: transaction.uuid },
+      {
+        $push: {
+          history: history,
+        },
+      },
+      {
+        new: true,
+      },
+    );
+
+    await this.elasticSearchClient.singleIndex(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      TransactionDoubleConverter.pack(updated.toObject()),
+    );
+  }
+
   public async applyActionRpcResult(
     transaction: TransactionUnpackedDetailsInterface,
     result: RpcResultDto,
@@ -190,7 +213,7 @@ export class TransactionsService {
     await this.applyPaymentProperties(transaction, result);
   }
 
-  public async applyPaymentProperties(
+  private async applyPaymentProperties(
     transaction: TransactionUnpackedDetailsInterface,
     result: RpcResultDto,
   ): Promise<void> {
@@ -219,24 +242,33 @@ export class TransactionsService {
       updateResult: updating,
     });
 
-    await this.transactionModel.updateOne(
+    const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
       {
         uuid: transaction.uuid,
       },
       {
         $set: updating,
       },
+      {
+        new: true,
+      },
+    );
+
+    await this.elasticSearchClient.singleIndex(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      TransactionDoubleConverter.pack(updated.toObject()),
     );
   }
 
-  public async applyPaymentItems(
+  private async applyPaymentItems(
     transaction: TransactionBasicInterface,
     result: RpcResultDto,
   ): Promise<void> {
     const items: TransactionCartItemInterface[] =
       TransactionCartConverter.fromCheckoutTransactionCart(result.payment_items, transaction.business_uuid);
 
-    await this.transactionModel.updateOne(
+    const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
       {
         uuid: transaction.uuid,
       },
@@ -245,6 +277,15 @@ export class TransactionsService {
           items,
         },
       },
+      {
+        new: true,
+      },
+    );
+
+    await this.elasticSearchClient.singleIndex(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      TransactionDoubleConverter.pack(updated.toObject()),
     );
   }
 }

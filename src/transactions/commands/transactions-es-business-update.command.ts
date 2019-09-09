@@ -2,66 +2,72 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Command, Positional } from '@pe/nest-kit';
 import { Model } from 'mongoose';
+import { TransactionDoubleConverter } from '../converter';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
-import { ElasticIndexingTextFieldsEnum, ElasticTransactionEnum } from '../enum';
+import { ElasticTransactionEnum } from '../enum';
+import { TransactionBasicInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 
 @Injectable()
-export class TransactionsEsExportCommand {
+export class TransactionsEsBusinessUpdateCommand {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly elasticSearchClient: ElasticSearchClient,
   ) {}
 
-  @Command({ command: 'transactions:export:es', describe: 'Export transactions for ElasticSearch' })
-  public async transactionsEsExport(
+  @Command({
+    command: 'transactions:es:business-update',
+    describe: 'Update transactions ElasticSearch index for business.',
+  })
+  public async update(
     @Positional({
-      name: 'after',
-    }) after: string,
-    @Positional({
-      name: 'before',
-    }) before: string,
+      name: 'business',
+    }) business_uuid: string,
   ): Promise<void> {
-    const criteria: any = {};
-    if (before || after) {
-      criteria.created_at = {};
-    }
-    if (before) {
-      criteria.created_at.$lte = new Date(before);
-    }
-    if (after) {
-      criteria.created_at.$gte = new Date(after);
+    if (!business_uuid) {
+      throw new Error('This command should run only with "business" option.');
     }
 
-    Logger.log(`Criteria is ${JSON.stringify(criteria, null, 2)}.`);
+    const criteria: any = {};
+    criteria.business_uuid = business_uuid;
+
+    Logger.log(`Clearing "${business_uuid}" transactions from ElasticSearch.`);
+    await this.elasticSearchClient.deleteByQuery(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      {
+        query: {
+          match_phrase: {
+            business_uuid: business_uuid,
+          },
+        },
+      },
+    );
+    Logger.log(`Clearing done.`);
 
     const count: number = await this.transactionsModel.countDocuments(criteria);
     Logger.log(`Found ${count} records.`);
 
-    const limit: number = 200;
+    const limit: number = 1000;
     let start: number = 0;
 
     while (start < count) {
       const transactions: TransactionModel[] = await this.getWithLimit(start, limit, criteria);
-      start += limit;
       Logger.log(`${transactions.length} items parsed`);
+      const processed: TransactionBasicInterface[] = [];
+
+      for (const transaction of transactions) {
+        processed.push(TransactionDoubleConverter.pack(transaction.toObject()));
+      }
+
       await this.elasticSearchClient.bulkIndex(
         ElasticTransactionEnum.index,
         ElasticTransactionEnum.type,
-        transactions,
+        processed,
       );
 
+      start += limit;
       Logger.log(`Exported ${start} of ${count}`);
-    }
-
-    for (const item in ElasticIndexingTextFieldsEnum) {
-      if (ElasticIndexingTextFieldsEnum[item]) {
-        await this.elasticSearchClient.setupFieldMapping(
-          ElasticTransactionEnum.index,
-          ElasticTransactionEnum.type,
-          ElasticIndexingTextFieldsEnum[item],
-        );
-      }
     }
   }
 

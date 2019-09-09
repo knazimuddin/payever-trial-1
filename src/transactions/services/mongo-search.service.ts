@@ -39,7 +39,7 @@ export class MongoSearchService {
           collection: res[0],
           filters: {},
           pagination_data: {
-            amount: res[2],
+            amount: res[2] ? res[2] : 0,
             amount_currency: listDto.currency,
             page: listDto.page,
             total: res[1],
@@ -71,9 +71,9 @@ export class MongoSearchService {
   }
 
   public async total(filters: any = {}, currency?: string): Promise<number> {
-    let res: any;
+    let result: any;
     if (!currency) {
-      res = await this.transactionsModel
+      result = await this.transactionsModel
         .aggregate([
           { $match: filters },
           {
@@ -85,12 +85,12 @@ export class MongoSearchService {
         ])
       ;
 
-      res = res && res[0]
-        ? res[0].total
+      result = result && result[0]
+        ? result[0].total
         : null
       ;
     } else {
-      res = await this.transactionsModel
+      result = await this.transactionsModel
         .aggregate([
           { $match: filters },
           {
@@ -104,7 +104,7 @@ export class MongoSearchService {
 
       let totalPerCurrency: number = 0;
 
-      for (const currentVal of res) {
+      for (const currentVal of result) {
         const filteredRate: number = await this.currencyExchangeService.getCurrencyExchangeRate(currentVal._id);
 
         totalPerCurrency += filteredRate
@@ -115,11 +115,11 @@ export class MongoSearchService {
       const rate: number = await this.currencyExchangeService.getCurrencyExchangeRate(currency);
 
       return rate
-        ? totalPerCurrency * rate
-        : totalPerCurrency;
+        ? Number((totalPerCurrency * rate).toFixed(2))
+        : Number(totalPerCurrency.toFixed(2));
     }
 
-    return res;
+    return result;
   }
 
   public async distinctFieldValues(field: string, filters: any = {}): Promise<Array<{ [key: string]: number}>> {

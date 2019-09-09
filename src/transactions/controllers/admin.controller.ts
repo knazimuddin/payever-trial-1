@@ -28,6 +28,7 @@ import {
   MongoSearchService,
   TransactionsService,
 } from '../services';
+import { IsNotExampleFilter } from '../tools';
 
 @Controller('admin')
 @ApiUseTags('admin')
@@ -56,6 +57,7 @@ export class AdminController {
   public async getList(
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
+    listDto.filters = IsNotExampleFilter.apply(listDto.filters);
     listDto.currency = this.defaultCurrency;
 
     return this.searchService.getResult(listDto);
@@ -66,6 +68,7 @@ export class AdminController {
   public async getElastic(
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
+    listDto.filters = IsNotExampleFilter.apply(listDto.filters);
     listDto.currency = this.defaultCurrency;
 
     return this.elasticSearchService.getResult(listDto);
