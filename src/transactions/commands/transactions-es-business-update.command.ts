@@ -45,29 +45,29 @@ export class TransactionsEsBusinessUpdateCommand {
     );
     Logger.log(`Clearing done.`);
 
-    const count: number = await this.transactionsModel.countDocuments(criteria);
-    Logger.log(`Found ${count} records.`);
+    const total: number = await this.transactionsModel.countDocuments(criteria);
+    Logger.log(`Found ${total} records.`);
 
     const limit: number = 1000;
-    let start: number = 0;
+    let processed: number = 0;
 
-    while (start < count) {
-      const transactions: TransactionModel[] = await this.getWithLimit(start, limit, criteria);
-      Logger.log(`${transactions.length} items parsed`);
-      const processed: TransactionBasicInterface[] = [];
+    while (processed < total) {
+      const transactions: TransactionModel[] = await this.getWithLimit(processed, limit, criteria);
+      Logger.log(`Starting next ${transactions.length} transactions.`);
+      const prepared: TransactionBasicInterface[] = [];
 
       for (const transaction of transactions) {
-        processed.push(TransactionDoubleConverter.pack(transaction.toObject()));
+        prepared.push(TransactionDoubleConverter.pack(transaction.toObject()));
       }
 
       await this.elasticSearchClient.bulkIndex(
         ElasticTransactionEnum.index,
         ElasticTransactionEnum.type,
-        processed,
+        prepared,
       );
 
-      start += limit;
-      Logger.log(`Exported ${start} of ${count}`);
+      processed += transactions.length;
+      Logger.log(`Exported ${processed} of ${total}.`);
     }
   }
 
