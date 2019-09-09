@@ -9,7 +9,9 @@ import {
   HistoryEventAddHistoryInterface,
 } from '../interfaces/history-event-message';
 import { TransactionModel } from '../models';
-import { StatisticsService, TransactionHistoryService, TransactionsService } from '../services';
+import { TransactionHistoryService, TransactionsService } from '../services';
+import { PaymentActionEventsEnum } from '../enum/events';
+import { InjectEventEmitter, NestEventEmitter } from '@pe/nest-kit';
 
 @Controller()
 export class HistoryEventsController {
@@ -23,8 +25,8 @@ export class HistoryEventsController {
   constructor(
     private readonly transactionService: TransactionsService,
     private readonly historyService: TransactionHistoryService,
-    private readonly statisticsService: StatisticsService,
     private readonly logger: Logger,
+    @InjectEventEmitter() private readonly emitter: NestEventEmitter,
   ) {}
 
   @MessagePattern({
@@ -53,12 +55,12 @@ export class HistoryEventsController {
     }
 
     this.logger.log({ text: 'ACTION.COMPLETED: Transaction found', transaction });
-    await this.statisticsService.processRefundedTransaction(transaction.uuid, message);
-    await this.historyService.processHistoryRecord(
+
+    this.emitter.emit(
+      PaymentActionEventsEnum.PaymentActionCompleted,
       transaction,
-      message.action,
-      (metadata.createdAt && AtomDateConverter.fromAtomFormatToDate(metadata.createdAt)) || new Date(),
-      message.data,
+      message,
+      metadata,
     );
     this.logger.log({ text: 'ACTION.COMPLETED: Saved', transaction });
   }

@@ -8,6 +8,7 @@ import * as qs from 'qs';
 
 import { AppModule } from './app.module';
 import { environment } from './environments';
+import { EmitterConsumerInitializer } from './transactions/emitter';
 
 async function bootstrap(): Promise<void> {
   const app: NestFastifyApplication = await NestFactory.create<NestFastifyApplication>(
@@ -16,6 +17,8 @@ async function bootstrap(): Promise<void> {
       querystringParser: (str: string): any => qs.parse(str),
     }),
   );
+
+  app.get(EmitterConsumerInitializer).init();
 
   app.register(jwt, {secret: environment.jwtOptions.secretOrPrivateKey});
   const logger: NestKitLogger = app.get(NestKitLogger);

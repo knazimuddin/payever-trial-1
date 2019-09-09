@@ -72,19 +72,23 @@ export const rabbitMqQueues: RabbitMqQueueConfigInterface[] = [
         source: 'async_events',
       },
       {
-        routingKey: 'users.event.business.export',
+        routingKey: RabbitRoutingKeys.BusinessExport,
         source: 'async_events',
       },
       {
-        routingKey: 'users.event.business.updated',
+        routingKey: RabbitRoutingKeys.BusinessUpdated,
         source: 'async_events',
       },
       {
-        routingKey: 'users.event.business.created',
+        routingKey: RabbitRoutingKeys.BusinessCreated,
         source: 'async_events',
       },
       {
-        routingKey: 'users.event.business.removed',
+        routingKey: RabbitRoutingKeys.BusinessRemoved,
+        source: 'async_events',
+      },
+      {
+        routingKey: RabbitRoutingKeys.ShippingOrderProcessed,
         source: 'async_events',
 
       },

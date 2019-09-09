@@ -8,3 +8,4 @@ export * from './migrate-events.controller';
 export * from './transaction-events.controller';
 export * from './user.controller';
 export * from './third-party-events.controller';
+export * from './shipping-bus-messages.controller';

@@ -5,6 +5,7 @@
     "consume:prod": "node dist/src/consumer.js",
     "cli:prod": "node dist/src/cli.js",
     "migrations:prod": "db-migrate --migrations-dir=dist/migrations",
+    "consume": "ts-node src/consumer.ts",
     "cli": "ts-node src/cli.ts",
     "http": "nodemon --config nodemon-http.json",
     "consumer": "nodemon --config nodemon-consumer.json",

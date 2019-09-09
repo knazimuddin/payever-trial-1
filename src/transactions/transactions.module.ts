@@ -19,6 +19,7 @@ import {
   FlowEventsController,
   HistoryEventsController,
   MigrateEventsController,
+  ShippingBusMessagesController,
   ThirdPartyEventsController,
   TransactionEventsController,
   UserController,
@@ -53,6 +54,9 @@ import {
   TransactionsExampleService,
   TransactionsService,
 } from './services';
+import { NestEmitterModule } from '@pe/nest-kit';
+import { AbstractConsumer, EmitterConsumerInitializer } from './emitter';
+import { EventEmiterConsumers } from './enum';
 
 @Module({
   controllers: [
@@ -66,6 +70,7 @@ import {
     ThirdPartyEventsController,
     TransactionEventsController,
     UserController,
+    ShippingBusMessagesController,
   ],
   imports: [
     HttpModule,
@@ -83,6 +88,7 @@ import {
       ],
       rsaPath: environment.rsa,
     }),
+    NestEmitterModule,
   ],
   providers: [
     ActionsRetriever,
@@ -107,6 +113,19 @@ import {
     TransactionsExampleService,
     TransactionsExportCommand,
     TransactionsService,
+    PaymentMailEventProducer,
+    ...EventEmiterConsumers,
+    EmitterConsumerInitializer,
+    {
+      inject: [...EventEmiterConsumers],
+      provide: EmitterConsumerInitializer,
+      useFactory: (...emitterConsumers: AbstractConsumer[]): EmitterConsumerInitializer => {
+        const initializer: EmitterConsumerInitializer = new EmitterConsumerInitializer();
+        emitterConsumers.forEach((consumer: AbstractConsumer) => initializer.addConsumer(consumer));
+
+        return initializer;
+      },
+    },
   ],
 })
 export class TransactionsModule {}

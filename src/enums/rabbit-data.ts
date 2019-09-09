@@ -26,4 +26,13 @@ export enum RabbitRoutingKeys {
   CodeUpdated = 'device_payments.code.updated',
 
   ThirdPartyPaymentActionRequested = 'third-party.event.payment.action',
+
+  ShippingOrderProcessed = 'shipping.event.shipping-order.processed',
+
+  BusinessExport = 'users.event.business.export',
+  BusinessUpdated = 'users.event.business.updated',
+  BusinessCreated = 'users.event.business.created',
+  BusinessRemoved = 'users.event.business.removed',
+
+  TransactionsActionShippingGoods = 'transactions.event.action.shipping-goods',
 }
