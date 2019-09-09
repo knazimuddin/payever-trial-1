@@ -14,58 +14,65 @@ export class ElasticSearchClient {
     private readonly logger: Logger,
   ) {}
 
-  public async singleIndex(index: string, type: string, item: any): Promise<void> {
+  public async singleIndex(index: string, type: string, record: any): Promise<void> {
     const bulkBody: any = [];
-    item.mongoId = item._id;
-    delete item._id;
+    const doc: any = Object.assign({}, record);
+    doc.mongoId = doc._id;
+    delete doc._id;
     bulkBody.push({
       update: {
-        _id: item.mongoId,
+        _id: doc.mongoId,
         _index: index,
         _type: type,
       },
     });
 
     bulkBody.push({
-      doc: item,
+      doc: doc,
       doc_as_upsert : true,
     });
 
     await this.client
       .bulk({ body: bulkBody })
       .then((response: any) => {
-        this.logger.log({
-          context: 'ElasticSearchClient',
-          response: JSON.stringify(response, null, 2),
-        });
-
-        let errorCount: number = 0;
-        for (const responseItem of response.items) {
-          if (responseItem.index && responseItem.index.error) {
-            this.logger.log({
+        if (response.errors) {
+          const item: any = response.items.shift();
+          if (item.update && item.update.error) {
+            this.logger.error({
               context: 'ElasticSearchClient',
+              message: `Error on ElasticSearch singleIndex request`,
               response: {
-                error: responseItem.index.error,
-                errorCount: ++errorCount,
+                error: item.update.error,
+                index: item.update.index,
+                itemId: item.update._id,
+                result: item.update.result,
               },
             });
           }
+        } else {
+          this.logger.log({
+            context: 'ElasticSearchClient',
+            item: record,
+            message: `Successfully indexed item`,
+          });
         }
       })
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
         error: e,
-        message: `Error on ElasticSearch request`,
+        item: record,
+        message: `Error on ElasticSearch singleIndex request`,
       }))
     ;
   }
 
-  public async bulkIndex(index: string, type: string, data: any[]): Promise<void> {
+  public async bulkIndex(index: string, type: string, records: any[]): Promise<void> {
     const bulkBody: any = [];
-    for (const item of data) {
-      const itemId: string = item._id;
-      item.mongoId = item._id;
-      delete item._id;
+    for (const record of records) {
+      const doc: any = Object.assign({}, record);
+      const itemId: string = doc._id;
+      doc.mongoId = doc._id;
+      delete doc._id;
 
       bulkBody.push({
         update: {
@@ -76,7 +83,7 @@ export class ElasticSearchClient {
       });
 
       bulkBody.push({
-        doc: item,
+        doc: doc,
         doc_as_upsert : true,
       });
     }
@@ -89,30 +96,34 @@ export class ElasticSearchClient {
       .bulk({ body: bulkBody })
       .then((response: any) => {
         let errorCount: number = 0;
-        for (const item of response.items) {
-          if (item.index && item.index.error) {
-            this.logger.log({
-              context: 'ElasticSearchClient',
-              response: {
-                error: item.index.error,
-                errorCount: ++errorCount,
-              },
-            });
+        if (response.errors) {
+          for (const item of response.items) {
+            if (item.update && item.update.error) {
+              this.logger.error({
+                context: 'ElasticSearchClient',
+                message: `Error on ElasticSearch bulkIndex request`,
+                response: {
+                  error: item.update.error,
+                  index: item.update.index,
+                  itemId: item.update._id,
+                  result: item.update.result,
+                },
+              });
+            }
+            errorCount++;
           }
         }
 
         this.logger.log({
           context: 'ElasticSearchClient',
-          message: `Successfully indexed ${data.length - errorCount} out of ${data.length} items`,
+          message: `Successfully indexed ${response.items.length - errorCount} out of ${response.items.length} items`,
         });
       })
-      .catch((e: any) => this.logger.error(
-        {
-          context: 'ElasticSearchClient',
-          error: e,
-          message: `Error on ElasticSearch request`,
-        },
-      ))
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e,
+        message: `Error on ElasticSearch bulkIndex request`,
+      }))
     ;
   }
 
@@ -122,14 +133,12 @@ export class ElasticSearchClient {
         body: search,
         index: index,
       })
-      .catch((e: any) => this.logger.error(
-        {
-          context: 'ElasticSearchClient',
-          error: e,
-          message: `Error on ElasticSearch request`,
-        },
-      ))
-    ;
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e,
+        message: `Error on ElasticSearch search request`,
+        request: search,
+      }));
   }
 
   public async deleteByQuery(index: string, type: string, search: any): Promise<any> {
@@ -139,14 +148,22 @@ export class ElasticSearchClient {
         index: index,
         type: type,
       })
-      .catch((e: any) => this.logger.error(
-        {
-          context: 'ElasticSearchClient',
-          error: e,
-          message: `Error on ElasticSearch request`,
+      .then((response: any) => this.logger.log({
+        context: 'ElasticSearchClient',
+        index: index,
+        message: 'Result of ElasticSearch deleteByQuery request',
+        query: search,
+        result: {
+          deleted: response.deleted,
+          total: response.total,
         },
-      ))
-    ;
+      }))
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e,
+        message: `Error on ElasticSearch deleteByQuery request`,
+        request: search,
+      }));
   }
 
   public async createIndex(index: string): Promise<any> {
@@ -154,13 +171,12 @@ export class ElasticSearchClient {
       .create({
         index: index,
       })
-      .catch((e: any) => this.logger.error(
-        {
-          context: 'ElasticSearchClient',
-          error: e,
-          message: `Error on ElasticSearch request`,
-        },
-      ));
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e,
+        indexName: index,
+        message: `Error on ElasticSearch createIndex request`,
+      }));
   }
 
   public async isIndexExists(index: string): Promise<any> {
@@ -168,13 +184,11 @@ export class ElasticSearchClient {
       .exists({
         index: index,
       })
-      .catch((e: any) => this.logger.error(
-        {
-          context: 'ElasticSearchClient',
-          error: e,
-          message: `Error on ElasticSearch request`,
-        },
-      ));
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e,
+        message: `Error on ElasticSearch request`,
+      }));
   }
 
   public async setupFieldMapping(index: string, type: string, field: string, config: {}): Promise<void> {

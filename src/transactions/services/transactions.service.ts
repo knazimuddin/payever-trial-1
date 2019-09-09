@@ -165,7 +165,7 @@ export class TransactionsService {
       ElasticTransactionEnum.type,
       {
         query: {
-          match: {
+          match_phrase: {
             uuid: transactionUuid,
           },
         },
