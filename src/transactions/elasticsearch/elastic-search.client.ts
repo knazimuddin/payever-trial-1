@@ -190,11 +190,12 @@ export class ElasticSearchClient {
       }));
   }
 
-  public async isIndexExists(index: string): Promise<any> {
+  public async isIndexExists(index: string): Promise<boolean> {
     return this.client.indices
       .exists({
         index: index,
       })
+      .then((response: ApiResponse<any>) => response.body)
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
         error: e,
@@ -219,7 +220,6 @@ export class ElasticSearchClient {
         field: field,
         index: index,
         response: response,
-        type: type,
       }))
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
