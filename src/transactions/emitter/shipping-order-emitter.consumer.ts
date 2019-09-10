@@ -1,12 +1,12 @@
 import { InjectEventEmitter, NestEventEmitter, RabbitMqClient } from '@pe/nest-kit';
+import { RabbitRoutingKeys } from '../../enums';
+import { EventHandler } from '../decorators/event-handler.decorator';
+import { ShippingGoodsDto } from '../dto/shipping';
+import { PaymentActionsEnum } from '../enum';
 import { PaymentActionEventsEnum } from '../enum/events';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 import { TransactionModel } from '../models';
-import { PaymentActionsEnum } from '../enum';
-import { ShippingGoodsDto } from '../dto/shipping';
-import { RabbitRoutingKeys } from '../../enums';
 import { AbstractConsumer } from './abstract.consumer';
-import { EventHandler } from '../decorators/event-handler.decorator';
 
 export class ShippingOrderEmitterConsumer extends AbstractConsumer{
   constructor(
@@ -24,10 +24,10 @@ export class ShippingOrderEmitterConsumer extends AbstractConsumer{
     if (actionEvent.action === PaymentActionsEnum.ShippingGoods) {
       const shippingGoodsMessage: ShippingGoodsDto = {
         businessName: transaction.merchant_name,
-        transactionId: transaction.uuid,
-        transactionDate: transaction.created_at,
         shipmentDate: new Date().toISOString().slice(0, 10),
         shippingOrderId: transaction.shipping_order_id,
+        transactionDate: transaction.created_at,
+        transactionId: transaction.uuid,
       };
 
       await this.rabbitClient.send(
@@ -38,7 +38,7 @@ export class ShippingOrderEmitterConsumer extends AbstractConsumer{
         {
           name: RabbitRoutingKeys.TransactionsActionShippingGoods,
           payload: shippingGoodsMessage,
-        }
+        },
       );
     }
   }

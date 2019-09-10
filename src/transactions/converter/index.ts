@@ -1,4 +1,4 @@
-export * from './mailer/';
+export * from './mailer';
 export * from './atom.date.converter';
 export * from './checkout-transaction-history-entry.converter';
 export * from './date-string.helper';
