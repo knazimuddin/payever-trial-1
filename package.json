@@ -5,6 +5,7 @@
     "consume:prod": "node dist/src/consumer.js",
     "cli:prod": "node dist/src/cli.js",
     "migrations:prod": "db-migrate --migrations-dir=dist/migrations",
+    "consume": "ts-node src/consumer.ts",
     "cli": "ts-node src/cli.ts",
     "http": "nodemon --config nodemon-http.json",
     "consumer": "nodemon --config nodemon-consumer.json",
@@ -26,11 +27,11 @@
     "test:unit": "mocha -r ts-node/register --recursive ./tests/**/*.spec.ts"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^6.8.2",
     "@pe/common-sdk": "^0.2.0",
     "@pe/nest-kit": "^4.8.8",
     "@pe/notifications-sdk": "^3.1.0",
     "@types/dotenv": "^6.1.1",
-    "@types/elasticsearch": "^5.0.34",
     "@types/mongoose": "^5.3.24",
     "@types/node": "^11.11.6",
     "@types/uuid": "^3.4.4",
@@ -39,7 +40,6 @@
     "cors": "^2.8.5",
     "db-migrate": "^0.11.5",
     "db-migrate-mongodb": "^1.5.0",
-    "elasticsearch": "^15.5.0",
     "fastify-jwt": "^0.10.0",
     "fastify-swagger": "2.4.0",
     "lodash": "^4.17.11",
