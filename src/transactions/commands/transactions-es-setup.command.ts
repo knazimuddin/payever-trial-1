@@ -19,6 +19,15 @@ export class TransactionsEsSetupCommand {
       await this.elasticSearchClient.createIndex(ElasticTransactionEnum.index);
     }
 
+    await this.elasticSearchClient.putIndexSettings(
+      ElasticTransactionEnum.index,
+      {
+        index: {
+          refresh_interval: null,
+        },
+      },
+    );
+
     for (const field in ElasticMappingFieldsConfig) {
       if (ElasticMappingFieldsConfig[field]) {
         await this.elasticSearchClient.setupFieldMapping(
