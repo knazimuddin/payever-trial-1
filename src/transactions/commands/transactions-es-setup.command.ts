@@ -23,7 +23,7 @@ export class TransactionsEsSetupCommand {
       ElasticTransactionEnum.index,
       {
         index: {
-          refresh_interval: -1,
+          refresh_interval: null,
         },
       },
     );
