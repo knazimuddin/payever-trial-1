@@ -11,6 +11,7 @@ import {
   TransactionSantanderApplicationConverter,
 } from '../converter';
 import { RpcResultDto } from '../dto';
+import { DelayRemoveClient } from '../elasticsearch/delay-remove.client';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
 import { ElasticTransactionEnum } from '../enum';
 import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
@@ -159,20 +160,21 @@ export class TransactionsService {
     return this.transactionModel.find({business_uuid: businessId});
   }
 
-  public async removeByUuid(transactionUuid: string): Promise<void> {
-    await this.elasticSearchClient.deleteByQuery(
+  public async removeByUuid(transactionId: string): Promise<void> {
+    const delayRemoveClient: DelayRemoveClient = new DelayRemoveClient(this.elasticSearchClient, this.logger);
+    await delayRemoveClient.deleteByQuery(
       ElasticTransactionEnum.index,
       ElasticTransactionEnum.type,
       {
         query: {
           match_phrase: {
-            uuid: transactionUuid,
+            uuid: transactionId,
           },
         },
       },
     );
 
-    await this.transactionModel.findOneAndRemove({ uuid: transactionUuid });
+    await this.transactionModel.findOneAndRemove({ uuid: transactionId });
   }
 
   public async pushHistoryRecord(

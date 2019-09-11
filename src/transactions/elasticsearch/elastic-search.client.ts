@@ -148,7 +148,7 @@ export class ElasticSearchClient {
       }));
   }
 
-  public async deleteByQuery(index: string, type: string, search: any): Promise<any> {
+  public async deleteByQuery(index: string, type: string, search: any): Promise<number> {
     this.logConnectionStatus();
 
     return this.client
@@ -156,6 +156,10 @@ export class ElasticSearchClient {
         body: search,
         index: index,
         type: type,
+
+        conflicts: 'proceed',
+        refresh: true,
+        wait_for_completion: true,
       })
       .then((response: ApiResponse<any>) => {
         this.logger.log({
@@ -168,6 +172,8 @@ export class ElasticSearchClient {
             total: response.body.total,
           },
         });
+
+        return response.body.total;
       })
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',

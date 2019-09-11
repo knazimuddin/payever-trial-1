@@ -6,6 +6,7 @@ import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
 import {
   BpoFixCommand,
+  TransactionsEsBusinessCheckCommand,
   TransactionsEsBusinessUpdateCommand,
   TransactionsEsCompareCommand,
   TransactionsEsExportCommand,
@@ -25,6 +26,7 @@ import {
   TransactionEventsController,
   UserController,
 } from './controllers';
+import { DebugController } from './controllers/debug.controller';
 import { ElasticSearchClient } from './elasticsearch/elastic-search.client';
 import { AbstractConsumer, EmitterConsumerInitializer } from './emitter';
 import { EventEmitterConsumersEnum } from './emitter/event-emitter-consumers.enum';
@@ -106,10 +108,11 @@ import {
     PaymentsMicroService,
     StatisticsService,
     TransactionHistoryService,
+    TransactionsEsBusinessCheckCommand,
+    TransactionsEsBusinessUpdateCommand,
     TransactionsEsCompareCommand,
     TransactionsEsExportCommand,
     TransactionsEsSetupCommand,
-    TransactionsEsBusinessUpdateCommand,
     TransactionsExampleService,
     TransactionsExportCommand,
     TransactionsService,
