@@ -21,10 +21,12 @@
     "test": "mocha -r ts-node/register --recursive ./tests/**/*.spec.ts",
     "test:coverage": "jest --config=jest.json --coverage --coverageDirectory=coverage",
     "test:watch": "jest --watch --config=jest.json",
+    "test:pact:verify": "mocha -r ts-node/register ./tests/contract/pact.verify.ts --timeout 30000 --exit",
+    "test:pact:can-i-deploy": "./node_modules/.bin/pact-broker can-i-deploy --pacticipant 'nodejs-backend-transactions' --latest --broker-base-url $PACT_BROKER_URL --broker-username $PACT_BROKER_USERNAME --broker-password $PACT_BROKER_PASSWORD",
     "lint": "pe-lint",
     "lint:fix": "pe-lint --fix",
     "test:integration": "cucumber-js features/tests/",
-    "test:unit": "mocha -r ts-node/register --recursive ./tests/**/*.spec.ts"
+    "test:unit": "mocha -r ts-node/register --recursive ./tests/unit/**/*.spec.ts"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^6.8.2",
@@ -58,6 +60,7 @@
   },
   "devDependencies": {
     "@nestjs/testing": "6.0.5",
+    "@pact-foundation/pact": "^9.1.1",
     "@pe/cucumber-sdk": "^0.1.28",
     "@pe/dev-kit": "^0.1.4",
     "@types/mocha": "^5.2.6",
@@ -66,6 +69,7 @@
     "chai-subset": "^1.6.0",
     "db-migrate-plugin-typescript": "^2.0.0",
     "mocha": "^6.2.0",
+    "mongodb-memory-server": "^5.2.3",
     "nodemon": "^1.18.10",
     "sinon": "^7.4.1",
     "sinon-chai": "^3.3.0",

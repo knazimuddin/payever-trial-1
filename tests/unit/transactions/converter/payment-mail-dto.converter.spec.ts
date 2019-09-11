@@ -1,9 +1,8 @@
 import * as chai from 'chai';
 import 'mocha';
 import * as sinonChai from 'sinon-chai';
-import { OderInvoiceMailDtoConverter } from '../../../src/transactions/converter';
-import { PaymentSubmittedDto } from '../../../src/transactions/dto';
-import { TransactionCartItemDto } from '../../../src/transactions/dto/transaction-cart-item.dto';
+import { OderInvoiceMailDtoConverter } from '../../../../src/transactions/converter';
+import { PaymentSubmittedDto, TransactionCartItemDto } from '../../../../src/transactions/dto';
 chai.use(sinonChai);
 const expect = chai.expect;
 

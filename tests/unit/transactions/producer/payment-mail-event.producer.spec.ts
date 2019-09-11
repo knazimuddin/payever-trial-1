@@ -4,10 +4,10 @@ import * as chai from 'chai';
 import 'mocha';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
-import { OderInvoiceMailDtoConverter } from '../../../src/transactions/converter';
-import { PaymentSubmittedDto } from '../../../src/transactions/dto';
-import { PaymentStatusesEnum } from '../../../src/transactions/enum';
-import { PaymentMailEventProducer } from '../../../src/transactions/producer';
+import { OderInvoiceMailDtoConverter } from '../../../../src/transactions/converter';
+import { PaymentSubmittedDto } from '../../../../src/transactions/dto';
+import { PaymentStatusesEnum } from '../../../../src/transactions/enum';
+import { PaymentMailEventProducer } from '../../../../src/transactions/producer';
 
 chai.use(sinonChai);
 const expect = chai.expect;
