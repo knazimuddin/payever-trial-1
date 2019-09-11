@@ -190,6 +190,20 @@ export class ElasticSearchClient {
       }));
   }
 
+  public async putIndexSettings(index: string, body: any): Promise<any> {
+    return this.client.indices
+      .putSettings({
+        body: body,
+        index: index,
+      })
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e,
+        indexName: index,
+        message: `Error on ElasticSearch putIndexSettings request`,
+      }));
+  }
+
   public async isIndexExists(index: string): Promise<boolean> {
     return this.client.indices
       .exists({
