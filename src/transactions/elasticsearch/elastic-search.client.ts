@@ -148,7 +148,7 @@ export class ElasticSearchClient {
       }));
   }
 
-  public async deleteByQuery(index: string, type: string, search: any): Promise<any> {
+  public async deleteByQuery(index: string, type: string, search: any): Promise<number> {
     this.logConnectionStatus();
 
     return this.client
@@ -156,6 +156,10 @@ export class ElasticSearchClient {
         body: search,
         index: index,
         type: type,
+
+        conflicts: 'proceed',
+        refresh: true,
+        wait_for_completion: true,
       })
       .then((response: ApiResponse<any>) => {
         this.logger.log({
@@ -168,6 +172,8 @@ export class ElasticSearchClient {
             total: response.body.total,
           },
         });
+
+        return response.body.total;
       })
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
@@ -190,11 +196,26 @@ export class ElasticSearchClient {
       }));
   }
 
-  public async isIndexExists(index: string): Promise<any> {
+  public async putIndexSettings(index: string, body: any): Promise<any> {
+    return this.client.indices
+      .putSettings({
+        body: body,
+        index: index,
+      })
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e,
+        indexName: index,
+        message: `Error on ElasticSearch putIndexSettings request`,
+      }));
+  }
+
+  public async isIndexExists(index: string): Promise<boolean> {
     return this.client.indices
       .exists({
         index: index,
       })
+      .then((response: ApiResponse<any>) => response.body)
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
         error: e,
@@ -219,7 +240,6 @@ export class ElasticSearchClient {
         field: field,
         index: index,
         response: response,
-        type: type,
       }))
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
