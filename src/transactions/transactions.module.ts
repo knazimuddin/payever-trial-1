@@ -26,7 +26,6 @@ import {
   TransactionEventsController,
   UserController,
 } from './controllers';
-import { DebugController } from './controllers/debug.controller';
 import { ElasticSearchClient } from './elasticsearch/elastic-search.client';
 import { AbstractConsumer, EmitterConsumerInitializer } from './emitter';
 import { EventEmitterConsumersEnum } from './emitter/event-emitter-consumers.enum';

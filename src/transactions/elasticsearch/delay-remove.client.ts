@@ -4,7 +4,7 @@ import { ElasticSearchClient } from './elastic-search.client';
 export class DelayRemoveClient {
   private retries: number = 0;
   private maxRetries: number = 10;
-  private timeout: number = 2000;
+  private timeout: number = 1000;
 
   constructor(
     private readonly client: ElasticSearchClient,
