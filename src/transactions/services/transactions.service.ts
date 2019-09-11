@@ -161,6 +161,11 @@ export class TransactionsService {
   }
 
   public async removeByUuid(transactionId: string): Promise<void> {
+    const transaction: TransactionModel = await this.transactionModel.findOneAndRemove({ uuid: transactionId });
+    if (!transaction) {
+      return;
+    }
+
     const delayRemoveClient: DelayRemoveClient = new DelayRemoveClient(this.elasticSearchClient, this.logger);
     await delayRemoveClient.deleteByQuery(
       ElasticTransactionEnum.index,
@@ -173,8 +178,6 @@ export class TransactionsService {
         },
       },
     );
-
-    await this.transactionModel.findOneAndRemove({ uuid: transactionId });
   }
 
   public async pushHistoryRecord(
