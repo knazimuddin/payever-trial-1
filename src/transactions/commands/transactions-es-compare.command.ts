@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Command, Positional } from '@pe/nest-kit';
 import { Model } from 'mongoose';
+import * as readline from 'readline';
 import { ListQueryDto, PagingResultDto } from '../dto';
 import { BusinessModel } from '../models';
 import { BusinessSchemaName } from '../schemas';
@@ -31,13 +32,14 @@ export class TransactionsEsCompareCommand {
     }
 
     const total: number = await this.businessModel.countDocuments(criteria);
-    const limit: number = 1000;
+    const limit: number = 10;
     let processed: number = 0;
 
     while (processed < total) {
       const businesses: BusinessModel[] = await this.getWithLimit(processed, limit, criteria);
       Logger.log(`Starting next ${businesses.length} businesses.`);
       for (const business of businesses) {
+        Logger.log(business.id);
         const listDto: ListQueryDto = new ListQueryDto();
 
         listDto.filters = BusinessFilter.apply(business.id, listDto.filters);
@@ -51,15 +53,20 @@ export class TransactionsEsCompareCommand {
         const elasticAmount: number = elasticResult.pagination_data.amount;
         const elasticTotal: number = elasticResult.pagination_data.total;
 
-        if (Math.ceil(mongoAmount) !== Math.ceil(elasticAmount) && mongoTotal !== elasticTotal) {
+        if (Math.ceil(mongoAmount) !== Math.ceil(elasticAmount) ) {
+          readline.moveCursor(process.stdout, 0, -1);
           Logger.log(
-            `Business "${business.id}" has differences `
-              + `between elastic (${elasticAmount}) `
-              + `and mongo(${mongoAmount}) transactions amount.`,
+            `Business "${business.id}" has differences`
+              + `\n elastic: transactions ${elasticTotal}, amount ${elasticAmount}`
+              + `\n mongo  : transactions ${mongoTotal}, amount ${mongoAmount}`
+              + `\n`,
           );
         } else if (business_uuid) {
           Logger.log(`Business "${business_uuid}" is equal.`);
         }
+
+        readline.moveCursor(process.stdout, 0, -1);
+        readline.clearLine(process.stdout, 0);
       }
 
       processed += businesses.length;
