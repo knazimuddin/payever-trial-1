@@ -19,7 +19,6 @@ export class ElasticSearchClient {
   }
 
   public async singleIndex(index: string, type: string, record: any): Promise<void> {
-    this.logConnectionStatus();
     const bulkBody: any = [];
     const doc: any = Object.assign({}, record);
     doc.mongoId = doc._id;
@@ -72,7 +71,6 @@ export class ElasticSearchClient {
   }
 
   public async bulkIndex(index: string, type: string, records: any[]): Promise<void> {
-    this.logConnectionStatus();
     const bulkBody: any = [];
     for (const record of records) {
       const doc: any = Object.assign({}, record);
@@ -149,8 +147,6 @@ export class ElasticSearchClient {
   }
 
   public async deleteByQuery(index: string, type: string, search: any): Promise<number> {
-    this.logConnectionStatus();
-
     return this.client
       .deleteByQuery({
         body: search,
@@ -246,14 +242,5 @@ export class ElasticSearchClient {
         error: e,
         message: `Error on ElasticSearch setupFieldMapping request`,
       }));
-  }
-
-  private logConnectionStatus(): void {
-    this.logger.log({
-      context: 'ElasticSearchClient',
-      message: `Status of connection`,
-
-      connections: JSON.stringify(this.client.connectionPool.connections),
-    });
   }
 }
