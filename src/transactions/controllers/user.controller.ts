@@ -24,7 +24,7 @@ export class UserController {
 
   constructor(
     private readonly transactionsService: TransactionsService,
-    private readonly searchService: MongoSearchService,
+    private readonly mongoSearchService: MongoSearchService,
     private readonly elasticSearchService: ElasticSearchService,
   ) {
     this.defaultCurrency = environment.defaultCurrency;
@@ -39,19 +39,19 @@ export class UserController {
     listDto.filters = UserFilter.apply(user.id, listDto.filters);
     listDto.currency = this.defaultCurrency;
 
-    return this.searchService.getResult(listDto);
+    return this.elasticSearchService.getResult(listDto);
   }
 
-  @Get('elastic')
+  @Get('mongo')
   @HttpCode(HttpStatus.OK)
-  public async getElastic(
+  public async getMongo(
     @User() user: UserTokenInterface,
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = UserFilter.apply(user.id, listDto.filters);
     listDto.currency = this.defaultCurrency;
 
-    return this.elasticSearchService.getResult(listDto);
+    return this.mongoSearchService.getResult(listDto);
   }
 
   @Get('detail/:uuid')
