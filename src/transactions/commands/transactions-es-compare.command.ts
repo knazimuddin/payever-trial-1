@@ -53,7 +53,7 @@ export class TransactionsEsCompareCommand {
         const elasticAmount: number = elasticResult.pagination_data.amount;
         const elasticTotal: number = elasticResult.pagination_data.total;
 
-        if (Math.ceil(mongoAmount) !== Math.ceil(elasticAmount) ) {
+        if (Math.ceil(mongoAmount) !== Math.ceil(elasticAmount) && mongoTotal !== elasticTotal) {
           readline.moveCursor(process.stdout, 0, -1);
           Logger.log(
             `Business "${business.id}" has differences`
