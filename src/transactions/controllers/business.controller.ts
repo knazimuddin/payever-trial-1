@@ -53,7 +53,7 @@ export class BusinessController {
 
   constructor(
     private readonly transactionsService: TransactionsService,
-    private readonly searchService: MongoSearchService,
+    private readonly mongoSearchService: MongoSearchService,
     private readonly elasticSearchService: ElasticSearchService,
     private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
@@ -231,13 +231,13 @@ export class BusinessController {
     const business: BusinessModel = await this.businessService.getBusinessCurrency(businessId);
     listDto.currency = business ? business.currency : this.defaultCurrency;
 
-    return this.searchService.getResult(listDto);
+    return this.elasticSearchService.getResult(listDto);
   }
 
-  @Get('elastic')
+  @Get('mongo')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
-  public async getElastic(
+  public async getMongo(
     @Param('businessId') businessId: string,
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
@@ -245,7 +245,7 @@ export class BusinessController {
     const currency: BusinessModel = await this.businessService.getBusinessCurrency(businessId);
     listDto.currency = currency ? currency.currency : this.defaultCurrency;
 
-    return this.elasticSearchService.getResult(listDto);
+    return this.mongoSearchService.getResult(listDto);
   }
 
   @Get('export')
@@ -262,7 +262,7 @@ export class BusinessController {
     exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
     const business: BusinessModel = await this.businessService.getBusinessCurrency(businessId);
     exportDto.currency = business ? business.currency : this.defaultCurrency;
-    const result: PagingResultDto =  await this.searchService.getResult(exportDto);
+    const result: PagingResultDto =  await this.elasticSearchService.getResult(exportDto);
     const format: ExportFormat = exportDto.format;
     const fileName: string = exportDto.businessName.replace(/[^\x00-\x7F]/g, '');
     const columns: Array<{ title: string, name: string }> = JSON.parse(exportDto.columns);

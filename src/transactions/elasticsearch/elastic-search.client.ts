@@ -19,7 +19,6 @@ export class ElasticSearchClient {
   }
 
   public async singleIndex(index: string, type: string, record: any): Promise<void> {
-    this.logConnectionStatus();
     const bulkBody: any = [];
     const doc: any = Object.assign({}, record);
     doc.mongoId = doc._id;
@@ -72,7 +71,6 @@ export class ElasticSearchClient {
   }
 
   public async bulkIndex(index: string, type: string, records: any[]): Promise<void> {
-    this.logConnectionStatus();
     const bulkBody: any = [];
     for (const record of records) {
       const doc: any = Object.assign({}, record);
@@ -148,14 +146,16 @@ export class ElasticSearchClient {
       }));
   }
 
-  public async deleteByQuery(index: string, type: string, search: any): Promise<any> {
-    this.logConnectionStatus();
-
+  public async deleteByQuery(index: string, type: string, search: any): Promise<number> {
     return this.client
       .deleteByQuery({
         body: search,
         index: index,
         type: type,
+
+        conflicts: 'proceed',
+        refresh: true,
+        wait_for_completion: true,
       })
       .then((response: ApiResponse<any>) => {
         this.logger.log({
@@ -168,6 +168,8 @@ export class ElasticSearchClient {
             total: response.body.total,
           },
         });
+
+        return response.body.total;
       })
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
@@ -190,11 +192,26 @@ export class ElasticSearchClient {
       }));
   }
 
-  public async isIndexExists(index: string): Promise<any> {
+  public async putIndexSettings(index: string, body: any): Promise<any> {
+    return this.client.indices
+      .putSettings({
+        body: body,
+        index: index,
+      })
+      .catch((e: any) => this.logger.error({
+        context: 'ElasticSearchClient',
+        error: e,
+        indexName: index,
+        message: `Error on ElasticSearch putIndexSettings request`,
+      }));
+  }
+
+  public async isIndexExists(index: string): Promise<boolean> {
     return this.client.indices
       .exists({
         index: index,
       })
+      .then((response: ApiResponse<any>) => response.body)
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
         error: e,
@@ -219,21 +236,11 @@ export class ElasticSearchClient {
         field: field,
         index: index,
         response: response,
-        type: type,
       }))
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
         error: e,
         message: `Error on ElasticSearch setupFieldMapping request`,
       }));
-  }
-
-  private logConnectionStatus(): void {
-    this.logger.log({
-      context: 'ElasticSearchClient',
-      message: `Status of connection`,
-
-      connections: JSON.stringify(this.client.connectionPool.connections),
-    });
   }
 }
