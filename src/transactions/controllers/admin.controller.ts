@@ -43,7 +43,7 @@ export class AdminController {
   constructor(
     private readonly dtoValidation: DtoValidationService,
     private readonly transactionsService: TransactionsService,
-    private readonly searchService: MongoSearchService,
+    private readonly mongoSearchService: MongoSearchService,
     private readonly elasticSearchService: ElasticSearchService,
     private readonly messagingService: MessagingService,
     private readonly actionsRetriever: ActionsRetriever,
@@ -60,18 +60,18 @@ export class AdminController {
     listDto.filters = IsNotExampleFilter.apply(listDto.filters);
     listDto.currency = this.defaultCurrency;
 
-    return this.searchService.getResult(listDto);
+    return this.elasticSearchService.getResult(listDto);
   }
 
-  @Get('elastic')
+  @Get('mongo')
   @HttpCode(HttpStatus.OK)
-  public async getElastic(
+  public async getMongo(
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = IsNotExampleFilter.apply(listDto.filters);
     listDto.currency = this.defaultCurrency;
 
-    return this.elasticSearchService.getResult(listDto);
+    return this.mongoSearchService.getResult(listDto);
   }
 
   @Get('detail/reference/:reference')

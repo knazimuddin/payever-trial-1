@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Command, Positional } from '@pe/nest-kit';
 import { Model } from 'mongoose';
+import * as readline from 'readline';
 import { ListQueryDto, PagingResultDto } from '../dto';
 import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
 import { ElasticTransactionEnum } from '../enum';
@@ -75,6 +76,7 @@ export class TransactionsEsBusinessCheckCommand {
         });
 
         if (!mongoTransaction) {
+          readline.moveCursor(process.stdout, 0, -1);
           Logger.log(`Transaction ${transaction.uuid} is not in mongo. Removing...`);
 
           await this.elasticSearchClient.deleteByQuery(
@@ -88,7 +90,11 @@ export class TransactionsEsBusinessCheckCommand {
               },
             },
           );
+          readline.moveCursor(process.stdout, 0, 1);
         }
+
+        readline.moveCursor(process.stdout, 0, -1);
+        readline.clearLine(process.stdout, 0);
       }
 
       delete listDto.filters.uuid;
@@ -96,7 +102,7 @@ export class TransactionsEsBusinessCheckCommand {
       processed += transactions.length;
       listDto.page++;
 
-      Logger.log(`Check ${processed} of ${total}.`);
+      Logger.log(`Checked ${processed} of ${total}.`);
     }
   }
 

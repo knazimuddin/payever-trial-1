@@ -19,7 +19,7 @@ export class DelayRemoveClient {
       this.logger.log({
         context: 'DelayRemoveClient',
         index: index,
-        message: 'Planning new cycle of deletion.',
+        message: 'Delaying new cycle.',
         query: search,
 
         attempt: this.retries,
