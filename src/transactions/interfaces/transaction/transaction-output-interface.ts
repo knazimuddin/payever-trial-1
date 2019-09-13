@@ -74,6 +74,7 @@ export interface TransactionOutputInterface {
     delivery_fee: number;
     order_id: string;
     example_label: string;
+    example_slip: string;
   };
   store: {
     id: string;

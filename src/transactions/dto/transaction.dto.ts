@@ -50,4 +50,5 @@ export class TransactionDto implements TransactionPackedDetailsInterface {
   public user_uuid: string;
   public example?: boolean;
   public example_shipping_label?: string;
+  public example_shipping_slip?: string;
 }
