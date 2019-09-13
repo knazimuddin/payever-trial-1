@@ -59,7 +59,7 @@
   "devDependencies": {
     "@nestjs/testing": "6.0.5",
     "@pe/cucumber-sdk": "^0.1.28",
-    "@pe/dev-kit": "^0.1.4",
+    "@pe/dev-kit": "^0.1.6",
     "@types/mocha": "^5.2.6",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
