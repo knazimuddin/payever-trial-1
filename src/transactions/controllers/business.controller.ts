@@ -16,7 +16,7 @@ import { ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
-import { createReadStream, ReadStream, Stats, statSync } from 'fs';
+import { createReadStream, readFileSync, ReadStream, Stats, statSync } from 'fs';
 import * as path from 'path';
 import { environment } from '../../environments';
 
@@ -145,7 +145,7 @@ export class BusinessController {
     ) transaction: TransactionModel,
     @Res() res: FastifyReply<any>,
   ): Promise<any> {
-    const pdfPath: string = path.resolve(`./example_labels/${pdf}`);
+    const pdfPath: string = path.resolve(`./example_data/${pdf}`);
     const pdfStream: ReadStream = createReadStream(pdfPath);
     const stats: Stats = statSync(pdfPath);
 
@@ -153,6 +153,25 @@ export class BusinessController {
     res.header('Content-Length', stats.size);
     res.header('Content-Type', 'application/pdf');
     res.send(pdfStream)
+  }
+
+  @Get(':uuid/slip/:name')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.anonymous)
+  public async slip(
+    @Param('name') name: string,
+    @ParamModel({ business_uuid: BusinessPlaceholder }, TransactionSchemaName) business: BusinessModel,
+    @ParamModel(
+      {
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+  ): Promise<any> {
+    const slipPath: string = path.resolve(`./example_data/${name}`);
+
+    return JSON.parse(readFileSync(slipPath, 'utf8'));
   }
 
   @Post(':uuid/legacy-api-action/:action')
@@ -352,17 +371,26 @@ export class BusinessController {
             transaction.example_shipping_label =
               `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
                 + `label/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa.pdf`;
+            transaction.example_shipping_slip =
+              `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
+                + `slip/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa.json`;
             break;
           case 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb':
             transaction.example_shipping_label =
               `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
               + `label/bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb.pdf`;
+            transaction.example_shipping_slip =
+              `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
+              + `slip/bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb.json`;
 
             break;
           case 'cccccccc-cccc-cccc-cccc-cccccccccccc':
             transaction.example_shipping_label =
               `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
               + `label/cccccccc-cccc-cccc-cccc-cccccccccccc.pdf`;
+            transaction.example_shipping_slip =
+              `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
+              + `slip/cccccccc-cccc-cccc-cccc-cccccccccccc.json`;
 
             break;
         }

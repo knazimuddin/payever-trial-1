@@ -64,6 +64,7 @@ export const TransactionSchema: Schema = new Schema({
 
   example: Boolean,
   example_shipping_label: String,
+  example_shipping_slip: String,
 });
 
 TransactionSchema.index({ uuid: 1});

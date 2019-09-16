@@ -57,6 +57,7 @@ export class TransactionPaymentDetailsConverter {
 
       example: transaction.example,
       example_shipping_label: transaction.example_shipping_label,
+      example_shipping_slip: transaction.example_shipping_slip,
     };
 
     try {
