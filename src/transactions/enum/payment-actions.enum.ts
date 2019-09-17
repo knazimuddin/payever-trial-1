@@ -11,4 +11,6 @@ export enum PaymentActionsEnum {
   Remind = 'remind',
   Upload = 'upload',
   Edit = 'edit',
+  DownloadShippingLabel = 'download_shipping_label',
+  DownloadShippingSlip = 'download_shipping_slip',
 }
