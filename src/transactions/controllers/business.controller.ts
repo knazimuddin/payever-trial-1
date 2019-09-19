@@ -19,7 +19,6 @@ import { FastifyReply } from 'fastify';
 import { createReadStream, readFileSync, ReadStream, Stats, statSync } from 'fs';
 import * as path from 'path';
 import { environment } from '../../environments';
-
 import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
 import { BusinessDto, ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
