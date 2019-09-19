@@ -1,4 +1,4 @@
-import { INestApplicationContext, INestMicroservice, ValidationPipe } from '@nestjs/common';
+import { INestApplicationContext, INestMicroservice } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { RABBITMQ_SERVER } from '@pe/nest-kit';
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
