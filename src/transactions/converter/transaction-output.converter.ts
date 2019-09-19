@@ -93,6 +93,7 @@ export class TransactionOutputConverter {
         option_name: transaction.shipping_option_name,
 
         example_label: transaction.example_shipping_label,
+        example_slip: transaction.example_shipping_slip,
         order_id: transaction.shipping_order_id,
       },
       status: {

@@ -1,0 +1,62 @@
+{
+  "businessName": "Business Name",
+  "from": {
+    "_id": "701c042d-1586-4955-944d-d416a0363ff4",
+    "name": "Business",
+    "countryCode": "DE",
+    "city": "Hamburg",
+    "streetName": "Marthastraße",
+    "streetNumber": " 31",
+    "zipCode": "90482",
+    "phone": "",
+    "stateProvinceCode": "",
+    "createdAt": "2019-08-27T14:27:22.891Z",
+    "updatedAt": "2019-08-27T14:27:22.891Z",
+    "__v": 0
+  },
+  "products": [
+    {
+      "uuid": "11",
+      "quantity": 1,
+      "name": "Product example",
+      "currency": "EUR",
+      "price": 29,
+      "weight": 1,
+      "width": 1,
+      "length": 2,
+      "height": 20,
+      "weightUnit": "kg",
+      "dimensionUnit": "cm",
+      "_id": "701c042d-1586-4955-944d-d416a0363ff4",
+      "createdAt": "2019-08-28T13:10:22.445Z",
+      "updatedAt": "2019-08-28T13:10:22.445Z"
+    },
+    {
+      "uuid": "11",
+      "quantity": 1,
+      "name": "Product example",
+      "currency": "EUR",
+      "price": 29,
+      "weight": 1,
+      "width": 1,
+      "length": 2,
+      "height": 20,
+      "weightUnit": "kg",
+      "dimensionUnit": "cm",
+      "_id": "701c042d-1586-4955-944d-d416a0363ff4",
+      "createdAt": "2019-08-28T13:10:22.445Z",
+      "updatedAt": "2019-08-28T13:10:22.445Z"
+    }
+  ],
+  "to": {
+    "_id": "701c042d-1586-4955-944d-d416a0363ff4",
+    "name": "Florian Kamp",
+    "countryCode": "DE",
+    "city": "München",
+    "streetName": "Schellingstraße",
+    "streetNumber": "133",
+    "zipCode": "80798",
+    "phone": "",
+    "stateProvinceCode": ""
+  }
+}

@@ -203,6 +203,22 @@ export class TransactionsService {
     );
   }
 
+  public async setShippingOrderProcessed(
+    transactionId: string,
+  ): Promise<TransactionModel> {
+    return await this.transactionModel.findOneAndUpdate(
+      { uuid: transactionId },
+      {
+        $set: {
+          is_shipping_order_processed: true,
+        },
+      },
+      {
+        new: true,
+      },
+    );
+  }
+
   public async applyActionRpcResult(
     transaction: TransactionUnpackedDetailsInterface,
     result: RpcResultDto,
