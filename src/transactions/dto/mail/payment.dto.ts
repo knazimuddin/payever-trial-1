@@ -2,6 +2,7 @@ import { AddressInterface } from '../../interfaces';
 
 export class PaymentDto {
   public id: string;
+  public uuid: string;
   public amount: number;
   public total: number;
   public currency: string;

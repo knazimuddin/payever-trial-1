@@ -93,6 +93,10 @@ export const rabbitMqQueues: RabbitMqQueueConfigInterface[] = [
 
       },
       commonSdkRabbitMqBindings.get(CommonModelsNamesEnum.CurrencyModel),
+      {
+        routingKey: RabbitRoutingKeys.MailerPaymentMailSent,
+        source: 'async_events',
+      },
     ],
   },
 ];

@@ -20,6 +20,7 @@ import {
   BusinessController,
   FlowEventsController,
   HistoryEventsController,
+  MailerBusMessagesController,
   MigrateEventsController,
   ShippingBusMessagesController,
   ThirdPartyEventsController,
@@ -72,6 +73,7 @@ import {
     TransactionEventsController,
     UserController,
     ShippingBusMessagesController,
+    MailerBusMessagesController,
   ],
   imports: [
     HttpModule,

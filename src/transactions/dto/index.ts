@@ -15,3 +15,4 @@ export * from './payment-submitted.dto';
 export * from './mail';
 export * from './transaction-payment.dto';
 export * from './shipping-order-processed-message.dto';
+export * from './payment-mail-sent.dto';
