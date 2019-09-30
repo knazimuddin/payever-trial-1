@@ -28,6 +28,8 @@ export enum RabbitRoutingKeys {
   ThirdPartyPaymentActionRequested = 'third-party.event.payment.action',
 
   ShippingOrderProcessed = 'shipping.event.shipping-order.processed',
+  ShippingLabelDownloaded = 'shipping.event.shipping-label.downloaded',
+  ShippingSlipDownloaded = 'shipping.event.shipping-slip.downloaded',
 
   BusinessExport = 'users.event.business.export',
   BusinessUpdated = 'users.event.business.updated',
