@@ -40,7 +40,7 @@ export class ActionsRetriever {
         enabled: true,
       });
 
-       if (unpackedTransaction.shipping_category === 'custom') {
+       if (unpackedTransaction.shipping_category !== 'custom') {
          actions.push({
            action: PaymentActionsEnum.DownloadShippingLabel as string,
            enabled: true,
