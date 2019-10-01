@@ -32,7 +32,7 @@ export class TransactionsEsCompareCommand {
     }
 
     const total: number = await this.businessModel.countDocuments(criteria);
-    const limit: number = 10;
+    const limit: number = 1000;
     let processed: number = 0;
 
     while (processed < total) {

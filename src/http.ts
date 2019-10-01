@@ -5,7 +5,6 @@ import { DocumentBuilder, SwaggerBaseConfig, SwaggerDocument, SwaggerModule } fr
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
 import * as jwt from 'fastify-jwt';
 import * as qs from 'qs';
-
 import { AppModule } from './app.module';
 import { environment } from './environments';
 import { EmitterConsumerInitializer } from './transactions/emitter';
@@ -14,6 +13,7 @@ async function bootstrap(): Promise<void> {
   const app: NestFastifyApplication = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({
+      maxParamLength: 255,
       querystringParser: (str: string): any => qs.parse(str),
     }),
   );

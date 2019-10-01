@@ -23,6 +23,7 @@ export class TransactionsEsSetupCommand {
       ElasticTransactionEnum.index,
       {
         index: {
+          max_result_window: 500000,
           refresh_interval: null,
         },
       },

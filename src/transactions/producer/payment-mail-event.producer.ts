@@ -39,6 +39,7 @@ export class PaymentMailEventProducer {
       PaymentStatusesEnum.Cancelled,
       PaymentStatusesEnum.Failed,
       PaymentStatusesEnum.Refunded,
+      PaymentStatusesEnum.New,
     ].indexOf(payment.status) === -1;
   }
 
