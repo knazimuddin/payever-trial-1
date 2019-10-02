@@ -41,6 +41,8 @@ export class ShippingBusMessagesController {
       orderProcessedDto,
     );
 
+    await this.transactionsService.setShippingOrderProcessed(orderProcessedDto.transactionId);
+
     await this.eventProducer.produceShippingEvent(mailDto);
   }
 }

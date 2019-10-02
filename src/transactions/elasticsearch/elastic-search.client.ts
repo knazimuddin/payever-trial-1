@@ -169,7 +169,7 @@ export class ElasticSearchClient {
           },
         });
 
-        return response.body.total;
+        return response.body.deleted;
       })
       .catch((e: any) => this.logger.error({
         context: 'ElasticSearchClient',
