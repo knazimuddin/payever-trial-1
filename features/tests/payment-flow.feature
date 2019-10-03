@@ -539,7 +539,7 @@ Feature: Full real payment flow
     Then I process messages from RabbitMQ "async_events_transactions_micro" channel
     Then print RabbitMQ message list
     Then debug RabbitMQ message list
-    And RabbitMQ exchange "async_events" should contain json:
+    And RabbitMQ exchange "async_events" should contain following ordered messages:
     """
     [
       {

@@ -24,8 +24,8 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^6.8.2",
-    "@pe/common-sdk": "^0.2.0",
-    "@pe/nest-kit": "^4.9.1",
+    "@pe/common-sdk": "^0.4.1",
+    "@pe/nest-kit": "^4.9.7",
     "@pe/notifications-sdk": "^3.1.0",
     "@types/dotenv": "^6.1.1",
     "@types/mongoose": "^5.3.24",
@@ -53,7 +53,7 @@
     "xlsx": "^0.15.0"
   },
   "devDependencies": {
-    "@nestjs/testing": "6.0.5",
+    "@nestjs/testing": "^6.8.0",
     "@pe/cucumber-sdk": "^0.3.3",
     "@pe/dev-kit": "^0.1.6",
     "@types/mocha": "^5.2.6",
