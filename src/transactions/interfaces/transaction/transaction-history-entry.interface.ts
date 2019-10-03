@@ -11,4 +11,8 @@ export interface TransactionHistoryEntryInterface {
   is_restock_items?: boolean;
   upload_items?: TransactionUploadItemInterface[];
   refund_items?: TransactionRefundItemInterface[];
+  mail_event?: {
+    event_id: string,
+    template_name: string,
+  }
 }
