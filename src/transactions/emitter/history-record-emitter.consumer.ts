@@ -22,12 +22,11 @@ export class HistoryRecordEmitterConsumer extends AbstractConsumer {
   public async handlePaymentCompleted(
     transaction: TransactionModel,
     message: HistoryEventActionCompletedInterface,
-    metadata: TypedMessageInterface<HistoryEventActionCompletedInterface>,
   ): Promise<void> {
     await this.historyService.processHistoryRecord(
       transaction,
       message.action,
-      (metadata.createdAt && AtomDateConverter.fromAtomFormatToDate(metadata.createdAt)) || new Date(),
+      new Date(),
       message.data,
     );
   }

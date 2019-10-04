@@ -29,9 +29,7 @@ export class ShippingBusMessagesController {
     name: RabbitRoutingKeys.ShippingOrderProcessed,
     origin: 'rabbitmq',
   })
-  public async onShippingOrderProcessed(msg: any): Promise<void> {
-    const orderProcessedDto: ShippingOrderProcessedMessageDto
-      = this.messageBusService.unwrapMessage<ShippingOrderProcessedMessageDto>(msg.data);
+  public async onShippingOrderProcessed(orderProcessedDto: ShippingOrderProcessedMessageDto): Promise<void> {
     const transaction: TransactionUnpackedDetailsInterface = await this.transactionsService.findUnpackedByUuid(
       orderProcessedDto.transactionId,
     );

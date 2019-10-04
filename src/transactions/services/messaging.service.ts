@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MessageInterface, RabbitMqClient, RabbitMqRPCClient } from '@pe/nest-kit';
-import { MessageBusService } from '@pe/nest-kit/modules/message';
+import { MessageBusService, MessageInterface, RabbitMqClient, RabbitMqRPCClient } from '@pe/nest-kit';
 import { environment } from '../../environments';
 import { TransactionConverter } from '../converter';
 import { NextActionDto } from '../dto';

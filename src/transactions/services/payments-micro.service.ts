@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MessageBusService, MessageInterface } from '@pe/nest-kit/modules/message';
+import { MessageBusService, MessageInterface } from '@pe/nest-kit';
 
 import { environment } from '../../environments';
 
