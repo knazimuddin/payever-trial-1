@@ -8,3 +8,4 @@ export * from './transaction-history-entry.schema';
 export * from './transaction-cart-item-schema';
 export * from './transaction-refund-item.schema';
 export * from './transaction-upload-item.schema';
+export * from './transaction-mail-event.schema';

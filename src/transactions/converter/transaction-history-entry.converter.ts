@@ -28,6 +28,10 @@ export class TransactionHistoryEntryConverter {
       item.is_restock_items = data.items_restocked;
     }
 
+    if (data.mail_event) {
+      item.mail_event = data.mail_event;
+    }
+
     return item;
   }
 

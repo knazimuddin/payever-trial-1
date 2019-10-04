@@ -9,4 +9,8 @@ export interface HistoryEventDataInterface {
   items_restocked: boolean;
   refund_items: HistoryEventRefundItemInterface[];
   saved_data: HistoryEventUploadItemInterface[];
+  mail_event?: {
+    event_id: string;
+    template_name: string;
+  }
 }
