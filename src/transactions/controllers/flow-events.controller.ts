@@ -18,7 +18,7 @@ export class FlowEventsController {
     origin: 'rabbitmq',
   })
   public async onPaymentFlowCreatedEvent(data: { flow: PaymentFlowInterface }): Promise<void> {
-    return this.createOrUpdate(msg, 'FLOW.CREATE');
+    return this.createOrUpdate(data, 'FLOW.CREATE');
   }
 
   @MessagePattern({
@@ -27,7 +27,7 @@ export class FlowEventsController {
     origin: 'rabbitmq',
   })
   public async onPaymentFlowMigrateEvent(data: { flow: PaymentFlowInterface }): Promise<void> {
-    return this.createOrUpdate(msg, 'FLOW.MIGRATE');
+    return this.createOrUpdate(data, 'FLOW.MIGRATE');
   }
 
   @MessagePattern({
