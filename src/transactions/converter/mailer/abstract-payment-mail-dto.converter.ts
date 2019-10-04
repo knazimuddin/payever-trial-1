@@ -7,6 +7,6 @@ export abstract class AbstractPaymentMailDtoConverter {
       taxAmount += item.vat_rate/100 * item.price * item.quantity;
     }
 
-    return taxAmount.toFixed(2);
+    return taxAmount;
   }
 }
