@@ -105,12 +105,18 @@ describe('PaymentMailDtoConverter ', () => {
           items: [
             {
               vat_rate: 2,
+              price: 10,
+              quantity: 1,
             },
             {
               vat_rate: 6,
+              price: 20,
+              quantity: 2,
             },
             {
               vat_rate: 7,
+              price: 30,
+              quantity: 3,
             },
           ],
           business: {
@@ -120,7 +126,7 @@ describe('PaymentMailDtoConverter ', () => {
       } as PaymentSubmittedDto;
 
       const expectedVatRate = paymentSubmittedDto.payment.items.map(
-        (item: TransactionCartItemDto) => item.vat_rate,
+        (item: TransactionCartItemDto) => item.vat_rate * item.price * item.quantity / 100,
       ).reduce((a, b) => a + b, 0);
 
       expect(
