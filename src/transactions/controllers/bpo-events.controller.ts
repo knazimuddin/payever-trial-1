@@ -1,6 +1,5 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
 import { BusinessPaymentOptionInterface } from '../interfaces';
@@ -8,13 +7,6 @@ import { BusinessPaymentOptionService } from '../services';
 
 @Controller()
 export class BpoEventsController {
-  private messageBusService: MessageBusService = new MessageBusService(
-    {
-      rsa: environment.rsa,
-    },
-    this.logger,
-  );
-
   constructor(
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly logger: Logger,
@@ -25,9 +17,7 @@ export class BpoEventsController {
     name: RabbitRoutingKeys.BpoCreated,
     origin: 'rabbitmq',
   })
-  public async onBpoCreatedEvent(msg: any): Promise<void> {
-    const data: { business_payment_option: BusinessPaymentOptionInterface } =
-      this.messageBusService.unwrapMessage<{ business_payment_option: BusinessPaymentOptionInterface }>(msg.data);
+  public async onBpoCreatedEvent(data: { business_payment_option: BusinessPaymentOptionInterface }): Promise<void> {
     this.logger.log({ text: 'BPO.CREATE', data });
     await this.bpoService.createOrUpdate(data.business_payment_option);
     this.logger.log('BPO.CREATE COMPLETED');
@@ -38,9 +28,7 @@ export class BpoEventsController {
     name: RabbitRoutingKeys.BpoUpdated,
     origin: 'rabbitmq',
   })
-  public async onBpoUpdatedEvent(msg: any): Promise<void> {
-    const data: { business_payment_option: BusinessPaymentOptionInterface } =
-      this.messageBusService.unwrapMessage<{ business_payment_option: BusinessPaymentOptionInterface }>(msg.data);
+  public async onBpoUpdatedEvent(data: { business_payment_option: BusinessPaymentOptionInterface }): Promise<void> {
     this.logger.log({ text: 'BPO.UPDATE', data });
     await this.bpoService.createOrUpdate(data.business_payment_option);
     this.logger.log('BPO.UPDATE COMPLETED');
