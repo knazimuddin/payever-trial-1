@@ -26,7 +26,7 @@
     "@elastic/elasticsearch": "^6.8.2",
     "@pe/common-sdk": "^0.4.1",
     "@pe/nest-kit": "^4.10.0",
-    "@pe/notifications-sdk": "^3.1.0",
+    "@pe/notifications-sdk": "^3.2.0",
     "@types/dotenv": "^6.1.1",
     "@types/mongoose": "^5.3.24",
     "@types/node": "^11.11.6",
