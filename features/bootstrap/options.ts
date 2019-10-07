@@ -31,6 +31,6 @@ export const options: CucumberOptionsInterface = {
   ],
   fixtures: path.resolve('./features/fixtures'),
   appConfigurator: AppConfigurator,
-  providers: [HttpProvider, PersistentProvider, RabbitMqProvider, RedisProvider],
+  providers: [HttpProvider, InMemoryProvider, RabbitMqProvider, RedisProvider],
   mongodb: env.MONGODB_URL,
 };
