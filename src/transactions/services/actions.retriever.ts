@@ -19,10 +19,11 @@ export class ActionsRetriever {
     } catch (e) {
       this.logger.error(
         {
-          context: 'ActionsRetriever',
-          error: e.message,
+          error: e.tr,
           message: `Error occurred while getting transaction actions`,
         },
+        e.stack,
+        ActionsRetriever.name,
       );
       actions = [];
     }
