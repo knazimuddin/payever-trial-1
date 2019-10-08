@@ -19,14 +19,6 @@ import { TransactionsService } from './transactions.service';
 
 @Injectable()
 export class MessagingService {
-
-  private messageBusService: MessageBusService = new MessageBusService(
-    {
-      rsa: environment.rsa,
-    },
-    this.logger,
-  );
-
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,
@@ -35,6 +27,7 @@ export class MessagingService {
     private readonly rabbitRpcClient: RabbitMqRPCClient,
     private readonly rabbitClient: RabbitMqClient,
     private readonly logger: Logger,
+    private readonly messageBusService: MessageBusService,
   ) {}
 
   public getBusinessPaymentOption(transaction: TransactionBasicInterface): Promise<BusinessPaymentOptionModel> {

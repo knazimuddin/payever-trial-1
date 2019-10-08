@@ -1,6 +1,5 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { MessageBusService } from '@pe/nest-kit';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
 import { TransactionPaymentDetailsConverter } from '../converter';
@@ -12,13 +11,6 @@ import { MessagingService, TransactionsService } from '../services';
 
 @Controller()
 export class ThirdPartyEventsController {
-  private messageBusService: MessageBusService = new MessageBusService(
-    {
-      rsa: environment.rsa,
-    },
-    this.logger,
-  );
-
   constructor(
     private readonly transactionService: TransactionsService,
     private readonly messagingService: MessagingService,
@@ -30,10 +22,7 @@ export class ThirdPartyEventsController {
     name: RabbitRoutingKeys.ThirdPartyPaymentActionRequested,
     origin: 'rabbitmq',
   })
-  public async onThirdPartyPaymentActionEvent(msg: any): Promise<void> {
-    const data: ThirdPartyActionRequestInterface = this.messageBusService
-      .unwrapMessage<ThirdPartyActionRequestInterface>(msg.data);
-
+  public async onThirdPartyPaymentActionEvent(data: ThirdPartyActionRequestInterface): Promise<void> {
     const transaction: TransactionModel = await this.transactionService.findModelByParams({
       business_uuid: data.business.id,
       reference: data.reference,
