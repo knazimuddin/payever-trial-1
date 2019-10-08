@@ -1,8 +1,6 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
-import { environment } from '../../environments';
-import { AtomDateConverter } from '../converter';
 import {
   HistoryEventActionCompletedInterface,
   HistoryEventAddHistoryInterface,
@@ -10,17 +8,10 @@ import {
 import { TransactionModel } from '../models';
 import { TransactionHistoryService, TransactionsService } from '../services';
 import { PaymentActionEventsEnum } from '../enum/events';
-import { InjectEventEmitter, NestEventEmitter, IncomingMessageInterface, MessageBusService, TypedMessageInterface } from '@pe/nest-kit';
+import { InjectEventEmitter, NestEventEmitter } from '@pe/nest-kit';
 
 @Controller()
 export class HistoryEventsController {
-  private messageBusService: MessageBusService = new MessageBusService(
-    {
-      rsa: environment.rsa,
-    },
-    this.logger,
-  );
-
   constructor(
     private readonly transactionService: TransactionsService,
     private readonly historyService: TransactionHistoryService,
