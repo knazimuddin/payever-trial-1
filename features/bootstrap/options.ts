@@ -6,7 +6,6 @@ import {
   HttpContext,
   HttpProvider,
   InMemoryProvider,
-  PersistentProvider,
   RabbitMqContext,
   StorageContext,
   WorldContext,
