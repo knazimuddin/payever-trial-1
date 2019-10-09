@@ -19,7 +19,7 @@ export class ActionsRetriever {
     } catch (e) {
       this.logger.error(
         {
-          error: e.tr,
+          error: e.message,
           message: `Error occurred while getting transaction actions`,
         },
         e.stack,
