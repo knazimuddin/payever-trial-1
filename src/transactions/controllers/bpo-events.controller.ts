@@ -18,9 +18,7 @@ export class BpoEventsController {
     origin: 'rabbitmq',
   })
   public async onBpoCreatedEvent(data: { business_payment_option: BusinessPaymentOptionInterface }): Promise<void> {
-    this.logger.log({ text: 'BPO.CREATE', data });
-    await this.bpoService.createOrUpdate(data.business_payment_option);
-    this.logger.log('BPO.CREATE COMPLETED');
+    return this.createOrUpdate('CREATE', data);
   }
 
   @MessagePattern({
@@ -29,8 +27,15 @@ export class BpoEventsController {
     origin: 'rabbitmq',
   })
   public async onBpoUpdatedEvent(data: { business_payment_option: BusinessPaymentOptionInterface }): Promise<void> {
-    this.logger.log({ text: 'BPO.UPDATE', data });
+    return this.createOrUpdate('UPDATE', data);
+  }
+
+  public async createOrUpdate(
+    createOrUpdate: string,
+    data: { business_payment_option: BusinessPaymentOptionInterface },
+  ): Promise<void> {
+    this.logger.log({ text: `BPO.${createOrUpdate}`, data });
     await this.bpoService.createOrUpdate(data.business_payment_option);
-    this.logger.log('BPO.UPDATE COMPLETED');
+    this.logger.log(`BPO.${createOrUpdate} COMPLETED`);
   }
 }

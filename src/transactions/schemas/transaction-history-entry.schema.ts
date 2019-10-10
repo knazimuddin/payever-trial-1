@@ -14,7 +14,7 @@ export const TransactionHistoryEntrySchema: Schema = new Schema({
   reason: String,
   reference: String,
 
+  mail_event: TransactionMailEventSchema,
   refund_items: [TransactionRefundItemSchema],
   upload_items: [TransactionUploadItemSchema],
-  mail_event: TransactionMailEventSchema,
 });

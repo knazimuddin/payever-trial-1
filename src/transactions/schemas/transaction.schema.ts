@@ -28,12 +28,12 @@ export const TransactionSchema: Schema = new Schema({
   customer_email: { type: String },
   customer_name: { type: String, required: true },
 
+  is_shipping_order_processed: Boolean,
   shipping_address: { type: AddressSchema },
   shipping_category: String,
   shipping_method_name: String,
   shipping_option_name: String,
   shipping_order_id: String,
-  is_shipping_order_processed: Boolean,
   specific_status: String,
 
   created_at: { type: Date, required: true },
