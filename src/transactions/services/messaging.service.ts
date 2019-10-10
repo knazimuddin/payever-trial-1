@@ -260,7 +260,6 @@ export class MessagingService {
         environment.stub,
       ),
     );
-    console.log(result);
 
     return this.messageBusService.unwrapRpcMessage(result);
   }
