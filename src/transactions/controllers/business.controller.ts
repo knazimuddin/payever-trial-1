@@ -365,33 +365,18 @@ export class BusinessController {
         transaction.status = 'STATUS_PAID';
         transaction.place = 'paid';
         transaction.shipping_order_id = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
-        switch (transaction.billing_address.id) {
-          case 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa':
-            transaction.example_shipping_label =
-              `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
-                + `label/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa.pdf`;
-            transaction.example_shipping_slip =
-              `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
-                + `slip/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa.json`;
-            break;
-          case 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb':
-            transaction.example_shipping_label =
-              `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
-              + `label/bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb.pdf`;
-            transaction.example_shipping_slip =
-              `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
-              + `slip/bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb.json`;
+        if (
+          transaction.billing_address.id === 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' ||
+          transaction.billing_address.id === 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb' ||
+          transaction.billing_address.id === 'cccccccc-cccc-cccc-cccc-cccccccccccc'
+        ) {
+          transaction.example_shipping_label =
+            `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
+            + `label/${transaction.billing_address.id}.pdf`;
+          transaction.example_shipping_slip =
+            `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
+            + `slip/${transaction.billing_address.id}.json`;
 
-            break;
-          case 'cccccccc-cccc-cccc-cccc-cccccccccccc':
-            transaction.example_shipping_label =
-              `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
-              + `label/cccccccc-cccc-cccc-cccc-cccccccccccc.pdf`;
-            transaction.example_shipping_slip =
-              `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
-              + `slip/cccccccc-cccc-cccc-cccc-cccccccccccc.json`;
-
-            break;
         }
 
         break;

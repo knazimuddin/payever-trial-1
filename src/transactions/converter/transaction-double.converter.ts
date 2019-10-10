@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { TransactionBasicInterface } from '../interfaces/transaction';
+import { TransactionBasicInterface, TransactionCartItemInterface } from '../interfaces/transaction';
 
 @Injectable()
 export class TransactionDoubleConverter {
@@ -21,34 +21,7 @@ export class TransactionDoubleConverter {
     ;
 
     for (const item of transaction.items) {
-      item.price = item.price
-        ? Math.trunc(item.price * 100)
-        : item.price
-      ;
-      item.price_net = item.price_net
-        ? Math.trunc(item.price_net * 100)
-        : item.price_net
-      ;
-      item.vat_rate = item.vat_rate
-        ? Math.trunc(item.vat_rate * 100)
-        : item.vat_rate
-      ;
-      item.fixed_shipping_price = item.fixed_shipping_price
-        ? Math.trunc(item.fixed_shipping_price * 100)
-        : item.fixed_shipping_price
-      ;
-      item.shipping_price = item.shipping_price
-        ? Math.trunc(item.shipping_price * 100)
-        : item.shipping_price
-      ;
-      item.shipping_settings_rate = item.shipping_settings_rate
-        ? Math.trunc(item.shipping_settings_rate * 100)
-        : item.shipping_settings_rate
-      ;
-      item.weight = item.weight
-        ? Math.trunc(item.weight * 100)
-        : item.weight
-      ;
+      this.handleItem1(item);
     }
 
     for (const record of transaction.history) {
@@ -78,34 +51,7 @@ export class TransactionDoubleConverter {
     ;
 
     for (const item of transaction.items) {
-      item.price = item.price
-        ? item.price / 100
-        : item.price
-      ;
-      item.price_net = item.price_net
-        ? item.price_net / 100
-        : item.price_net
-      ;
-      item.vat_rate = item.vat_rate
-        ? item.vat_rate / 100
-        : item.vat_rate
-      ;
-      item.fixed_shipping_price = item.fixed_shipping_price
-        ? item.fixed_shipping_price / 100
-        : item.fixed_shipping_price
-      ;
-      item.shipping_price = item.shipping_price
-        ? item.shipping_price / 100
-        : item.shipping_price
-      ;
-      item.shipping_settings_rate = item.shipping_settings_rate
-        ? item.shipping_settings_rate / 100
-        : item.shipping_settings_rate
-      ;
-      item.weight = item.weight
-        ? item.weight / 100
-        : item.weight
-      ;
+      this.handleItem(item);
     }
 
     for (const record of transaction.history) {
@@ -116,5 +62,67 @@ export class TransactionDoubleConverter {
     }
 
     return transaction;
+  }
+
+  private static handleItem1(item: TransactionCartItemInterface): void {
+    item.price = item.price
+      ? Math.trunc(item.price * 100)
+      : item.price
+    ;
+    item.price_net = item.price_net
+      ? Math.trunc(item.price_net * 100)
+      : item.price_net
+    ;
+    item.vat_rate = item.vat_rate
+      ? Math.trunc(item.vat_rate * 100)
+      : item.vat_rate
+    ;
+    item.fixed_shipping_price = item.fixed_shipping_price
+      ? Math.trunc(item.fixed_shipping_price * 100)
+      : item.fixed_shipping_price
+    ;
+    item.shipping_price = item.shipping_price
+      ? Math.trunc(item.shipping_price * 100)
+      : item.shipping_price
+    ;
+    item.shipping_settings_rate = item.shipping_settings_rate
+      ? Math.trunc(item.shipping_settings_rate * 100)
+      : item.shipping_settings_rate
+    ;
+    item.weight = item.weight
+      ? Math.trunc(item.weight * 100)
+      : item.weight
+    ;
+  }
+
+  private static handleItem(item: TransactionCartItemInterface): void {
+    item.price = item.price
+      ? item.price / 100
+      : item.price
+    ;
+    item.price_net = item.price_net
+      ? item.price_net / 100
+      : item.price_net
+    ;
+    item.vat_rate = item.vat_rate
+      ? item.vat_rate / 100
+      : item.vat_rate
+    ;
+    item.fixed_shipping_price = item.fixed_shipping_price
+      ? item.fixed_shipping_price / 100
+      : item.fixed_shipping_price
+    ;
+    item.shipping_price = item.shipping_price
+      ? item.shipping_price / 100
+      : item.shipping_price
+    ;
+    item.shipping_settings_rate = item.shipping_settings_rate
+      ? item.shipping_settings_rate / 100
+      : item.shipping_settings_rate
+    ;
+    item.weight = item.weight
+      ? item.weight / 100
+      : item.weight
+    ;
   }
 }
