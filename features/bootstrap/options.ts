@@ -1,13 +1,17 @@
 import {
+  AuthContext,
   AxiosContext,
   CucumberOptionsInterface,
   DatabaseContext,
   HttpContext,
-  PersistentProvider,
+  HttpProvider,
+  InMemoryProvider,
   RabbitMqContext,
   StorageContext,
   WorldContext,
 } from '@pe/cucumber-sdk/module/';
+import { RabbitMqProvider } from '@pe/cucumber-sdk/module/rabbit';
+import { RedisProvider } from '@pe/cucumber-sdk/module/redis';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { AppConfigurator } from './app.configurator';
@@ -26,6 +30,6 @@ export const options: CucumberOptionsInterface = {
   ],
   fixtures: path.resolve('./features/fixtures'),
   appConfigurator: AppConfigurator,
-  databaseProvider: PersistentProvider,
+  providers: [HttpProvider, InMemoryProvider, RabbitMqProvider, RedisProvider],
   mongodb: env.MONGODB_URL,
 };

@@ -1,6 +1,5 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { MessageBusService } from '@pe/nest-kit';
 import { RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
 import { ShippingLabelDownloadedDto, ShippingOrderProcessedMessageDto, ShippingSlipDownloadedDto } from '../dto';
@@ -14,13 +13,6 @@ import { HistoryEventDataInterface } from '../interfaces/history-event-message';
 
 @Controller()
 export class ShippingBusMessagesController {
-  private messageBusService: MessageBusService = new MessageBusService(
-    {
-      rsa: environment.rsa,
-    },
-    this.logger,
-  );
-
   constructor(
     private readonly logger: Logger,
     private readonly transactionsService: TransactionsService,
@@ -32,9 +24,7 @@ export class ShippingBusMessagesController {
     name: RabbitRoutingKeys.ShippingOrderProcessed,
     origin: 'rabbitmq',
   })
-  public async onShippingOrderProcessed(msg: any): Promise<void> {
-    const orderProcessedDto: ShippingOrderProcessedMessageDto
-      = this.messageBusService.unwrapMessage<ShippingOrderProcessedMessageDto>(msg.data);
+  public async onShippingOrderProcessed(orderProcessedDto: ShippingOrderProcessedMessageDto): Promise<void> {
     const transaction: TransactionUnpackedDetailsInterface = await this.transactionsService.findUnpackedByUuid(
       orderProcessedDto.transactionId,
     );
@@ -53,16 +43,15 @@ export class ShippingBusMessagesController {
     name: RabbitRoutingKeys.ShippingLabelDownloaded,
     origin: 'rabbitmq',
   })
-  public async onShippingLabelDownloaded(msg: any): Promise<void> {
-    const labelDownloadedDto: ShippingLabelDownloadedDto
-      = this.messageBusService.unwrapMessage<ShippingLabelDownloadedDto>(msg.data);
+  public async onShippingLabelDownloaded(labelDownloadedDto: ShippingLabelDownloadedDto): Promise<void> {
     const transaction: TransactionModel = await this.transactionsService.findModelByParams({
         shipping_order_id: labelDownloadedDto.shippingOrder.id,
     });
 
     if (!transaction) {
       this.logger.warn(`Transaction related with shipping order "${labelDownloadedDto.shippingOrder.id}" not found`);
-      return ;
+
+      return;
     }
 
     await this.historyService.processHistoryRecord(
@@ -77,16 +66,15 @@ export class ShippingBusMessagesController {
     name: RabbitRoutingKeys.ShippingSlipDownloaded,
     origin: 'rabbitmq',
   })
-  public async onShippingSlipDownloaded(msg: any): Promise<void> {
-    const slipDownloadedDto: ShippingSlipDownloadedDto
-      = this.messageBusService.unwrapMessage<ShippingSlipDownloadedDto>(msg.data);
+  public async onShippingSlipDownloaded(slipDownloadedDto: ShippingSlipDownloadedDto): Promise<void> {
     const transaction: TransactionModel = await this.transactionsService.findModelByParams({
       shipping_order_id: slipDownloadedDto.shippingOrder.id,
     });
 
     if (!transaction) {
       this.logger.warn(`Transaction related with shipping order "${slipDownloadedDto.shippingOrder.id}" not found`);
-      return ;
+
+      return;
     }
 
     await this.historyService.processHistoryRecord(

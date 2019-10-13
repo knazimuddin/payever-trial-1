@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MessageBusService, MessageInterface } from '@pe/nest-kit/modules/message';
+import { MessageBusService, MessageInterface } from '@pe/nest-kit';
 
 import { environment } from '../../environments';
 
@@ -9,13 +9,7 @@ const ORIGINAL_TIMEOUT: number = 15;
 export class PaymentsMicroService {
   private readonly stubMessageName: string = 'payment_option.stub_proxy.sandbox';
 
-  private messageBusService: MessageBusService = new MessageBusService(
-    {
-      rsa: environment.rsa,
-    },
-    this.logger);
-
-  constructor(private readonly logger: Logger) {
+  constructor(private readonly logger: Logger, private readonly messageBusService: MessageBusService) {
   }
 
   public createPaymentMicroMessage(

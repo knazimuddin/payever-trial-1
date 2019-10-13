@@ -27,7 +27,7 @@ Feature: Shipment confirmation email dto sending
         "uuid": "ad738281-f9f0-4db7-a4f6-670b0dff5327"
       }
       """
-    Then RabbitMQ exchange "async_events" should contain json:
+    Then RabbitMQ exchange "async_events" should contain following ordered messages:
     """
     [
       {

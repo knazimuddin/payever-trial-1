@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MessageInterface, RabbitMqClient, RabbitMqRPCClient } from '@pe/nest-kit';
-import { MessageBusService } from '@pe/nest-kit/modules/message';
+import { MessageBusService, MessageInterface, RabbitMqClient, RabbitMqRPCClient } from '@pe/nest-kit';
 import { environment } from '../../environments';
 import { TransactionConverter } from '../converter';
 import { NextActionDto } from '../dto';
@@ -20,14 +19,6 @@ import { TransactionsService } from './transactions.service';
 
 @Injectable()
 export class MessagingService {
-
-  private messageBusService: MessageBusService = new MessageBusService(
-    {
-      rsa: environment.rsa,
-    },
-    this.logger,
-  );
-
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,
@@ -36,6 +27,7 @@ export class MessagingService {
     private readonly rabbitRpcClient: RabbitMqRPCClient,
     private readonly rabbitClient: RabbitMqClient,
     private readonly logger: Logger,
+    private readonly messageBusService: MessageBusService,
   ) {}
 
   public getBusinessPaymentOption(transaction: TransactionBasicInterface): Promise<BusinessPaymentOptionModel> {

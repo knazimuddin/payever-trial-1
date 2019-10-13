@@ -1,9 +1,6 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { IncomingMessageInterface, MessageBusService, TypedMessageInterface } from '@pe/nest-kit/modules/message';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
-import { environment } from '../../environments';
-import { AtomDateConverter } from '../converter';
 import {
   HistoryEventActionCompletedInterface,
   HistoryEventAddHistoryInterface,
@@ -15,13 +12,6 @@ import { InjectEventEmitter, NestEventEmitter } from '@pe/nest-kit';
 
 @Controller()
 export class HistoryEventsController {
-  private messageBusService: MessageBusService = new MessageBusService(
-    {
-      rsa: environment.rsa,
-    },
-    this.logger,
-  );
-
   constructor(
     private readonly transactionService: TransactionsService,
     private readonly historyService: TransactionHistoryService,
@@ -35,11 +25,8 @@ export class HistoryEventsController {
     origin: 'rabbitmq',
   })
   public async onActionCompletedEvent(
-    msg: IncomingMessageInterface<HistoryEventActionCompletedInterface>,
+    message: HistoryEventActionCompletedInterface,
   ): Promise<void> {
-    const metadata: TypedMessageInterface<HistoryEventActionCompletedInterface> = msg.data;
-    const message: HistoryEventActionCompletedInterface =
-      this.messageBusService.unwrapMessage<HistoryEventActionCompletedInterface>(metadata);
     this.logger.log({ text: 'ACTION.COMPLETED', message });
     const search: { [key: string]: string } = message.payment.uuid
       ? { uuid: message.payment.uuid }
@@ -60,7 +47,6 @@ export class HistoryEventsController {
       PaymentActionEventsEnum.PaymentActionCompleted,
       transaction,
       message,
-      metadata,
     );
     this.logger.log({ text: 'ACTION.COMPLETED: Saved', transaction });
   }
@@ -71,11 +57,8 @@ export class HistoryEventsController {
     origin: 'rabbitmq',
   })
   public async onHistoryAddEvent(
-    msg: IncomingMessageInterface<HistoryEventAddHistoryInterface>,
+    message: HistoryEventAddHistoryInterface,
   ): Promise<void> {
-    const metadata: TypedMessageInterface<HistoryEventAddHistoryInterface> = msg.data;
-    const message: HistoryEventAddHistoryInterface =
-      this.messageBusService.unwrapMessage<HistoryEventAddHistoryInterface>(msg.data);
     this.logger.log({ text: 'HISTORY.ADD', message });
     // @TODO use only uuid later, no original_id
     const search: { [key: string]: string } = message.payment.uuid
@@ -95,7 +78,7 @@ export class HistoryEventsController {
     await this.historyService.processHistoryRecord(
       transaction,
       message.history_type,
-      (metadata.createdAt && AtomDateConverter.fromAtomFormatToDate(metadata.createdAt)) || new Date(),
+      new Date(),
       message.data,
     );
     this.logger.log({ text: 'HISTORY.ADD: Saved', transaction });
