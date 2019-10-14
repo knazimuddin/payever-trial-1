@@ -51,6 +51,10 @@ export const environment: any = {
     prefetchCount: 1,
     queues: rabbitMqQueues,
     urls: [env.RABBITMQ_URL],
+
+    rsa: {
+      private: path.resolve(env.RABBITMQ_CERTIFICATE_PATH),
+    },
   },
   redis: {
     retryAttempts: env.REDIS_RETRY_ATTEMPTS,
