@@ -15,19 +15,19 @@ export const pactEnvironment: any = {
     dir: path.resolve(process.cwd(), 'pacts'),
     log: path.resolve(process.cwd(), 'pact.log'),
     spec: 2,
+    consumerVersion: env.PACT_CONSUMER_VERSION,
   },
   pactBroker: {
     pactFilesOrDirs: [path.resolve(process.cwd(), 'pacts')],
     pactBroker: env.PACT_BROKER_URL,
     pactBrokerUsername: env.PACT_BROKER_USERNAME,
     pactBrokerPassword: env.PACT_BROKER_PASSWORD,
-    consumerVersion: env.PACT_CONSUMER_VERSION,
     tags: env.PACT_ENV_TAGS ? env.PACT_ENV_TAGS.split(',').map((s: string) => s.trim()) : [],
   },
   provider: {
     provider: participantName,
     providerBaseUrl: `http://localhost:${env.PACT_CONSUMER_PORT}`,
     providerStatesSetupUrl: `http://localhost:${env.PACT_CONSUMER_PORT}/api/setup`,
-    providerVersion: '1.0.0',
+    providerVersion: env.PACT_CONSUMER_VERSION,
   },
 };

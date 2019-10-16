@@ -12,7 +12,6 @@ describe('Pact Verification', () => {
 
   it('should validate the expectations of all consumers', (done: () => void) => {
     const options: VerifierOptions = {
-      consumerVersionTag: pactEnvironment.pactBroker.consumerVersion,
       pactBrokerPassword: pactEnvironment.pactBroker.pactBrokerPassword,
       pactBrokerUrl: pactEnvironment.pactBroker.pactBroker,
       pactBrokerUsername: pactEnvironment.pactBroker.pactBrokerUsername,
