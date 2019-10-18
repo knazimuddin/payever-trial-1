@@ -33,8 +33,30 @@ Feature: Full real payment flow
     }
     """
     Then I process messages from RabbitMQ "async_events_transactions_micro" channel
+    And look for model "BusinessPaymentOption" by JSON and remember it as "bpo"
+      """
+      {
+        "uuid": "6fef651d-de9a-441c-a88f-2b9ce0f41aba"
+      }
+      """
+    And model "BusinessPaymentOption" with id "{{bpo._id}}" should contain json:
+      """
+      {
+           "id" : 300088,
+          "__v" : 0,
+          "accept_fee" : true,
+          "completed" : false,
+          "credentials" : {},
+          "fixed_fee" : 0,
+          "payment_option_id" : 69,
+          "shop_redirect_enabled" : false,
+          "status" : "new",
+          "uuid" : "6fef651d-de9a-441c-a88f-2b9ce0f41aba",
+          "variable_fee" : 0
+      }
+      """
 
-  Scenario: Creating BPO with event from checkout
+  Scenario: Create and update event came at the same time
     Given I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
     """
     {
@@ -91,11 +113,33 @@ Feature: Full real payment flow
           "fixed_fee":0,
           "variable_fee":0,
           "credentials":[],
-          "completed":false,
+          "completed":true,
           "shop_redirect_enabled":false
         }
       }
     }
     """
     Then I process messages from RabbitMQ "async_events_transactions_micro" channel
+    And look for model "BusinessPaymentOption" by JSON and remember it as "bpo"
+      """
+      {
+        "uuid": "6fef651d-de9a-441c-a88f-2b9ce0f41aba"
+      }
+      """
+    And model "BusinessPaymentOption" with id "{{bpo._id}}" should contain json:
+      """
+      {
+           "id" : 300088,
+          "__v" : 0,
+          "accept_fee" : true,
+          "completed" : true,
+          "credentials" : {},
+          "fixed_fee" : 0,
+          "payment_option_id" : 69,
+          "shop_redirect_enabled" : false,
+          "status" : "new",
+          "uuid" : "6fef651d-de9a-441c-a88f-2b9ce0f41aba",
+          "variable_fee" : 0
+      }
+      """
 

@@ -1,0 +1,380 @@
+{
+  "body": {
+    "took": 10,
+    "timed_out": false,
+    "_shards": {
+      "total": 5,
+      "successful": 5,
+      "skipped": 0,
+      "failed": 0
+    },
+    "hits": {
+      "total": 4,
+      "max_score": 1.4384104,
+      "hits": [
+        {
+          "_index": "transactions",
+          "_type": "transaction",
+          "_id": "5dadd0c9660ea7095b88c55f",
+          "_score": 1.4384104,
+          "_source": {
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "778ca3c6-a71c-429c-a9b8-899a0e0f4e23",
+            "status": "STATUS_PAID",
+            "currency": "USD",
+            "customer_name": "Customer 2",
+            "customer_email": "test_2@test.com",
+            "channel": "pos",
+            "amount": 5000,
+            "total": 5000,
+            "items": [
+              {
+                "uuid": "40672be8-8069-4a33-817f-ae7afd7f883f",
+                "name": "test item #2",
+                "identifier": "19e04f38-693e-4d11-9965-a4d024ae4626",
+                "price": 10000,
+                "price_net": 0,
+                "vat_rate": 0,
+                "quantity": 1,
+                "thumbnail": "https://payeverstaging.blob.core.windows.net/products/image_2"
+              }
+            ],
+            "payment_details": "{}",
+            "business_option_id": 34679,
+            "reference": "f8a0f494-b43c-4ded-b566-858afe00dbca",
+            "delivery_fee": 0,
+            "payment_fee": 0,
+            "down_payment": 0,
+            "shipping_method_name": "shipping_method_2",
+            "billing_address": {
+              "_id": "5be8dbe4-e83b-485e-b5c1-489899fb1a43",
+              "salutation": "SALUTATION_MR",
+              "first_name": "First_name_2",
+              "last_name": "Last_name_2",
+              "email": "test_2@test.com",
+              "country": "DE",
+              "country_name": "Germany",
+              "city": "Hamburg",
+              "zip_code": "12345",
+              "street": "Rödingsmarkt"
+            },
+            "type": "type_2",
+            "business_uuid": "36bf8981-8827-4c0c-a645-02d9fc6d72c8",
+            "merchant_name": "test_merchant_2",
+            "merchant_email": "testcases_2@merchant.com",
+            "payment_flow_id": "f0a3b9fb-724a-48f7-a545-9d45cc145071",
+            "channel_set_uuid": "7f8030c2-2b1a-4947-a599-ed02b988dd1c",
+            "original_id": "75c500b3-88e4-4e67-9021-afa94f7dbeb0",
+            "history": [],
+            "place": "paid",
+            "specific_status": "PAID",
+            "shipping_address": {
+              "_id": "20340568-fbd1-40eb-aef7-0dcd924aef84",
+              "salutation": "SALUTATION_MR",
+              "first_name": "First_name_2",
+              "last_name": "Last_name_2",
+              "email": "test_2@test.com",
+              "country": "DE",
+              "country_name": "Germany",
+              "city": "Hamburg",
+              "zip_code": "12345",
+              "street": "Rödingsmarkt"
+            },
+            "shipping_order_id": "9d43680d-e3c7-433e-9c22-551cce8610af",
+            "created_at": "2019-10-21T15:37:45.406Z",
+            "updated_at": "2019-10-21T15:37:45.406Z",
+            "__v": 0,
+            "mongoId": "5dadd0c9660ea7095b88c55f"
+          }
+        },
+        {
+          "_index": "transactions",
+          "_type": "transaction",
+          "_id": "5dadd0c9660ea7095b88c561",
+          "_score": 1.4384104,
+          "_source": {
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "c35ce841-13f5-4406-8a2d-7859930b69a6",
+            "status": "STATUS_PAID",
+            "currency": "CZK",
+            "customer_name": "Customer 4",
+            "customer_email": "test_4@test.com",
+            "channel": "pos",
+            "amount": 5000,
+            "total": 5000,
+            "items": [
+              {
+                "uuid": "84888f13-dfd9-402e-8193-09321c413cfe",
+                "name": "test item #4",
+                "identifier": "ec494dab-c54b-4352-9de8-a15b2f8a36d3",
+                "price": 10000,
+                "price_net": 0,
+                "vat_rate": 0,
+                "quantity": 1,
+                "thumbnail": "https://payeverstaging.blob.core.windows.net/products/image_4"
+              }
+            ],
+            "payment_details": "{}",
+            "business_option_id": 34679,
+            "reference": "bfec2ef3-4170-40cc-831a-7d5beec3e45e",
+            "delivery_fee": 0,
+            "payment_fee": 0,
+            "down_payment": 0,
+            "shipping_method_name": "shipping_method_4",
+            "billing_address": {
+              "_id": "eb3f368c-2a92-45a9-8bfd-020523242fd8",
+              "salutation": "SALUTATION_MR",
+              "first_name": "First_name_4",
+              "last_name": "Last_name_4",
+              "email": "test_4@test.com",
+              "country": "DE",
+              "country_name": "Germany",
+              "city": "Hamburg",
+              "zip_code": "12345",
+              "street": "Rödingsmarkt"
+            },
+            "type": "type_4",
+            "business_uuid": "36bf8981-8827-4c0c-a645-02d9fc6d72c8",
+            "merchant_name": "test_merchant_4",
+            "merchant_email": "testcases_4@merchant.com",
+            "payment_flow_id": "29fb8046-504c-4070-b237-bb7f571cfaf5",
+            "channel_set_uuid": "3ff78572-efce-4c69-9181-e7604797b7cd",
+            "original_id": "2fce62e3-2e17-4004-95ea-a8ca20902c48",
+            "history": [],
+            "place": "paid",
+            "specific_status": "PAID",
+            "shipping_address": {
+              "_id": "6310d9d7-5014-4cdb-b2ce-f010035df6fb",
+              "salutation": "SALUTATION_MR",
+              "first_name": "First_name_4",
+              "last_name": "Last_name_4",
+              "email": "test_4@test.com",
+              "country": "DE",
+              "country_name": "Germany",
+              "city": "Hamburg",
+              "zip_code": "12345",
+              "street": "Rödingsmarkt"
+            },
+            "shipping_order_id": "ce87a390-b5f7-4a52-8362-57ef018edfb5",
+            "created_at": "2019-10-21T15:37:45.427Z",
+            "updated_at": "2019-10-21T15:37:45.427Z",
+            "__v": 0,
+            "mongoId": "5dadd0c9660ea7095b88c561"
+          }
+        },
+        {
+          "_index": "transactions",
+          "_type": "transaction",
+          "_id": "5dadd0c9660ea7095b88c55e",
+          "_score": 0.9116078,
+          "_source": {
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "aff4765d-94ab-4da1-892c-3a8f8199b509",
+            "status": "STATUS_PAID",
+            "currency": "EUR",
+            "customer_name": "Customer 1",
+            "customer_email": "test_1@test.com",
+            "channel": "pos",
+            "amount": 5000,
+            "total": 5000,
+            "items": [
+              {
+                "uuid": "fe5850ea-aab5-4c26-b959-d5c83490ddce",
+                "name": "test item #1",
+                "identifier": "c6e53e9b-a66d-4bce-a53c-b98795627785",
+                "price": 10000,
+                "price_net": 0,
+                "vat_rate": 0,
+                "quantity": 1,
+                "thumbnail": "https://payeverstaging.blob.core.windows.net/products/image_1"
+              }
+            ],
+            "payment_details": "{}",
+            "business_option_id": 34679,
+            "reference": "d2dbb756-d5a2-4c01-9bca-0ba910db61d4",
+            "delivery_fee": 0,
+            "payment_fee": 0,
+            "down_payment": 0,
+            "shipping_method_name": "shipping_method_1",
+            "billing_address": {
+              "_id": "35088e3b-0504-4b3e-bf36-477029e48ba1",
+              "salutation": "SALUTATION_MR",
+              "first_name": "First_name_1",
+              "last_name": "Last_name_1",
+              "email": "test_1@test.com",
+              "country": "DE",
+              "country_name": "Germany",
+              "city": "Hamburg",
+              "zip_code": "12345",
+              "street": "Rödingsmarkt"
+            },
+            "type": "type_1",
+            "business_uuid": "b109cac7-e47e-40a2-ab3f-c3b339a2cc73",
+            "merchant_name": "test_merchant_1",
+            "merchant_email": "testcases_1@merchant.com",
+            "payment_flow_id": "61277fc9-f8dc-4a9e-a11d-74bc6ed4b4f4",
+            "channel_set_uuid": "13de0b6e-dd6b-49c4-a156-b3b1e9a0ff62",
+            "original_id": "4825c310-ffcb-4f92-844b-0248b7c099a5",
+            "history": [],
+            "place": "paid",
+            "specific_status": "PAID",
+            "shipping_address": {
+              "_id": "1f86f6ad-72cc-4c93-9227-c486bbf4ccfd",
+              "salutation": "SALUTATION_MR",
+              "first_name": "First_name_1",
+              "last_name": "Last_name_1",
+              "email": "test_1@test.com",
+              "country": "DE",
+              "country_name": "Germany",
+              "city": "Hamburg",
+              "zip_code": "12345",
+              "street": "Rödingsmarkt"
+            },
+            "shipping_order_id": "2e91c4c0-3ecd-45ec-abfc-0a976c23a753",
+            "created_at": "2019-10-21T15:37:45.397Z",
+            "updated_at": "2019-10-21T15:37:45.397Z",
+            "__v": 0,
+            "mongoId": "5dadd0c9660ea7095b88c55e"
+          }
+        },
+        {
+          "_index": "transactions",
+          "_type": "transaction",
+          "_id": "5dadd0c9660ea7095b88c560",
+          "_score": 0.9116078,
+          "_source": {
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "5456c5e1-3c48-4d2c-a731-f91ab09c856f",
+            "status": "STATUS_PAID",
+            "currency": "DK",
+            "customer_name": "Customer 3",
+            "customer_email": "test_3@test.com",
+            "channel": "pos",
+            "amount": 5000,
+            "total": 5000,
+            "items": [
+              {
+                "uuid": "215cdc04-7361-4e7e-8746-d2f3b674ae43",
+                "name": "test item #3",
+                "identifier": "c19d24c4-4ac7-433a-9c09-f0b00c6707a7",
+                "price": 10000,
+                "price_net": 0,
+                "vat_rate": 0,
+                "quantity": 1,
+                "thumbnail": "https://payeverstaging.blob.core.windows.net/products/image_3"
+              }
+            ],
+            "payment_details": "{}",
+            "business_option_id": 34679,
+            "reference": "d27186b4-150a-4c92-9bf4-2316b0c93e89",
+            "delivery_fee": 0,
+            "payment_fee": 0,
+            "down_payment": 0,
+            "shipping_method_name": "shipping_method_3",
+            "billing_address": {
+              "_id": "ce32e779-cd5f-4a90-bbbe-be49f7380caa",
+              "salutation": "SALUTATION_MR",
+              "first_name": "First_name_3",
+              "last_name": "Last_name_3",
+              "email": "test_3@test.com",
+              "country": "DE",
+              "country_name": "Germany",
+              "city": "Hamburg",
+              "zip_code": "12345",
+              "street": "Rödingsmarkt"
+            },
+            "type": "type_3",
+            "business_uuid": "b109cac7-e47e-40a2-ab3f-c3b339a2cc73",
+            "merchant_name": "test_merchant_3",
+            "merchant_email": "testcases_3@merchant.com",
+            "payment_flow_id": "5bf616ba-f0f8-4ec0-8d61-b0d2b12d1e84",
+            "channel_set_uuid": "550d9874-4859-410b-8108-d17adae6dbd5",
+            "original_id": "12ede2b9-bf85-4b17-b6a8-d5360d69ea64",
+            "history": [],
+            "place": "paid",
+            "specific_status": "PAID",
+            "shipping_address": {
+              "_id": "910fbea2-3480-4244-8f61-39b156d5dfbd",
+              "salutation": "SALUTATION_MR",
+              "first_name": "First_name_3",
+              "last_name": "Last_name_3",
+              "email": "test_3@test.com",
+              "country": "DE",
+              "country_name": "Germany",
+              "city": "Hamburg",
+              "zip_code": "12345",
+              "street": "Rödingsmarkt"
+            },
+            "shipping_order_id": "b32f44ba-63bf-4198-ae6b-382068161f34",
+            "created_at": "2019-10-21T15:37:45.423Z",
+            "updated_at": "2019-10-21T15:37:45.424Z",
+            "__v": 0,
+            "mongoId": "5dadd0c9660ea7095b88c560"
+          }
+        }
+      ]
+    },
+    "aggregations": {
+      "status": {
+        "doc_count_error_upper_bound": 0,
+        "sum_other_doc_count": 0,
+        "buckets": [
+          {
+            "key": "status_paid",
+            "doc_count": 4
+          }
+        ]
+      }
+    }
+  },
+  "statusCode": 200,
+  "headers": {
+    "content-type": "application/json; charset=UTF-8",
+    "content-encoding": "gzip",
+    "content-length": "2228"
+  },
+  "warnings": null,
+  "meta": {
+    "context": null,
+    "request": {
+      "params": {
+        "method": "POST",
+        "path": "/transactions/_search",
+        "querystring": "",
+        "headers": {
+          "User-Agent": "elasticsearch-js/6.8.3 (linux 4.15.0-45-generic-x64; Node.js v10.15.3)",
+          "Content-Type": "application/json",
+          "Content-Length": "173",
+          "Accept-Encoding": "gzip,deflate"
+        },
+        "timeout": 60000
+      },
+      "options": {
+        "warnings": null
+      },
+      "id": 3
+    },
+    "name": "elasticsearch-js",
+    "connection": {
+      "url": "http://localhost:9200/",
+      "id": "http://localhost:9200/",
+      "headers": {},
+      "deadCount": 0,
+      "resurrectTimeout": 0,
+      "_openRequests": 0,
+      "status": "alive",
+      "roles": {
+        "master": true,
+        "data": true,
+        "ingest": true,
+        "ml": false
+      }
+    },
+    "attempts": 0,
+    "aborted": false
+  }
+}
