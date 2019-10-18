@@ -1,6 +1,6 @@
 Feature: Save history records
   Scenario: Payment action completed
-    Given I use DB fixture "transactions/shipping-goods"
+    Given I use DB fixture "transactions/transaction-for-history"
     When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
       """
       {
@@ -63,6 +63,41 @@ Feature: Save history records
             "amount" : 5290,
             "refund_items" : [],
             "upload_items" : []
+          }
+        ]
+      }
+      """
+
+  Scenario: Payment Email Sent
+    Given I use DB fixture "transactions/transaction-for-history"
+    When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
+      """
+      {
+        "name": "mailer.event.payment-mail.sent",
+        "payload": {
+            "id": "242905da-16b0-4fd2-98c9-259b5aceb62f",
+            "templateName": "some_template",
+            "transactionId": "ad738281-f9f0-4db7-a4f6-670b0dff5327"
+        }
+      }
+      """
+    Then I process messages from RabbitMQ "async_events_transactions_micro" channel
+    When look for model "Transaction" by JSON and remember it as "transaction"
+      """
+      {
+        "uuid": "ad738281-f9f0-4db7-a4f6-670b0dff5327"
+      }
+      """
+    Then model "Transaction" with id "{{transaction._id}}" should contain json:
+      """
+      {
+        "history": [
+          {
+            "action" : "email_sent",
+            "mail_event": {
+              "event_id": "242905da-16b0-4fd2-98c9-259b5aceb62f",
+              "template_name": "some_template"
+            }
           }
         ]
       }
