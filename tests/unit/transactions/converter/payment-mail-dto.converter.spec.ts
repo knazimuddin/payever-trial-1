@@ -14,6 +14,7 @@ describe('PaymentMailDtoConverter ', () => {
       const paymentSubmittedDto: PaymentSubmittedDto = {
         payment: {
           id: '',
+          uuid: '96211c90-e563-4809-9091-a58b129428f0',
           amount: 2,
           currency: 'cur',
           reference: '123',
@@ -45,6 +46,7 @@ describe('PaymentMailDtoConverter ', () => {
           amount: paymentSubmittedDto.payment.amount,
           currency: paymentSubmittedDto.payment.currency,
           reference: paymentSubmittedDto.payment.reference,
+          uuid: paymentSubmittedDto.payment.uuid,
           total: paymentSubmittedDto.payment.total,
           created_at: paymentSubmittedDto.payment.created_at,
           customer_email: paymentSubmittedDto.payment.customer_email,
@@ -102,12 +104,18 @@ describe('PaymentMailDtoConverter ', () => {
           items: [
             {
               vat_rate: 2,
+              price: 10,
+              quantity: 1,
             },
             {
               vat_rate: 6,
+              price: 20,
+              quantity: 2,
             },
             {
               vat_rate: 7,
+              price: 30,
+              quantity: 3,
             },
           ],
           business: {
@@ -117,7 +125,7 @@ describe('PaymentMailDtoConverter ', () => {
       } as PaymentSubmittedDto;
 
       const expectedVatRate = paymentSubmittedDto.payment.items.map(
-        (item: TransactionCartItemDto) => item.vat_rate,
+        (item: TransactionCartItemDto) => item.vat_rate * item.price * item.quantity / 100,
       ).reduce((a, b) => a + b, 0);
 
       expect(

@@ -1,6 +1,5 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { MessageBusService } from '@pe/nest-kit/modules/message';
 import { RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
 import { AtomDateConverter, TransactionConverter, TransactionHistoryEntryConverter } from '../converter';
@@ -11,13 +10,6 @@ import { StatisticsService, TransactionsService } from '../services';
 
 @Controller()
 export class MigrateEventsController {
-  private messageBusService: MessageBusService = new MessageBusService(
-    {
-      rsa: environment.rsa,
-    },
-    this.logger,
-  );
-
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly statisticsService: StatisticsService,
@@ -28,8 +20,7 @@ export class MigrateEventsController {
     name: RabbitRoutingKeys.PaymentMigrate,
     origin: 'rabbitmq',
   })
-  public async onActionMigrateEvent(msg: any): Promise<void> {
-    const data: any = this.messageBusService.unwrapMessage<any>(msg.data);
+  public async onActionMigrateEvent(data: any): Promise<void> {
     this.logger.log('ACTION.MIGRATE!', data.payment);
     const checkoutTransaction: CheckoutTransactionInterface = data.payment;
     const transaction: TransactionPackedDetailsInterface =

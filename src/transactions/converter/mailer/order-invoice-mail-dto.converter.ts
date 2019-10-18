@@ -15,9 +15,9 @@ export class OderInvoiceMailDtoConverter extends AbstractPaymentMailDtoConverter
         uuid: paymentSubmittedDto.payment.business.uuid,
       },
       payment: {
-        id: paymentSubmittedDto.payment.id,
-
         address: paymentSubmittedDto.payment.address,
+        id: paymentSubmittedDto.payment.id,
+        uuid: paymentSubmittedDto.payment.uuid,
 
         amount: paymentSubmittedDto.payment.amount,
         created_at: paymentSubmittedDto.payment.created_at,

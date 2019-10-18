@@ -90,9 +90,20 @@ export const rabbitMqQueues: RabbitMqQueueConfigInterface[] = [
       {
         routingKey: RabbitRoutingKeys.ShippingOrderProcessed,
         source: 'async_events',
-
+      },
+      {
+        routingKey: RabbitRoutingKeys.ShippingLabelDownloaded,
+        source: 'async_events',
+      },
+      {
+        routingKey: RabbitRoutingKeys.ShippingSlipDownloaded,
+        source: 'async_events',
       },
       commonSdkRabbitMqBindings.get(CommonModelsNamesEnum.CurrencyModel),
+      {
+        routingKey: RabbitRoutingKeys.MailerPaymentMailSent,
+        source: 'async_events',
+      },
     ],
   },
 ];

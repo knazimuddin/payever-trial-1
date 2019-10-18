@@ -18,9 +18,9 @@ export class ShippingGoodsMailDtoConverter extends AbstractPaymentMailDtoConvert
         uuid: transaction.business_uuid,
       },
       payment: {
-        id: transaction.original_id,
-
         address: transaction.shipping_address,
+        id: transaction.original_id,
+        uuid: transaction.uuid,
 
         amount: transaction.amount,
         created_at: transaction.created_at,
@@ -45,10 +45,10 @@ export class ShippingGoodsMailDtoConverter extends AbstractPaymentMailDtoConvert
         vat_rate: item.vat_rate,
       })),
       variables: {
+        deliveryDate: shippingOrder.deliveryDate,
         trackingNumber: shippingOrder.trackingNumber,
         trackingUrl: shippingOrder.trackingUrl,
-        deliveryDate: shippingOrder.deliveryDate,
-      }
+      },
     };
   }
 }

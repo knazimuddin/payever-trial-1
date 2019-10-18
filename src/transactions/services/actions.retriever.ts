@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ActionItemInterface } from '../interfaces';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { MessagingService } from './messaging.service';
-import { PaymentActionsEnum } from '../enum';
 
 @Injectable()
 export class ActionsRetriever {
@@ -17,35 +16,16 @@ export class ActionsRetriever {
 
     try {
       actions = await this.messagingService.getActionsList(unpackedTransaction);
-      actions = actions.concat(this.getShippingActions(unpackedTransaction));
     } catch (e) {
       this.logger.error(
         {
-          context: 'ActionsRetriever',
           error: e.message,
           message: `Error occurred while getting transaction actions`,
         },
+        e.stack,
+        ActionsRetriever.name,
       );
       actions = [];
-    }
-
-    return actions;
-  }
-
-  private getShippingActions(unpackedTransaction: TransactionUnpackedDetailsInterface): ActionItemInterface[] {
-    const actions: ActionItemInterface[] = [];
-    if (unpackedTransaction.is_shipping_order_processed) {
-      actions.push({
-        action: PaymentActionsEnum.DownloadShippingSlip as string,
-        enabled: true,
-      });
-
-       if (unpackedTransaction.shipping_category !== 'custom') {
-         actions.push({
-           action: PaymentActionsEnum.DownloadShippingLabel as string,
-           enabled: true,
-         });
-       }
     }
 
     return actions;

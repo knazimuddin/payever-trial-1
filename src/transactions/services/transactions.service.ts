@@ -206,7 +206,7 @@ export class TransactionsService {
   public async setShippingOrderProcessed(
     transactionId: string,
   ): Promise<TransactionModel> {
-    return await this.transactionModel.findOneAndUpdate(
+    return this.transactionModel.findOneAndUpdate(
       { uuid: transactionId },
       {
         $set: {
