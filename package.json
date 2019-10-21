@@ -26,6 +26,8 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^6.8.2",
+    "@nestjs/common": "^6.8.3",
+    "@nestjs/core": "^6.8.3",
     "@pe/common-sdk": "^1.1.0",
     "@pe/nest-kit": "^4.10.3",
     "@pe/notifications-sdk": "^3.2.0",
@@ -50,7 +52,7 @@
     "xlsx": "^0.15.0"
   },
   "devDependencies": {
-    "@nestjs/testing": "^6.8.0",
+    "@nestjs/testing": "^6.8.3",
     "@pact-foundation/pact": "^9.1.1",
     "@pe/cucumber-sdk": "^0.3.9",
     "@pe/dev-kit": "^0.1.6",
