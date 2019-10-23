@@ -3,7 +3,6 @@ const common = [
   "--parallel 1",
   "--require-module ts-node/register/transpile-only",
   "--require ./features/bootstrap/**/*.ts",
-  "--logLevel=error",
 ].join(" ");
 
 module.exports = {

@@ -1,12 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Command } from '@pe/nest-kit';
-import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
+import { Command, ElasticsearchClient } from '@pe/nest-kit';
 import { ElasticMappingFieldsConfig, ElasticTransactionEnum } from '../enum';
 
 @Injectable()
 export class TransactionsEsSetupCommand {
   constructor(
-    private readonly elasticSearchClient: ElasticSearchClient,
+    private readonly elasticSearchClient: ElasticsearchClient,
   ) {}
 
   @Command({

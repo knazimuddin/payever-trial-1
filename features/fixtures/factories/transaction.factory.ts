@@ -1,10 +1,10 @@
 import uuid = require('uuid');
-import { partialFactory, SequenceGenerator } from '@pe/cucumber-sdk';
+import { partialFactory, PartialFactory, SequenceGenerator } from '@pe/cucumber-sdk';
 import { TransactionModel } from '../../../src/transactions/models';
 
 const seq = new SequenceGenerator();
 
-export const defaultTransactionFactory = (): TransactionModel => {
+const defaultTransactionFactory = (): TransactionModel => {
   seq.next();
 
   return ({
@@ -20,14 +20,14 @@ export const defaultTransactionFactory = (): TransactionModel => {
     total : 100,
     items : [
       {
-        "uuid" : uuid.v4(),
-        "name" : `test item #${seq.current}`,
-        "identifier": uuid.v4(),
-        "price" : 100,
-        "price_net" : 0,
-        "vat_rate" : 0,
-        "quantity" : 1,
-        "thumbnail" : `https://payeverstaging.blob.core.windows.net/products/image_${seq.current}`,
+        'uuid' : uuid.v4(),
+        'name' : `test item #${seq.current}`,
+        'identifier': uuid.v4(),
+        'price' : 100,
+        'price_net' : 0,
+        'vat_rate' : 0,
+        'quantity' : 1,
+        'thumbnail' : `https://payeverstaging.blob.core.windows.net/products/image_${seq.current}`,
       }
     ],
     payment_details: `{}`,
@@ -55,7 +55,7 @@ export const defaultTransactionFactory = (): TransactionModel => {
     payment_flow_id : uuid.v4(),
     channel_set_uuid : uuid.v4(),
     original_id : uuid.v4(),
-    history : [ ],
+    history : [],
     place : 'paid',
     specific_status : 'PAID',
     shipping_address : {
@@ -75,4 +75,6 @@ export const defaultTransactionFactory = (): TransactionModel => {
   });
 };
 
-export const transactionFactory = partialFactory(defaultTransactionFactory);
+export class transactionFactory {
+  public static create: PartialFactory<TransactionModel> = partialFactory<TransactionModel>(defaultTransactionFactory);
+}

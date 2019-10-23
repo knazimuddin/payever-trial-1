@@ -536,6 +536,19 @@ Feature: Full real payment flow
       }
     }
     """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "transactions",
+          "transaction",
+          {
+            "uuid": "f61e09b6-61ca-426b-8ee6-e8ce3118e932"
+          }
+         ],
+        "result": {}
+      }
+      """
     Then I process messages from RabbitMQ "async_events_transactions_micro" channel
     Then print RabbitMQ message list
     Then debug RabbitMQ message list
@@ -568,5 +581,71 @@ Feature: Full real payment flow
           }
         }
       }
+    ]
+    """
+    And print Elasticsearch calls
+    And Elasticsearch calls stack should contain following ordered messages:
+    """
+    [
+      [
+        "singleIndex",
+        [
+          "transactions",
+          "transaction",
+          {
+            "uuid": "f61e09b6-61ca-426b-8ee6-e8ce3118e932"
+          }
+        ]
+      ],
+      [
+        "singleIndex",
+        [
+          "transactions",
+          "transaction",
+          {
+            "uuid": "f61e09b6-61ca-426b-8ee6-e8ce3118e932"
+          }
+        ]
+      ],
+      [
+        "singleIndex",
+        [
+          "transactions",
+          "transaction",
+          {
+            "uuid": "f61e09b6-61ca-426b-8ee6-e8ce3118e932"
+          }
+        ]
+      ],
+      [
+        "singleIndex",
+        [
+          "transactions",
+          "transaction",
+          {
+            "uuid": "f61e09b6-61ca-426b-8ee6-e8ce3118e932"
+          }
+        ]
+      ],
+      [
+        "singleIndex",
+        [
+          "transactions",
+          "transaction",
+          {
+            "uuid": "f61e09b6-61ca-426b-8ee6-e8ce3118e932"
+          }
+        ]
+      ],
+      [
+        "singleIndex",
+        [
+          "transactions",
+          "transaction",
+          {
+            "uuid": "f61e09b6-61ca-426b-8ee6-e8ce3118e932"
+          }
+        ]
+      ]
     ]
     """

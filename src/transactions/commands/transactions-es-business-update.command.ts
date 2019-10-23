@@ -1,9 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Command, Positional } from '@pe/nest-kit';
+import { Command, ElasticsearchClient, Positional } from '@pe/nest-kit';
 import { Model } from 'mongoose';
 import { TransactionDoubleConverter } from '../converter';
-import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
 import { ElasticTransactionEnum } from '../enum';
 import { TransactionBasicInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
@@ -12,7 +11,7 @@ import { TransactionModel } from '../models';
 export class TransactionsEsBusinessUpdateCommand {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
-    private readonly elasticSearchClient: ElasticSearchClient,
+    private readonly elasticSearchClient: ElasticsearchClient,
   ) {}
 
   @Command({

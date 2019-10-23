@@ -1,0 +1,43 @@
+{
+  "collection": [
+    {
+      "uuid": "778ca3c6-a71c-429c-a9b8-899a0e0f4e23",
+      "currency": "USD",
+      "amount": 50,
+      "total": 50
+    },
+    {
+      "uuid": "c35ce841-13f5-4406-8a2d-7859930b69a6",
+      "currency": "CZK",
+      "amount": 50,
+      "total": 50
+    },
+    {
+      "uuid": "aff4765d-94ab-4da1-892c-3a8f8199b509",
+      "currency": "EUR",
+      "amount": 50,
+      "total": 50
+    },
+    {
+      "uuid": "5456c5e1-3c48-4d2c-a731-f91ab09c856f",
+      "currency": "DK",
+      "amount": 50,
+      "total": 50
+    }
+  ],
+  "filters": {},
+  "pagination_data": {
+    "amount": 215.54,
+    "amount_currency": "EUR",
+    "page": 1,
+    "total": 4
+  },
+  "usage": {
+    "specific_statuses": [
+      "PAID"
+    ],
+    "statuses": [
+      "STATUS_PAID"
+    ]
+  }
+}

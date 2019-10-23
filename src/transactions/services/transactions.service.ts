@@ -11,8 +11,6 @@ import {
   TransactionSantanderApplicationConverter,
 } from '../converter';
 import { RpcResultDto } from '../dto';
-import { DelayRemoveClient } from '../elasticsearch/delay-remove.client';
-import { ElasticSearchClient } from '../elasticsearch/elastic-search.client';
 import { ElasticTransactionEnum } from '../enum';
 import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
 import {
@@ -24,6 +22,7 @@ import {
 } from '../interfaces/transaction';
 import { TransactionHistoryEntryModel, TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
+import { DelayRemoveClient, ElasticsearchClient } from '@pe/nest-kit';
 
 @Injectable()
 export class TransactionsService {
@@ -31,7 +30,7 @@ export class TransactionsService {
   constructor(
     @InjectModel(TransactionSchemaName) private readonly transactionModel: Model<TransactionModel>,
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
-    private readonly elasticSearchClient: ElasticSearchClient,
+    private readonly elasticSearchClient: ElasticsearchClient,
     private readonly logger: Logger,
   ) {}
 
