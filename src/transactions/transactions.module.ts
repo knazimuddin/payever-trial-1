@@ -1,7 +1,7 @@
 import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
-import { NestEmitterModule } from '@pe/nest-kit';
+import { ElasticsearchModule, NestEmitterModule } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
 import {
@@ -27,7 +27,6 @@ import {
   TransactionEventsController,
   UserController,
 } from './controllers';
-import { ElasticSearchClient } from './elasticsearch/elastic-search.client';
 import { AbstractConsumer, EmitterConsumerInitializer } from './emitter';
 import { EventEmitterConsumersEnum } from './emitter/event-emitter-consumers.enum';
 import { PaymentMailEventProducer } from './producer';
@@ -92,6 +91,9 @@ import {
       rsaPath: environment.rsa,
     }),
     NestEmitterModule,
+    ElasticsearchModule.forRoot({
+      host: environment.elasticSearch,
+    }),
   ],
   providers: [
     ActionsRetriever,
@@ -100,7 +102,6 @@ import {
     BusinessService,
     CurrencyExchangeService,
     DtoValidationService,
-    ElasticSearchClient,
     ElasticSearchService,
     MessagingService,
     MongoSearchService,

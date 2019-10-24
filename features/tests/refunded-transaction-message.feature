@@ -1,6 +1,19 @@
 Feature: Refunded transactions message sending
   Scenario: Payment action "refund" completed
     Given I use DB fixture "transactions/shipping-goods"
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "transactions",
+          "transaction",
+          {
+            "uuid": "ad738281-f9f0-4db7-a4f6-670b0dff5327"
+          }
+         ],
+        "result": {}
+      }
+      """
     When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
     """
     {
