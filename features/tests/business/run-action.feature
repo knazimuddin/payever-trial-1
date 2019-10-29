@@ -8,6 +8,10 @@ Feature: Run payment action
       """
       "ad738281-f9f0-4db7-a4f6-670b0dff5327"
       """
+    Given I remember as "transactionReference" following value:
+      """
+      "f3d44333-21e2-4f0f-952b-72ac2dfb8fc9"
+      """
     Given I authenticate as a user with the following data:
       """
       {
@@ -331,6 +335,93 @@ Feature: Run payment action
            ]
          }
       """
+    And print Elasticsearch calls
+    And Elasticsearch calls stack should contain following ordered messages:
+    """
+      [
+        [
+          "singleIndex",
+          [
+            "transactions",
+            "transaction",
+            {
+              "action_running": false,
+              "santander_applications": [],
+              "uuid": "{{transactionId}}"
+            }
+          ]
+        ]
+      ]
+    """
+
+  Scenario: Run async payment action requested by third-party
+    And I use DB fixture "transactions/run-actions-file-upload"
+    And I get file "features/fixtures/json/run-santander-de-action-file-upload.payload.json" content and remember as "requestPayload"
+    And I mock RPC request "payment_option.santander_installment.action" to "rpc_payment_santander_de" with:
+      """
+      {
+        "requestPayload": {
+          "action": "action.do"
+        },
+        "responsePayload": "s:133:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"payment\":{\"amount\":100,\"reference\":\"{{transactionReference}}\"},\"payment_items\":[]}}}\";"
+      }
+      """
+    And I mock RPC request "payment_option.santander_installment.action" to "rpc_payment_santander_de" with:
+      """
+      {
+        "requestPayload": {
+          "action": "action.list"
+        },
+        "responsePayload": "s:80:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"test_action\":true,\"another_action\":false}}}\";"
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "transactions",
+          "transaction",
+          {
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "{{transactionId}}"
+          }
+         ],
+        "result": {}
+      }
+      """
+    When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
+      """
+      {
+        "name": "third-party.event.payment.action",
+        "payload": {
+          "business": {
+            "id": "{{businessId}}"
+          },
+          "integration": {
+            "name": "shopify"
+          },
+          "action": "test_action",
+          "reference": "{{transactionReference}}",
+          "fields": {}
+        }
+      }
+      """
+    Then I process messages from RabbitMQ "async_events_transactions_micro" channel
+    And RabbitMQ exchange "async_events" should contain following ordered messages:
+    """
+    [
+      {
+        "name": "transactions_app.payment.updated",
+        "payload": {
+          "payment": {
+            "reference": "{{transactionReference}}",
+            "uuid": "{{transactionId}}"
+          }
+        }
+      }
+    ]
+    """
     And print Elasticsearch calls
     And Elasticsearch calls stack should contain following ordered messages:
     """
