@@ -30,4 +30,30 @@ export class ActionsRetriever {
 
     return actions;
   }
+
+  public retrieveFakeActions(unpackedTransaction: TransactionUnpackedDetailsInterface): ActionItemInterface[] {
+    switch (unpackedTransaction.status) {
+      case 'STATUS_ACCEPTED':
+        return [
+          {
+            action: 'refund',
+            enabled: true,
+          },
+          {
+            action: 'cancel',
+            enabled: true,
+          },
+          {
+            action: 'shipping_goods',
+            enabled: true,
+          },
+        ];
+      case 'STATUS_PAID':
+      case 'STATUS_REFUNDED':
+      case 'STATUS_CANCELLED':
+        return [];
+      default:
+        return [];
+    }
+  }
 }
