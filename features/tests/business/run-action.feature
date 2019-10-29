@@ -355,9 +355,9 @@ Feature: Run payment action
     """
 
   Scenario: Run async payment action requested by third-party
-    And I use DB fixture "transactions/run-actions-file-upload"
+    And I use DB fixture "transactions/run-actions-async-third-party"
     And I get file "features/fixtures/json/run-santander-de-action-file-upload.payload.json" content and remember as "requestPayload"
-    And I mock RPC request "payment_option.santander_installment.action" to "rpc_payment_santander_de" with:
+    And I mock RPC request "payment_option.santander_invoice_de.action" to "rpc_payment_santander_invoice_de" with:
       """
       {
         "requestPayload": {
@@ -366,7 +366,7 @@ Feature: Run payment action
         "responsePayload": "s:133:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"payment\":{\"amount\":100,\"reference\":\"{{transactionReference}}\"},\"payment_items\":[]}}}\";"
       }
       """
-    And I mock RPC request "payment_option.santander_installment.action" to "rpc_payment_santander_de" with:
+    And I mock RPC request "payment_option.santander_invoice_de.action" to "rpc_payment_santander_invoice_de" with:
       """
       {
         "requestPayload": {
