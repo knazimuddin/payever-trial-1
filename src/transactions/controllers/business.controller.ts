@@ -22,17 +22,16 @@ import { environment } from '../../environments';
 import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
 import { BusinessDto, ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { ActionItemInterface } from '../interfaces';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { BusinessModel, TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import {
   ActionsRetriever,
   BusinessService,
-  DtoValidationService,
   ElasticSearchService,
   MessagingService,
   MongoSearchService,
+  TransactionActionService,
   TransactionsExampleService,
   TransactionsService,
 } from '../services';
@@ -54,9 +53,9 @@ export class BusinessController {
     private readonly transactionsService: TransactionsService,
     private readonly mongoSearchService: MongoSearchService,
     private readonly elasticSearchService: ElasticSearchService,
-    private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
     private readonly actionsRetriever: ActionsRetriever,
+    private readonly transactionActionService: TransactionActionService,
     private readonly logger: Logger,
     private readonly businessService: BusinessService,
     private readonly exampleService: TransactionsExampleService,
@@ -109,12 +108,12 @@ export class BusinessController {
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionOutputInterface> {
     const updatedTransaction: TransactionUnpackedDetailsInterface = !transaction.example
-      ? await this.doAction(
+      ? await this.transactionActionService.doAction(
         transaction,
         actionPayload,
         action,
       )
-      : await this.doFakeAction(
+      : await this.transactionActionService.doFakeAction(
         transaction,
         actionPayload,
         action,
@@ -125,7 +124,7 @@ export class BusinessController {
       updatedTransaction,
       !transaction.example
         ? await this.actionsRetriever.retrieve(updatedTransaction)
-        : this.retrieveFakeActions(updatedTransaction)
+        : this.actionsRetriever.retrieveFakeActions(updatedTransaction)
       ,
     );
   }
@@ -187,7 +186,7 @@ export class BusinessController {
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionUnpackedDetailsInterface> {
-    return this.doAction(
+    return this.transactionActionService.doAction(
       transaction,
       actionPayload,
       action,
@@ -319,112 +318,6 @@ export class BusinessController {
     return this.exampleService.createBusinessExamples(businessDto);
   }
 
-  private async doAction(
-    transaction: TransactionModel,
-    actionPayload: ActionPayloadDto,
-    action: string,
-  ): Promise<TransactionUnpackedDetailsInterface> {
-    this.dtoValidation.checkFileUploadDto(actionPayload);
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
-    );
-
-    try {
-      await this.messagingService.runAction(unpackedTransaction, action, actionPayload);
-    } catch (e) {
-      this.logger.log(
-        {
-          context: 'BusinessController',
-          error: e.message,
-          message: `Error occurred during running action`,
-        },
-      );
-
-      throw new BadRequestException(e.message);
-    }
-
-    const updatedTransaction: TransactionUnpackedDetailsInterface =
-      await this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
-    /** Send update to checkout-php */
-    try {
-      await this.messagingService.sendTransactionUpdate(updatedTransaction);
-    } catch (e) {
-      throw new BadRequestException(`Error occurred while sending transaction update: ${e.message}`);
-    }
-
-    return updatedTransaction;
-  }
-
-  private async doFakeAction(
-    transaction: TransactionModel,
-    actionPayload: ActionPayloadDto,
-    action: string,
-  ): Promise<TransactionUnpackedDetailsInterface> {
-    switch (action) {
-      case 'shipping_goods':
-        transaction.status = 'STATUS_PAID';
-        transaction.place = 'paid';
-        transaction.shipping_order_id = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
-        if (
-          transaction.billing_address.id === 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' ||
-          transaction.billing_address.id === 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb' ||
-          transaction.billing_address.id === 'cccccccc-cccc-cccc-cccc-cccccccccccc'
-        ) {
-          transaction.example_shipping_label =
-            `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
-            + `label/${transaction.billing_address.id}.pdf`;
-          transaction.example_shipping_slip =
-            `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
-            + `slip/${transaction.billing_address.id}.json`;
-
-        }
-
-        break;
-      case 'refund':
-        transaction.status = 'STATUS_REFUNDED';
-        transaction.place = 'refunded';
-        await this.exampleService.refundExample(transaction, actionPayload.fields.payment_return.amount);
-
-        break;
-      case 'cancel':
-        transaction.status = 'STATUS_CANCELLED';
-        transaction.place = 'cancelled';
-
-        break;
-      default:
-    }
-
-    await transaction.save();
-
-    return this.transactionsService.findUnpackedByUuid(transaction.uuid);
-  }
-
-  private retrieveFakeActions(unpackedTransaction: TransactionUnpackedDetailsInterface): ActionItemInterface[] {
-    switch (unpackedTransaction.status) {
-      case 'STATUS_ACCEPTED':
-        return [
-          {
-            action: 'refund',
-            enabled: true,
-          },
-          {
-            action: 'cancel',
-            enabled: true,
-          },
-          {
-            action: 'shipping_goods',
-            enabled: true,
-          },
-        ];
-      case 'STATUS_PAID':
-      case 'STATUS_REFUNDED':
-      case 'STATUS_CANCELLED':
-        return [];
-      default:
-        return [];
-    }
-  }
-
   private async getDetails(transaction: TransactionModel): Promise<TransactionOutputInterface>  {
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
@@ -434,7 +327,7 @@ export class BusinessController {
       unpackedTransaction,
       !transaction.example
         ? await this.actionsRetriever.retrieve(unpackedTransaction)
-        : this.retrieveFakeActions(unpackedTransaction)
+        : this.actionsRetriever.retrieveFakeActions(unpackedTransaction)
       ,
     );
   }

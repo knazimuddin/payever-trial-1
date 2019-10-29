@@ -1,19 +1,20 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
-import { environment } from '../../environments';
 import { TransactionPaymentDetailsConverter } from '../converter';
 import { ActionItemInterface } from '../interfaces';
 import { ThirdPartyActionRequestInterface } from '../interfaces/third-party';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
-import { MessagingService, TransactionsService } from '../services';
+import { ActionsRetriever, TransactionActionService, TransactionsService } from '../services';
+import { ActionPayloadDto } from '../dto/action-payload';
 
 @Controller()
 export class ThirdPartyEventsController {
   constructor(
+    private readonly transactionActionService: TransactionActionService,
+    private readonly actionsRetriever: ActionsRetriever,
     private readonly transactionService: TransactionsService,
-    private readonly messagingService: MessagingService,
     private readonly logger: Logger,
   ) {}
 
@@ -22,7 +23,9 @@ export class ThirdPartyEventsController {
     name: RabbitRoutingKeys.ThirdPartyPaymentActionRequested,
     origin: 'rabbitmq',
   })
-  public async onThirdPartyPaymentActionEvent(data: ThirdPartyActionRequestInterface): Promise<void> {
+  public async onThirdPartyPaymentActionEvent(
+    data: ThirdPartyActionRequestInterface,
+  ): Promise<TransactionUnpackedDetailsInterface> {
     const transaction: TransactionModel = await this.transactionService.findModelByParams({
       business_uuid: data.business.id,
       reference: data.reference,
@@ -42,7 +45,7 @@ export class ThirdPartyEventsController {
       transaction.toObject({ virtuals: true }),
     );
 
-    const actions: ActionItemInterface[] = await this.messagingService.getActionsList(unpackedTransaction);
+    const actions: ActionItemInterface[] = await this.actionsRetriever.retrieve(unpackedTransaction);
     const targetAction: ActionItemInterface = actions.find(
       (item: ActionItemInterface) => item.action === data.action,
     );
@@ -59,6 +62,6 @@ export class ThirdPartyEventsController {
       return;
     }
 
-    return this.messagingService.runAction(unpackedTransaction, targetAction.action, data);
+    return this.transactionActionService.doAction(transaction, data as ActionPayloadDto, targetAction.action);
   }
 }

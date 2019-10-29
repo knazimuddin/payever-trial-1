@@ -22,10 +22,10 @@ import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import {
   ActionsRetriever,
-  DtoValidationService,
   ElasticSearchService,
   MessagingService,
   MongoSearchService,
+  TransactionActionService,
   TransactionsService,
 } from '../services';
 import { IsNotExampleFilter } from '../tools';
@@ -41,12 +41,12 @@ export class AdminController {
   private defaultCurrency: string;
 
   constructor(
-    private readonly dtoValidation: DtoValidationService,
     private readonly transactionsService: TransactionsService,
     private readonly mongoSearchService: MongoSearchService,
     private readonly elasticSearchService: ElasticSearchService,
     private readonly messagingService: MessagingService,
     private readonly actionsRetriever: ActionsRetriever,
+    private readonly transactionActionService: TransactionActionService,
     private readonly logger: Logger,
   ) {
     this.defaultCurrency = environment.defaultCurrency;
@@ -112,32 +112,11 @@ export class AdminController {
     ) transaction: TransactionModel,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionOutputInterface> {
-    this.dtoValidation.checkFileUploadDto(actionPayload);
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
+    const updatedTransaction: TransactionUnpackedDetailsInterface = await this.transactionActionService.doAction(
+        transaction,
+        actionPayload,
+        action,
     );
-
-    try {
-      await this.messagingService.runAction(unpackedTransaction, action, actionPayload);
-    } catch (e) {
-      this.logger.error(
-        {
-          context: 'AdminController',
-          error: e.message,
-          message: `Error occured during running action`,
-        },
-      );
-      throw new BadRequestException(e.message);
-    }
-
-    const updatedTransaction: TransactionUnpackedDetailsInterface =
-      await this.transactionsService.findUnpackedByUuid(transaction.uuid);
-    /** Send update to checkout-php */
-    try {
-      await this.messagingService.sendTransactionUpdate(updatedTransaction);
-    } catch (e) {
-      throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
-    }
 
     return TransactionOutputConverter.convert(
       updatedTransaction,
