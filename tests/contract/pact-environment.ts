@@ -22,7 +22,7 @@ export const pactEnvironment: any = {
     pactBroker: env.PACT_BROKER_BASE_URL,
     pactBrokerUsername: env.PACT_BROKER_USERNAME,
     pactBrokerPassword: env.PACT_BROKER_PASSWORD,
-    tags: env.PACT_ENV_TAGS ? env.PACT_ENV_TAGS.split(',').map((s: string) => s.trim()) : [],
+    tags: env.PACT_ENV_TAGS ? env.PACT_ENV_TAGS.split(',').map(s => s.trim()) : [],
   },
   provider: {
     provider: participantName,
