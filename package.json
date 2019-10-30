@@ -18,7 +18,7 @@
     "probe-mongo": "pe-probe-mongo",
     "test": "mocha -r ts-node/register --recursive ./tests/**/*.spec.ts",
     "test:pact:verify": "mocha -r ts-node/register ./tests/contract/pact.verify.ts --timeout 60000 --exit",
-    "test:pact:can-i-deploy": "./node_modules/.bin/pact-broker can-i-deploy --pacticipant 'nodejs-backend-transactions' --latest --broker-base-url $PACT_BROKER_URL --broker-username $PACT_BROKER_USERNAME --broker-password $PACT_BROKER_PASSWORD",
+    "test:pact:can-i-deploy": "./node_modules/.bin/pact-broker can-i-deploy --pacticipant 'nodejs-backend-transactions' --latest --broker-base-url $PACT_BROKER_BASE_URL --broker-username $PACT_BROKER_USERNAME --broker-password $PACT_BROKER_PASSWORD",
     "lint": "pe-lint",
     "lint:fix": "pe-lint --fix",
     "test:integration": "cucumber-js features/tests/",

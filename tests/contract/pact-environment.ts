@@ -19,7 +19,7 @@ export const pactEnvironment: any = {
   },
   pactBroker: {
     pactFilesOrDirs: [path.resolve(process.cwd(), 'pacts')],
-    pactBroker: env.PACT_BROKER_URL,
+    pactBroker: env.PACT_BROKER_BASE_URL,
     pactBrokerUsername: env.PACT_BROKER_USERNAME,
     pactBrokerPassword: env.PACT_BROKER_PASSWORD,
     tags: env.PACT_ENV_TAGS ? env.PACT_ENV_TAGS.split(',').map((s: string) => s.trim()) : [],
