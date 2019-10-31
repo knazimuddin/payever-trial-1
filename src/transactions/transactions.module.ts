@@ -27,8 +27,7 @@ import {
   TransactionEventsController,
   UserController,
 } from './controllers';
-import { AbstractConsumer, EmitterConsumerInitializer } from './emitter';
-import { EventEmitterConsumersEnum } from './emitter/event-emitter-consumers.enum';
+import { EventHandlersEnum } from './event-listeners/event-handlers.enum';
 import { PaymentMailEventProducer } from './producer';
 import {
   BusinessPaymentOptionSchema,
@@ -121,18 +120,7 @@ import {
     TransactionsExportCommand,
     TransactionsService,
     PaymentMailEventProducer,
-    ...EventEmitterConsumersEnum,
-    EmitterConsumerInitializer,
-    {
-      inject: [...EventEmitterConsumersEnum],
-      provide: EmitterConsumerInitializer,
-      useFactory: (...emitterConsumers: AbstractConsumer[]): EmitterConsumerInitializer => {
-        const initializer: EmitterConsumerInitializer = new EmitterConsumerInitializer();
-        emitterConsumers.forEach((consumer: AbstractConsumer) => initializer.addConsumer(consumer));
-
-        return initializer;
-      },
-    },
+    ...EventHandlersEnum,
   ],
 })
 export class TransactionsModule {}
