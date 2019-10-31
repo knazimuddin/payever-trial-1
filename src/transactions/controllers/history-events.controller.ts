@@ -8,7 +8,7 @@ import {
 } from '../interfaces/history-event-message';
 import { TransactionModel } from '../models';
 import { TransactionHistoryService, TransactionsService } from '../services';
-import { PaymentActionEventsEnum } from '../enum/events';
+import { PaymentActionEventEnum } from '../enum/events';
 
 @Controller()
 export class HistoryEventsController {
@@ -44,7 +44,7 @@ export class HistoryEventsController {
     this.logger.log({ text: 'ACTION.COMPLETED: Transaction found', transaction });
 
     await this.eventDispatcher.dispatch(
-      PaymentActionEventsEnum.PaymentActionCompleted,
+      PaymentActionEventEnum.PaymentActionCompleted,
       transaction,
       message,
     );

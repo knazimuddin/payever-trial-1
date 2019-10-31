@@ -1,5 +1,5 @@
 import { HistoryRecordEventListener } from './history-record-event.listener';
-import { StatisticsEventListener } from './index';
+import { StatisticsEventListener } from './statistics-event.listener';
 
 export const EventHandlersEnum: any[] = [
   HistoryRecordEventListener,

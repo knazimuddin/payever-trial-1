@@ -1,3 +1,3 @@
-export enum PaymentActionEventsEnum {
+export enum PaymentActionEventEnum {
   PaymentActionCompleted = 'payment-action.completed',
 }

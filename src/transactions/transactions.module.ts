@@ -1,7 +1,7 @@
 import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
-import { ElasticsearchModule, NestEmitterModule } from '@pe/nest-kit';
+import { ElasticsearchModule, EventDispatcherModule } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
 import {
@@ -90,7 +90,7 @@ import {
       ],
       rsaPath: environment.rsa,
     }),
-    NestEmitterModule,
+    EventDispatcherModule,
     ElasticsearchModule.forRoot({
       host: environment.elasticSearch,
     }),

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PaymentActionEventsEnum } from '../enum/events';
+import { EventListener } from '@pe/nest-kit';
+import { PaymentActionEventEnum } from '../enum/events';
 import { TransactionModel } from '../models';
 import { StatisticsService } from '../services';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
-import { EventHandler } from '../decorators/event-handler.decorator';
 
 @Injectable()
 export class StatisticsEventListener {
@@ -11,7 +11,7 @@ export class StatisticsEventListener {
     private readonly statisticsService: StatisticsService,
   ) {}
 
-  @EventHandler(PaymentActionEventsEnum.PaymentActionCompleted)
+  @EventListener(PaymentActionEventEnum.PaymentActionCompleted)
   public async handlePaymentCompleted(
     transaction: TransactionModel,
     message: HistoryEventActionCompletedInterface,
