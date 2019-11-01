@@ -1,5 +1,6 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
+import { EventDispatcher } from '@pe/nest-kit';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import {
   HistoryEventActionCompletedInterface,
@@ -7,8 +8,7 @@ import {
 } from '../interfaces/history-event-message';
 import { TransactionModel } from '../models';
 import { TransactionHistoryService, TransactionsService } from '../services';
-import { PaymentActionEventsEnum } from '../enum/events';
-import { InjectEventEmitter, NestEventEmitter } from '@pe/nest-kit';
+import { PaymentActionEventEnum } from '../enum/events';
 
 @Controller()
 export class HistoryEventsController {
@@ -16,7 +16,7 @@ export class HistoryEventsController {
     private readonly transactionService: TransactionsService,
     private readonly historyService: TransactionHistoryService,
     private readonly logger: Logger,
-    @InjectEventEmitter() private readonly emitter: NestEventEmitter,
+    private readonly eventDispatcher: EventDispatcher,
   ) {}
 
   @MessagePattern({
@@ -43,8 +43,8 @@ export class HistoryEventsController {
 
     this.logger.log({ text: 'ACTION.COMPLETED: Transaction found', transaction });
 
-    this.emitter.emit(
-      PaymentActionEventsEnum.PaymentActionCompleted,
+    await this.eventDispatcher.dispatch(
+      PaymentActionEventEnum.PaymentActionCompleted,
       transaction,
       message,
     );
