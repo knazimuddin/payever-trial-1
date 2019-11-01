@@ -1,7 +1,7 @@
 import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
-import { ElasticsearchModule, NestEmitterModule } from '@pe/nest-kit';
+import { ElasticsearchModule, EventDispatcherModule } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
 import {
@@ -27,8 +27,7 @@ import {
   TransactionEventsController,
   UserController,
 } from './controllers';
-import { AbstractConsumer, EmitterConsumerInitializer } from './emitter';
-import { EventEmitterConsumersEnum } from './emitter/event-emitter-consumers.enum';
+import { EventListenersList } from './event-listeners/event-listeners.list';
 import { PaymentMailEventProducer } from './producer';
 import {
   BusinessPaymentOptionSchema,
@@ -91,7 +90,7 @@ import {
       ],
       rsaPath: environment.rsa,
     }),
-    NestEmitterModule,
+    EventDispatcherModule,
     ElasticsearchModule.forRoot({
       host: environment.elasticSearch,
     }),
@@ -121,18 +120,7 @@ import {
     TransactionsExportCommand,
     TransactionsService,
     PaymentMailEventProducer,
-    ...EventEmitterConsumersEnum,
-    EmitterConsumerInitializer,
-    {
-      inject: [...EventEmitterConsumersEnum],
-      provide: EmitterConsumerInitializer,
-      useFactory: (...emitterConsumers: AbstractConsumer[]): EmitterConsumerInitializer => {
-        const initializer: EmitterConsumerInitializer = new EmitterConsumerInitializer();
-        emitterConsumers.forEach((consumer: AbstractConsumer) => initializer.addConsumer(consumer));
-
-        return initializer;
-      },
-    },
+    ...EventListenersList,
   ],
 })
 export class TransactionsModule {}

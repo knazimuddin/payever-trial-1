@@ -2,27 +2,14 @@ import { AbstractWorld } from '@pe/cucumber-sdk';
 import { setWorldConstructor } from 'cucumber';
 import { AppModule } from '../../src/app.module';
 import { options } from './options';
-import { EmitterConsumerInitializer } from '../../src/transactions/emitter';
-import { INestApplication } from '@nestjs/common';
 
 export class CustomWorld extends AbstractWorld {
-  protected application: INestApplication;
-  protected consumersInitialized: boolean;
-
-  public constructor({attach, parameters}) {
+  public constructor({ attach, parameters }: { attach: any, parameters: any }) {
     super(
       {attach, parameters},
       AppModule,
       options,
     );
-  }
-
-  public async init(scenario): Promise<void> {
-    await super.init(scenario);
-    if (!this.consumersInitialized) {
-      this.application.get(EmitterConsumerInitializer).init();
-      this.consumersInitialized = true;
-    }
   }
 }
 

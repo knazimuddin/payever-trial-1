@@ -1,1 +1,1 @@
-export * from './payment-action-events.enum';
+export * from './payment-action-event.enum';
