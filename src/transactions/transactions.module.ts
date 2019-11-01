@@ -27,7 +27,7 @@ import {
   TransactionEventsController,
   UserController,
 } from './controllers';
-import { EventHandlersEnum } from './event-listeners/event-handlers.enum';
+import { EventListenersList } from './event-listeners/event-listeners.list';
 import { PaymentMailEventProducer } from './producer';
 import {
   BusinessPaymentOptionSchema,
@@ -120,7 +120,7 @@ import {
     TransactionsExportCommand,
     TransactionsService,
     PaymentMailEventProducer,
-    ...EventHandlersEnum,
+    ...EventListenersList,
   ],
 })
 export class TransactionsModule {}
