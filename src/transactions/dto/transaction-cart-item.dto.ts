@@ -22,5 +22,5 @@ export class TransactionCartItemDto implements TransactionCartItemInterface {
   public vat_rate: number;
   public weight: number;
   public created_at: Date;
-  public options: any[];
+  public options?: any[];
 }
