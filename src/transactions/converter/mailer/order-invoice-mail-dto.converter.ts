@@ -40,6 +40,7 @@ export class OderInvoiceMailDtoConverter extends AbstractPaymentMailDtoConverter
         thumbnail: item.thumbnail,
         uuid: item.uuid,
         vat_rate: item.vat_rate,
+        options: item.options,
       })),
     };
   }
