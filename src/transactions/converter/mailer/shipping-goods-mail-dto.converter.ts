@@ -43,6 +43,7 @@ export class ShippingGoodsMailDtoConverter extends AbstractPaymentMailDtoConvert
         thumbnail: item.thumbnail,
         uuid: item.uuid,
         vat_rate: item.vat_rate,
+        options: item.options,
       })),
       variables: {
         deliveryDate: shippingOrder.deliveryDate,
