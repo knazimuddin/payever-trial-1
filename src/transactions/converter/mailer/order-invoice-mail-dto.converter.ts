@@ -35,12 +35,12 @@ export class OderInvoiceMailDtoConverter extends AbstractPaymentMailDtoConverter
 
       payment_items: paymentSubmittedDto.payment.items.map((item: TransactionCartItemDto): PaymentItemDto => ({
         name: item.name,
+        options: item.options,
         price: item.price,
         quantity: item.quantity,
         thumbnail: item.thumbnail,
         uuid: item.uuid,
         vat_rate: item.vat_rate,
-        options: item.options,
       })),
     };
   }

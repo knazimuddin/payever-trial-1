@@ -38,12 +38,12 @@ export class ShippingGoodsMailDtoConverter extends AbstractPaymentMailDtoConvert
 
       payment_items: transaction.items.map((item: TransactionCartItemDto): PaymentItemDto => ({
         name: item.name,
+        options: item.options,
         price: item.price,
         quantity: item.quantity,
         thumbnail: item.thumbnail,
         uuid: item.uuid,
         vat_rate: item.vat_rate,
-        options: item.options,
       })),
       variables: {
         deliveryDate: shippingOrder.deliveryDate,
