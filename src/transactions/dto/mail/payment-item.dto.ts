@@ -5,4 +5,5 @@ export class PaymentItemDto {
   public quantity: number;
   public vat_rate: number;
   public thumbnail: string;
+  public options: any[];
 }

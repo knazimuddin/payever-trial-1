@@ -19,4 +19,5 @@ export interface TransactionCartItemInterface {
   vat_rate: number;
   weight: number;
   created_at: Date;
+  options?: any[];
 }

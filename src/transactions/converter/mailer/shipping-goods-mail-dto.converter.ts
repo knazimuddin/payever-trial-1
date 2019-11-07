@@ -38,6 +38,7 @@ export class ShippingGoodsMailDtoConverter extends AbstractPaymentMailDtoConvert
 
       payment_items: transaction.items.map((item: TransactionCartItemDto): PaymentItemDto => ({
         name: item.name,
+        options: item.options,
         price: item.price,
         quantity: item.quantity,
         thumbnail: item.thumbnail,
