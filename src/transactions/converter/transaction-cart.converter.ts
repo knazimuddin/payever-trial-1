@@ -43,6 +43,7 @@ export class TransactionCartConverter {
         url: cartItem.url,
         vat_rate: cartItem.vat_rate,
         weight: cartItem.weight,
+        options: cartItem.options,
       };
 
       newCart.push(newCartItem);

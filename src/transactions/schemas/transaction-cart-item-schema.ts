@@ -23,6 +23,7 @@ export const TransactionCartItemSchema: Schema = new Schema({
   updated_at: Date,
   url: String,
   vat_rate: Number,
+  options: [{_id: String, name: String, value: String}],
   weight: Number,
 });
 
