@@ -30,6 +30,7 @@ export class ShippingGoodsMailDtoConverter extends AbstractPaymentMailDtoConvert
 
         customer_email: transaction.customer_email,
         customer_name: transaction.customer_name,
+        delivery_fee: transaction.delivery_fee,
         payment_option: {
           payment_method: transaction.type,
         },
