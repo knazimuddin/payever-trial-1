@@ -28,6 +28,7 @@ export class OderInvoiceMailDtoConverter extends AbstractPaymentMailDtoConverter
 
         customer_email: paymentSubmittedDto.payment.customer_email,
         customer_name: paymentSubmittedDto.payment.customer_name,
+        delivery_fee: paymentSubmittedDto.payment.delivery_fee,
         payment_option: {
           payment_method: paymentSubmittedDto.payment.payment_type,
         },
@@ -35,6 +36,7 @@ export class OderInvoiceMailDtoConverter extends AbstractPaymentMailDtoConverter
 
       payment_items: paymentSubmittedDto.payment.items.map((item: TransactionCartItemDto): PaymentItemDto => ({
         name: item.name,
+        options: item.options,
         price: item.price,
         quantity: item.quantity,
         thumbnail: item.thumbnail,

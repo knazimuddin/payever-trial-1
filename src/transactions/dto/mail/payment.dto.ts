@@ -7,6 +7,7 @@ export class PaymentDto {
   public total: number;
   public currency: string;
   public reference: string;
+  public delivery_fee: number;
   public customer_name: string;
   public customer_email: string;
   public created_at: Date;

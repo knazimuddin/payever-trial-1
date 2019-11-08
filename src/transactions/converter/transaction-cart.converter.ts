@@ -30,6 +30,7 @@ export class TransactionCartConverter {
         identifier: cartItem.identifier,
         item_type: cartItem.item_type,
         name: cartItem.name,
+        options: cartItem.options,
         price: cartItem.price,
         price_net: cartItem.price_net,
         product_variant_uuid: cartItem.product_variant_uuid,

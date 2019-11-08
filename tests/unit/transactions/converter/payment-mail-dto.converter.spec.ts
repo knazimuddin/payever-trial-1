@@ -17,6 +17,7 @@ describe('PaymentMailDtoConverter ', () => {
           uuid: '96211c90-e563-4809-9091-a58b129428f0',
           amount: 2,
           currency: 'cur',
+          delivery_fee: 10,
           reference: '123',
           total: 100,
           created_at: new Date('2019-07-11'),
@@ -44,6 +45,7 @@ describe('PaymentMailDtoConverter ', () => {
         payment: {
           id: paymentSubmittedDto.payment.id,
           amount: paymentSubmittedDto.payment.amount,
+          delivery_fee: 10,
           currency: paymentSubmittedDto.payment.currency,
           reference: paymentSubmittedDto.payment.reference,
           uuid: paymentSubmittedDto.payment.uuid,
