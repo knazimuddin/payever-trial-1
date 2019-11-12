@@ -198,6 +198,7 @@ export class BusinessController {
   @Get(':uuid/update-status')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async updateStatus(
     @ParamModel(
       {
@@ -257,6 +258,7 @@ export class BusinessController {
   @Get('mongo')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async getMongo(
     @Param('businessId') businessId: string,
     @QueryDto() listDto: ListQueryDto,
@@ -271,6 +273,7 @@ export class BusinessController {
   @Get('export')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async export(
     @Param('businessId') businessId: string,
     @QueryDto() exportDto: ExportQueryDto,
