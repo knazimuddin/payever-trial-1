@@ -66,6 +66,7 @@ export class BusinessController {
   @Get('detail/reference/:reference')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async getDetailByReference(
     @ParamModel(
       {
@@ -81,6 +82,7 @@ export class BusinessController {
   @Get('detail/:uuid')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async getDetail(
     @ParamModel(
       {
