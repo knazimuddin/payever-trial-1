@@ -98,6 +98,7 @@ export class BusinessController {
   @Post(':uuid/action/:action')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.update})
   public async runAction(
     @Param('action') action: string,
     @ParamModel(
