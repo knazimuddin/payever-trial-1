@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
-import { ParamModel } from '@pe/nest-kit';
+import { Acl, AclActionsEnum, ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
@@ -240,6 +240,7 @@ export class BusinessController {
   @Get('list')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async getList(
     @Param('businessId') businessId: string,
     @QueryDto() listDto: ListQueryDto,
@@ -289,6 +290,7 @@ export class BusinessController {
   @Get('settings')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async getSettings(): Promise<any> {
     return {
       columns_to_show: [
