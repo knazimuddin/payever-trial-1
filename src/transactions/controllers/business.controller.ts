@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
-import { ParamModel } from '@pe/nest-kit';
+import { Acl, AclActionsEnum, ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
@@ -66,6 +66,7 @@ export class BusinessController {
   @Get('detail/reference/:reference')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async getDetailByReference(
     @ParamModel(
       {
@@ -81,6 +82,7 @@ export class BusinessController {
   @Get('detail/:uuid')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async getDetail(
     @ParamModel(
       {
@@ -96,6 +98,7 @@ export class BusinessController {
   @Post(':uuid/action/:action')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.update})
   public async runAction(
     @Param('action') action: string,
     @ParamModel(
@@ -196,6 +199,7 @@ export class BusinessController {
   @Get(':uuid/update-status')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async updateStatus(
     @ParamModel(
       {
@@ -240,6 +244,7 @@ export class BusinessController {
   @Get('list')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async getList(
     @Param('businessId') businessId: string,
     @QueryDto() listDto: ListQueryDto,
@@ -254,6 +259,7 @@ export class BusinessController {
   @Get('mongo')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async getMongo(
     @Param('businessId') businessId: string,
     @QueryDto() listDto: ListQueryDto,
@@ -268,6 +274,7 @@ export class BusinessController {
   @Get('export')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async export(
     @Param('businessId') businessId: string,
     @QueryDto() exportDto: ExportQueryDto,
@@ -289,6 +296,7 @@ export class BusinessController {
   @Get('settings')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async getSettings(): Promise<any> {
     return {
       columns_to_show: [
