@@ -17,10 +17,14 @@
     "pre-commit": "npm run tslint:fix && npm run test && npm run e2e",
     "probe-mongo": "pe-probe-mongo",
     "test": "mocha -r ts-node/register --recursive ./tests/**/*.spec.ts",
+    "test:pact": "mocha -r ts-node/register --recursive ./tests/**/*.spec.pact.ts --exit",
+    "test:pact:verify": "npm run test:pact:verify-api",
+    "test:pact:verify-api": "mocha -r ts-node/register ./tests/contract/verify-api.ts --timeout 60000 --exit",
+    "test:pact:can-i-deploy": "./node_modules/.bin/pact-broker can-i-deploy --pacticipant 'nodejs-backend-transactions' --latest --broker-base-url $PACT_BROKER_BASE_URL --broker-username $PACT_BROKER_USERNAME --broker-password $PACT_BROKER_PASSWORD",
     "lint": "pe-lint",
     "lint:fix": "pe-lint --fix",
     "test:integration": "cucumber-js features/tests/",
-    "test:unit": "mocha -r ts-node/register --recursive ./tests/**/*.spec.ts"
+    "test:unit": "mocha -r ts-node/register --recursive ./tests/unit/**/*.spec.ts"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^6.8.2",
@@ -48,9 +52,10 @@
     "xlsx": "^0.15.0"
   },
   "devDependencies": {
-    "@nestjs/testing": "^6.8.0",
+    "@nestjs/testing": "^6.8.3",
     "@pe/cucumber-sdk": "^0.5.1",
     "@pe/dev-kit": "^0.1.6",
+    "@pe/pact-kit": "^0.1.0",
     "@types/mocha": "^5.2.6",
     "@types/sinon": "^7.5.0",
     "@types/sinon-chai": "^3.2.3",

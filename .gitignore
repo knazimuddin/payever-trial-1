@@ -5,6 +5,7 @@
 
 # compiled output
 /dist
+/pact
 
 # dependencies
 /node_modules
