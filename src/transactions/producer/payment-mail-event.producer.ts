@@ -30,7 +30,7 @@ export class PaymentMailEventProducer {
   }
 
   private isInvoiceSupportedChannel(paymentSubmittedDto: PaymentSubmittedDto): boolean {
-    return ['shop', 'pos', 'mail'].indexOf(paymentSubmittedDto.payment.channel) !== -1;
+    return ['shop', 'mail'].indexOf(paymentSubmittedDto.payment.channel) !== -1;
   }
 
   private isStatusSuccessFull(payment: TransactionPaymentDto): boolean {
