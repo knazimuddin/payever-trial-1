@@ -30,7 +30,7 @@ export class PaymentMailEventProducer {
   }
 
   private isInvoiceSupportedChannel(paymentSubmittedDto: PaymentSubmittedDto): boolean {
-    return ['shop', 'pos', 'mail'].indexOf(paymentSubmittedDto.payment.channel) !== -1;
+    return ['shop', 'mail'].indexOf(paymentSubmittedDto.payment.channel) !== -1;
   }
 
   private isStatusSuccessFull(payment: TransactionPaymentDto): boolean {
@@ -43,8 +43,8 @@ export class PaymentMailEventProducer {
     ].indexOf(payment.status) === -1;
   }
 
-  private sendMailEvent(mailDto: PaymentMailDto): Promise<void> {
-    return this.rabbitMqClient.send(
+  private async sendMailEvent(mailDto: PaymentMailDto): Promise<void> {
+    await this.rabbitMqClient.send(
       {
         channel: 'payever.event.payment.email',
         exchange: 'async_events',
