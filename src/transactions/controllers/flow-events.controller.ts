@@ -1,9 +1,9 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
-import { environment } from '../../environments';
 import { PaymentFlowInterface } from '../interfaces';
 import { PaymentFlowService } from '../services';
+import { PaymentFlowChangedDto, PaymentFlowDto, PaymentFlowRemovedDto } from '../dto/checkout-rabbit';
 
 @Controller()
 export class FlowEventsController {
@@ -17,7 +17,7 @@ export class FlowEventsController {
     name: RabbitRoutingKeys.PaymentFlowCreated,
     origin: 'rabbitmq',
   })
-  public async onPaymentFlowCreatedEvent(data: { flow: PaymentFlowInterface }): Promise<void> {
+  public async onPaymentFlowCreatedEvent(data: PaymentFlowChangedDto): Promise<void> {
     return this.createOrUpdate(data, 'FLOW.CREATE');
   }
 
@@ -26,7 +26,7 @@ export class FlowEventsController {
     name: RabbitRoutingKeys.PaymentFlowMigrate,
     origin: 'rabbitmq',
   })
-  public async onPaymentFlowMigrateEvent(data: { flow: PaymentFlowInterface }): Promise<void> {
+  public async onPaymentFlowMigrateEvent(data: PaymentFlowChangedDto): Promise<void> {
     return this.createOrUpdate(data, 'FLOW.MIGRATE');
   }
 
@@ -35,7 +35,7 @@ export class FlowEventsController {
     name: RabbitRoutingKeys.PaymentFlowUpdated,
     origin: 'rabbitmq',
   })
-  public async onPaymentFlowUpdatedEvent(msg: any): Promise<void> {
+  public async onPaymentFlowUpdatedEvent(msg: PaymentFlowChangedDto): Promise<void> {
     return this.createOrUpdate(msg, 'FLOW.UPDATE');
   }
 
@@ -44,16 +44,15 @@ export class FlowEventsController {
     name: RabbitRoutingKeys.PaymentFlowRemoved,
     origin: 'rabbitmq',
   })
-  public async onPaymentFlowRemovedEvent(data: { flow: PaymentFlowInterface }): Promise<void> {
+  public async onPaymentFlowRemovedEvent(data: PaymentFlowRemovedDto): Promise<void> {
     this.logger.log({ text: 'FLOW.REMOVE', data });
-    const flow: PaymentFlowInterface = data.flow;
-    await this.flowService.removeById(flow.id);
+    await this.flowService.removeById(data.flow.id);
     this.logger.log('FLOW.REMOVE COMPLETED');
   }
 
-  private async createOrUpdate(data: { flow: PaymentFlowInterface }, action: string): Promise<void> {
+  private async createOrUpdate(data: PaymentFlowChangedDto, action: string): Promise<void> {
     this.logger.log({ text: action, data });
-    const flow: PaymentFlowInterface = data.flow;
+    const flow: PaymentFlowDto = data.flow;
     await this.flowService.createOrUpdate(flow);
     this.logger.log(`${action} COMPLETED`);
   }

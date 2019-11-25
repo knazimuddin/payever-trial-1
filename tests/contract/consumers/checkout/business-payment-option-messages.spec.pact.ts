@@ -48,7 +48,7 @@ const messages: ExpectedMessageDto[] = [
 
 const messagePact: MessageConsumerPact = MessageConsumerPactFactory.fromConfig(
   pactConfiguration,
-  ProvidersEnum.Users,
+  ProvidersEnum.CheckoutPhp,
 );
 
 describe('Receive checkout business payment option bus messages', () => {
