@@ -4,6 +4,7 @@ import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
 import { BusinessPaymentOptionInterface } from '../interfaces';
 import { BusinessPaymentOptionService } from '../services';
+import { BusinessPaymentOptionChangedDto } from '../dto/checkout-rabbit';
 
 @Controller()
 export class BpoEventsController {
@@ -17,7 +18,7 @@ export class BpoEventsController {
     name: RabbitRoutingKeys.BpoCreated,
     origin: 'rabbitmq',
   })
-  public async onBpoCreatedEvent(data: { business_payment_option: BusinessPaymentOptionInterface }): Promise<void> {
+  public async onBpoCreatedEvent(data: BusinessPaymentOptionChangedDto): Promise<void> {
     return this.createOrUpdate('CREATE', data);
   }
 
@@ -26,13 +27,13 @@ export class BpoEventsController {
     name: RabbitRoutingKeys.BpoUpdated,
     origin: 'rabbitmq',
   })
-  public async onBpoUpdatedEvent(data: { business_payment_option: BusinessPaymentOptionInterface }): Promise<void> {
+  public async onBpoUpdatedEvent(data: BusinessPaymentOptionChangedDto): Promise<void> {
     return this.createOrUpdate('UPDATE', data);
   }
 
   public async createOrUpdate(
     createOrUpdate: string,
-    data: { business_payment_option: BusinessPaymentOptionInterface },
+    data: BusinessPaymentOptionChangedDto,
   ): Promise<void> {
     this.logger.log({ text: `BPO.${createOrUpdate}`, data });
     await this.bpoService.createOrUpdate(data.business_payment_option);
