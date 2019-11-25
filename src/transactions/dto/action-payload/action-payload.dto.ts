@@ -13,5 +13,5 @@ export class ActionPayloadDto implements ActionPayloadInterface {
 
   @ApiModelProperty()
   @ValidateNested()
-  public files: [FileDataDto];
+  public files: FileDataDto[];
 }

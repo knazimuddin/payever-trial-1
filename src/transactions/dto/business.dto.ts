@@ -1,4 +1,6 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, ValidateNested, IsDefined } from 'class-validator';
+import { Type } from 'class-transformer';
+import { CompanyAddressDto } from './company-address.dto';
 
 export class BusinessDto {
   @IsString()
@@ -9,9 +11,10 @@ export class BusinessDto {
   @IsNotEmpty()
   public currency: string;
 
-  public companyAddress: {
-    country: string;
-  };
+  @ValidateNested()
+  @IsDefined()
+  @Type(() => CompanyAddressDto)
+  public companyAddress: CompanyAddressDto;
 
   @IsString()
   @IsNotEmpty()
