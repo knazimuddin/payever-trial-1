@@ -23,7 +23,7 @@ export class ShippingGoodsMailDtoConverter extends AbstractPaymentMailDtoConvert
         uuid: transaction.uuid,
 
         amount: transaction.amount,
-        created_at: transaction.created_at,
+        created_at: transaction.created_at.toString(),
         currency: transaction.currency,
         reference: transaction.reference,
         total: transaction.total,

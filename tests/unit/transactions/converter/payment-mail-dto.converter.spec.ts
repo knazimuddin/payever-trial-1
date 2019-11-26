@@ -2,7 +2,8 @@ import * as chai from 'chai';
 import 'mocha';
 import * as sinonChai from 'sinon-chai';
 import { OderInvoiceMailDtoConverter } from '../../../../src/transactions/converter';
-import { PaymentSubmittedDto, TransactionCartItemDto } from '../../../../src/transactions/dto';
+import { TransactionCartItemDto } from '../../../../src/transactions/dto';
+import { TransactionChangedDto } from '../../../../src/transactions/dto/checkout-rabbit';
 chai.use(sinonChai);
 const expect = chai.expect;
 
@@ -11,7 +12,7 @@ describe('PaymentMailDtoConverter ', () => {
     it('should convert data', () => {
       const templateName = 'order_invoice_template';
 
-      const paymentSubmittedDto: PaymentSubmittedDto = {
+      const paymentSubmittedDto: TransactionChangedDto = {
         payment: {
           id: '',
           uuid: '96211c90-e563-4809-9091-a58b129428f0',
@@ -20,7 +21,7 @@ describe('PaymentMailDtoConverter ', () => {
           delivery_fee: 10,
           reference: '123',
           total: 100,
-          created_at: new Date('2019-07-11'),
+          created_at: '2019-07-11',
           channel: 'channelName',
           business: {
             uuid: 'business_id',
@@ -33,7 +34,7 @@ describe('PaymentMailDtoConverter ', () => {
           },
           payment_type: 'payment_type',
         },
-      } as PaymentSubmittedDto;
+      } as TransactionChangedDto;
 
       const expectedResult = {
         to: paymentSubmittedDto.payment.customer_email,
@@ -63,7 +64,7 @@ describe('PaymentMailDtoConverter ', () => {
       };
 
       expect(
-        OderInvoiceMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto),
+        OderInvoiceMailDtoConverter.fromTransactionChangedDto(paymentSubmittedDto),
       ).to.eql(
         expectedResult,
       );
@@ -72,14 +73,14 @@ describe('PaymentMailDtoConverter ', () => {
     it('should set proper template name', () => {
       const templateName = 'order_invoice_template';
 
-      const paymentSubmittedDto: PaymentSubmittedDto = {
+      const paymentSubmittedDto: TransactionChangedDto = {
         payment: {
           id: '',
           amount: 2,
           currency: 'cur',
           reference: '123',
           total: 100,
-          created_at: new Date('2019-07-11'),
+          created_at: '2019-07-11',
           channel: 'channelName',
           business: {
             uuid: 'business_id',
@@ -91,17 +92,17 @@ describe('PaymentMailDtoConverter ', () => {
             street: 'street name',
           },
         },
-      } as PaymentSubmittedDto;
+      } as TransactionChangedDto;
 
       expect(
-        OderInvoiceMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto).template_name,
+        OderInvoiceMailDtoConverter.fromTransactionChangedDto(paymentSubmittedDto).template_name,
       ).to.eql(
         templateName,
       );
     });
 
     it('should calculate tax, based on items vat rate amount', () => {
-      const paymentSubmittedDto: PaymentSubmittedDto = {
+      const paymentSubmittedDto: TransactionChangedDto = {
         payment: {
           items: [
             {
@@ -124,14 +125,14 @@ describe('PaymentMailDtoConverter ', () => {
             uuid: 'business_id',
           },
         },
-      } as PaymentSubmittedDto;
+      } as TransactionChangedDto;
 
       const expectedVatRate = paymentSubmittedDto.payment.items.map(
         (item: TransactionCartItemDto) => item.vat_rate * item.price * item.quantity / 100,
       ).reduce((a, b) => a + b, 0);
 
       expect(
-        OderInvoiceMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto).payment.vat_rate,
+        OderInvoiceMailDtoConverter.fromTransactionChangedDto(paymentSubmittedDto).payment.vat_rate,
       ).to.eql(
         expectedVatRate,
       );
