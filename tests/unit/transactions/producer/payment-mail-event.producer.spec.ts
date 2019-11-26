@@ -45,7 +45,7 @@ describe('PaymentMailEventProducer ', () => {
   });
 
   describe('produceOrderInvoiceEvent method', () => {
-    const availableChannels = ['pos', 'shop', 'mail'];
+    const availableChannels = ['shop', 'mail'];
     const unsuccessfulStatuses = [
       PaymentStatusesEnum.Declined,
       PaymentStatusesEnum.Failed,
