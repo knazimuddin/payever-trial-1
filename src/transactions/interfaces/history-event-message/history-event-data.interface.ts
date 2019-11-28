@@ -5,10 +5,10 @@ export interface HistoryEventDataInterface {
   amount: number;
   payment_status: string;
   reason: string;
-  params: string;
+  params?: string;
   items_restocked: boolean;
-  refund_items: HistoryEventRefundItemInterface[];
-  saved_data: HistoryEventUploadItemInterface[];
+  refund_items?: HistoryEventRefundItemInterface[];
+  saved_data?: HistoryEventUploadItemInterface[];
   mail_event?: {
     event_id: string;
     template_name: string;

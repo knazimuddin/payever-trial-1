@@ -4,5 +4,5 @@ import { UnwrappedFieldsInterface } from './unwrapped-fields.interface';
 
 export interface ActionPayloadInterface {
   fields?: FieldsInterface & UnwrappedFieldsInterface;
-  files?: [FileDataInterface];
+  files?: FileDataInterface[];
 }

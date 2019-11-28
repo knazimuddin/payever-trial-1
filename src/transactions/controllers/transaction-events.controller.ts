@@ -3,12 +3,12 @@ import { MessagePattern } from '@nestjs/microservices';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { environment } from '../../environments';
 import { TransactionConverter } from '../converter';
-import { PaymentSubmittedDto } from '../dto';
 import { CheckoutTransactionInterface } from '../interfaces/checkout';
 import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { PaymentMailEventProducer } from '../producer';
 import { StatisticsService, TransactionsExampleService, TransactionsService } from '../services';
+import { TransactionChangedDto, TransactionRemovedDto } from '../dto/checkout-rabbit';
 
 @Controller()
 export class TransactionEventsController {
@@ -25,7 +25,7 @@ export class TransactionEventsController {
     name: RabbitRoutingKeys.PaymentCreated,
     origin: 'rabbitmq',
   })
-  public async onTransactionCreateEvent(data: { payment: CheckoutTransactionInterface }): Promise<void> {
+  public async onTransactionCreateEvent(data: TransactionChangedDto): Promise<void> {
     this.logger.log({ text: 'PAYMENT.CREATE', data });
 
     const checkoutTransaction: CheckoutTransactionInterface = data.payment;
@@ -44,7 +44,7 @@ export class TransactionEventsController {
     name: RabbitRoutingKeys.PaymentUpdated,
     origin: 'rabbitmq',
   })
-  public async onTransactionUpdateEvent(data: { payment: CheckoutTransactionInterface }): Promise<void> {
+  public async onTransactionUpdateEvent(data: TransactionChangedDto): Promise<void> {
     this.logger.log({ text: 'PAYMENT.UPDATE', data });
 
     const checkoutTransaction: CheckoutTransactionInterface = data.payment;
@@ -62,7 +62,7 @@ export class TransactionEventsController {
     name: RabbitRoutingKeys.PaymentRemoved,
     origin: 'rabbitmq',
   })
-  public async onTransactionRemoveEvent(data: { payment: CheckoutTransactionInterface }): Promise<void> {
+  public async onTransactionRemoveEvent(data: TransactionRemovedDto): Promise<void> {
     this.logger.log({ text: 'PAYMENT.REMOVE: Prepared transaction', data });
 
     return this.transactionsService.removeByUuid(data.payment.uuid);
@@ -73,7 +73,7 @@ export class TransactionEventsController {
     name: RabbitRoutingKeys.PaymentSubmitted,
     origin: 'rabbitmq',
   })
-  public async onTransactionSubmittedEvent(data: PaymentSubmittedDto): Promise<void> {
+  public async onTransactionSubmittedEvent(data: TransactionChangedDto): Promise<void> {
     this.logger.log(data, 'PAYMENT.SUBMIT');
 
     return this.paymentMailEventProducer.produceOrderInvoiceEvent(data);

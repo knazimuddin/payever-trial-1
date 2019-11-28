@@ -5,9 +5,9 @@ import 'mocha';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import { OderInvoiceMailDtoConverter } from '../../../../src/transactions/converter';
-import { PaymentSubmittedDto } from '../../../../src/transactions/dto';
 import { PaymentStatusesEnum } from '../../../../src/transactions/enum';
 import { PaymentMailEventProducer } from '../../../../src/transactions/producer';
+import { TransactionChangedDto } from '../../../../src/transactions/dto/checkout-rabbit';
 
 chai.use(sinonChai);
 const expect = chai.expect;
@@ -57,7 +57,7 @@ describe('PaymentMailEventProducer ', () => {
       it(`should send payment mail dto if channel is ${channelName}`, async () => {
         const eventName = 'payever.event.payment.email';
 
-        const paymentSubmittedDto: PaymentSubmittedDto = {
+        const paymentSubmittedDto: TransactionChangedDto = {
           payment: {
             channel: channelName,
             business: {
@@ -65,7 +65,7 @@ describe('PaymentMailEventProducer ', () => {
             },
             items: [],
           },
-        } as PaymentSubmittedDto;
+        } as TransactionChangedDto;
 
         await paymentMailEventProducer.produceOrderInvoiceEvent(paymentSubmittedDto);
 
@@ -76,7 +76,7 @@ describe('PaymentMailEventProducer ', () => {
           },
           {
             name: eventName,
-            payload: OderInvoiceMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto),
+            payload: OderInvoiceMailDtoConverter.fromTransactionChangedDto(paymentSubmittedDto),
           },
         );
       });
@@ -84,7 +84,7 @@ describe('PaymentMailEventProducer ', () => {
       for (const status of unsuccessfulStatuses) {
         it(`should not send payment mail dto if status is ${status} and channel is ${channelName}`, async () => {
 
-          const paymentSubmittedDto: PaymentSubmittedDto = {
+          const paymentSubmittedDto: TransactionChangedDto = {
             payment: {
               channel: channelName,
               status: status,
@@ -93,7 +93,7 @@ describe('PaymentMailEventProducer ', () => {
               },
               items: [],
             },
-          } as PaymentSubmittedDto;
+          } as TransactionChangedDto;
 
           await paymentMailEventProducer.produceOrderInvoiceEvent(paymentSubmittedDto);
 
@@ -104,11 +104,11 @@ describe('PaymentMailEventProducer ', () => {
 
     it(`should not send payment mail dto if channel is not in ${availableChannels.join(',')}`, async () => {
 
-      const paymentSubmittedDto: PaymentSubmittedDto = {
+      const paymentSubmittedDto: TransactionChangedDto = {
         payment: {
           channel: 'not shop channel',
         },
-      } as PaymentSubmittedDto;
+      } as TransactionChangedDto;
 
       await paymentMailEventProducer.produceOrderInvoiceEvent(paymentSubmittedDto);
 

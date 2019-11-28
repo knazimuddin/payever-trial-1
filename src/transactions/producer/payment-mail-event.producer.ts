@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { RabbitMqClient } from '@pe/nest-kit';
 import { OderInvoiceMailDtoConverter } from '../converter';
-import { PaymentMailDto, PaymentSubmittedDto, TransactionPaymentDto } from '../dto';
+import { PaymentMailDto } from '../dto';
 import { PaymentStatusesEnum } from '../enum';
 import { ShippingMailDto } from '../dto/mail';
+import { TransactionChangedDto, TransactionDto } from '../dto/checkout-rabbit';
 
 @Injectable()
 export class PaymentMailEventProducer {
@@ -11,7 +12,7 @@ export class PaymentMailEventProducer {
     private readonly rabbitMqClient: RabbitMqClient,
   ) {}
 
-  public async produceOrderInvoiceEvent(paymentSubmittedDto: PaymentSubmittedDto): Promise<void> {
+  public async produceOrderInvoiceEvent(paymentSubmittedDto: TransactionChangedDto): Promise<void> {
 
     if (
       !this.isInvoiceSupportedChannel(paymentSubmittedDto) ||
@@ -20,7 +21,7 @@ export class PaymentMailEventProducer {
       return ;
     }
 
-    const mailDto: PaymentMailDto = OderInvoiceMailDtoConverter.fromPaymentSubmittedDto(paymentSubmittedDto);
+    const mailDto: PaymentMailDto = OderInvoiceMailDtoConverter.fromTransactionChangedDto(paymentSubmittedDto);
 
     return this.sendMailEvent(mailDto);
   }
@@ -29,18 +30,18 @@ export class PaymentMailEventProducer {
     return this.sendMailEvent(mailDto);
   }
 
-  private isInvoiceSupportedChannel(paymentSubmittedDto: PaymentSubmittedDto): boolean {
-    return ['shop', 'mail'].indexOf(paymentSubmittedDto.payment.channel) !== -1;
+  private isInvoiceSupportedChannel(paymentSubmittedDto: TransactionChangedDto): boolean {
+    return ['shop', 'mail'].includes(paymentSubmittedDto.payment.channel);
   }
 
-  private isStatusSuccessFull(payment: TransactionPaymentDto): boolean {
+  private isStatusSuccessFull(payment: TransactionDto): boolean {
     return [
       PaymentStatusesEnum.Declined,
       PaymentStatusesEnum.Cancelled,
       PaymentStatusesEnum.Failed,
       PaymentStatusesEnum.Refunded,
       PaymentStatusesEnum.New,
-    ].indexOf(payment.status) === -1;
+    ].indexOf(payment.status as PaymentStatusesEnum) === -1;
   }
 
   private async sendMailEvent(mailDto: PaymentMailDto): Promise<void> {

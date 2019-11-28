@@ -10,7 +10,7 @@ export class PaymentDto {
   public delivery_fee: number;
   public customer_name: string;
   public customer_email: string;
-  public created_at: Date;
+  public created_at: string;
   public address: AddressInterface;
   public vat_rate: number;
   public payment_option: {

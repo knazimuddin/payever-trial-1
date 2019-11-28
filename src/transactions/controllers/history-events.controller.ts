@@ -9,6 +9,7 @@ import {
 import { TransactionModel } from '../models';
 import { TransactionHistoryService, TransactionsService } from '../services';
 import { PaymentActionEventEnum } from '../enum/events';
+import { ActionCompletedMessageDto, AddHistoryEventMessageDto } from '../dto/payment-micro';
 
 @Controller()
 export class HistoryEventsController {
@@ -25,7 +26,7 @@ export class HistoryEventsController {
     origin: 'rabbitmq',
   })
   public async onActionCompletedEvent(
-    message: HistoryEventActionCompletedInterface,
+    message: ActionCompletedMessageDto,
   ): Promise<void> {
     this.logger.log({ text: 'ACTION.COMPLETED', message });
     const search: { [key: string]: string } = message.payment.uuid
@@ -57,7 +58,7 @@ export class HistoryEventsController {
     origin: 'rabbitmq',
   })
   public async onHistoryAddEvent(
-    message: HistoryEventAddHistoryInterface,
+    message: AddHistoryEventMessageDto,
   ): Promise<void> {
     this.logger.log({ text: 'HISTORY.ADD', message });
     // @TODO use only uuid later, no original_id

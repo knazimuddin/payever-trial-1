@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { PaymentItemDto, PaymentMailDto, PaymentSubmittedDto, TransactionCartItemDto } from '../../dto';
+import { PaymentItemDto, PaymentMailDto, TransactionCartItemDto } from '../../dto';
 import { AbstractPaymentMailDtoConverter } from './abstract-payment-mail-dto.converter';
+import { TransactionChangedDto } from '../../dto/checkout-rabbit';
 
 @Injectable()
 export class OderInvoiceMailDtoConverter extends AbstractPaymentMailDtoConverter{
-  public static fromPaymentSubmittedDto(paymentSubmittedDto: PaymentSubmittedDto): PaymentMailDto {
+  public static fromTransactionChangedDto(paymentSubmittedDto: TransactionChangedDto): PaymentMailDto {
     return {
       cc: [],
       to: paymentSubmittedDto.payment.customer_email,

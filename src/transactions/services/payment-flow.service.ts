@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { PaymentFlowInterface } from '../interfaces';
 import { PaymentFlowModel } from '../models';
+import { PaymentFlowDto } from '../dto/checkout-rabbit';
 
 @Injectable()
 export class PaymentFlowService {
@@ -11,8 +12,8 @@ export class PaymentFlowService {
     @InjectModel('PaymentFlow') private readonly model: Model<PaymentFlowModel>,
   ) {}
 
-  public async createOrUpdate(flowDto: PaymentFlowInterface): Promise<PaymentFlowModel> {
-    const dto: PaymentFlowInterface = {
+  public async createOrUpdate(flowDto: PaymentFlowDto): Promise<PaymentFlowModel> {
+    const dto: PaymentFlowDto = {
       ...flowDto,
     };
 
