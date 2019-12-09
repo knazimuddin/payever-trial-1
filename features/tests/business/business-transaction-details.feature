@@ -159,3 +159,20 @@ Feature: Transaction details for business
          "user": {}
       }
       """
+    And RabbitMQ exchange "async_events" should contain following ordered messages:
+    """
+    [
+      {
+        "name": "notifications.event.notification.cancel",
+        "payload": {
+          "kind": "business",
+          "entity": "36bf8981-8827-4c0c-a645-02d9fc6d72c8",
+          "app": "transactions",
+          "message": "notification.transactions.title.new_transaction",
+          "data": {
+            "transactionId": "ad738281-f9f0-4db7-a4f6-670b0dff5327"
+          }
+        }
+      }
+    ]
+    """

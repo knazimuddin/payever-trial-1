@@ -23,6 +23,7 @@ import {
 import { TransactionHistoryEntryModel, TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import { DelayRemoveClient, ElasticsearchClient } from '@pe/nest-kit';
+import { TransactionsNotifier } from '../notifiers';
 
 @Injectable()
 export class TransactionsService {
@@ -32,6 +33,7 @@ export class TransactionsService {
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
     private readonly elasticSearchClient: ElasticsearchClient,
     private readonly logger: Logger,
+    private readonly notifier: TransactionsNotifier,
   ) {}
 
   public async create(transactionDto: TransactionPackedDetailsInterface): Promise<TransactionModel> {
@@ -51,17 +53,7 @@ export class TransactionsService {
         TransactionDoubleConverter.pack(created.toObject()),
       );
 
-      await this.notificationsEmitter.sendNotification(
-        {
-          app: 'transactions',
-          entity: transactionDto.business_uuid,
-          kind: 'business',
-        },
-        `notification.transactions.title.new_transaction`,
-        {
-          transactionId: transactionDto.uuid,
-        },
-      );
+      await this.notifier.sendNewTransactionNotification(created);
 
       return created;
     } catch (err) {
