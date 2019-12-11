@@ -58,6 +58,7 @@ import {
   TransactionsExampleService,
   TransactionsService,
 } from './services';
+import { TransactionsNotifier } from './notifiers';
 
 @Module({
   controllers: [
@@ -119,6 +120,7 @@ import {
     TransactionsExampleService,
     TransactionsExportCommand,
     TransactionsService,
+    TransactionsNotifier,
     PaymentMailEventProducer,
     ...EventListenersList,
   ],
