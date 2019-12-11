@@ -4,8 +4,9 @@ import { SantanderPaymentWithPanIdState } from "../states";
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { AppModule } from '../../../src/app.module'
-import {MessagingServiceMock} from "../mocks";
-import {MessagingService} from "../../../src/transactions/services";
+import { MessagingServiceMock } from "../mocks";
+import { MessagingService } from "../../../src/transactions/services";
+import { StatisticsMessagesMock } from '../providers/transactions-messages.pact.mock';
 
 dotenv.config();
 const env: any = process.env;
@@ -32,7 +33,9 @@ export const pactConfiguration: PactConfigurationInterface = {
       },
     ],
     providers: [],
-    rabbitMessagesProviders: [],
+    rabbitMessagesProviders: [
+      StatisticsMessagesMock,
+    ],
     states: [
       SantanderPaymentWithPanIdState,
     ],
