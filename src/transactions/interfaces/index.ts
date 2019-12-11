@@ -6,3 +6,4 @@ export * from './business-payment-option.interface';
 export * from './channel-set.interface';
 export * from './currency.interface';
 export * from './payment-flow.interface';
+export * from './transaction';
