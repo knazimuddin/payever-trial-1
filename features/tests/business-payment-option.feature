@@ -33,7 +33,7 @@ Feature: Full real payment flow
     }
     """
     Then I process messages from RabbitMQ "async_events_transactions_micro" channel
-    And look for model "BusinessPaymentOption" by JSON and remember it as "bpo"
+    And look for model "BusinessPaymentOption" by following JSON and remember as "bpo":
       """
       {
         "uuid": "6fef651d-de9a-441c-a88f-2b9ce0f41aba"
@@ -120,7 +120,7 @@ Feature: Full real payment flow
     }
     """
     Then I process messages from RabbitMQ "async_events_transactions_micro" channel
-    And look for model "BusinessPaymentOption" by JSON and remember it as "bpo"
+    And look for model "BusinessPaymentOption" by following JSON and remember as "bpo":
       """
       {
         "uuid": "6fef651d-de9a-441c-a88f-2b9ce0f41aba"

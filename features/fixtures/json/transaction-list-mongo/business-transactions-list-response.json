@@ -1,0 +1,155 @@
+{
+  "collection": [
+    {
+      "uuid": "c35ce841-13f5-4406-8a2d-7859930b69a6",
+      "status": "STATUS_PAID",
+      "currency": "CZK",
+      "channel": "pos",
+      "amount": 50,
+      "total": 50,
+      "delivery_fee": 0,
+      "payment_fee": 0,
+      "down_payment": 0,
+      "business_uuid": "36bf8981-8827-4c0c-a645-02d9fc6d72c8",
+      "place": "paid",
+      "specific_status": "PAID",
+      "shipping_address": {
+        "salutation": "SALUTATION_MR",
+        "country": "DE",
+        "country_name": "Germany",
+        "city": "Hamburg",
+        "zip_code": "12345",
+        "street": "Rödingsmarkt"
+      }
+    },
+    {
+      "uuid": "5456c5e1-3c48-4d2c-a731-f91ab09c856f",
+      "status": "STATUS_PAID",
+      "currency": "DK",
+      "channel": "pos",
+      "amount": 50,
+      "total": 50,
+      "items": [
+        {
+          "options": [],
+          "price": 100,
+          "price_net": 0,
+          "vat_rate": 0,
+          "quantity": 1
+        }
+      ],
+      "delivery_fee": 0,
+      "payment_fee": 0,
+      "down_payment": 0,
+      "billing_address": {
+        "salutation": "SALUTATION_MR",
+        "country": "DE",
+        "country_name": "Germany",
+        "city": "Hamburg",
+        "zip_code": "12345",
+        "street": "Rödingsmarkt"
+      },
+      "business_uuid": "36bf8981-8827-4c0c-a645-02d9fc6d72c8",
+      "history": [],
+      "place": "paid",
+      "specific_status": "PAID"
+    },
+    {
+      "uuid": "778ca3c6-a71c-429c-a9b8-899a0e0f4e23",
+      "status": "STATUS_PAID",
+      "currency": "USD",
+      "channel": "pos",
+      "amount": 50,
+      "total": 50,
+      "items": [
+        {
+          "options": [],
+          "price": 100,
+          "price_net": 0,
+          "vat_rate": 0,
+          "quantity": 1
+        }
+      ],
+      "delivery_fee": 0,
+      "payment_fee": 0,
+      "down_payment": 0,
+      "billing_address": {
+        "salutation": "SALUTATION_MR",
+        "country": "DE",
+        "country_name": "Germany",
+        "city": "Hamburg",
+        "zip_code": "12345",
+        "street": "Rödingsmarkt"
+      },
+      "business_uuid": "36bf8981-8827-4c0c-a645-02d9fc6d72c8",
+      "place": "paid",
+      "specific_status": "PAID",
+      "shipping_address": {
+        "salutation": "SALUTATION_MR",
+        "country": "DE",
+        "country_name": "Germany",
+        "city": "Hamburg",
+        "zip_code": "12345",
+        "street": "Rödingsmarkt"
+      },
+      "user_uuid": "08a3fac8-43ef-4998-99aa-cabc97a39261"
+    },
+    {
+      "uuid": "aff4765d-94ab-4da1-892c-3a8f8199b509",
+      "status": "STATUS_PAID",
+      "currency": "EUR",
+      "channel": "pos",
+      "amount": 50,
+      "total": 50,
+      "items": [
+        {
+          "options": [],
+          "price": 100,
+          "price_net": 0,
+          "vat_rate": 0,
+          "quantity": 1
+        }
+      ],
+      "payment_details": "{}",
+      "delivery_fee": 0,
+      "payment_fee": 0,
+      "down_payment": 0,
+      "billing_address": {
+        "salutation": "SALUTATION_MR",
+        "country": "DE",
+        "country_name": "Germany",
+        "city": "Hamburg",
+        "zip_code": "12345",
+        "street": "Rödingsmarkt"
+      },
+      "business_uuid": "36bf8981-8827-4c0c-a645-02d9fc6d72c8",
+      "history": [],
+      "place": "paid",
+      "specific_status": "PAID",
+      "shipping_address": {
+        "salutation": "SALUTATION_MR",
+        "country": "DE",
+        "country_name": "Germany",
+        "city": "Hamburg",
+        "zip_code": "12345",
+        "street": "Rödingsmarkt"
+      },
+      "user_uuid": "08a3fac8-43ef-4998-99aa-cabc97a39261"
+    }
+  ],
+  "filters": {},
+  "pagination_data": {
+    "amount": 239.48,
+    "amount_currency": "USD",
+    "page": 1,
+    "total": 4
+  },
+  "usage": {
+    "specific_statuses": [
+      "PAID"
+    ],
+    "statuses": [
+      "STATUS_PAID"
+    ]
+  }
+}

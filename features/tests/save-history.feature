@@ -61,7 +61,7 @@ Feature: Save history records
       }
       """
     Then I process messages from RabbitMQ "async_events_transactions_micro" channel
-    When look for model "Transaction" by JSON and remember it as "transaction"
+    When look for model "Transaction" by following JSON and remember as "transaction":
       """
       {
         "uuid": "ad738281-f9f0-4db7-a4f6-670b0dff5327"
@@ -108,7 +108,7 @@ Feature: Save history records
       }
       """
     Then I process messages from RabbitMQ "async_events_transactions_micro" channel
-    When look for model "Transaction" by JSON and remember it as "transaction"
+    When look for model "Transaction" by following JSON and remember as "transaction":
       """
       {
         "uuid": "ad738281-f9f0-4db7-a4f6-670b0dff5327"
@@ -156,7 +156,7 @@ Feature: Save history records
       }
       """
     Then I process messages from RabbitMQ "async_events_transactions_micro" channel
-    When look for model "Transaction" by JSON and remember it as "transaction"
+    When look for model "Transaction" by following JSON and remember as "transaction":
       """
       {
         "uuid": "ad738281-f9f0-4db7-a4f6-670b0dff5327"
@@ -200,7 +200,7 @@ Feature: Save history records
       }
       """
     Then I process messages from RabbitMQ "async_events_transactions_micro" channel
-    When look for model "Transaction" by JSON and remember it as "transaction"
+    When look for model "Transaction" by following JSON and remember as "transaction":
       """
       {
         "uuid": "ad738281-f9f0-4db7-a4f6-670b0dff5327"

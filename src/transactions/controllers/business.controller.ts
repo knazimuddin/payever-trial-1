@@ -223,7 +223,7 @@ export class BusinessController {
           message: `Error occurred during status update`,
         },
       );
-      throw new BadRequestException(`Error occured during status update. Please try again later. ${e.message}`);
+      throw new BadRequestException(`Error occurred during status update. Please try again later. ${e.message}`);
     }
 
     const updatedTransaction: TransactionUnpackedDetailsInterface =
@@ -232,7 +232,7 @@ export class BusinessController {
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
-      throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
+      throw new BadRequestException(`Error occurred while sending transaction update: ${e.message}`);
     }
 
     return TransactionOutputConverter.convert(

@@ -1,43 +1,39 @@
 Feature: Transaction details for business
-  Scenario: User doesn't have permission to business
-    Given I authenticate as a user with the following data:
+
+  Background:
+    Given I remember as "businessId" following value:
       """
-      {
-        "email": "email@email.com",
-        "roles": [
-          {
-            "name": "merchant",
-            "permissions": [
-              {
-                "businessId": "36bf8981-8827-4c0c-a645-02d9fc6d72c8",
-                "acls": []
-              }
-            ]
-          }
-        ]
-      }
+      "36bf8981-8827-4c0c-a645-02d9fc6d72c8"
       """
-    When I send a GET request to "/api/business/2382ffce-5620-4f13-885d-3c069f9dd9b4/detail/95a2904a-815c-4257-81b7-4df3934115f3"
+
+  Scenario Outline: No token provided
+    Given I am not authenticated
+    When I send a GET request to "<uri>"
     Then print last response
     And the response status code should be 403
+    Examples:
+      | uri                                                                                            |
+      | /api/business/2382ffce-5620-4f13-885d-3c069f9dd9b4/detail/95a2904a-815c-4257-81b7-4df3934115f3 |
+      | /api/admin/detail/95a2904a-815c-4257-81b7-4df3934115f3                                         |
+      | /api/user/detail/95a2904a-815c-4257-81b7-4df3934115f3                                          |
 
-  Scenario: Get transaction details
+  Scenario Outline: Insufficient token permissions
     Given I authenticate as a user with the following data:
       """
-      {
-        "email": "email@email.com",
-        "roles": [
-          {
-            "name": "merchant",
-            "permissions": [
-              {
-                "businessId": "36bf8981-8827-4c0c-a645-02d9fc6d72c8",
-                "acls": []
-              }
-            ]
-          }
-        ]
-      }
+      <token>
+      """
+    When I send a GET request to "<uri>"
+    Then print last response
+    And the response status code should be 403
+    Examples:
+      | uri                                                                                            | token                                                                                                                     |
+      | /api/business/2382ffce-5620-4f13-885d-3c069f9dd9b4/detail/95a2904a-815c-4257-81b7-4df3934115f3 | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | /api/admin/detail/95a2904a-815c-4257-81b7-4df3934115f3                                         | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+
+  Scenario Outline: Get transaction details
+    Given I authenticate as a user with the following data:
+      """
+      <token>
       """
     And I use DB fixture "transactions/transaction-details"
     And I mock RPC request "payment_option.paypal.action" to "rpc_payment_paypal" with:
@@ -49,7 +45,7 @@ Feature: Transaction details for business
         "responsePayload": "s:80:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"test_action\":true,\"another_action\":false}}}\";"
       }
       """
-    When I send a GET request to "/api/business/36bf8981-8827-4c0c-a645-02d9fc6d72c8/detail/ad738281-f9f0-4db7-a4f6-670b0dff5327"
+    When I send a GET request to "<uri>"
     Then print last response
     And the response status code should be 200
     And the response should contain json:
@@ -77,7 +73,7 @@ Feature: Transaction details for business
            "street": "Rödingsmarkt"
          },
          "business": {
-           "uuid": "36bf8981-8827-4c0c-a645-02d9fc6d72c8"
+           "uuid": "{{businessId}}"
          },
          "cart": {
            "available_refund_items": [
@@ -159,3 +155,9 @@ Feature: Transaction details for business
          "user": {}
       }
       """
+    Examples:
+      | uri                                                                                | token                                                                                                                     |
+      | /api/business/{{businessId}}/detail/ad738281-f9f0-4db7-a4f6-670b0dff5327           | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | /api/business/{{businessId}}/detail/reference/f3d44333-21e2-4f0f-952b-72ac2dfb8fc9 | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | /api/admin/detail/ad738281-f9f0-4db7-a4f6-670b0dff5327                             | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
+      | /api/admin/detail/reference/f3d44333-21e2-4f0f-952b-72ac2dfb8fc9                   | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |

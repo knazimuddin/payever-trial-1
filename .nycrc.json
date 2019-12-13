@@ -1,0 +1,31 @@
+{
+  "reporter": [
+    "html",
+    "text-summary"
+  ],
+  "extension": [
+    ".ts"
+  ],
+  "include": [
+    "src/**/*.js",
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/*.spec.*",
+    "src/**/*.command.*",
+    "src/**/*.interface.*",
+    "src/**/*schema.*",
+    "src/**/*.enum.*",
+    "src/**/*.module.*",
+    "src/**/*.dto.*",
+    "src/**/index.*",
+    "src/environments/*"
+  ],
+  "require": [
+    "ts-node"
+  ],
+  "sourceMap": true,
+  "instrument": true,
+  "check-coverage": false,
+  "cache": false
+}

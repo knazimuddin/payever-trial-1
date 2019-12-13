@@ -14,6 +14,7 @@
     "migrations": "db-migrate",
     "cucumber": "./node_modules/.bin/cucumber-js",
     "cucumber:all": "./node_modules/.bin/cucumber-js features/tests/",
+    "cucumber:all:cov": "./node_modules/.bin/nyc --exclude-after-remap=false --reporter=text ./node_modules/.bin/cucumber-js features/tests/",
     "pre-commit": "npm run tslint:fix && npm run test && npm run e2e",
     "probe-mongo": "pe-probe-mongo",
     "test": "mocha -r ts-node/register --recursive ./tests/**/*.spec.ts",
@@ -53,7 +54,7 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^6.8.3",
-    "@pe/cucumber-sdk": "^0.5.1",
+    "@pe/cucumber-sdk": "^0.9.0",
     "@pe/dev-kit": "^0.1.6",
     "@pe/pact-kit": "^0.2.0",
     "@types/mocha": "^5.2.6",
@@ -70,8 +71,8 @@
     "supertest": "^3.4.2",
     "ts-loader": "^4.5.0",
     "ts-node": "^8.3.0",
-    "tslint": "^5.14.0",
-    "tsconfig-paths": "^3.8.0"
+    "tsconfig-paths": "^3.8.0",
+    "tslint": "^5.14.0"
   },
   "peerDependencies": {
     "class-validator": "*"
