@@ -161,3 +161,39 @@ Feature: Transaction details for business
       | /api/business/{{businessId}}/detail/reference/f3d44333-21e2-4f0f-952b-72ac2dfb8fc9 | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
       | /api/admin/detail/ad738281-f9f0-4db7-a4f6-670b0dff5327                             | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
       | /api/admin/detail/reference/f3d44333-21e2-4f0f-952b-72ac2dfb8fc9                   | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
+
+  Scenario: Should cancel new transaction notification
+    Given I authenticate as a user with the following data:
+      """
+      {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
+      """
+    And I use DB fixture "transactions/transaction-details"
+    And I mock RPC request "payment_option.paypal.action" to "rpc_payment_paypal" with:
+      """
+      {
+        "requestPayload": {
+          "action": "action.list"
+        },
+        "responsePayload": "s:80:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"test_action\":true,\"another_action\":false}}}\";"
+      }
+      """
+    When I send a GET request to "/api/business/{{businessId}}/detail/ad738281-f9f0-4db7-a4f6-670b0dff5327"
+    Then print last response
+    And the response status code should be 200
+    And RabbitMQ exchange "async_events" should contain following ordered messages:
+      """
+      [
+        {
+          "name": "notifications.event.notification.cancel",
+          "payload": {
+            "kind": "business",
+            "entity": "36bf8981-8827-4c0c-a645-02d9fc6d72c8",
+            "app": "transactions",
+            "message": "notification.transactions.title.new_transaction",
+            "data": {
+              "transactionId": "ad738281-f9f0-4db7-a4f6-670b0dff5327"
+            }
+          }
+        }
+      ]
+      """
