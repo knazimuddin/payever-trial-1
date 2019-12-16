@@ -1,4 +1,5 @@
 Feature: Run payment action
+
   Background:
     Given I remember as "businessId" following value:
       """
@@ -12,25 +13,31 @@ Feature: Run payment action
       """
       "f3d44333-21e2-4f0f-952b-72ac2dfb8fc9"
       """
+
+  Scenario Outline: Insufficient token permissions
     Given I authenticate as a user with the following data:
       """
-      {
-        "email": "email@email.com",
-        "roles": [
-          {
-            "name": "merchant",
-            "permissions": [
-              {
-                "businessId": "{{businessId}}",
-                "acls": []
-              }
-            ]
-          }
-        ]
-      }
+      <token>
       """
+    When I send a POST request to "<path>" with json:
+      """
+        {
+          "fields": {}
+        }
+      """
+    Then the response status code should be 403
+    Examples:
+      | path                                                       | token                                                                                                                                           |
+      | /api/business/{{businessId}}/{{transactionId}}/action/test | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "36bf8981-0000-0000-0000-02d9fc6d72c8","acls": []}]}]} |
+      | /api/business/{{businessId}}/{{transactionId}}/action/test | {"email": "email@email.com","roles": [{"name": "user","permissions": []}]}                                                                      |
+      | /api/admin/{{transactionId}}/action/test                   | {"email": "email@email.com","roles": [{"name": "user","permissions": []}]}                                                                      |
 
-  Scenario: Run paypal payment action
+
+  Scenario Outline: Run paypal payment action
+    Given I authenticate as a user with the following data:
+      """
+      <token>
+      """
     Given I use DB fixture "transactions/run-actions"
     And I get file "features/fixtures/json/run-test-action-paypal-request.payload.json" content and remember as "requestPayloadPayPal"
     And I mock RPC request "payment_option.paypal.action" to "rpc_payment_paypal" with:
@@ -64,7 +71,7 @@ Feature: Run payment action
         "result": {}
       }
       """
-    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/test" with json:
+    When I send a POST request to "<path>" with json:
       """
         {
           "fields": {}
@@ -130,24 +137,15 @@ Feature: Run payment action
       ]
     ]
     """
+    Examples:
+      | path                                                       | token                                                                                                                     |
+      | /api/business/{{businessId}}/{{transactionId}}/action/test | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | /api/admin/{{transactionId}}/action/test                   | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
 
-  Scenario: Run payment action with file upload
+  Scenario Outline: Run payment action with file upload
     Given I authenticate as a user with the following data:
       """
-      {
-        "email": "email@email.com",
-        "roles": [
-          {
-            "name": "merchant",
-            "permissions": [
-              {
-                "businessId": "{{businessId}}",
-                "acls": []
-              }
-            ]
-          }
-        ]
-      }
+      <token>
       """
     And I use DB fixture "transactions/run-actions-file-upload"
     And I get file "features/fixtures/json/run-santander-de-action-file-upload.payload.json" content and remember as "requestPayload"
@@ -182,7 +180,7 @@ Feature: Run payment action
         "result": {}
       }
       """
-    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/test" with json:
+    When I send a POST request to "<path>" with json:
       """
         {
           "fields": {},
@@ -255,24 +253,15 @@ Feature: Run payment action
       ]
     ]
     """
+    Examples:
+      | path                                                       | token                                                                                                                     |
+      | /api/business/{{businessId}}/{{transactionId}}/action/test | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | /api/admin/{{transactionId}}/action/test                   | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
 
-  Scenario: Run payment action for santander_installment_dk, should remove edit action, because it is not implemented at FE
+  Scenario Outline: Run payment action for santander_installment_dk, should remove edit action, because it is not implemented at FE
     Given I authenticate as a user with the following data:
       """
-      {
-        "email": "email@email.com",
-        "roles": [
-          {
-            "name": "merchant",
-            "permissions": [
-              {
-                "businessId": "{{businessId}}",
-                "acls": []
-              }
-            ]
-          }
-        ]
-      }
+      <token>
       """
     And I use DB fixture "transactions/run-actions-santander-dk"
     And I mock RPC request "payment_option.santander_installment_dk.action" to "rpc_payment_santander_dk" with:
@@ -308,7 +297,7 @@ Feature: Run payment action
         "result": {}
       }
       """
-    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/test" with json:
+    When I send a POST request to "<path>" with json:
       """
         {
           "fields": {},
@@ -353,6 +342,10 @@ Feature: Run payment action
         ]
       ]
     """
+    Examples:
+      | path                                                       | token                                                                                                                     |
+      | /api/business/{{businessId}}/{{transactionId}}/action/test | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | /api/admin/{{transactionId}}/action/test                   | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
 
   Scenario: Run async payment action requested by third-party
     And I use DB fixture "transactions/run-actions-async-third-party"

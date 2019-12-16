@@ -149,7 +149,7 @@ export class AdminController {
         },
       );
 
-      throw new BadRequestException(`Error occured during status update. Please try again later.`);
+      throw new BadRequestException(`Error occurred during status update. Please try again later.`);
     }
 
     const updatedTransaction: TransactionUnpackedDetailsInterface =
@@ -158,7 +158,7 @@ export class AdminController {
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
-      throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
+      throw new BadRequestException(`Error occurred while sending transaction update: ${e.message}`);
     }
 
     return TransactionOutputConverter.convert(

@@ -11,6 +11,7 @@ import {
 
 const transactionId: string = 'ad738281-f9f0-4db7-a4f6-670b0dff5327';
 const businessId: string = '36bf8981-8827-4c0c-a645-02d9fc6d72c8';
+const userId: string = '08a3fac8-43ef-4998-99aa-cabc97a39261';
 const businessOptionId: string = 1;
 const paymentFlowId: string = 2;
 
@@ -40,6 +41,7 @@ class TransactionDetailsFixture extends BaseFixture {
         street : 'Rödingsmarkt',
       },
       business_uuid : businessId,
+      user_uuid: userId,
       merchant_name: 'Test merchant',
       business_option_id: businessOptionId,
       payment_flow_id: paymentFlowId,
