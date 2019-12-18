@@ -1,7 +1,6 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { RabbitRoutingKeys } from '../../enums';
-import { environment } from '../../environments';
 import { AtomDateConverter, TransactionConverter, TransactionHistoryEntryConverter } from '../converter';
 import { CheckoutTransactionInterface } from '../interfaces/checkout';
 import { TransactionHistoryEntryInterface, TransactionPackedDetailsInterface } from '../interfaces/transaction';
