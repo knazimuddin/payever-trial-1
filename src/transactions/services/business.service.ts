@@ -28,7 +28,7 @@ export class BusinessService {
   }
 
   public async deleteOneById(id: string): Promise<void> {
-    this.businessModel.deleteOne({
+    await this.businessModel.deleteOne({
       _id: id,
     });
   }

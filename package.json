@@ -14,6 +14,7 @@
     "migrations": "db-migrate",
     "cucumber": "./node_modules/.bin/cucumber-js",
     "cucumber:all": "./node_modules/.bin/cucumber-js features/tests/",
+    "cucumber:all:cov": "./node_modules/.bin/nyc --exclude-after-remap=false --reporter=text ./node_modules/.bin/cucumber-js features/tests/",
     "pre-commit": "npm run tslint:fix && npm run test && npm run e2e",
     "probe-mongo": "pe-probe-mongo",
     "test": "mocha -r ts-node/register --recursive ./tests/**/*.spec.ts",

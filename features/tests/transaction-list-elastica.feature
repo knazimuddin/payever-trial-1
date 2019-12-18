@@ -1,71 +1,72 @@
-Feature: Transaction list for admin
+Feature: Transaction list for business
   Background:
     Given I remember as "businessId" following value:
       """
       "36bf8981-8827-4c0c-a645-02d9fc6d72c8"
       """
-    Given I authenticate as a user with the following data:
+    Given I remember as "userId" following value:
       """
-      {
-        "id": "08a3fac8-43ef-4998-99aa-cabc97a39261",
-        "email": "email@email.com",
-        "roles": [
-          {
-            "name": "admin",
-            "permissions": []
-          }
-        ]
-      }
+      "08a3fac8-43ef-4998-99aa-cabc97a39261"
       """
 
-  Scenario: User doesn't have admin permission
-    Given I authenticate as a user with the following data:
-      """
-      {
-        "email": "email@email.com",
-        "roles": [
-          {
-            "name": "merchant",
-            "permissions": [
-              {
-                "businessId": "{{businessId}}",
-                "acls": []
-              }
-            ]
-          }
-        ]
-      }
-      """
-    When I send a GET request to "/api/admin/list?orderBy=created_at&direction=desc&limit=20&query=&page=1&currency=EUR"
+  Scenario Outline: No token provided
+    Given I am not authenticated
+    When I send a GET request to "<uri>"
     Then print last response
     And the response status code should be 403
+    Examples:
+      | uri                                                                                                     |
+      | /api/business/{{businessId}}/list?orderBy=created_at&direction=desc&limit=20&query=&page=1&currency=EUR |
+      | /api/admin/list?orderBy=created_at&direction=desc&limit=20&query=&page=1&currency=EUR                   |
+      | /api/user/list?orderBy=created_at&direction=desc&limit=20&query=&page=1&currency=EUR                    |
 
-  Scenario: Transactions have different currencies, total amount should be converted to the default currency
-    Given I use DB fixture "transactions/admin-transactions-list-with-different-currencies"
-    And I get file "features/fixtures/json/admin-transaction-list/elastic-transactions-list.json" content and remember as "elasticTransactionsListJson"
-    And I get file "features/fixtures/json/admin-transaction-list/elastic-total-by-currencies.json" content and remember as "totalByCurrencies"
-    And I get file "features/fixtures/json/admin-transaction-list/elastic-statuses-response.json" content and remember as "statusesResponse"
-    And I get file "features/fixtures/json/admin-transaction-list/elastic-specific-statuses-response.json" content and remember as "specificStatusesResponse"
-    And I get file "features/fixtures/json/admin-transaction-list/transactions-list-response.json" content and remember as "transactionsListJson"
+  Scenario Outline: Insufficient token permissions
+    Given I authenticate as a user with the following data:
+      """
+      <token>
+      """
+    And I remember as "anotherBusinessId" following value:
+      """
+      "2382ffce-5620-4f13-885d-3c069f9dd9b4"
+      """
+    When I send a GET request to "<uri>"
+    Then print last response
+    And the response status code should be 403
+    Examples:
+      | uri                                                                                                     | token                                                                                                                            |
+      | /api/business/{{businessId}}/list?orderBy=created_at&direction=desc&limit=20&query=&page=1&currency=EUR | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{anotherBusinessId}}","acls": []}]}]} |
+      | /api/admin/list?orderBy=created_at&direction=desc&limit=20&query=&page=1&currency=EUR                   | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{anotherBusinessId}}","acls": []}]}]} |
+
+  Scenario Outline: Transactions have different currencies, total amount should be converted to the business currency
+    Given I authenticate as a user with the following data:
+      """
+      <token>
+      """
+    And I use DB fixture "transactions/transactions-list-with-different-currencies"
+    And I get file "features/fixtures/json/transaction-list-elastica/elastic-transactions-list.json" content and remember as "elasticTransactionsListJson"
+    And I get file "features/fixtures/json/transaction-list-elastica/elastic-total-by-currencies.json" content and remember as "totalByCurrencies"
+    And I get file "features/fixtures/json/transaction-list-elastica/elastic-statuses-response.json" content and remember as "statusesResponse"
+    And I get file "features/fixtures/json/transaction-list-elastica/elastic-specific-statuses-response.json" content and remember as "specificStatusesResponse"
+    And I get file "features/fixtures/json/transaction-list-elastica/<case_prefix>-transactions-list-response.json" content and remember as "transactionsListJson"
     And I mock Elasticsearch method "search" with:
       """
       {
         "arguments": [
           "transactions",
           {
-            "from": 0,
-            "query": {
-              "bool": {
-                "must": [],
-                "must_not": []
-              }
-            },
-            "size": 20,
-            "sort": [
-              {
-                "created_at": "desc"
-              }
-            ]
+           "from": 0,
+           "query": {
+             "bool": {
+               "must": <elasticsearch_filter>,
+               "must_not": []
+             }
+           },
+           "size": 10,
+           "sort": [
+             {
+               "created_at": "asc"
+             }
+           ]
           }
         ],
         "result": {{elasticTransactionsListJson}}
@@ -94,12 +95,12 @@ Feature: Transaction list for admin
            "from": 0,
            "query": {
              "bool": {
-               "must": [],
+               "must": <elasticsearch_filter>,
                "must_not": []
              }
            }
           }
-          ],
+        ],
         "result": {{totalByCurrencies}}
       }
       """
@@ -119,7 +120,7 @@ Feature: Transaction list for admin
            "from": 0,
            "query": {
              "bool": {
-               "must": [],
+               "must": <elasticsearch_filter>,
                "must_not": []
              }
            }
@@ -144,7 +145,7 @@ Feature: Transaction list for admin
            "from": 0,
            "query": {
              "bool": {
-               "must": [],
+               "must": <elasticsearch_filter>,
                "must_not": []
              }
            }
@@ -153,16 +154,25 @@ Feature: Transaction list for admin
         "result": {{specificStatusesResponse}}
       }
       """
-    When I send a GET request to "/api/admin/list?orderBy=created_at&direction=desc&limit=20&query=&page=1"
+    When I send a GET request to "<path>"
     Then print last response
     And the response status code should be 200
     And the response should contain json:
       """
       {{transactionsListJson}}
       """
+    Examples:
+      | case_prefix | path                                                                    | elasticsearch_filter                                    | token                                                                                                                     |
+      | business    | /api/business/{{businessId}}/list                                       | [{"match_phrase": {"business_uuid": "{{businessId}}"}}] | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | admin       | /api/admin/list?orderBy=created_at&direction=asc&limit=10&query=&page=1 | []                                                      | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
+      | user        | /api/user/list?orderBy=created_at&direction=asc&limit=10&query=&page=1  | [{"match_phrase": {"user_uuid": "{{userId}}"}}]         | {"id":"{{userId}}","email": "email@email.com","roles": [{"name": "user","permissions": []}]}                              |
 
-  Scenario: Sending request with filter, should build valid filters for elasticsearch
-    Given I mock Elasticsearch method "search" with:
+  Scenario Outline: Sending request with filter, should build valid filters for elasticsearch
+    Given I authenticate as a user with the following data:
+      """
+      <token>
+      """
+    And I mock Elasticsearch method "search" with:
       """
       {
         "arguments": [
@@ -193,6 +203,7 @@ Feature: Transaction list for admin
                       "query": "*testContains*"
                     }
                   },
+                  <match_phrase>
                   {
                     "query_string": {
                       "fields": [
@@ -274,6 +285,7 @@ Feature: Transaction list for admin
                        "query": "*testContains*"
                      }
                    },
+                   <match_phrase>
                    {
                      "query_string": {
                        "fields": [
@@ -354,6 +366,7 @@ Feature: Transaction list for admin
                        "query": "*testContains*"
                      }
                    },
+                   <match_phrase>
                    {
                      "query_string": {
                        "fields": [
@@ -441,6 +454,7 @@ Feature: Transaction list for admin
                        "query": "*testContains*"
                      }
                    },
+                   <match_phrase>
                    {
                      "query_string": {
                        "fields": [
@@ -483,7 +497,7 @@ Feature: Transaction list for admin
         }
       }
       """
-    When I send a GET request to "/api/admin/list?orderBy=total&direction=desc&limit=20&query=test%20query&page=1&currency=EUR&filters%5Bcurrency%5D%5B0%5D%5Bcondition%5D=is&filters%5Bcurrency%5D%5B0%5D%5Bvalue%5D=AFN&filters%5Btype%5D%5B0%5D%5Bcondition%5D=isNot&filters%5Btype%5D%5B0%5D%5Bvalue%5D=cash&filters%5Boriginal_id%5D%5B0%5D%5Bcondition%5D=startsWith&filters%5Boriginal_id%5D%5B0%5D%5Bvalue%5D%5B0%5D=asd&filters%5Breference%5D%5B0%5D%5Bcondition%5D=contains&filters%5Breference%5D%5B0%5D%5Bvalue%5D%5B0%5D=testContains&search=test%20query"
+    When I send a GET request to "<uri>"
     Then print last response
     And the response status code should be 200
     And Elasticsearch calls stack should contain following ordered messages:
@@ -518,6 +532,7 @@ Feature: Transaction list for admin
                        "query": "*testContains*"
                      }
                    },
+                   <match_phrase>
                    {
                      "query_string": {
                        "fields": [
@@ -547,9 +562,18 @@ Feature: Transaction list for admin
       ]
     ]
     """
+    Examples:
+      | match_phrase                                           | token                                                                                                                     | uri                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+      | {"match_phrase": {"business_uuid": "{{businessId}}"}}, | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} | /api/business/{{businessId}}/list?orderBy=total&direction=desc&limit=20&query=test%20query&page=1&currency=EUR&filters%5Bcurrency%5D%5B0%5D%5Bcondition%5D=is&filters%5Bcurrency%5D%5B0%5D%5Bvalue%5D=AFN&filters%5Btype%5D%5B0%5D%5Bcondition%5D=isNot&filters%5Btype%5D%5B0%5D%5Bvalue%5D=cash&filters%5Boriginal_id%5D%5B0%5D%5Bcondition%5D=startsWith&filters%5Boriginal_id%5D%5B0%5D%5Bvalue%5D%5B0%5D=asd&filters%5Breference%5D%5B0%5D%5Bcondition%5D=contains&filters%5Breference%5D%5B0%5D%5Bvalue%5D%5B0%5D=testContains&search=test%20query |
+      |                                                        | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               | /api/admin/list?orderBy=total&direction=desc&limit=20&query=test%20query&page=1&currency=EUR&filters%5Bcurrency%5D%5B0%5D%5Bcondition%5D=is&filters%5Bcurrency%5D%5B0%5D%5Bvalue%5D=AFN&filters%5Btype%5D%5B0%5D%5Bcondition%5D=isNot&filters%5Btype%5D%5B0%5D%5Bvalue%5D=cash&filters%5Boriginal_id%5D%5B0%5D%5Bcondition%5D=startsWith&filters%5Boriginal_id%5D%5B0%5D%5Bvalue%5D%5B0%5D=asd&filters%5Breference%5D%5B0%5D%5Bcondition%5D=contains&filters%5Breference%5D%5B0%5D%5Bvalue%5D%5B0%5D=testContains&search=test%20query                   |
+      | {"match_phrase": {"user_uuid": "{{userId}}"}},         | {"id":"{{userId}}","email": "email@email.com","roles": [{"name": "user","permissions": []}]}                              | /api/user/list?orderBy=total&direction=desc&limit=20&query=test%20query&page=1&currency=EUR&filters%5Bcurrency%5D%5B0%5D%5Bcondition%5D=is&filters%5Bcurrency%5D%5B0%5D%5Bvalue%5D=AFN&filters%5Btype%5D%5B0%5D%5Bcondition%5D=isNot&filters%5Btype%5D%5B0%5D%5Bvalue%5D=cash&filters%5Boriginal_id%5D%5B0%5D%5Bcondition%5D=startsWith&filters%5Boriginal_id%5D%5B0%5D%5Bvalue%5D%5B0%5D=asd&filters%5Breference%5D%5B0%5D%5Bcondition%5D=contains&filters%5Breference%5D%5B0%5D%5Bvalue%5D%5B0%5D=testContains&search=test%20query                    |
 
-  Scenario: Sending request with dates filter, should build valid filters for elasticsearch
-    Given I mock Elasticsearch method "search" with:
+  Scenario Outline: Sending request with dates filter, should build valid filters for elasticsearch
+    Given I authenticate as a user with the following data:
+      """
+      <token>
+      """
+    And I mock Elasticsearch method "search" with:
       """
       {
         "arguments": [
@@ -589,6 +613,7 @@ Feature: Transaction list for admin
                      }
                    }
                  }
+                 <match_phrase>
                ],
                "must_not": [
                  {
@@ -668,6 +693,7 @@ Feature: Transaction list for admin
                        }
                      }
                    }
+                   <match_phrase>
                  ],
                  "must_not": [
                    {
@@ -746,6 +772,7 @@ Feature: Transaction list for admin
                      }
                    }
                  }
+                 <match_phrase>
                ],
                "must_not": [
                  {
@@ -831,6 +858,7 @@ Feature: Transaction list for admin
                        }
                      }
                    }
+                   <match_phrase>
                  ],
                  "must_not": [
                    {
@@ -862,7 +890,7 @@ Feature: Transaction list for admin
         }
       }
       """
-    When I send a GET request to "/api/admin/list?orderBy=created_at&direction=desc&limit=20&query=&page=1&currency=EUR&filters%5Bcreated_at%5D%5B0%5D%5Bcondition%5D=afterDate&filters%5Bcreated_at%5D%5B0%5D%5Bvalue%5D%5B0%5D=2019-10-01&filters%5Bcreated_at%5D%5B1%5D%5Bcondition%5D=isDate&filters%5Bcreated_at%5D%5B1%5D%5Bvalue%5D%5B0%5D=2019-10-01&filters%5Bcreated_at%5D%5B2%5D%5Bcondition%5D=isNotDate&filters%5Bcreated_at%5D%5B2%5D%5Bvalue%5D%5B0%5D=2019-10-09&filters%5Bcreated_at%5D%5B3%5D%5Bcondition%5D=beforeDate&filters%5Bcreated_at%5D%5B3%5D%5Bvalue%5D%5B0%5D=2019-10-09&filters%5Bcreated_at%5D%5B4%5D%5Bcondition%5D=betweenDates&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5BdateFrom%5D=2019-09-30T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5BdateTo%5D=2019-10-06T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5Bfrom%5D=2019-09-30T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5Bto%5D=2019-10-06T22:00:00.000Z"
+    When I send a GET request to "<uri>"
     Then print last response
     And the response status code should be 200
     And Elasticsearch calls stack should contain following ordered messages:
@@ -906,6 +934,7 @@ Feature: Transaction list for admin
                       }
                     }
                   }
+                  <match_phrase>
                 ],
                 "must_not": [
                   {
@@ -924,3 +953,9 @@ Feature: Transaction list for admin
       ]
     ]
     """
+
+    Examples:
+      | match_phrase                                           | token                                                                                                                     | uri                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+      | ,{"match_phrase": {"business_uuid": "{{businessId}}"}} | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} | /api/business/{{businessId}}/list?orderBy=created_at&direction=desc&limit=20&query=&page=1&currency=EUR&filters%5Bcreated_at%5D%5B0%5D%5Bcondition%5D=afterDate&filters%5Bcreated_at%5D%5B0%5D%5Bvalue%5D%5B0%5D=2019-10-01&filters%5Bcreated_at%5D%5B1%5D%5Bcondition%5D=isDate&filters%5Bcreated_at%5D%5B1%5D%5Bvalue%5D%5B0%5D=2019-10-01&filters%5Bcreated_at%5D%5B2%5D%5Bcondition%5D=isNotDate&filters%5Bcreated_at%5D%5B2%5D%5Bvalue%5D%5B0%5D=2019-10-09&filters%5Bcreated_at%5D%5B3%5D%5Bcondition%5D=beforeDate&filters%5Bcreated_at%5D%5B3%5D%5Bvalue%5D%5B0%5D=2019-10-09&filters%5Bcreated_at%5D%5B4%5D%5Bcondition%5D=betweenDates&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5BdateFrom%5D=2019-09-30T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5BdateTo%5D=2019-10-06T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5Bfrom%5D=2019-09-30T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5Bto%5D=2019-10-06T22:00:00.000Z |
+      |                                                        | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               | /api/admin/list?orderBy=created_at&direction=desc&limit=20&query=&page=1&currency=EUR&filters%5Bcreated_at%5D%5B0%5D%5Bcondition%5D=afterDate&filters%5Bcreated_at%5D%5B0%5D%5Bvalue%5D%5B0%5D=2019-10-01&filters%5Bcreated_at%5D%5B1%5D%5Bcondition%5D=isDate&filters%5Bcreated_at%5D%5B1%5D%5Bvalue%5D%5B0%5D=2019-10-01&filters%5Bcreated_at%5D%5B2%5D%5Bcondition%5D=isNotDate&filters%5Bcreated_at%5D%5B2%5D%5Bvalue%5D%5B0%5D=2019-10-09&filters%5Bcreated_at%5D%5B3%5D%5Bcondition%5D=beforeDate&filters%5Bcreated_at%5D%5B3%5D%5Bvalue%5D%5B0%5D=2019-10-09&filters%5Bcreated_at%5D%5B4%5D%5Bcondition%5D=betweenDates&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5BdateFrom%5D=2019-09-30T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5BdateTo%5D=2019-10-06T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5Bfrom%5D=2019-09-30T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5Bto%5D=2019-10-06T22:00:00.000Z                   |
+      | ,{"match_phrase": {"user_uuid": "{{userId}}"}}         | {"id":"{{userId}}","email": "email@email.com","roles": [{"name": "user","permissions": []}]}                              | /api/user/list?orderBy=created_at&direction=desc&limit=20&query=&page=1&currency=EUR&filters%5Bcreated_at%5D%5B0%5D%5Bcondition%5D=afterDate&filters%5Bcreated_at%5D%5B0%5D%5Bvalue%5D%5B0%5D=2019-10-01&filters%5Bcreated_at%5D%5B1%5D%5Bcondition%5D=isDate&filters%5Bcreated_at%5D%5B1%5D%5Bvalue%5D%5B0%5D=2019-10-01&filters%5Bcreated_at%5D%5B2%5D%5Bcondition%5D=isNotDate&filters%5Bcreated_at%5D%5B2%5D%5Bvalue%5D%5B0%5D=2019-10-09&filters%5Bcreated_at%5D%5B3%5D%5Bcondition%5D=beforeDate&filters%5Bcreated_at%5D%5B3%5D%5Bvalue%5D%5B0%5D=2019-10-09&filters%5Bcreated_at%5D%5B4%5D%5Bcondition%5D=betweenDates&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5BdateFrom%5D=2019-09-30T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5BdateTo%5D=2019-10-06T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5Bfrom%5D=2019-09-30T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5Bto%5D=2019-10-06T22:00:00.000Z                    |
