@@ -11,7 +11,7 @@ export class TransactionEventProducer {
     private readonly rabbitClient: RabbitMqClient,
   ) { }
 
-  public async produceAcceptedTransaction(
+  public async produceAcceptedTransactionEvent(
     existing: TransactionModel,
     updating: TransactionPackedDetailsInterface,
   ): Promise<void> {
@@ -31,7 +31,7 @@ export class TransactionEventProducer {
     await this.send(RabbitRoutingKeys.TransactionsPaymentAdd, payload);
   }
 
-  public async produceAcceptedMigratedTransaction(transaction: TransactionPackedDetailsInterface): Promise<void> {
+  public async produceAcceptedMigratedTransactionEvent(transaction: TransactionPackedDetailsInterface): Promise<void> {
     const payload: any = {
       amount: transaction.amount,
       business: {
@@ -48,7 +48,7 @@ export class TransactionEventProducer {
     await this.send(RabbitRoutingKeys.TransactionsPaymentAdd, payload);
   }
 
-  public async produceRefundedMigratedTransaction(
+  public async produceRefundedMigratedTransactionEvent(
     transaction: TransactionPackedDetailsInterface,
     refundedAmount: number,
   ): Promise<void> {
@@ -68,7 +68,7 @@ export class TransactionEventProducer {
     await this.send(RabbitRoutingKeys.TransactionsPaymentAdd, payload);
   }
 
-  public async produceRefundedTransaction(
+  public async produceTransactionRefundedEvent(
     existing: TransactionModel,
     refund: HistoryEventActionCompletedInterface,
   ): Promise<void> {
@@ -85,6 +85,23 @@ export class TransactionEventProducer {
       items: existing.items,
     }
     await this.send(RabbitRoutingKeys.TransactionsPaymentSubtract, payload);
+  }
+
+  public async produceTransactionRemoveEvent(transaction: TransactionModel): Promise<void> {
+    const payload: any = {
+      amount: transaction.amount,
+      business: {
+        id: transaction.business_uuid,
+      },
+      channel_set: {
+        id: transaction.channel_set_uuid,
+      },
+      date: transaction.updated_at,
+      id: transaction.uuid,
+      items: transaction.items,
+    };
+
+    await this.send(RabbitRoutingKeys.TransactionsPaymentRemoved, payload);
   }
 
   private async send(eventName: string, payload: any): Promise<void> {

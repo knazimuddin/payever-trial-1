@@ -101,14 +101,14 @@ export class StatisticsMessagesMock extends AbstractMessageMock {
   public async mockProduceAcceptedTransaction(): Promise<void> {
     const producer: TransactionEventProducer =
       await this.getProvider<TransactionEventProducer>(TransactionEventProducer);
-    await producer.produceAcceptedTransaction(this.existing, this.updating);
+    await producer.produceAcceptedTransactionEvent(this.existing, this.updating);
   }
 
   @PactRabbitMqMessageProvider(RabbitRoutingKeys.TransactionsPaymentAdd)
   public async mockProduceAcceptedMigratedTransaction(): Promise<void> {
     const producer: TransactionEventProducer =
       await this.getProvider<TransactionEventProducer>(TransactionEventProducer);
-    await producer.produceAcceptedMigratedTransaction(this.transaction);
+    await producer.produceAcceptedMigratedTransactionEvent(this.transaction);
   }
 
   @PactRabbitMqMessageProvider(RabbitRoutingKeys.TransactionsPaymentAdd)
@@ -116,14 +116,21 @@ export class StatisticsMessagesMock extends AbstractMessageMock {
     const producer: TransactionEventProducer =
       await this.getProvider<TransactionEventProducer>(TransactionEventProducer);
     const refundedAmount: number = 123;
-    await producer.produceRefundedMigratedTransaction(this.existing, refundedAmount);
+    await producer.produceRefundedMigratedTransactionEvent(this.existing, refundedAmount);
   }
 
   @PactRabbitMqMessageProvider(RabbitRoutingKeys.TransactionsPaymentSubtract)
   public async mockProductRefunedTransaction(): Promise<void> {
     const producer: TransactionEventProducer =
       await this.getProvider<TransactionEventProducer>(TransactionEventProducer);
-    producer.produceRefundedTransaction(this.existing, this.refund);
+    await producer.produceTransactionRefundedEvent(this.existing, this.refund);
+  }
+
+  @PactRabbitMqMessageProvider(RabbitRoutingKeys.TransactionsPaymentRemoved)
+  public async mockProduceTrasactionRemoveEvent(): Promise<void> {
+    const producer: TransactionEventProducer =
+      await this.getProvider<TransactionEventProducer>(TransactionEventProducer);
+    await producer.produceTransactionRemoveEvent(this.existing);
   }
 
 }

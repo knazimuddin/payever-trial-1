@@ -27,13 +27,13 @@ export class StatisticsService {
     }
 
     if (existing.status !== updating.status && updating.status === 'STATUS_ACCEPTED') {
-      await this.transactionsEventProducer.produceAcceptedTransaction(existing, updating);
+      await this.transactionsEventProducer.produceAcceptedTransactionEvent(existing, updating);
     }
   }
 
   public async processMigratedTransaction(transaction: TransactionPackedDetailsInterface): Promise<void> {
     if (transaction.status === 'STATUS_ACCEPTED' || transaction.status === 'STATUS_PAID') {
-      await this.transactionsEventProducer.produceAcceptedMigratedTransaction(transaction);
+      await this.transactionsEventProducer.produceAcceptedMigratedTransactionEvent(transaction);
     }
 
     if (transaction.status === 'STATUS_REFUNDED') {
@@ -43,7 +43,7 @@ export class StatisticsService {
           refundedAmount = Number(refundedAmount) + Number(item.amount);
         }
       }
-      await this.transactionsEventProducer.produceRefundedMigratedTransaction(transaction, refundedAmount);
+      await this.transactionsEventProducer.produceRefundedMigratedTransactionEvent(transaction, refundedAmount);
     }
   }
 
@@ -55,7 +55,7 @@ export class StatisticsService {
     }
 
     if (refund.action && refund.action === 'refund') {
-      await this.transactionsEventProducer.produceRefundedTransaction(existing, refund);
+      await this.transactionsEventProducer.produceTransactionRefundedEvent(existing, refund);
     }
   }
 }
