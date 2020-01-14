@@ -1,11 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import {
-  ApmModule,
-  CommandModule,
-  JwtAuthModule,
-  RabbitMqModule,
-} from '@pe/nest-kit';
+import { ApmModule, CommandModule, JwtAuthModule, RabbitMqModule } from '@pe/nest-kit';
 import { NestKitLoggingModule } from '@pe/nest-kit/modules/logging';
 import { StatusModule } from '@pe/nest-kit/modules/status';
 import { environment } from './environments';
@@ -26,6 +21,7 @@ import { TransactionsModule } from './transactions/transactions.module';
         useCreateIndex: true,
         useFindAndModify: false,
         useNewUrlParser: true,
+        useUnifiedTopology: true,
       },
     ),
     NestKitLoggingModule.forRoot({
