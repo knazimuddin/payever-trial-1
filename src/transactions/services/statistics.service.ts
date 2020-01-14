@@ -27,13 +27,13 @@ export class StatisticsService {
     }
 
     if (existing.status !== updating.status && updating.status === 'STATUS_ACCEPTED') {
-      await this.transactionsEventProducer.produceAcceptedTransactionEvent(existing, updating);
+      await this.transactionsEventProducer.produceAcceptedTransactionEvent(updating, existing);
     }
   }
 
   public async processMigratedTransaction(transaction: TransactionPackedDetailsInterface): Promise<void> {
     if (transaction.status === 'STATUS_ACCEPTED' || transaction.status === 'STATUS_PAID') {
-      await this.transactionsEventProducer.produceAcceptedMigratedTransactionEvent(transaction);
+      await this.transactionsEventProducer.produceAcceptedTransactionEvent(transaction);
     }
 
     if (transaction.status === 'STATUS_REFUNDED') {

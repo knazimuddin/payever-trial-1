@@ -12,39 +12,21 @@ export class TransactionEventProducer {
   ) { }
 
   public async produceAcceptedTransactionEvent(
-    existing: TransactionModel,
-    updating: TransactionPackedDetailsInterface,
+    transaction: TransactionPackedDetailsInterface,
+    existing: TransactionModel = null,
   ): Promise<void> {
-
-    const payload: any = {
-      amount: updating.amount,
-      business: {
-        id: existing.business_uuid,
-      },
-      channel_set: {
-        id: existing.channel_set_uuid,
-      },
-      date: updating.updated_at,
-      id: existing.uuid,
-      items: existing.items,
-    };
-    await this.send(RabbitRoutingKeys.TransactionsPaymentAdd, payload);
-  }
-
-  public async produceAcceptedMigratedTransactionEvent(transaction: TransactionPackedDetailsInterface): Promise<void> {
     const payload: any = {
       amount: transaction.amount,
       business: {
-        id: transaction.business_uuid,
+        id: existing ? existing.business_uuid : transaction.business_uuid,
       },
       channel_set: {
-        id: transaction.channel_set_uuid,
+        id: existing ? existing.channel_set_uuid : transaction.channel_set_uuid,
       },
       date: transaction.updated_at,
-      id: transaction.uuid,
-      items: transaction.items,
-    }
-
+      id: existing ? existing.uuid : transaction.uuid,
+      items: existing ? existing.items : transaction.items,
+    };
     await this.send(RabbitRoutingKeys.TransactionsPaymentAdd, payload);
   }
 
