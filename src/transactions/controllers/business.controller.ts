@@ -36,6 +36,7 @@ import {
   TransactionsService,
 } from '../services';
 import { BusinessFilter, Exporter, ExportFormat } from '../tools';
+import { TransactionsNotifier } from '../notifiers';
 
 const BusinessPlaceholder: string = ':businessId';
 const UuidPlaceholder: string = ':uuid';
@@ -59,6 +60,7 @@ export class BusinessController {
     private readonly logger: Logger,
     private readonly businessService: BusinessService,
     private readonly exampleService: TransactionsExampleService,
+    private readonly transactionsNotifier: TransactionsNotifier,
   ) {
     this.defaultCurrency = environment.defaultCurrency;
   }
@@ -223,7 +225,7 @@ export class BusinessController {
           message: `Error occurred during status update`,
         },
       );
-      throw new BadRequestException(`Error occured during status update. Please try again later. ${e.message}`);
+      throw new BadRequestException(`Error occurred during status update. Please try again later. ${e.message}`);
     }
 
     const updatedTransaction: TransactionUnpackedDetailsInterface =
@@ -232,7 +234,7 @@ export class BusinessController {
     try {
       await this.messagingService.sendTransactionUpdate(updatedTransaction);
     } catch (e) {
-      throw new BadRequestException(`Error occured while sending transaction update: ${e.message}`);
+      throw new BadRequestException(`Error occurred while sending transaction update: ${e.message}`);
     }
 
     return TransactionOutputConverter.convert(
@@ -330,6 +332,8 @@ export class BusinessController {
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
     );
+
+    await this.transactionsNotifier.cancelNewTransactionNotification(transaction);
 
     return TransactionOutputConverter.convert(
       unpackedTransaction,

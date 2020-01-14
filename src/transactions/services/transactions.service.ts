@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
+import { DelayRemoveClient, ElasticsearchClient } from '@pe/nest-kit';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
@@ -21,8 +22,8 @@ import {
   TransactionUnpackedDetailsInterface,
 } from '../interfaces/transaction';
 import { TransactionHistoryEntryModel, TransactionModel } from '../models';
+import { TransactionsNotifier } from '../notifiers';
 import { TransactionSchemaName } from '../schemas';
-import { DelayRemoveClient, ElasticsearchClient } from '@pe/nest-kit';
 
 @Injectable()
 export class TransactionsService {
@@ -32,6 +33,7 @@ export class TransactionsService {
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
     private readonly elasticSearchClient: ElasticsearchClient,
     private readonly logger: Logger,
+    private readonly notifier: TransactionsNotifier,
   ) {}
 
   public async create(transactionDto: TransactionPackedDetailsInterface): Promise<TransactionModel> {
@@ -51,22 +53,14 @@ export class TransactionsService {
         TransactionDoubleConverter.pack(created.toObject()),
       );
 
-      await this.notificationsEmitter.sendNotification(
-        {
-          app: 'transactions',
-          entity: transactionDto.business_uuid,
-          kind: 'business',
-        },
-        `notification.transactions.title.new_transaction`,
-        {
-          transactionId: transactionDto.uuid,
-        },
-      );
+      await this.notifier.sendNewTransactionNotification(created);
 
       return created;
     } catch (err) {
       if (err.name === 'MongoError' && err.code === 11000) {
         this.logger.warn({ text: `Attempting to create existing Transaction with uuid '${transactionDto.uuid}'`});
+
+        return this.transactionModel.findOne({ original_id: transactionDto.id });
       } else {
         throw err;
       }
@@ -77,29 +71,46 @@ export class TransactionsService {
     transactionUuid: string,
     transactionDto: TransactionPackedDetailsInterface,
   ): Promise<TransactionModel> {
-    if (transactionDto.id) {
-      transactionDto.original_id = transactionDto.id;
-    }
-    transactionDto.uuid = transactionUuid;
-
-    const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
-      {
+    try {
+      const insertData: any = {
         uuid: transactionUuid,
-      },
-      transactionDto,
-      {
-        new: true,
-        upsert: true,
-      },
-    );
+      };
+      if (transactionDto.id) {
+        insertData.original_id = transactionDto.id;
+      }
 
-    await this.elasticSearchClient.singleIndex(
-      ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
-      TransactionDoubleConverter.pack(updated.toObject()),
-    );
+      delete transactionDto.id;
+      delete transactionDto.original_id;
+      delete transactionDto.uuid;
 
-    return updated;
+      const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
+        {
+          uuid: transactionUuid,
+        },
+        {
+          $set: transactionDto,
+          $setOnInsert: insertData,
+        },
+        {
+          new: true,
+          upsert: true,
+        },
+      );
+
+      await this.elasticSearchClient.singleIndex(
+        ElasticTransactionEnum.index,
+        ElasticTransactionEnum.type,
+        TransactionDoubleConverter.pack(updated.toObject()),
+      );
+
+      return updated;
+    } catch (err) {
+      if (err.name === 'MongoError' && err.code === 11000) {
+        this.logger.warn({ text: `Simultaneous update caused error, transaction uuid '${transactionDto.uuid}'`});
+      } else {
+        throw err;
+      }
+    }
   }
 
   public async updateHistoryByUuid(

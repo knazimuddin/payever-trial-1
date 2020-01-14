@@ -32,12 +32,12 @@ Feature: Transaction export for business
     And the response status code should be 403
 
   Scenario: Export transactions for business
-    Given I use DB fixture "transactions/business-transactions-list-with-different-currencies"
-    And I get file "features/fixtures/json/business-transaction-list/elastic-transactions-list.json" content and remember as "elasticTransactionsListJson"
-    And I get file "features/fixtures/json/business-transaction-list/elastic-total-by-currencies.json" content and remember as "totalByCurrencies"
-    And I get file "features/fixtures/json/business-transaction-list/elastic-statuses-response.json" content and remember as "statusesResponse"
-    And I get file "features/fixtures/json/business-transaction-list/elastic-specific-statuses-response.json" content and remember as "specificStatusesResponse"
-    And I get file "features/fixtures/json/business-transaction-list/transactions-list-response.json" content and remember as "transactionsListJson"
+    Given I use DB fixture "transactions/transactions-list-with-different-currencies"
+    And I get file "features/fixtures/json/transaction-list-elastica/elastic-transactions-list.json" content and remember as "elasticTransactionsListJson"
+    And I get file "features/fixtures/json/transaction-list-elastica/elastic-total-by-currencies.json" content and remember as "totalByCurrencies"
+    And I get file "features/fixtures/json/transaction-list-elastica/elastic-statuses-response.json" content and remember as "statusesResponse"
+    And I get file "features/fixtures/json/transaction-list-elastica/elastic-specific-statuses-response.json" content and remember as "specificStatusesResponse"
+    And I get file "features/fixtures/json/transaction-list-elastica/business-transactions-list-response.json" content and remember as "transactionsListJson"
     And I mock Elasticsearch method "search" with:
       """
       {
