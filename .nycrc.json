@@ -1,7 +1,7 @@
 {
   "reporter": [
     "html",
-    "text-summary"
+    "text"
   ],
   "extension": [
     ".ts"
