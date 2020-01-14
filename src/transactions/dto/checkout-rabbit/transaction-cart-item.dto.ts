@@ -3,7 +3,7 @@ import { CheckoutTransactionCartItemInterface } from '../../interfaces/checkout'
 
 export class TransactionCartItemDto implements CheckoutTransactionCartItemInterface {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   public _id: string;
   @IsString()
   @IsOptional()

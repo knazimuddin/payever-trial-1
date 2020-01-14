@@ -101,14 +101,7 @@ export class StatisticsMessagesMock extends AbstractMessageMock {
   public async mockProduceAcceptedTransaction(): Promise<void> {
     const producer: TransactionEventProducer =
       await this.getProvider<TransactionEventProducer>(TransactionEventProducer);
-    await producer.produceAcceptedTransactionEvent(this.existing, this.updating);
-  }
-
-  @PactRabbitMqMessageProvider(RabbitRoutingKeys.TransactionsPaymentAdd)
-  public async mockProduceAcceptedMigratedTransaction(): Promise<void> {
-    const producer: TransactionEventProducer =
-      await this.getProvider<TransactionEventProducer>(TransactionEventProducer);
-    await producer.produceAcceptedMigratedTransactionEvent(this.transaction);
+    await producer.produceAcceptedTransactionEvent(this.updating, this.existing);
   }
 
   @PactRabbitMqMessageProvider(RabbitRoutingKeys.TransactionsPaymentAdd)
