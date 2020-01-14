@@ -27,13 +27,39 @@ export class StatisticsService {
     }
 
     if (existing.status !== updating.status && updating.status === 'STATUS_ACCEPTED') {
-      await this.transactionsEventProducer.produceAcceptedTransactionEvent(updating, existing);
+      const payload: any = {
+        amount: updating.amount,
+        business: {
+          id: existing.business_uuid,
+        },
+        channel_set: {
+          id: existing.channel_set_uuid,
+        },
+        date: updating.updated_at,
+        id: existing.uuid,
+        items: existing.items,
+      };
+
+      await this.transactionsEventProducer.produceTransactionAddEvent(payload);
     }
   }
 
   public async processMigratedTransaction(transaction: TransactionPackedDetailsInterface): Promise<void> {
     if (transaction.status === 'STATUS_ACCEPTED' || transaction.status === 'STATUS_PAID') {
-      await this.transactionsEventProducer.produceAcceptedTransactionEvent(transaction);
+      const payload: any = {
+        amount: transaction.amount,
+        business: {
+          id: transaction.business_uuid,
+        },
+        channel_set: {
+          id: transaction.channel_set_uuid,
+        },
+        date: transaction.updated_at,
+        id: transaction.uuid,
+        items: transaction.items,
+      };
+
+      await this.transactionsEventProducer.produceTransactionAddEvent(payload);
     }
 
     if (transaction.status === 'STATUS_REFUNDED') {
@@ -43,7 +69,21 @@ export class StatisticsService {
           refundedAmount = Number(refundedAmount) + Number(item.amount);
         }
       }
-      await this.transactionsEventProducer.produceRefundedMigratedTransactionEvent(transaction, refundedAmount);
+
+      const payload: any = {
+        amount: Number(transaction.amount) - Number(refundedAmount),
+        business: {
+          id: transaction.business_uuid,
+        },
+        channel_set: {
+          id: transaction.channel_set_uuid,
+        },
+        date: transaction.updated_at,
+        id: transaction.uuid,
+        items: transaction.items,
+      };
+
+      await this.transactionsEventProducer.produceTransactionAddEvent(payload);
     }
   }
 
@@ -55,7 +95,20 @@ export class StatisticsService {
     }
 
     if (refund.action && refund.action === 'refund') {
-      await this.transactionsEventProducer.produceTransactionRefundedEvent(existing, refund);
+      const payload: any = {
+        amount: refund.data.amount,
+        business: {
+          id: existing.business_uuid,
+        },
+        channel_set: {
+          id: existing.channel_set_uuid,
+        },
+        date: existing.updated_at,
+        id: existing.uuid,
+        items: existing.items,
+      };
+
+      await this.transactionsEventProducer.produceTransactionSubtractEvent(payload);
     }
   }
 }

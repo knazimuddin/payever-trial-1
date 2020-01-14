@@ -11,61 +11,11 @@ export class TransactionEventProducer {
     private readonly rabbitClient: RabbitMqClient,
   ) { }
 
-  public async produceAcceptedTransactionEvent(
-    transaction: TransactionPackedDetailsInterface,
-    existing: TransactionModel = null,
-  ): Promise<void> {
-    const payload: any = {
-      amount: transaction.amount,
-      business: {
-        id: existing ? existing.business_uuid : transaction.business_uuid,
-      },
-      channel_set: {
-        id: existing ? existing.channel_set_uuid : transaction.channel_set_uuid,
-      },
-      date: transaction.updated_at,
-      id: existing ? existing.uuid : transaction.uuid,
-      items: existing ? existing.items : transaction.items,
-    };
+  public async produceTransactionAddEvent(payload: any): Promise<void> {
     await this.send(RabbitRoutingKeys.TransactionsPaymentAdd, payload);
   }
 
-  public async produceRefundedMigratedTransactionEvent(
-    transaction: TransactionPackedDetailsInterface,
-    refundedAmount: number,
-  ): Promise<void> {
-    const payload: any = {
-      amount: Number(transaction.amount) - Number(refundedAmount),
-      business: {
-        id: transaction.business_uuid,
-      },
-      channel_set: {
-        id: transaction.channel_set_uuid,
-      },
-      date: transaction.updated_at,
-      id: transaction.uuid,
-      items: transaction.items,
-    }
-
-    await this.send(RabbitRoutingKeys.TransactionsPaymentAdd, payload);
-  }
-
-  public async produceTransactionRefundedEvent(
-    existing: TransactionModel,
-    refund: HistoryEventActionCompletedInterface,
-  ): Promise<void> {
-    const payload: any = {
-      amount: refund.data.amount,
-      business: {
-        id: existing.business_uuid,
-      },
-      channel_set: {
-        id: existing.channel_set_uuid,
-      },
-      date: existing.updated_at,
-      id: existing.uuid,
-      items: existing.items,
-    }
+  public async produceTransactionSubtractEvent(payload: any): Promise<void> {
     await this.send(RabbitRoutingKeys.TransactionsPaymentSubtract, payload);
   }
 
