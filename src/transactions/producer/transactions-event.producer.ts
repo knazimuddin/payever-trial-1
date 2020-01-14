@@ -4,6 +4,7 @@ import { TransactionPackedDetailsInterface } from '../interfaces';
 import { TransactionModel } from '../../../src/transactions/models';
 import { RabbitRoutingKeys } from '../../enums';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
+import { TransactionPaymentInterface } from '../interfaces/transaction/transaction-payment.interface';
 
 @Injectable()
 export class TransactionEventProducer {
@@ -11,11 +12,11 @@ export class TransactionEventProducer {
     private readonly rabbitClient: RabbitMqClient,
   ) { }
 
-  public async produceTransactionAddEvent(payload: any): Promise<void> {
+  public async produceTransactionAddEvent(payload: TransactionPaymentInterface): Promise<void> {
     await this.send(RabbitRoutingKeys.TransactionsPaymentAdd, payload);
   }
 
-  public async produceTransactionSubtractEvent(payload: any): Promise<void> {
+  public async produceTransactionSubtractEvent(payload: TransactionPaymentInterface): Promise<void> {
     await this.send(RabbitRoutingKeys.TransactionsPaymentSubtract, payload);
   }
 
