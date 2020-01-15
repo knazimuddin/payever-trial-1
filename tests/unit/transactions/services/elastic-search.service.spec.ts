@@ -4,13 +4,12 @@ import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
-import * as uuid from 'uuid';
 
 import { ElasticSearchService } from '../../../../src/transactions/services/elastic-search.service';
 import { CurrencyExchangeService } from '../../../../src/transactions/services/currency-exchange.service';
 import { ElasticsearchClient } from '@pe/nest-kit';
 import { ListQueryDto } from '../../../../src/transactions/dto';
-import { TransactionBasicInterface, TransactionCartItemInterface } from '../../../../src/transactions/interfaces';
+import { TransactionCartItemInterface } from '../../../../src/transactions/interfaces';
 
 
 chai.use(sinonChai);
