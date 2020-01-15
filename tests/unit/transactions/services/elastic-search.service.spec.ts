@@ -11,7 +11,6 @@ import { ElasticsearchClient } from '@pe/nest-kit';
 import { ListQueryDto } from '../../../../src/transactions/dto';
 import { TransactionCartItemInterface } from '../../../../src/transactions/interfaces';
 
-
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
 const expect: Chai.ExpectStatic = chai.expect;
