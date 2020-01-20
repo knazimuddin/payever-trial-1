@@ -17,10 +17,10 @@ export class BetweenConditionFilter {
 
     const condition: {} = {
       [field]: {
-        gte: Math.max(...from),
-        lte: Math.min(...to),
+        $gte: Math.max(...from),
+        $lte: Math.min(...to),
       },
     };
-    mongoFilters.must.push(condition);
+    mongoFilters.$and.push(condition);
   }
 }
