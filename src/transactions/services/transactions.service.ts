@@ -34,7 +34,8 @@ export class TransactionsService {
     private readonly elasticSearchClient: ElasticsearchClient,
     private readonly logger: Logger,
     private readonly notifier: TransactionsNotifier,
-  ) {}
+    private readonly delayRemoveClient: DelayRemoveClient,
+  ) { }
 
   public async create(transactionDto: TransactionPackedDetailsInterface): Promise<TransactionModel> {
     if (transactionDto.id) {
@@ -176,8 +177,7 @@ export class TransactionsService {
       return;
     }
 
-    const delayRemoveClient: DelayRemoveClient = new DelayRemoveClient(this.elasticSearchClient, this.logger);
-    await delayRemoveClient.deleteByQuery(
+    await this.delayRemoveClient.deleteByQuery(
       ElasticTransactionEnum.index,
       ElasticTransactionEnum.type,
       {
