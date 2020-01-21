@@ -5,6 +5,7 @@ import { DelayRemoveClient, ElasticsearchClient } from '@pe/nest-kit';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
+
 import {
   TransactionCartConverter,
   TransactionDoubleConverter,
@@ -24,6 +25,7 @@ import {
 import { TransactionHistoryEntryModel, TransactionModel } from '../models';
 import { TransactionsNotifier } from '../notifiers';
 import { TransactionSchemaName } from '../schemas';
+import { TransactionEventsProducer } from '../producer';
 
 @Injectable()
 export class TransactionsService {
@@ -34,6 +36,7 @@ export class TransactionsService {
     private readonly elasticSearchClient: ElasticsearchClient,
     private readonly logger: Logger,
     private readonly notifier: TransactionsNotifier,
+    private readonly transactionEventsProducer: TransactionEventsProducer,
   ) {}
 
   public async create(transactionDto: TransactionPackedDetailsInterface): Promise<TransactionModel> {
@@ -54,6 +57,7 @@ export class TransactionsService {
       );
 
       await this.notifier.sendNewTransactionNotification(created);
+      await this.transactionEventsProducer.sendTransactionCreatedEvent(created);
 
       return created;
     } catch (err) {

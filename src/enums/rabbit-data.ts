@@ -37,4 +37,6 @@ export enum RabbitRoutingKeys {
   BusinessRemoved = 'users.event.business.removed',
 
   MailerPaymentMailSent = 'mailer.event.payment-mail.sent',
+
+  TransactionCreated = 'transactions.events.transaction.created',
 }
