@@ -20,7 +20,7 @@ export class DevicePaymentsController {
   })
   public async onPaymentCodeUpdatedEvent(data: {flow: {payment: {_id: string}}, sellerName?: string}): Promise<void> {
     if (data.flow.payment._id && data.sellerName) {
-      await this.transactionModel.findByIdAndUpdate(data.flow.payment._id, {sellerName: data.sellerName});
+      await this.transactionModel.findByIdAndUpdate(data.flow.payment._id, {$set: {sellerName: data.sellerName}});
     }
   }
 }
