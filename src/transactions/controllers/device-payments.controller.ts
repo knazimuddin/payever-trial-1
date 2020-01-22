@@ -3,7 +3,7 @@ import { MessagePattern } from '@nestjs/microservices';
 import { Model } from "mongoose";
 import { InjectModel } from '@nestjs/mongoose';
 
-import { RabbitRoutingKeys } from '../../enums';
+import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { TransactionSchemaName } from '../schemas';
 import { TransactionModel } from '../models';
 
@@ -14,7 +14,9 @@ export class DevicePaymentsController {
   ) {}
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.CodeUpdated,
+    origin: 'rabbitmq',
   })
   public async onPaymentCodeUpdatedEvent(data: {flow: {payment: {_id: string}}, sellerName?: string}): Promise<void> {
     if (data.flow.payment._id && data.sellerName) {
