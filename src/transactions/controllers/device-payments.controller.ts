@@ -19,7 +19,7 @@ export class DevicePaymentsController {
     origin: 'rabbitmq',
   })
   public async onPaymentCodeUpdatedEvent(
-    data?: {flow?: {payment?: {id?: string}}, sellerName?: string}
+    data?: {flow?: {payment?: {id?: string}}, sellerName?: string},
   ): Promise<void> {
     if (data?.flow?.payment?.id && data.sellerName) {
       await this.transactionModel.findOneAndUpdate(
