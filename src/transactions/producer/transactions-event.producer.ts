@@ -3,8 +3,8 @@ import { RabbitMqClient } from '@pe/nest-kit';
 import { TransactionPackedDetailsInterface } from '../interfaces';
 import { TransactionModel } from '../../../src/transactions/models';
 import { RabbitRoutingKeys } from '../../enums';
-import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 import { TransactionPaymentInterface } from '../interfaces/transaction/transaction-payment.interface';
+import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 
 @Injectable()
 export class TransactionEventProducer {
@@ -12,11 +12,42 @@ export class TransactionEventProducer {
     private readonly rabbitClient: RabbitMqClient,
   ) { }
 
-  public async produceTransactionAddEvent(payload: TransactionPaymentInterface): Promise<void> {
+  public async produceTransactionAddEvent(
+    transaction: TransactionPackedDetailsInterface,
+    amount: number,
+  ): Promise<void> {
+
+    const payload: TransactionPaymentInterface = {
+      amount: amount,
+      business: {
+        id: transaction.business_uuid,
+      },
+      channel_set: {
+        id: transaction.channel_set_uuid,
+      },
+      date: transaction.updated_at,
+      id: transaction.uuid,
+      items: transaction.items,
+    };
     await this.send(RabbitRoutingKeys.TransactionsPaymentAdd, payload);
   }
 
-  public async produceTransactionSubtractEvent(payload: TransactionPaymentInterface): Promise<void> {
+  public async produceTransactionSubtractEvent(
+    transaction: TransactionModel,
+    refund: HistoryEventActionCompletedInterface,
+  ): Promise<void> {
+    const payload: TransactionPaymentInterface = {
+      amount: refund.data.amount,
+      business: {
+        id: transaction.business_uuid,
+      },
+      channel_set: {
+        id: transaction.channel_set_uuid,
+      },
+      date: transaction.updated_at,
+      id: transaction.uuid,
+      items: transaction.items,
+    };
     await this.send(RabbitRoutingKeys.TransactionsPaymentSubtract, payload);
   }
 
