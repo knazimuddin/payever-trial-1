@@ -6,6 +6,7 @@ import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import { TransactionEventProducer } from '../producer';
+import { TransactionPaymentInterface } from '../interfaces/transaction/transaction-payment.interface';
 
 @Injectable()
 export class StatisticsService {
@@ -27,7 +28,7 @@ export class StatisticsService {
     }
 
     if (existing.status !== updating.status && updating.status === 'STATUS_ACCEPTED') {
-      const payload: any = {
+      const payload: TransactionPaymentInterface = {
         amount: updating.amount,
         business: {
           id: existing.business_uuid,
@@ -46,7 +47,7 @@ export class StatisticsService {
 
   public async processMigratedTransaction(transaction: TransactionPackedDetailsInterface): Promise<void> {
     if (transaction.status === 'STATUS_ACCEPTED' || transaction.status === 'STATUS_PAID') {
-      const payload: any = {
+      const payload: TransactionPaymentInterface = {
         amount: transaction.amount,
         business: {
           id: transaction.business_uuid,
@@ -70,7 +71,7 @@ export class StatisticsService {
         }
       }
 
-      const payload: any = {
+      const payload: TransactionPaymentInterface = {
         amount: Number(transaction.amount) - Number(refundedAmount),
         business: {
           id: transaction.business_uuid,
@@ -95,7 +96,7 @@ export class StatisticsService {
     }
 
     if (refund.action && refund.action === 'refund') {
-      const payload: any = {
+      const payload: TransactionPaymentInterface = {
         amount: refund.data.amount,
         business: {
           id: existing.business_uuid,
