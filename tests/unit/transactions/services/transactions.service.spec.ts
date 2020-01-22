@@ -16,6 +16,7 @@ import { TransactionPackedDetailsInterface, TransactionUnpackedDetailsInterface 
 import { RpcResultDto } from '../../../../src/transactions/dto';
 import { AnyARecord } from 'dns';
 import { RpcException } from '@nestjs/microservices';
+import { TransactionEventsProducer } from '../../../../src/transactions/producer';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -29,6 +30,7 @@ describe('TransactionsService', () => {
   let elasticSearchClient: ElasticsearchClient;
   let logger: Logger;
   let notifier: TransactionsNotifier;
+  let transactionEnventsProducer: TransactionEventsProducer;
   let delayRemoveClient: DelayRemoveClient;
 
   const transaction: TransactionModel = {
@@ -67,6 +69,10 @@ describe('TransactionsService', () => {
       deleteByQuery: (): any => { },
     } as any;
 
+    transactionEnventsProducer = {
+      sendTransactionCreatedEvent: (): any => { },
+    } as any;
+
     testService = new TransactionsService(
       transactionModel,
       notificationsEmitter,
@@ -74,6 +80,7 @@ describe('TransactionsService', () => {
       logger,
       notifier,
       delayRemoveClient,
+      transactionEnventsProducer,
     );
   });
 

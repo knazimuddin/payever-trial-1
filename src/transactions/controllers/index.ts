@@ -10,3 +10,4 @@ export * from './user.controller';
 export * from './third-party-events.controller';
 export * from './shipping-bus-messages.controller';
 export * from './mailer-bus-messages.controller';
+export * from './device-payments.controller';

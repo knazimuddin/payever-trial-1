@@ -13,8 +13,8 @@ describe('AtomDateConverter', () => {
   describe('fromAtomFormatToDate()', () => {
     it('should convert date string from atom format to Date', () => {
       expect(
-        AtomDateConverter.fromAtomFormatToDate('2009-11-04T19:55:41Z+00:00'),
-      ).to.deep.equal(new Date('2009-11-04T18:55:41.000Z'));
+        AtomDateConverter.fromAtomFormatToDate('2009-11-04T19:55:41Z+00:00').toISOString(),
+      ).to.equal(new Date('2009-11-04T19:55:41.000Z').toISOString());
     });
   });
 

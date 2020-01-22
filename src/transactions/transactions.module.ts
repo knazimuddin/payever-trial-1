@@ -4,7 +4,7 @@ import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
 import { ElasticsearchModule, EventDispatcherModule, DelayRemoveClient } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
   BpoFixCommand,
   TransactionsEsBusinessCheckCommand,
@@ -18,7 +18,7 @@ import {
   AdminController,
   BpoEventsController,
   BusinessBusMessagesController,
-  BusinessController,
+  BusinessController, DevicePaymentsController,
   FlowEventsController,
   HistoryEventsController,
   MailerBusMessagesController,
@@ -29,7 +29,7 @@ import {
   UserController,
 } from './controllers';
 import { EventListenersList } from './event-listeners/event-listeners.list';
-import { PaymentMailEventProducer, TransactionEventProducer } from './producer';
+import { PaymentMailEventProducer, TransactionEventsProducer, TransactionEventProducer } from './producer';
 import {
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,
@@ -75,6 +75,7 @@ import { TransactionsNotifier } from './notifiers';
     UserController,
     ShippingBusMessagesController,
     MailerBusMessagesController,
+    DevicePaymentsController,
   ],
   imports: [
     ConfigModule,
@@ -104,6 +105,7 @@ import { TransactionsNotifier } from './notifiers';
     BusinessPaymentOptionService,
     BusinessService,
     CurrencyExchangeService,
+    ConfigService,
     DtoValidationService,
     DelayRemoveClient,
     ElasticSearchService,
@@ -120,6 +122,7 @@ import { TransactionsNotifier } from './notifiers';
     TransactionsEsCompareCommand,
     TransactionsEsExportCommand,
     TransactionsEsSetupCommand,
+    TransactionEventsProducer,
     TransactionsExampleService,
     TransactionsExportCommand,
     TransactionsService,
@@ -129,4 +132,4 @@ import { TransactionsNotifier } from './notifiers';
     ...EventListenersList,
   ],
 })
-export class TransactionsModule {}
+export class TransactionsModule { }

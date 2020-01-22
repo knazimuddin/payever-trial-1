@@ -1,6 +1,6 @@
 export class AtomDateConverter {
 
-  public static fromAtomFormatToDate(incoming: string): any {
+  public static fromAtomFormatToDate(incoming: string): Date {
     const parsed: RegExpMatchArray = incoming.match(
       /(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).*/,
     );

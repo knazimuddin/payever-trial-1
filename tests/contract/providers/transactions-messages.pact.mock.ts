@@ -69,38 +69,16 @@ export class StatisticsMessagesMock extends AbstractMessageMock {
   public async mockProduceTransactionPaymentAddEvent(): Promise<void> {
     const producer: TransactionEventProducer =
       await this.getProvider<TransactionEventProducer>(TransactionEventProducer)
-    const payload: TransactionPaymentInterface = {
-      amount: this.updating.amount,
-      business: {
-        id: this.existing.business_uuid,
-      },
-      channel_set: {
-        id: this.existing.channel_set_uuid,
-      },
-      date: this.updating.updated_at,
-      id: this.existing.uuid,
-      items: this.existing.items,
-    }
-    await producer.produceTransactionAddEvent(payload);
+
+    await producer.produceTransactionAddEvent(this.existing, this.updating.amount);
   }
 
   @PactRabbitMqMessageProvider(RabbitRoutingKeys.TransactionsPaymentSubtract)
   public async mockProduceRefunedTransaction(): Promise<void> {
     const producer: TransactionEventProducer =
       await this.getProvider<TransactionEventProducer>(TransactionEventProducer);
-    const payload: any = {
-      amount: this.refund.data.amount,
-      business: {
-        id: this.existing.business_uuid,
-      },
-      channel_set: {
-        id: this.existing.channel_set_uuid,
-      },
-      date: this.existing.updated_at,
-      id: this.existing.uuid,
-      items: this.existing.items,
-    }
-    await producer.produceTransactionSubtractEvent(payload)
+
+    await producer.produceTransactionSubtractEvent(this.existing, this.refund)
   }
 
   @PactRabbitMqMessageProvider(RabbitRoutingKeys.TransactionsPaymentRemoved)
