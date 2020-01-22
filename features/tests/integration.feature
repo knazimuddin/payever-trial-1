@@ -56,7 +56,8 @@ Feature: Integration management
       }
       """
     When I send a GET request to "/api/integration"
-    Then the response status code should be 200
+    Then print last response
+    And the response status code should be 200
     And the response should contain json:
       """
       [
