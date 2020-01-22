@@ -54,4 +54,8 @@ export class ListQueryDto {
   public get search(): string {
     return this.query;
   }
+
+  public set search(search: string) {
+    this.query = search;
+  }
 }
