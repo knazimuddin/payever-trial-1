@@ -28,7 +28,7 @@ import {
   UserController,
 } from './controllers';
 import { EventListenersList } from './event-listeners/event-listeners.list';
-import { PaymentMailEventProducer, TransactionEventsProducer } from './producer';
+import { PaymentMailEventProducer, TransactionEventsProducer, TransactionEventProducer } from './producer';
 import {
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,
@@ -124,6 +124,7 @@ import { TransactionsNotifier } from './notifiers';
     TransactionsService,
     TransactionsNotifier,
     PaymentMailEventProducer,
+    TransactionEventProducer,
     ...EventListenersList,
   ],
 })

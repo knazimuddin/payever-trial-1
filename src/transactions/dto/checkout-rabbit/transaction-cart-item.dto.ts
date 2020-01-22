@@ -1,6 +1,10 @@
-import { IsString, IsNumber, IsOptional, Allow } from 'class-validator';
+import { IsString, IsNumber, IsOptional, Allow, IsNotEmpty } from 'class-validator';
 import { CheckoutTransactionCartItemInterface } from '../../interfaces/checkout';
-export class TransactionCartItemDto implements CheckoutTransactionCartItemInterface{
+
+export class TransactionCartItemDto implements CheckoutTransactionCartItemInterface {
+  @IsString()
+  @IsOptional()
+  public _id: string;
   @IsString()
   @IsOptional()
   public product_uuid?: string;
