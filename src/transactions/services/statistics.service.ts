@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { RabbitMqClient } from '@pe/nest-kit';
 import { Model } from 'mongoose';
-import { RabbitRoutingKeys } from '../../enums';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
+import { TransactionEventProducer } from '../producer';
+import { TransactionPaymentInterface } from '../interfaces/transaction/transaction-payment.interface';
 
 @Injectable()
 export class StatisticsService {
 
   constructor(
     @InjectModel(TransactionSchemaName) private readonly transactionsModel: Model<TransactionModel>,
-    private readonly rabbitClient: RabbitMqClient,
+    private readonly transactionsEventProducer: TransactionEventProducer,
   ) {}
 
   /**
@@ -28,55 +28,13 @@ export class StatisticsService {
     }
 
     if (existing.status !== updating.status && updating.status === 'STATUS_ACCEPTED') {
-      await this.rabbitClient
-        .send(
-          {
-            channel: RabbitRoutingKeys.TransactionsPaymentAdd,
-            exchange: 'async_events',
-          },
-          {
-            name: RabbitRoutingKeys.TransactionsPaymentAdd,
-            payload: {
-              amount: updating.amount,
-              business: {
-                id: existing.business_uuid,
-              },
-              channel_set: {
-                id: existing.channel_set_uuid,
-              },
-              date: updating.updated_at,
-              id: existing.uuid,
-              items: existing.items,
-            },
-          },
-        );
+      await this.transactionsEventProducer.produceTransactionAddEvent(updating, updating.amount);
     }
   }
 
   public async processMigratedTransaction(transaction: TransactionPackedDetailsInterface): Promise<void> {
     if (transaction.status === 'STATUS_ACCEPTED' || transaction.status === 'STATUS_PAID') {
-      await this.rabbitClient
-        .send(
-          {
-            channel: RabbitRoutingKeys.TransactionsPaymentAdd,
-            exchange: 'async_events',
-          },
-          {
-            name: RabbitRoutingKeys.TransactionsPaymentAdd,
-            payload: {
-              amount: transaction.amount,
-              business: {
-                id: transaction.business_uuid,
-              },
-              channel_set: {
-                id: transaction.channel_set_uuid,
-              },
-              date: transaction.updated_at,
-              id: transaction.uuid,
-              items: transaction.items,
-            },
-          },
-        );
+      await this.transactionsEventProducer.produceTransactionAddEvent(transaction, transaction.amount);
     }
 
     if (transaction.status === 'STATUS_REFUNDED') {
@@ -86,29 +44,8 @@ export class StatisticsService {
           refundedAmount = Number(refundedAmount) + Number(item.amount);
         }
       }
-
-      await this.rabbitClient
-        .send(
-          {
-            channel: RabbitRoutingKeys.TransactionsPaymentAdd,
-            exchange: 'async_events',
-          },
-          {
-            name: RabbitRoutingKeys.TransactionsPaymentAdd,
-            payload: {
-              amount: Number(transaction.amount) - Number(refundedAmount),
-              business: {
-                id: transaction.business_uuid,
-              },
-              channel_set: {
-                id: transaction.channel_set_uuid,
-              },
-              date: transaction.updated_at,
-              id: transaction.uuid,
-              items: transaction.items,
-            },
-          },
-        );
+      const amount: number = Number(transaction.amount) - Number(refundedAmount);
+      await this.transactionsEventProducer.produceTransactionAddEvent(transaction, amount);
     }
   }
 
@@ -120,28 +57,7 @@ export class StatisticsService {
     }
 
     if (refund.action && refund.action === 'refund') {
-      await this.rabbitClient
-        .send(
-          {
-            channel: RabbitRoutingKeys.TransactionsPaymentSubtract,
-            exchange: 'async_events',
-          },
-          {
-            name: RabbitRoutingKeys.TransactionsPaymentSubtract,
-            payload: {
-              amount: refund.data.amount,
-              business: {
-                id: existing.business_uuid,
-              },
-              channel_set: {
-                id: existing.channel_set_uuid,
-              },
-              date: existing.updated_at,
-              id: existing.uuid,
-              items: existing.items,
-            },
-          },
-        );
+      await this.transactionsEventProducer.produceTransactionSubtractEvent(existing, refund);
     }
   }
 }

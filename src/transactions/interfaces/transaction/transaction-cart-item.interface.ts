@@ -1,4 +1,5 @@
 export interface TransactionCartItemInterface {
+  _id: string;
   uuid: string;
   description: string;
   fixed_shipping_price: number;
