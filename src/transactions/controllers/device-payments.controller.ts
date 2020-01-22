@@ -18,10 +18,12 @@ export class DevicePaymentsController {
     name: RabbitRoutingKeys.CodeUpdated,
     origin: 'rabbitmq',
   })
-  public async onPaymentCodeUpdatedEvent(data: {flow: {payment: {_id: string}}, sellerName?: string}): Promise<void> {
-    if (data?.flow?.payment?._id && data.sellerName) {
+  public async onPaymentCodeUpdatedEvent(
+    data?: {flow?: {payment?: {id?: string}}, sellerName?: string}
+  ): Promise<void> {
+    if (data?.flow?.payment?.id && data.sellerName) {
       await this.transactionModel.findOneAndUpdate(
-        {original_id: data.flow.payment._id},
+        {original_id: data.flow.payment.id},
         {$set: {sellerName: data.sellerName}},
       );
     }
