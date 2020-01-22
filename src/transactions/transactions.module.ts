@@ -4,6 +4,7 @@ import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
 import { ElasticsearchModule, EventDispatcherModule, DelayRemoveClient } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
+import { ConfigModule } from '@nestjs/config';
 import {
   BpoFixCommand,
   TransactionsEsBusinessCheckCommand,
@@ -76,6 +77,7 @@ import { TransactionsNotifier } from './notifiers';
     MailerBusMessagesController,
   ],
   imports: [
+    ConfigModule,
     HttpModule,
     MongooseModule.forFeature([
       { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },

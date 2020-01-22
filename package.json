@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^6.8.2",
+    "@nestjs/config": "^0.1.0",
     "@pe/common-sdk": "^1.4.0",
     "@pe/nest-kit": "4.16.0",
     "@pe/notifications-sdk": "^3.3.0",

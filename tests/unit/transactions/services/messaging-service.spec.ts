@@ -19,6 +19,7 @@ import {
 } from '../../../../src/transactions/interfaces';
 import { BusinessPaymentOptionModel, PaymentFlowModel } from '../../../../src/transactions/models';
 import { ActionPayloadInterface } from '../../../../src/transactions/interfaces/action-payload';
+import { ConfigService } from '@nestjs/config';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -35,6 +36,7 @@ describe('MessagingService', () => {
   let rabbitClient: RabbitMqClient;
   let logger: Logger;
   let messageBusService: MessageBusService;
+  let configService: ConfigService;
 
   const transactionUnpackedDetails: TransactionUnpackedDetailsInterface = {
     id: uuid.v4(),
@@ -146,6 +148,10 @@ describe('MessagingService', () => {
       unwrapRpcMessage: (): any => { },
     } as any;
 
+    configService = {
+      get: (): any => true,
+    } as any
+
     testService = new MessagingService(
       transactionService,
       bpoService,
@@ -155,6 +161,7 @@ describe('MessagingService', () => {
       rabbitClient,
       logger,
       messageBusService,
+      configService,
     );
   });
 

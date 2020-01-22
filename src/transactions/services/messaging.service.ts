@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MessageBusService, MessageInterface, RabbitMqClient, RabbitMqRPCClient } from '@pe/nest-kit';
-import { environment } from '../../environments';
 import { TransactionConverter } from '../converter';
 import { NextActionDto } from '../dto';
 import { ActionItemInterface } from '../interfaces';
@@ -16,6 +15,7 @@ import { BusinessPaymentOptionService } from './business-payment-option.service'
 import { PaymentFlowService } from './payment-flow.service';
 import { PaymentsMicroService } from './payments-micro.service';
 import { TransactionsService } from './transactions.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MessagingService {
@@ -28,7 +28,8 @@ export class MessagingService {
     private readonly rabbitClient: RabbitMqClient,
     private readonly logger: Logger,
     private readonly messageBusService: MessageBusService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) { }
 
   public getBusinessPaymentOption(transaction: TransactionBasicInterface): Promise<BusinessPaymentOptionModel> {
     return this.bpoService.findOneById(transaction.business_option_id);
@@ -182,15 +183,16 @@ export class MessagingService {
     paymentMethod: string,
     payload: any,
   ): Promise<void> {
+    const stub: boolean = this.configService.get<string>('STUB') === 'true';
     await this.rabbitRpcClient.send(
       {
-        channel: this.paymentMicroService.getChannelByPaymentType(paymentMethod, environment.stub),
+        channel: this.paymentMicroService.getChannelByPaymentType(paymentMethod, stub),
       },
       this.paymentMicroService.createPaymentMicroMessage(
         paymentMethod,
         'external_capture',
         payload,
-        environment.stub,
+        stub,
       ),
     );
   }
@@ -249,15 +251,16 @@ export class MessagingService {
     payload: CheckoutRpcPayloadInterface,
     messageIdentifier: string,
   ): Promise<any> {
+    const stub: boolean = this.configService.get<string>('STUB') === 'true';
     const result: any = await this.rabbitRpcClient.send(
       {
-        channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, environment.stub),
+        channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, stub),
       },
       this.paymentMicroService.createPaymentMicroMessage(
         transaction.type,
         messageIdentifier,
         payload,
-        environment.stub,
+        stub,
       ),
     );
 
