@@ -61,7 +61,6 @@ export class TransactionsService {
       await this.notifier.sendNewTransactionNotification(created);
       const flow: PaymentFlowModel = await this.paymentFlowService.findOne({id: created.payment_flow_id});
       if (flow.seller_email) {
-        console.log(flow);
         await this.transactionEventsProducer.getSellerName({email: flow.seller_email});
       }
 

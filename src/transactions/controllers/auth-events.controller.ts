@@ -48,7 +48,6 @@ export class AuthEventsController {
     const sellerName: string = nameArray
       .filter((e?: string) => !!e)
       .join(' ');
-    console.log(sellerName);
 
     await this.transactionModel.updateMany(
       {_id: {$in: transactions.map((e: {_id: string}) => e._id)}, sellerName: {$exists: false}},
