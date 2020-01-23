@@ -28,7 +28,7 @@ export class AuthEventsController {
       $lookup: {
         as: 'paymentflow',
         foreignField: 'id',
-        from: PaymentFlowSchemaName,
+        from: 'paymentflows',
         localField: 'payment_flow_id',
       },
     }, {
@@ -49,7 +49,7 @@ export class AuthEventsController {
       .filter((e?: string) => !!e)
       .join(' ');
 
-    this.transactionModel.updateMany(
+    await this.transactionModel.updateMany(
       {_id: {$in: transactions.map((e: {_id: string}) => e._id)}, sellerName: {$exists: false}},
       {sellerName},
     );
