@@ -17,7 +17,7 @@ import {
   AdminController, AuthEventsController,
   BpoEventsController,
   BusinessBusMessagesController,
-  BusinessController, DevicePaymentsController,
+  BusinessController,
   FlowEventsController,
   HistoryEventsController,
   MailerBusMessagesController,
@@ -74,7 +74,7 @@ import { TransactionsNotifier } from './notifiers';
     UserController,
     ShippingBusMessagesController,
     MailerBusMessagesController,
-    DevicePaymentsController,
+    AuthEventsController,
   ],
   imports: [
     HttpModule,

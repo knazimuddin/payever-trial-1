@@ -24,4 +24,5 @@ export interface PaymentFlowInterface {
   callback?: string;
   x_frame_host?: string;
   business_payment_option?: BusinessPaymentOptionInterface;
+  seller_email: string;
 }
