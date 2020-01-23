@@ -32,6 +32,10 @@ export class PaymentFlowService {
     return this.model.findOne({ id: flowDto.id });
   }
 
+  public async findOne(conditions: any): Promise<PaymentFlowModel> {
+    return this.model.findOne(conditions);
+  }
+
   public async findOneById(id: string): Promise<PaymentFlowModel> {
     return this.model.findOne({id});
   }

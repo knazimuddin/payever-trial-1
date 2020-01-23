@@ -60,10 +60,6 @@ export const rabbitMqQueues: RabbitMqQueueConfigInterface[] = [
         source: 'async_events',
       },
       {
-        routingKey: RabbitRoutingKeys.CodeUpdated,
-        source: 'async_events',
-      },
-      {
         routingKey: RabbitRoutingKeys.ThirdPartyPaymentActionRequested,
         source: 'async_events',
       },
@@ -97,6 +93,10 @@ export const rabbitMqQueues: RabbitMqQueueConfigInterface[] = [
       },
       {
         routingKey: RabbitRoutingKeys.ShippingSlipDownloaded,
+        source: 'async_events',
+      },
+      {
+        routingKey: RabbitRoutingKeys.SellerNamePropagated,
         source: 'async_events',
       },
       commonSdkRabbitMqBindings.get(CommonModelsNamesEnum.CurrencyModel),
