@@ -4,7 +4,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { RabbitRoutingKeys } from '../../enums';
-import { TransactionsService } from '../services';
 import { PaymentFlowSchemaName, TransactionSchemaName } from '../schemas';
 import { TransactionModel } from '../models';
 
@@ -12,7 +11,6 @@ import { TransactionModel } from '../models';
 export class AuthEventsController {
   constructor(
     @InjectModel(TransactionSchemaName) private readonly transactionModel: Model<TransactionModel>,
-    private readonly transactionsService: TransactionsService,
   ) {}
 
   @MessagePattern({

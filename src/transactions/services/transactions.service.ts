@@ -57,9 +57,9 @@ export class TransactionsService {
         ElasticTransactionEnum.type,
         TransactionDoubleConverter.pack(created.toObject()),
       );
-      const flow: PaymentFlowModel = await this.paymentFlowService.findOne(created.payment_flow_id);
 
       await this.notifier.sendNewTransactionNotification(created);
+      const flow: PaymentFlowModel = await this.paymentFlowService.findOne(created.payment_flow_id);
       if (flow.seller_email) {
         await this.transactionEventsProducer.getSellerName({email: flow.seller_email});
       }
