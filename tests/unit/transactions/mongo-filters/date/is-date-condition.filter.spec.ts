@@ -31,12 +31,12 @@ describe('IsDateConditionFilter', () => {
         ],
       }
       IsDateConditionFilter.apply(mongoFilters, field, _filter);
-      expect(mongoFilters.$and[0]).to.deep.equal(
-        {
+      expect(mongoFilters.$and).to.deep.equal(
+        [{
           startedAt: {
             $gte: "2022-01-23T00:00:00.000Z", $lt: "2022-01-24T00:00:00.000Z",
           },
-        },
+        }],
       );
     });
   });

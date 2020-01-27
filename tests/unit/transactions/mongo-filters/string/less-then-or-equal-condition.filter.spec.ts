@@ -33,10 +33,10 @@ describe('LessThenOrEqualConditionFilter', () => {
         ],
       }
       LessThenOrEqualConditionFilter.apply(mongoFilters, field, _filter);
-      expect(mongoFilters.$and[0]).to.deep.equal(
-        {
+      expect(mongoFilters.$and).to.deep.equal(
+        [{
           amount: { $lte: 123 },
-        },
+        }],
       );
     });
   });

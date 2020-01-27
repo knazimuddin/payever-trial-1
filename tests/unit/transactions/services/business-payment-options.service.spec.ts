@@ -51,7 +51,7 @@ describe('BusinessPaymentOption', () => {
       const dto: BusinessPaymentOptionInterface = {
         credentials: [],
         options: '{}',
-      } as any;
+      } as BusinessPaymentOptionInterface;
 
       const bpo: BusinessPaymentOptionModel = {
         id: 12345678,
@@ -59,11 +59,15 @@ describe('BusinessPaymentOption', () => {
           return this;
         },
         options: '{}',
-      } as any;
+      } as BusinessPaymentOptionModel;
 
       sandbox.stub(businessPaymentModel, 'updateOne');
       sandbox.stub(businessPaymentModel, 'findOne').resolves(bpo)
-      await testService.createOrUpdate(dto);
+      expect(
+        await testService.createOrUpdate(dto),
+      ).to.eq(
+        bpo,
+      )
     });
 
     it('should create or update business payment model with illigal character in options', async () => {
@@ -84,7 +88,13 @@ describe('BusinessPaymentOption', () => {
 
       sandbox.stub(businessPaymentModel, 'updateOne');
       sandbox.stub(businessPaymentModel, 'findOne').resolves(bpo)
-      await testService.createOrUpdate(dto);
+      sandbox.spy(logger, 'warn');
+      expect(
+        await testService.createOrUpdate(dto),
+      ).to.eq(bpo);
+
+      expect(logger.warn).calledTwice;
+
     });
 
     it('should create or update business payment model with no \'options\'', async () => {
@@ -97,29 +107,17 @@ describe('BusinessPaymentOption', () => {
         toObject(): any {
           return this;
         },
-      } as any;
+      } as BusinessPaymentOptionModel;
 
       sandbox.stub(businessPaymentModel, 'updateOne');
       sandbox.stub(businessPaymentModel, 'findOne').resolves(bpo)
-      await testService.createOrUpdate(dto);
+      expect(
+        await testService.createOrUpdate(dto),
+      ).to.deep.equal(
+        bpo,
+      );
     });
 
-    it('should create or update business payment model with no \'options\'', async () => {
-      const dto: BusinessPaymentOptionInterface = {
-        credentials: [],
-      } as any;
-
-      const bpo: BusinessPaymentOptionModel = {
-        id: 12345678,
-        toObject(): any {
-          return this;
-        },
-      } as any;
-
-      sandbox.stub(businessPaymentModel, 'updateOne');
-      sandbox.stub(businessPaymentModel, 'findOne').resolves(bpo)
-      await testService.createOrUpdate(dto);
-    });
   });
 
   describe('findOneById()', async () => {

@@ -33,12 +33,12 @@ describe('AfterDateConditionFilter', () => {
         ],
       }
       AfterDateConditionFilter.apply(mongoFilters, field, _filter);
-      expect(mongoFilters.$and[0]).to.deep.eq(
-        {
+      expect(mongoFilters.$and).to.deep.eq(
+        [{
           startedAt: {
             $gte: 1642896000000,
           },
-        },
+        }],
       )
     });
   });

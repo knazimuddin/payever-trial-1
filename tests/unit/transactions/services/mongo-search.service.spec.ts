@@ -48,121 +48,156 @@ describe('MongoSearchService', () => {
   });
 
   describe('getResult()', () => {
-    it('should return result', async () => {
-      sandbox.stub(testService, 'search');
-      sandbox.stub(testService, 'count');
-      sandbox.stub(testService, 'total');
-      sandbox.stub(testService, 'distinctFieldValues');
-
-      const listDto: ListQueryDto = {
-        filters: {
-          channel_set_uuid: {
-            value: {},
-          },
-          uuid: {
-            value: {},
-          },
-          id: [
-            {
-              condition: 'is',
-              value: [
-                "search",
-              ],
-            },
-            {
-              value: {},
-            },
-
-            {},
-          ],
+    it('should return result with No currency in listDto', async () => {
+      const listDto: ListQueryDto = new ListQueryDto();
+      listDto.filters = {
+        channel_set_uuid: {
+          value: '8b609edb-f61e-4c9e-951b-5d4f9a1b5b52',
         },
-        search: "search_keyword",
-      } as any;
-      await testService.getResult(listDto);
+        id: [
+          {
+            condition: 'is',
+            value: [
+              "search",
+            ],
+          },
+          {
+            value: {},
+          },
+          {},
+        ],
+        uuid: {
+          value: {},
+        },
+      }
+      listDto.search = "search_keyword";
+
+      sandbox.stub(transactionModel, 'countDocuments').resolves(10);
+      sandbox.stub(testService, 'search').resolves({})
+      sandbox.stub(transactionModel, 'aggregate').resolves([
+        {
+          _id: '7eefae05-f504-4d28-9720-f5e5195227ff',
+          total: 12,
+        },
+      ]);
+      sandbox.stub(currencyExchangeService, 'getCurrencyExchangeRate').resolves(1.26)
+      sandbox.stub(transactionModel, 'distinct')
+        .onFirstCall().resolves([{ statuses: ['SUCEEDED'] }])
+        .onSecondCall().resolves([{ specific_statuses: ['PENDING'] }]);
+
+      const result: any = await testService.getResult(listDto);
+
+      const expectedFilter: any = {
+        channel_set_uuid: '8b609edb-f61e-4c9e-951b-5d4f9a1b5b52',
+        '$and': [{ id: { $in: ["search"] } }],
+        '$or': [
+          { merchant_name: /search_keyword/i },
+          { merchant_email: /search_keyword/i },
+          { customer_name: /search_keyword/i },
+          { customer_email: /search_keyword/i },
+          { reference: /search_keyword/i },
+          { original_id: /search_keyword/i },
+          { santander_applications: /search_keyword/i },
+        ],
+      }
+
+      expect(transactionModel.countDocuments).calledOnceWithExactly(expectedFilter);
+      expect(transactionModel.aggregate).calledWithExactly(
+        [
+          { $match: expectedFilter },
+          { '$group': { _id: null, total: { '$sum': '$total' } } },
+        ],
+      )
+      expect(result).to.deep.eq(
+        {
+          collection: {},
+          filters: {},
+          pagination_data: { amount: 12, amount_currency: undefined, page: 1, total: 10 },
+          usage: { specific_statuses: [{ specific_statuses: ['PENDING'] }], statuses: [{ statuses: ['SUCEEDED'] }] },
+        });
+      expect(testService.search).calledOnceWith(expectedFilter);
     });
 
-    it('should return result', async () => {
-      sandbox.stub(testService, 'search');
-      sandbox.stub(testService, 'count');
-      sandbox.stub(testService, 'total').resolves(2);
-      sandbox.stub(testService, 'distinctFieldValues');
-
-      const listDto: ListQueryDto = {
-        filters: {
-
-          uuid: {
+    it('should return result with currency in listDto', async () => {
+      const listDto: ListQueryDto = new ListQueryDto();
+      listDto.filters = {
+        channel_set_uuid: {
+          value: '8b609edb-f61e-4c9e-951b-5d4f9a1b5b52',
+        },
+        id: [
+          {
+            condition: 'is',
+            value: [
+              "search",
+            ],
+          },
+          {
             value: {},
           },
+          {},
+        ],
+        uuid: {
+          value: {},
         },
-        search: "search_keyword",
-      } as any;
-      await testService.getResult(listDto);
+      }
+      listDto.search = "search_keyword";
+      listDto.currency = 'EUR';
+
+      sandbox.stub(transactionModel, 'countDocuments').resolves(10);
+      sandbox.stub(testService, 'search').resolves({})
+      sandbox.stub(transactionModel, 'aggregate').resolves([
+        {
+          _id: '7eefae05-f504-4d28-9720-f5e5195227ff',
+          total: 12,
+        },
+      ]);
+      sandbox.stub(currencyExchangeService, 'getCurrencyExchangeRate').resolves(1.26)
+      sandbox.stub(transactionModel, 'distinct')
+        .onFirstCall().resolves([{ statuses: ['SUCEEDED'] }])
+        .onSecondCall().resolves([{ specific_statuses: ['PENDING'] }]);
+
+      const result: any = await testService.getResult(listDto);
+
+      const expectedFilter: any = {
+        channel_set_uuid: '8b609edb-f61e-4c9e-951b-5d4f9a1b5b52',
+        '$and': [{ id: { $in: ["search"] } }],
+        '$or': [
+          { merchant_name: /search_keyword/i },
+          { merchant_email: /search_keyword/i },
+          { customer_name: /search_keyword/i },
+          { customer_email: /search_keyword/i },
+          { reference: /search_keyword/i },
+          { original_id: /search_keyword/i },
+          { santander_applications: /search_keyword/i },
+        ],
+      }
+
+      expect(transactionModel.countDocuments).calledOnceWithExactly(expectedFilter);
+      expect(transactionModel.aggregate).calledWithExactly(
+        [
+          { $match: expectedFilter },
+          { '$group': { _id: '$currency', total: { '$sum': '$total' } } },
+        ],
+      )
+      expect(result).to.deep.eq(
+        {
+          collection: {},
+          filters: {},
+          pagination_data: { amount: 12, amount_currency: 'EUR', page: 1, total: 10 },
+          usage: { specific_statuses: [{ specific_statuses: ['PENDING'] }], statuses: [{ statuses: ['SUCEEDED'] }] },
+        });
+      expect(testService.search).calledOnceWith(expectedFilter);
+
     });
+
   });
 
   describe('search()', () => {
     it('should search for transactions', async () => {
-      sandbox.stub()
+
       await testService.search(
         {}, { key: 'value' }, {} as any,
       );
-    });
-  });
-
-  describe('count()', () => {
-    it('shoud count the documents from search result', async () => {
-      sandbox.stub(transactionModel, 'countDocuments')
-      await testService.count({});
-    });
-  });
-
-  describe('total()', () => {
-    it('should return total value of transaction in EUR', async () => {
-      const result: any = [
-        {
-          total: 2,
-        },
-        {
-          total: 1,
-        },
-      ];
-
-      sandbox.stub(transactionModel, 'aggregate').resolves(result);
-      sandbox.stub(currencyExchangeService, 'getCurrencyExchangeRate')
-        .onFirstCall().resolves(null)
-        .onSecondCall().resolves(3)
-        .onThirdCall().resolves(1);
-      await testService.total({}, 'EUR');
-    })
-
-    it('should return total value of transaction', async () => {
-      const result: any = [];
-
-      sandbox.stub(transactionModel, 'aggregate').resolves(result);
-      sandbox.stub(currencyExchangeService, 'getCurrencyExchangeRate')
-        .onFirstCall().resolves(null)
-      await testService.total({});
-    })
-    it('should return total value of transaction', async () => {
-      const result: any = [
-        {},
-      ];
-
-      sandbox.stub(transactionModel, 'aggregate').resolves(result);
-      sandbox.stub(currencyExchangeService, 'getCurrencyExchangeRate')
-        .onFirstCall().resolves(null)
-      await testService.total({});
-    })
-  });
-
-  describe('distinctFieldValues()', () => {
-    it('should find destinct values', async () => {
-      sandbox.stub(transactionModel, 'distinct').resolves([
-        {
-          _id: 123,
-        },
-      ]);
-      await testService.distinctFieldValues('field', {});
     });
   });
 });

@@ -34,10 +34,10 @@ describe('BetweenDatesConditionFilter', () => {
         ],
       }
       BetweenDatesConditionFilter.apply(elasticFilters, field, _filter);
-      expect(elasticFilters.$and[0]).to.deep.equal(
-        {
+      expect(elasticFilters.$and).to.deep.equal(
+        [{
           startedAt: { $gte: 1642896000000, $lte: 1671840000000 },
-        },
+        }],
       );
     });
   });

@@ -33,10 +33,10 @@ describe('IsConditionFilter', () => {
         ],
       }
       IsConditionFilter.apply(mongoFilters, field, _filter);
-      expect(mongoFilters.$and[0]).to.deep.equal(
-        {
+      expect(mongoFilters.$and).to.deep.equal(
+        [{
           tags: { $in: ['tag1', 'tag2'] },
-        },
+        }],
       );
     });
   });

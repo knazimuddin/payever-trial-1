@@ -31,12 +31,12 @@ describe('BeforeDateConditionFilter', () => {
         ],
       }
       BeforeDateConditionFilter.apply(mongoFilter, field, _filter);
-      expect(mongoFilter.$and[0]).to.deep.equal(
-        {
+      expect(mongoFilter.$and).to.deep.equal(
+        [{
           startedAt: {
             $lt: 1671840000000,
           },
-        },
+        }],
       );
     });
   });

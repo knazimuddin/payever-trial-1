@@ -31,14 +31,14 @@ describe('LessThenOrEqualConditionFilter', () => {
         ],
       }
       LessThenOrEqualConditionFilter.apply(elasticFilters, field, _filter);
-      expect(elasticFilters.must[0]).to.deep.equal(
-        {
+      expect(elasticFilters.must).to.deep.equal(
+        [{
           range: {
             title: {
               lte: '123',
             },
           },
-        },
+        }],
       );
     });
   });

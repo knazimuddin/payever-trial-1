@@ -80,7 +80,6 @@ describe('TransactionConverter', () => {
         updated_at: '2020-01-27T09:27:41.241Z',
         history: [],
       } as CheckoutTransactionInterface;
-      console.log(TransactionConverter.fromCheckoutTransaction(checkoutTransaction));
       expect(
         TransactionConverter.fromCheckoutTransaction(checkoutTransaction),
       ).to.deep.equal(

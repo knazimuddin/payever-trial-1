@@ -14,6 +14,7 @@ import { TransactionEventProducer } from '../../../../src/transactions/producer'
 import { RabbitMqClient } from '@pe/nest-kit';
 import { TransactionsService } from '../../../../src/transactions/services/transactions.service';
 import { BusinessDto } from '../../../../src/transactions/dto';
+import { RabbitRoutingKeys } from '../../../../src/enums';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -86,19 +87,34 @@ describe('TransactionsExampleService', () => {
         {
           toObject(): any { return this },
           _id: uuid.v4(),
-        } as any,
-      ]
+        },
+        {
+          toObject(): any { return this },
+          _id: uuid.v4(),
+        },
+      ] as TransactionExampleModel[];
 
       const transaction: TransactionModel = {
         amount: 123,
         business_uuid: uuid.v4(),
         channel_set_uuid: uuid.v4(),
-        updated_at: new Date(),
+        updated_at: new Date('2020-10-19'),
         uuid: uuid.v4(),
-      } as any;
+      } as TransactionModel;
       sandbox.stub(transactionExampleModel, 'find').resolves(examples);
       sandbox.stub(transactionsService, 'create').resolves(transaction);
-      testService.createBusinessExamples(dto)
+      sandbox.spy(rabbitClient, 'send');
+
+      await testService.createBusinessExamples(dto)
+
+      expect(transactionsService.create).calledTwice;
+      expect(rabbitClient.send).calledTwice;
+      expect(rabbitClient.send).calledWith(
+        {
+          channel: RabbitRoutingKeys.TransactionsPaymentAdd,
+          exchange: 'async_events',
+        },
+      );
     });
   });
 
@@ -106,17 +122,58 @@ describe('TransactionsExampleService', () => {
     it('should remove business transactions examples', async () => {
       const transactions: TransactionModel[] = [
         {
-          _id: uuid.v4(),
+          _id: 'ed376e5e-b954-4eb1-83a1-9b174e512441',
+          business_uuid: '4b94f63b-fe21-4a97-9288-07583cb74d67',
+          uuid: '5fe5f561-fdad-4634-ad3e-8fe72b649d93',
         },
-      ] as any;
+      ] as TransactionModel[];
       sandbox.stub(transactionsService, 'findCollectionByParams').resolves(transactions);
-      await testService.removeBusinessExamples(uuid.v4());
+      sandbox.spy(transactionsService, 'removeByUuid');
+      sandbox.spy(transactionEventProducer, 'produceTransactionRemoveEvent');
+
+      await testService.removeBusinessExamples('4b94f63b-fe21-4a97-9288-07583cb74d67');
+
+      expect(transactionsService.removeByUuid).calledOnceWith(transactions[0].uuid);
+      expect(transactionEventProducer.produceTransactionRemoveEvent).calledOnceWith(transactions[0]);
+
     });
   });
 
   describe('refundExample()', () => {
     it('should send rabbit message', async () => {
-      await testService.refundExample({} as any, 12);
+      const transaction: TransactionModel = {
+        amount: 123,
+        business_uuid: uuid.v4(),
+        channel_set_uuid: uuid.v4(),
+        updated_at: new Date('2020-10-19'),
+        uuid: uuid.v4(),
+      } as TransactionModel;
+      const refund: number = 123;
+      sandbox.spy(rabbitClient, 'send')
+      await testService.refundExample(transaction, refund);
+
+
+      expect(rabbitClient.send).calledWith(
+        {
+          channel: RabbitRoutingKeys.TransactionsPaymentSubtract,
+          exchange: 'async_events',
+        },
+        {
+          name: RabbitRoutingKeys.TransactionsPaymentSubtract,
+          payload: {
+            amount: refund,
+            business: {
+              id: transaction.business_uuid,
+            },
+            channel_set: {
+              id: transaction.channel_set_uuid,
+            },
+            date: transaction.updated_at,
+            id: transaction.uuid,
+            items: transaction.items,
+          },
+        },
+      )
     });
   });
 });

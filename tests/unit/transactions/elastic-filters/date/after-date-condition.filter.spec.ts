@@ -29,11 +29,21 @@ describe('AfterDateConditionFilter', () => {
       const field: string = 'startedAt';
       const _filter: StringFilterInterface = {
         value: [
-          new Date().toString(),
+          new Date('2020-01-27').toString(),
         ],
       }
       AfterDateConditionFilter.apply(elasticFilters, field, _filter);
-      expect(elasticFilters.must.length).to.be.greaterThan(0);
+      expect(elasticFilters.must).to.deep.eq(
+        [
+          {
+            range: {
+              startedAt: {
+                gte: '2020-01-27T00:00:00.000Z',
+              },
+            },
+          },
+        ],
+      )
     });
   });
 });

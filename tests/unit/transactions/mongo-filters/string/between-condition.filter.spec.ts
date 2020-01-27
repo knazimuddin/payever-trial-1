@@ -34,10 +34,10 @@ describe('BetweenConditionFilter', () => {
         ],
       }
       BetweenConditionFilter.apply(mongoFilters, field, _filter);
-      expect(mongoFilters.$and[0]).to.deep.equal(
-        {
+      expect(mongoFilters.$and).to.deep.equal(
+        [{
           shipping_cost: { $gte: 20, $lte: 30 },
-        },
+        }],
       );
     });
   });

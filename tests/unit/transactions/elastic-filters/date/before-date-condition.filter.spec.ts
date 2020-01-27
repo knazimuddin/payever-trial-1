@@ -26,11 +26,21 @@ describe('BeforeDateConditionFilter', () => {
       const field: string = 'startedAt';
       const _filter: StringFilterInterface = {
         value: [
-          new Date().toString(),
+          new Date('2020-01-27').toString(),
         ],
       }
       BeforeDateConditionFilter.apply(elasticFilters, field, _filter);
-      expect(elasticFilters.must.length).to.be.greaterThan(0);
+      expect(elasticFilters.must).to.deep.eq(
+        [
+          {
+            range: {
+              startedAt: {
+                lt: '2020-01-28T00:00:00.000Z',
+              },
+            },
+          },
+        ],
+      )
     });
   });
 });

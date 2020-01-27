@@ -31,15 +31,15 @@ describe('StartsWithConditionFilter', () => {
         ],
       }
       StartsWithConditionFilter.apply(elasticFilters, field, _filter);
-      expect(elasticFilters.must[0]).to.deep.equal(
-        {
+      expect(elasticFilters.must).to.deep.equal(
+        [{
           query_string: {
             fields: [
               'title^1',
             ],
             query: 'keyword*',
           },
-        },
+        }],
       );
     });
   });

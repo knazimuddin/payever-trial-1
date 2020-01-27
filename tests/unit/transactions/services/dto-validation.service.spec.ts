@@ -30,32 +30,45 @@ describe('DtoValidationService', () => {
   describe('checkFileUploadDto()', () => {
     it('should check file dto', async () => {
       const dto: ActionPayloadDto = {
-        fields: {} as any,
         files: [
           {
             url: 'www.payever.de/files',
-          } as any,
+          },
         ],
-      };
+      } as ActionPayloadDto;
       testService.checkFileUploadDto(dto);
+      expect(dto).to.deep.equal({
+        files: [
+          {
+            url: 'www.payever.de/files',
+          },
+        ],
+      })
     });
     it('should check file dto with space in url', async () => {
       const dto: ActionPayloadDto = {
-        fields: {} as any,
         files: [
           {
             url: 'www.payever.de/ files',
           } as any,
         ],
-      };
+      } as ActionPayloadDto;
+      testService.checkFileUploadDto(dto),
+        expect(dto).to.deep.eq({
+          files: [
+            {
+              url: 'www.payever.de/%20files',
+            },
+          ],
+        })
       testService.checkFileUploadDto(dto);
     });
     it('should check file dto with no files', async () => {
       const dto: ActionPayloadDto = {
-        fields: {} as any,
         files: undefined,
-      };
+      } as ActionPayloadDto;
       testService.checkFileUploadDto(dto);
+      expect(dto).to.deep.eq({ files: undefined });
     });
   });
 });

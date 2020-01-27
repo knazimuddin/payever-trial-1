@@ -31,12 +31,14 @@ describe('IsNotDateConditionFilter', () => {
         ],
       }
       IsNotDateConditionFilter.apply(elasticFilters, field, _filter);
-      expect(elasticFilters.must_not[0]).to.deep.equal(
-        {
-          range: {
-            startedAt: { gte: '2020-01-20T00:00:00.000Z', lt: '2020-01-21T00:00:00.000Z' },
+      expect(elasticFilters.must_not).to.deep.equal(
+        [
+          {
+            range: {
+              startedAt: { gte: '2020-01-20T00:00:00.000Z', lt: '2020-01-21T00:00:00.000Z' },
+            },
           },
-        },
+        ],
       );
     });
   });

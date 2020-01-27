@@ -32,15 +32,15 @@ describe('DoesNotContainConditionFilter', () => {
         ],
       }
       DoesNotContainConditionFilter.apply(elasticFilters, field, _filter);
-      expect(elasticFilters.must_not[0]).to.deep.equal(
-        {
+      expect(elasticFilters.must_not).to.deep.equal(
+        [{
           query_string: {
             fields: [
               'shipping_cost^1',
             ],
             query: '*keyword*',
           },
-        },
+        }],
       );
     });
   });
