@@ -7,16 +7,16 @@ import * as sinonChai from 'sinon-chai';
 import * as uuid from 'uuid';
 import { Logger } from '@nestjs/common';
 import { Model } from 'mongoose';
-import { TransactionModel, TransactionHistoryEntryModel } from '../../../../src/transactions/models';
+import { TransactionModel, TransactionHistoryEntryModel, PaymentFlowModel } from '../../../../src/transactions/models';
 import { NotificationsEmitter } from '@pe/notifications-sdk';
 import { ElasticsearchClient, DelayRemoveClient } from '@pe/nest-kit';
 import { TransactionsNotifier } from '../../../../src/transactions/notifiers';
 import { TransactionsService } from '../../../../src/transactions/services/transactions.service';
 import { TransactionPackedDetailsInterface, TransactionUnpackedDetailsInterface } from '../../../../src/transactions/interfaces';
 import { RpcResultDto } from '../../../../src/transactions/dto';
-import { AnyARecord } from 'dns';
-import { RpcException } from '@nestjs/microservices';
-import { TransactionEventsProducer } from '../../../../src/transactions/producer';
+import { AuthEventsProducer } from '../../../../src/transactions/producer';
+import { PaymentFlowService } from '../../../../src/transactions/services/payment-flow.service';
+import { AnyTxtRecord } from 'dns';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -27,11 +27,12 @@ describe('TransactionsService', () => {
   let testService: TransactionsService;
   let transactionModel: Model<TransactionModel>
   let notificationsEmitter: NotificationsEmitter;
+  let paymentFlowService: PaymentFlowService;
   let elasticSearchClient: ElasticsearchClient;
   let logger: Logger;
   let notifier: TransactionsNotifier;
-  let transactionEnventsProducer: TransactionEventsProducer;
   let delayRemoveClient: DelayRemoveClient;
+  let authEventsProducer: AuthEventsProducer;
 
   const transaction: TransactionModel = {
     id: uuid.v4(),
@@ -43,6 +44,10 @@ describe('TransactionsService', () => {
     history: [],
   } as any;
 
+  const flow: PaymentFlowModel = {
+    seller_email: 'seller@email.com',
+  } as PaymentFlowModel;
+
   before(() => {
     transactionModel = {
       create: (): any => { },
@@ -50,6 +55,10 @@ describe('TransactionsService', () => {
       findOne: (): any => { },
       findOneAndRemove: (): any => { },
       findOneAndUpdate: (): any => { },
+    } as any;
+
+    paymentFlowService = {
+      findOne: (): any => { },
     } as any;
 
     elasticSearchClient = {
@@ -69,18 +78,19 @@ describe('TransactionsService', () => {
       deleteByQuery: (): any => { },
     } as any;
 
-    transactionEnventsProducer = {
-      sendTransactionCreatedEvent: (): any => { },
+    authEventsProducer = {
+      getSellerName: (): any => { },
     } as any;
 
     testService = new TransactionsService(
       transactionModel,
       notificationsEmitter,
+      paymentFlowService,
       elasticSearchClient,
       logger,
       notifier,
       delayRemoveClient,
-      transactionEnventsProducer,
+      authEventsProducer,
     );
   });
 
@@ -101,6 +111,7 @@ describe('TransactionsService', () => {
       } as any;
 
       sandbox.stub(transactionModel, 'create').resolves(transaction);
+      sandbox.stub(paymentFlowService, 'findOne').resolves(flow);
       expect(
         await testService.create(transactionDto),
       ).to.equal(transaction);
@@ -110,6 +121,7 @@ describe('TransactionsService', () => {
       const transactionDto: TransactionPackedDetailsInterface = {
       } as any;
 
+      sandbox.stub(paymentFlowService, 'findOne').resolves(flow);
       sandbox.stub(transactionModel, 'create').throws({
         code: 11000,
         name: 'MongoError',
@@ -125,6 +137,7 @@ describe('TransactionsService', () => {
       const transactionDto: TransactionPackedDetailsInterface = {
       } as any;
 
+      sandbox.stub(paymentFlowService, 'findOne').resolves(flow);
       sandbox.stub(transactionModel, 'create').throws({
         code: 123,
         name: 'SomeError',
@@ -144,6 +157,7 @@ describe('TransactionsService', () => {
         id: uuid.v4(),
       } as any;
 
+      sandbox.stub(paymentFlowService, 'findOne').resolves(flow);
       sandbox.stub(transactionModel, 'findOneAndUpdate').resolves(transaction);
       expect(
         await testService.updateByUuid(transaction.id, transactionDto),
@@ -164,6 +178,7 @@ describe('TransactionsService', () => {
         history: [],
       } as any;
 
+      sandbox.stub(paymentFlowService, 'findOne').resolves(flow);
       sandbox.stub(transactionModel, 'findOneAndUpdate').throws({
         code: 11000,
         name: 'MongoError',
@@ -189,6 +204,7 @@ describe('TransactionsService', () => {
         history: [],
       } as any;
 
+      sandbox.stub(paymentFlowService, 'findOne').resolves(flow);
       sandbox.stub(transactionModel, 'findOneAndUpdate').throws({
         code: 100,
         name: 'SomeOtherError',

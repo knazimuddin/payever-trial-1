@@ -22,10 +22,11 @@ import {
   TransactionPackedDetailsInterface,
   TransactionUnpackedDetailsInterface,
 } from '../interfaces/transaction';
-import { TransactionHistoryEntryModel, TransactionModel } from '../models';
+import { PaymentFlowModel, TransactionHistoryEntryModel, TransactionModel } from '../models';
 import { TransactionsNotifier } from '../notifiers';
 import { TransactionSchemaName } from '../schemas';
-import { TransactionEventsProducer } from '../producer';
+import { AuthEventsProducer } from '../producer';
+import { PaymentFlowService } from './payment-flow.service';
 
 @Injectable()
 export class TransactionsService {
@@ -33,12 +34,13 @@ export class TransactionsService {
   constructor(
     @InjectModel(TransactionSchemaName) private readonly transactionModel: Model<TransactionModel>,
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
+    private readonly paymentFlowService: PaymentFlowService,
     private readonly elasticSearchClient: ElasticsearchClient,
     private readonly logger: Logger,
     private readonly notifier: TransactionsNotifier,
     private readonly delayRemoveClient: DelayRemoveClient,
-    private readonly transactionEventsProducer: TransactionEventsProducer,
-  ) {}
+    private readonly authEventsProducer: AuthEventsProducer,
+  ) { }
 
   public async create(transactionDto: TransactionPackedDetailsInterface): Promise<TransactionModel> {
     if (transactionDto.id) {
@@ -58,7 +60,10 @@ export class TransactionsService {
       );
 
       await this.notifier.sendNewTransactionNotification(created);
-      await this.transactionEventsProducer.sendTransactionCreatedEvent(created);
+      const flow: PaymentFlowModel = await this.paymentFlowService.findOne({id: created.payment_flow_id});
+      if (flow.seller_email) {
+        await this.authEventsProducer.getSellerName({ email: flow.seller_email });
+      }
 
       return created;
     } catch (err) {

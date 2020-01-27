@@ -168,8 +168,8 @@ describe('TransactionConverter', () => {
               weight: 200,
             },
           ],
-          created_at: new Date('2020-01-27T09:27:41.241Z'),
-          updated_at: new Date('2020-01-27T09:27:41.241Z'),
+          created_at: new Date('2020-01-27T09:27:41.000Z'),
+          updated_at: new Date('2020-01-27T09:27:41.000Z'),
         } ,
       )
     });

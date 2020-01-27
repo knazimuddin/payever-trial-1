@@ -5,13 +5,13 @@ import { TransactionModel } from '../models';
 import { RabbitRoutingKeys } from '../../enums';
 
 @Injectable()
-export class TransactionEventsProducer {
+export class AuthEventsProducer {
   constructor(
     private readonly rabbitMqClient: RabbitMqClient,
   ) {}
 
-  public async sendTransactionCreatedEvent(payload: TransactionModel): Promise<void> {
-    await this.send(RabbitRoutingKeys.TransactionCreated, payload);
+  public async getSellerName(payload: {email: string}): Promise<void> {
+    await this.send(RabbitRoutingKeys.GetSellerName, payload);
   }
 
   private async send(channel: string, payload: any): Promise<void> {
