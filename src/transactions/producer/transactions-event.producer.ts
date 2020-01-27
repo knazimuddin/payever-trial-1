@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { RabbitMqClient } from '@pe/nest-kit';
+
 import { TransactionPackedDetailsInterface } from '../interfaces';
-import { TransactionModel } from '../../../src/transactions/models';
+import { TransactionModel } from '../models';
 import { RabbitRoutingKeys } from '../../enums';
 import { TransactionPaymentInterface } from '../interfaces/transaction/transaction-payment.interface';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
@@ -66,6 +67,10 @@ export class TransactionEventProducer {
     };
 
     await this.send(RabbitRoutingKeys.TransactionsPaymentRemoved, payload);
+  }
+
+  public async sendTransactionCreatedEvent(payload: TransactionModel): Promise<void> {
+    await this.send(RabbitRoutingKeys.TransactionCreated, payload);
   }
 
   private async send(eventName: string, payload: any): Promise<void> {
