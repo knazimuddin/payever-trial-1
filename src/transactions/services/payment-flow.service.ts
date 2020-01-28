@@ -13,23 +13,19 @@ export class PaymentFlowService {
   ) {}
 
   public async createOrUpdate(flowDto: PaymentFlowDto): Promise<PaymentFlowModel> {
-    const dto: PaymentFlowDto = {
-      ...flowDto,
-    };
+    try {
+      return this.model.create(flowDto);
+    } catch (exception) {
+      if (exception.name === 'MongoError' && exception.code === 11000) {
+        return this.model.findOneAndUpdate(
+          {id: flowDto.id},
+          flowDto,
+          {new: true},
+        );
+      }
 
-    if (await this.model.findOne({ id: flowDto.id })) {
-      delete flowDto.id;
-      await this.model.findOneAndUpdate(
-        {
-          id: flowDto.id,
-        },
-        flowDto,
-      );
-    } else {
-      await this.model.create(dto);
+      throw exception;
     }
-
-    return this.model.findOne({ id: flowDto.id });
   }
 
   public async findOne(conditions: any): Promise<PaymentFlowModel> {
