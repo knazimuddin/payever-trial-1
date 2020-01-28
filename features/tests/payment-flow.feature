@@ -572,7 +572,7 @@ Feature: Full real payment flow
         "payload": {
           "action_running": false,
           "santander_applications": [],
-          "_id": "5e2fe4a1a720782e4a88e8f5",
+          "_id": "*",
           "uuid": "f61e09b6-61ca-426b-8ee6-e8ce3118e932",
           "status": "STATUS_NEW",
           "currency": "EUR",
@@ -582,8 +582,8 @@ Feature: Full real payment flow
           "amount": 650,
           "total": 650,
           "items": [],
-          "created_at": "2019-04-15T04:33:15.000Z",
-          "updated_at": "2019-04-15T04:33:15.000Z",
+          "created_at": "*",
+          "updated_at": "*",
           "payment_details": "[]",
           "business_option_id": 34196,
           "reference": "diusfhiuwehfui",
@@ -602,7 +602,7 @@ Feature: Full real payment flow
             "city": "Hamburg",
             "zip_code": "20457",
             "street": "Am Strandkai",
-            "_id": "11b1316f-e3aa-4256-95a5-357b696f48b8"
+            "_id": "*"
           },
           "type": "stripe_directdebit",
           "business_uuid": "504dbe56-a67f-4e92-9470-477e88b12bae",
