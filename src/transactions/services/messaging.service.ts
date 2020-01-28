@@ -183,7 +183,7 @@ export class MessagingService {
     paymentMethod: string,
     payload: any,
   ): Promise<void> {
-    const stub: boolean = this.configService.get<string>('STUB') === 'true';
+    const stub: boolean = this.configService.get<boolean>('STUB');
     await this.rabbitRpcClient.send(
       {
         channel: this.paymentMicroService.getChannelByPaymentType(paymentMethod, stub),

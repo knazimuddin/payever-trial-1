@@ -2,7 +2,6 @@ import { Controller, Get, HttpCode, HttpStatus, NotFoundException, UseGuards } f
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel, QueryDto } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum, User, UserTokenInterface } from '@pe/nest-kit/modules/auth';
-import { environment } from '../../environments';
 import { TransactionOutputConverter } from '../converter';
 import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionItemInterface } from '../interfaces';
@@ -11,6 +10,7 @@ import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import { ElasticSearchService, MongoSearchService, TransactionsService } from '../services';
 import { UserFilter } from '../tools';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('user')
 @ApiUseTags('user')
@@ -26,8 +26,9 @@ export class UserController {
     private readonly transactionsService: TransactionsService,
     private readonly mongoSearchService: MongoSearchService,
     private readonly elasticSearchService: ElasticSearchService,
+    private readonly configService: ConfigService,
   ) {
-    this.defaultCurrency = environment.defaultCurrency;
+    this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
   }
 
   @Get('list')
