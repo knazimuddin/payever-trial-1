@@ -14,7 +14,7 @@ export class PaymentFlowService {
 
   public async createOrUpdate(flowDto: PaymentFlowDto): Promise<PaymentFlowModel> {
     try {
-      return this.model.create(flowDto);
+      return await this.model.create(flowDto);
     } catch (exception) {
       if (exception.name === 'MongoError' && exception.code === 11000) {
         return this.model.findOneAndUpdate(
