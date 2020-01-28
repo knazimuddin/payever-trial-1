@@ -25,7 +25,7 @@ import {
 import { PaymentFlowModel, TransactionHistoryEntryModel, TransactionModel } from '../models';
 import { TransactionsNotifier } from '../notifiers';
 import { TransactionSchemaName } from '../schemas';
-import { AuthEventsProducer, TransactionEventProducer } from '../producer';
+import { AuthEventsProducer } from '../producer';
 import { PaymentFlowService } from './payment-flow.service';
 
 @Injectable()
@@ -38,8 +38,7 @@ export class TransactionsService {
     private readonly elasticSearchClient: ElasticsearchClient,
     private readonly logger: Logger,
     private readonly notifier: TransactionsNotifier,
-    private readonly authEventsProducer: AuthEventsProducer,
-    private readonly transactionEventsProducer: TransactionEventProducer,
+    private readonly transactionEventsProducer: AuthEventsProducer,
   ) {}
 
   public async create(transactionDto: TransactionPackedDetailsInterface): Promise<TransactionModel> {
@@ -62,9 +61,8 @@ export class TransactionsService {
       await this.notifier.sendNewTransactionNotification(created);
       const flow: PaymentFlowModel = await this.paymentFlowService.findOne({id: created.payment_flow_id});
       if (flow.seller_email) {
-        await this.authEventsProducer.getSellerName({email: flow.seller_email});
+        await this.transactionEventsProducer.getSellerName({email: flow.seller_email});
       }
-      await this.transactionEventsProducer.sendTransactionCreatedEvent(created);
 
       return created;
     } catch (err) {

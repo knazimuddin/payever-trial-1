@@ -69,10 +69,6 @@ export class TransactionEventProducer {
     await this.send(RabbitRoutingKeys.TransactionsPaymentRemoved, payload);
   }
 
-  public async sendTransactionCreatedEvent(payload: TransactionModel): Promise<void> {
-    await this.send(RabbitRoutingKeys.TransactionCreated, payload);
-  }
-
   private async send(eventName: string, payload: any): Promise<void> {
     await this.rabbitClient.send(
       {
