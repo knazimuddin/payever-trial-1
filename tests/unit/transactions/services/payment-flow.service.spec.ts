@@ -53,26 +53,11 @@ describe('PaymentFlowService', () => {
       sandbox.stub(paymentFlowModel, 'create');
 
       await testService.createOrUpdate(flowDto);
-      expect(paymentFlowModel.findOneAndUpdate).to.calledOnce;
-      expect(paymentFlowModel.create).to.not.called;
-    });
-    it('shoudl create paymentFlowModel', async () => {
-      const paymentFlow: PaymentFlowModel = {
-        id: uuid.v4(),
-      } as any;
-      const flowDto: PaymentFlowDto = {
-        id: uuid.v4(),
-      } as any;
-
-      sandbox.stub(paymentFlowModel, 'findOne')
-        .onFirstCall().resolves(null)
-        .onSecondCall().resolves(paymentFlow);
-      sandbox.stub(paymentFlowModel, 'findOneAndUpdate');
-      sandbox.stub(paymentFlowModel, 'create');
-
-      await testService.createOrUpdate(flowDto);
-      expect(paymentFlowModel.create).calledOnce;
-      expect(paymentFlowModel.findOneAndUpdate).not.called;
+      expect(paymentFlowModel.findOneAndUpdate).to.calledOnceWithExactly(
+        { id: flowDto.id },
+        flowDto,
+        { new: true, upsert: true },
+      );
     });
   });
 

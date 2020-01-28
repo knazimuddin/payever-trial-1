@@ -8,7 +8,7 @@ import { Model } from 'mongoose';
 import { MongoSearchService } from '../../../../src/transactions/services/mongo-search.service';
 import { TransactionModel } from '../../../../src/transactions/models';
 import { CurrencyExchangeService } from '../../../../src/transactions/services/currency-exchange.service';
-import { ListQueryDto } from '../../../../src/transactions/dto';
+import { ListQueryDto, PagingDto } from '../../../../src/transactions/dto';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -194,10 +194,15 @@ describe('MongoSearchService', () => {
 
   describe('search()', () => {
     it('should search for transactions', async () => {
+      sandbox.spy(transactionModel, 'find')
 
       await testService.search(
-        {}, { key: 'value' }, {} as any,
+        { $and: { key1: 'value1' } },
+        { key: 'value' },
+        new PagingDto(2, 4),
       );
+      expect(transactionModel.find).calledOnceWith({ $and: { key1: 'value1' } })
+
     });
   });
 });

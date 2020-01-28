@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { RabbitMqClient } from '@pe/nest-kit';
+
 import { TransactionPackedDetailsInterface } from '../interfaces';
-import { TransactionModel } from '../../../src/transactions/models';
+import { TransactionModel } from '../models';
 import { RabbitRoutingKeys } from '../../enums';
 import { TransactionPaymentInterface } from '../interfaces/transaction/transaction-payment.interface';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
