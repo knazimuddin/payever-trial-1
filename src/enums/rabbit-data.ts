@@ -38,4 +38,5 @@ export enum RabbitRoutingKeys {
 
   GetSellerName = 'auth.commands.get_user_data',
   SellerNamePropagated = 'auth.event.propagate_user_data',
+  TransactionCreated = 'transactions.events.transaction.created',
 }
