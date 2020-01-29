@@ -63,7 +63,8 @@ export const TransactionSchema: Schema = new Schema({
   updated_at: Date,
   user_uuid: String,
 
-  sellerName: String,
+  seller_email: String,
+  seller_name: String,
 
   example: Boolean,
   example_shipping_label: String,
