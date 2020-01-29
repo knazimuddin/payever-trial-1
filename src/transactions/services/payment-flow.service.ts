@@ -13,19 +13,11 @@ export class PaymentFlowService {
   ) {}
 
   public async createOrUpdate(flowDto: PaymentFlowDto): Promise<PaymentFlowModel> {
-    try {
-      return await this.model.create(flowDto);
-    } catch (exception) {
-      if (exception.name === 'MongoError' && exception.code === 11000) {
-        return this.model.findOneAndUpdate(
-          {id: flowDto.id},
-          flowDto,
-          {new: true},
-        );
-      }
-
-      throw exception;
-    }
+    return this.model.findOneAndUpdate(
+      {id: flowDto.id},
+      flowDto,
+      {new: true, upsert: true},
+    );
   }
 
   public async findOne(conditions: any): Promise<PaymentFlowModel> {
