@@ -12,8 +12,8 @@ export class PaymentMailMessagesProvider extends AbstractMessageMock {
     const producer: PaymentMailEventProducer = await this.getProvider<PaymentMailEventProducer>(PaymentMailEventProducer);
     await producer.produceShippingEvent(
       {
-        to: 'to address',
-        cc: ['cc address', 'cc address2'],
+        to: 'test@test.com',
+        cc: ['cc1@test.com', 'cc2@test.com'],
         template_name: 'tempalte name',
         business: {
             uuid : uuid.v4(),
@@ -23,7 +23,7 @@ export class PaymentMailMessagesProvider extends AbstractMessageMock {
             uuid: uuid.v4(),
             amount: 123,
             total: 123,
-            currency: 'some currency',
+            currency: 'EUR',
             reference: 'reference',
             delivery_fee: 123,
             customer_name: 'customer name',
@@ -32,14 +32,14 @@ export class PaymentMailMessagesProvider extends AbstractMessageMock {
             address: {
                 city: 'city',
                 company: 'company',
-                country: 'id', // code like de/en
+                country: 'de', 
                 country_name: 'indonesia',
                 email: 'some@mail.com',
                 fax: 'some fax number',
                 first_name: 'first name',
                 last_name: 'last name',
-                mobile_phone: 'mobile phone number',
-                phone: 'phone number',
+                mobile_phone: '+49-152-5555-428',
+                phone: '+49-159-5555-970',
                 salutation: 'salutation',
                 social_security_number: 'social security number',
                 type: 'shipping',
@@ -63,8 +63,8 @@ export class PaymentMailMessagesProvider extends AbstractMessageMock {
             }
         ],
         variables: {
-            trackingNumber: 'tracking number',
-            trackingUrl: 'tracking url',
+            trackingNumber: '01283102981',
+            trackingUrl: 'http://sometracking.com',
             deliveryDate: '2019-12-10T14:33:27.876Z',
         }
       } as ShippingMailDto,
@@ -92,10 +92,10 @@ export class PaymentMailMessagesProvider extends AbstractMessageMock {
             action_running: true,
             amount: 123,
             business_option_id: 123,
-            business_uuid: 'business_uuid',
+            business_uuid: '834a1b9e-c044-4c23-adb6-d386e88f13b2',
             channel: 'channel',
-            channel_uuid: 'channel_uuid',
-            channel_set_uuid: 'channel_set_uuid',
+            channel_uuid: '8358cf0c-fdf6-46d0-ac37-28e4741555b2',
+            channel_set_uuid: '14e738f6-30cc-4d63-892a-2912bc288f9b',
             created_at: 'created_at',
             currency: 'currency',
             customer_email: 'customer_email',
@@ -137,7 +137,7 @@ export class PaymentMailMessagesProvider extends AbstractMessageMock {
             total: 123,
             type: 'type',
             updated_at: 'updated_at',
-            user_uuid: 'user_uuid',
+            user_uuid: '3d2ff034-a318-4e7c-8928-be239d0be96c',
             payment_type: 'payment_type',
             payment_details: {},
         }
