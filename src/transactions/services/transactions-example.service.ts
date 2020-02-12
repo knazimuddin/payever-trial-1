@@ -10,6 +10,7 @@ import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionExampleModel, TransactionModel } from '../models';
 import { TransactionExampleSchemaName } from '../schemas';
 import { TransactionsService } from './transactions.service';
+import { TransactionEventProducer } from '../producer';
 
 @Injectable()
 export class TransactionsExampleService {
@@ -17,6 +18,7 @@ export class TransactionsExampleService {
     @InjectModel(TransactionExampleSchemaName) private readonly transactionExampleModel: Model<TransactionExampleModel>,
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
     private readonly transactionsService: TransactionsService,
+    private readonly transactionEventProducer: TransactionEventProducer,
     private readonly rabbitClient: RabbitMqClient,
   ) {}
 
@@ -79,30 +81,7 @@ export class TransactionsExampleService {
 
     for (const transaction of transactions) {
       await this.transactionsService.removeByUuid(transaction.uuid);
-
-      await this.rabbitClient
-        .send(
-          {
-            channel: RabbitRoutingKeys.TransactionsPaymentRemoved,
-            exchange: 'async_events',
-          },
-          {
-            name: RabbitRoutingKeys.TransactionsPaymentRemoved,
-            payload: {
-              amount: transaction.amount,
-              business: {
-                id: transaction.business_uuid,
-              },
-              channel_set: {
-                id: transaction.channel_set_uuid,
-              },
-              date: transaction.updated_at,
-              id: transaction.uuid,
-              items: transaction.items,
-            },
-          },
-        )
-      ;
+      await this.transactionEventProducer.produceTransactionRemoveEvent(transaction);
     }
   }
 

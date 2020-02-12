@@ -13,23 +13,15 @@ export class PaymentFlowService {
   ) {}
 
   public async createOrUpdate(flowDto: PaymentFlowDto): Promise<PaymentFlowModel> {
-    const dto: PaymentFlowDto = {
-      ...flowDto,
-    };
+    return this.model.findOneAndUpdate(
+      {id: flowDto.id},
+      flowDto,
+      {new: true, upsert: true},
+    );
+  }
 
-    if (await this.model.findOne({ id: flowDto.id })) {
-      delete flowDto.id;
-      await this.model.findOneAndUpdate(
-        {
-          id: flowDto.id,
-        },
-        flowDto,
-      );
-    } else {
-      await this.model.create(dto);
-    }
-
-    return this.model.findOne({ id: flowDto.id });
+  public async findOne(conditions: any): Promise<PaymentFlowModel> {
+    return this.model.findOne(conditions);
   }
 
   public async findOneById(id: string): Promise<PaymentFlowModel> {

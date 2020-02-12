@@ -23,8 +23,6 @@ export enum RabbitRoutingKeys {
   TransactionsPaymentSubtract = 'transactions.event.payment.subtract',
   TransactionsPaymentRemoved = 'transactions.event.payment.removed',
 
-  CodeUpdated = 'device_payments.code.updated',
-
   ThirdPartyPaymentActionRequested = 'third-party.event.payment.action',
 
   ShippingOrderProcessed = 'shipping.event.shipping-order.processed',
@@ -37,4 +35,7 @@ export enum RabbitRoutingKeys {
   BusinessRemoved = 'users.event.business.removed',
 
   MailerPaymentMailSent = 'mailer.event.payment-mail.sent',
+
+  GetSellerName = 'auth.commands.get_user_data',
+  SellerNamePropagated = 'auth.event.propagate_user_data',
 }

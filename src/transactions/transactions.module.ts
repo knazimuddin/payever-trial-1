@@ -14,7 +14,7 @@ import {
   TransactionsExportCommand,
 } from './commands';
 import {
-  AdminController,
+  AdminController, AuthEventsController,
   BpoEventsController,
   BusinessBusMessagesController,
   BusinessController,
@@ -28,7 +28,7 @@ import {
   UserController,
 } from './controllers';
 import { EventListenersList } from './event-listeners/event-listeners.list';
-import { PaymentMailEventProducer } from './producer';
+import { PaymentMailEventProducer, AuthEventsProducer, TransactionEventProducer } from './producer';
 import {
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,
@@ -74,6 +74,7 @@ import { TransactionsNotifier } from './notifiers';
     UserController,
     ShippingBusMessagesController,
     MailerBusMessagesController,
+    AuthEventsController,
   ],
   imports: [
     HttpModule,
@@ -117,11 +118,13 @@ import { TransactionsNotifier } from './notifiers';
     TransactionsEsCompareCommand,
     TransactionsEsExportCommand,
     TransactionsEsSetupCommand,
+    AuthEventsProducer,
     TransactionsExampleService,
     TransactionsExportCommand,
     TransactionsService,
     TransactionsNotifier,
     PaymentMailEventProducer,
+    TransactionEventProducer,
     ...EventListenersList,
   ],
 })

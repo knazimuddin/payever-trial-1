@@ -27,6 +27,7 @@ export const PaymentFlowSchema: Schema = new Schema(
     origin: String,
     reference: String,
     salutation: String,
+    seller_email: String,
     state: String,
     step: String,
     tax_value: Number,

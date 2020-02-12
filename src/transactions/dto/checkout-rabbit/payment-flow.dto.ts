@@ -85,4 +85,8 @@ export class PaymentFlowDto {
   @IsOptional()
   @IsString()
   public x_frame_host?: string;
+
+  @IsOptional()
+  @IsString()
+  public seller_email: string;
 }
