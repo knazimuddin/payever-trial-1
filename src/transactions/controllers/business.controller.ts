@@ -24,6 +24,7 @@ import { BusinessDto, ExportQueryDto, ListQueryDto, PagingResultDto } from '../d
 import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { BusinessModel, TransactionModel } from '../models';
+import { TransactionsNotifier } from '../notifiers';
 import { TransactionSchemaName } from '../schemas';
 import {
   ActionsRetriever,
@@ -36,7 +37,6 @@ import {
   TransactionsService,
 } from '../services';
 import { BusinessFilter, Exporter, ExportFormat } from '../tools';
-import { TransactionsNotifier } from '../notifiers';
 
 const BusinessPlaceholder: string = ':businessId';
 const UuidPlaceholder: string = ':uuid';

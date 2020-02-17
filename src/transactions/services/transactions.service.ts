@@ -67,7 +67,10 @@ export class TransactionsService {
       return created;
     } catch (err) {
       if (err.name === 'MongoError' && err.code === 11000) {
-        this.logger.warn({ text: `Attempting to create existing Transaction with uuid '${transactionDto.uuid}'`});
+        this.logger.warn({
+          data: transactionDto,
+          text: `Attempting to create existing Transaction with uuid '${transactionDto.uuid}'`,
+        });
 
         return this.transactionModel.findOne({ original_id: transactionDto.id });
       } else {
@@ -115,7 +118,12 @@ export class TransactionsService {
       return updated;
     } catch (err) {
       if (err.name === 'MongoError' && err.code === 11000) {
-        this.logger.warn({ text: `Simultaneous update caused error, transaction uuid '${transactionDto.uuid}'`});
+        this.logger.warn({
+          data: transactionDto,
+          text: `Simultaneous update caused error, transaction uuid '${transactionDto.uuid}'`,
+        });
+
+        return this.transactionModel.findOne({ original_id: transactionDto.id });
       } else {
         throw err;
       }
