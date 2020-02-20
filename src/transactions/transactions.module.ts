@@ -53,6 +53,7 @@ import {
   PaymentFlowService,
   PaymentsMicroService,
   StatisticsService,
+  ThirdPartyCallerService,
   TransactionActionService,
   TransactionHistoryService,
   TransactionsExampleService,
@@ -125,6 +126,7 @@ import { TransactionsNotifier } from './notifiers';
     TransactionsNotifier,
     PaymentMailEventProducer,
     TransactionEventProducer,
+    ThirdPartyCallerService,
     ...EventListenersList,
   ],
 })

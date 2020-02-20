@@ -1,13 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ActionItemInterface } from '../interfaces';
+import { ActionCallerInterface, ActionItemInterface } from '../interfaces';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { MessagingService } from './messaging.service';
+import { ThirdPartyCallerService } from './third-party-caller.service';
+import { ThirdPartyPaymentsEnum } from '../enum';
 
 @Injectable()
 export class ActionsRetriever {
 
   constructor(
     private readonly messagingService: MessagingService,
+    private readonly thirdPartyCallerService: ThirdPartyCallerService,
     private readonly logger: Logger,
   ) {}
 
@@ -15,7 +18,9 @@ export class ActionsRetriever {
     let actions: ActionItemInterface[] = [];
 
     try {
-      actions = await this.messagingService.getActionsList(unpackedTransaction);
+      const actionCallerService: ActionCallerInterface = this.chooseActionCallerService(unpackedTransaction);
+
+      actions = await actionCallerService.getActionsList(unpackedTransaction);
     } catch (e) {
       this.logger.error(
         {
@@ -55,5 +60,15 @@ export class ActionsRetriever {
       default:
         return [];
     }
+  }
+
+  private chooseActionCallerService(
+    unpackedTransaction: TransactionUnpackedDetailsInterface,
+  ): ActionCallerInterface {
+    const thirdPartyMethods: string[] = Object.values(ThirdPartyPaymentsEnum);
+
+    return thirdPartyMethods.includes(unpackedTransaction.type)
+      ? this.thirdPartyCallerService
+      : this.messagingService;
   }
 }

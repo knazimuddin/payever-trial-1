@@ -8,6 +8,9 @@ import { TransactionsService } from './transactions.service';
 import { DtoValidationService } from './dto-validation.service';
 import { MessagingService } from './messaging.service';
 import { TransactionsExampleService } from './transactions-example.service';
+import {ActionCallerInterface} from "../interfaces";
+import {ThirdPartyPaymentsEnum} from "../enum";
+import {ThirdPartyCallerService} from "./third-party-caller.service";
 
 @Injectable()
 export class TransactionActionService {
@@ -15,6 +18,7 @@ export class TransactionActionService {
     private readonly transactionsService: TransactionsService,
     private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
+    private readonly thirdPartyCallerService: ThirdPartyCallerService,
     private readonly logger: Logger,
     private readonly exampleService: TransactionsExampleService,
   ) {}
@@ -30,7 +34,9 @@ export class TransactionActionService {
     );
 
     try {
-      await this.messagingService.runAction(unpackedTransaction, action, actionPayload);
+      const actionCallerService: ActionCallerInterface = this.chooseActionCallerService(unpackedTransaction);
+
+      await actionCallerService.runAction(unpackedTransaction, action, actionPayload);
     } catch (e) {
       this.logger.log(
         {
@@ -97,5 +103,15 @@ export class TransactionActionService {
     await transaction.save();
 
     return this.transactionsService.findUnpackedByUuid(transaction.uuid);
+  }
+
+  private chooseActionCallerService(
+    unpackedTransaction: TransactionUnpackedDetailsInterface,
+  ): ActionCallerInterface {
+    const thirdPartyMethods: string[] = Object.values(ThirdPartyPaymentsEnum);
+
+    return thirdPartyMethods.includes(unpackedTransaction.type)
+      ? this.thirdPartyCallerService
+      : this.messagingService;
   }
 }
