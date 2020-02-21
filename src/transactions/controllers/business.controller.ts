@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  NotFoundException,
   Body,
   Controller,
   Get,
@@ -70,14 +71,18 @@ export class BusinessController {
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
   @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async getDetailByReference(
-    @ParamModel(
-      {
-        business_uuid: BusinessPlaceholder,
-        reference: ':reference',
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('businessId') businessId: string,
+    @Param('reference') reference: string,
   ): Promise<TransactionOutputInterface>  {
+    const transaction: TransactionModel = await this.transactionsService.findModelByParams({
+      business_uuid: businessId,
+      reference: reference,
+    });
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by reference ${reference} not found`);
+    }
+
     return this.getDetails(transaction);
   }
 

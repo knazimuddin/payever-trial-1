@@ -162,7 +162,7 @@ export class TransactionsService {
   }
 
   public async findModelByParams(params: any): Promise<TransactionModel> {
-    return this.transactionModel.findOne(params);
+    return this.transactionModel.findOne(params).sort({ created_at: -1 });
   }
 
   public async findCollectionByParams(params: any): Promise<TransactionModel[]> {
