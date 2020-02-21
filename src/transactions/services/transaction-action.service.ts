@@ -8,9 +8,9 @@ import { TransactionsService } from './transactions.service';
 import { DtoValidationService } from './dto-validation.service';
 import { MessagingService } from './messaging.service';
 import { TransactionsExampleService } from './transactions-example.service';
-import {ActionCallerInterface} from "../interfaces";
-import {ThirdPartyPaymentsEnum} from "../enum";
-import {ThirdPartyCallerService} from "./third-party-caller.service";
+import { ActionCallerInterface } from '../interfaces';
+import { ThirdPartyPaymentsEnum } from '../enum';
+import { ThirdPartyCallerService } from './third-party-caller.service';
 
 @Injectable()
 export class TransactionActionService {
