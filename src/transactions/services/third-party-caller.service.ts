@@ -1,4 +1,4 @@
-import { HttpService, Injectable, Logger, HttpException, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, HttpException, NotFoundException } from '@nestjs/common';
 import { ActionCallerInterface, ActionItemInterface } from '../interfaces';
 import { ActionPayloadInterface } from '../interfaces/action-payload';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
@@ -8,12 +8,13 @@ import { Observable } from 'rxjs';
 import { AxiosError, AxiosResponse } from 'axios';
 import { catchError, map } from 'rxjs/operators';
 import { ThirdPartyPaymentActionsEnum, TransactionActionsToThirdPartyActions } from '../enum';
+import { IntercomService } from '@pe/nest-kit';
 
 @Injectable()
 export class ThirdPartyCallerService implements ActionCallerInterface {
   constructor(
     private readonly transactionsService: TransactionsService,
-    private readonly httpService: HttpService,
+    private readonly httpService: IntercomService,
     private readonly logger: Logger,
   ) {}
 
@@ -74,7 +75,7 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
       url: url,
     });
 
-    const response: Observable<AxiosResponse<any>> = this.httpService.post(url, actionPayload);
+    const response: Observable<AxiosResponse<any>> = await this.httpService.post(url, actionPayload);
 
     return response.pipe(
         map((res: any) => {
