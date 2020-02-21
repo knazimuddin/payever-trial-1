@@ -1,7 +1,7 @@
 import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
-import { ElasticsearchModule, EventDispatcherModule } from '@pe/nest-kit';
+import { ElasticsearchModule, EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
 import {
@@ -79,6 +79,7 @@ import { TransactionsNotifier } from './notifiers';
   ],
   imports: [
     HttpModule,
+    IntercomModule,
     MongooseModule.forFeature([
       { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
       { name: TransactionExampleSchemaName, schema: TransactionExampleSchema },
