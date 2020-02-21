@@ -3,7 +3,7 @@ import { MessageBusService, MessageInterface, RabbitMqClient, RabbitMqRPCClient 
 import { environment } from '../../environments';
 import { TransactionConverter } from '../converter';
 import { NextActionDto } from '../dto';
-import { ActionItemInterface } from '../interfaces';
+import { ActionCallerInterface, ActionItemInterface } from '../interfaces';
 import { ActionPayloadInterface, FieldsInterface, UnwrappedFieldsInterface } from '../interfaces/action-payload';
 import {
   CheckoutRpcPayloadInterface,
@@ -18,7 +18,7 @@ import { PaymentsMicroService } from './payments-micro.service';
 import { TransactionsService } from './transactions.service';
 
 @Injectable()
-export class MessagingService {
+export class MessagingService implements ActionCallerInterface {
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,

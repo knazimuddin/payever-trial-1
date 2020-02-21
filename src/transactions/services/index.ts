@@ -13,3 +13,4 @@ export * from './transaction-history.service';
 export * from './transactions.service';
 export * from './transaction-action.service';
 export * from './transactions-example.service';
+export * from './third-party-caller.service';
