@@ -71,5 +71,5 @@ export const environment: any = {
   },
   statusPort: env.STATUS_APP_PORT,
   stub: env.STUB === 'true',
-  thirdPartyPaymentsMicroUrlBase: env.MICRO_URL_THIRD_PARTY_PAYMENTS,
+  thirdPartyPaymentsMicroUrl: env.MICRO_URL_THIRD_PARTY_PAYMENTS,
 };
