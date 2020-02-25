@@ -16,6 +16,7 @@ export class TransactionsNotifier {
       `notification.transactions.title.new_transaction`,
       {
         transactionId: transaction.uuid,
+        transaction: transaction,
       },
     );
   }
