@@ -1,13 +1,13 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
+import { RabbitRoutingKeys } from '../../enums';
 import { TransactionPaymentDetailsConverter } from '../converter';
+import { ActionPayloadDto } from '../dto/action-payload';
 import { ActionItemInterface } from '../interfaces';
 import { ThirdPartyActionRequestInterface } from '../interfaces/third-party';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { ActionsRetriever, TransactionActionService, TransactionsService } from '../services';
-import { ActionPayloadDto } from '../dto/action-payload';
 
 @Controller()
 export class ThirdPartyEventsController {
@@ -19,9 +19,7 @@ export class ThirdPartyEventsController {
   ) {}
 
   @MessagePattern({
-    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.ThirdPartyPaymentActionRequested,
-    origin: 'rabbitmq',
   })
   public async onThirdPartyPaymentActionEvent(
     data: ThirdPartyActionRequestInterface,

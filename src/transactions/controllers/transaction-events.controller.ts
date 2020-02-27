@@ -1,14 +1,13 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
-import { environment } from '../../environments';
+import { RabbitRoutingKeys } from '../../enums';
 import { TransactionConverter } from '../converter';
+import { TransactionChangedDto, TransactionRemovedDto } from '../dto/checkout-rabbit';
 import { CheckoutTransactionInterface } from '../interfaces/checkout';
 import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { PaymentMailEventProducer } from '../producer';
 import { StatisticsService, TransactionsExampleService, TransactionsService } from '../services';
-import { TransactionChangedDto, TransactionRemovedDto } from '../dto/checkout-rabbit';
 
 @Controller()
 export class TransactionEventsController {
@@ -21,9 +20,7 @@ export class TransactionEventsController {
   ) { }
 
   @MessagePattern({
-    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentCreated,
-    origin: 'rabbitmq',
   })
   public async onTransactionCreateEvent(data: TransactionChangedDto): Promise<void> {
     this.logger.log({ text: 'PAYMENT.CREATE', data });
@@ -40,9 +37,7 @@ export class TransactionEventsController {
   }
 
   @MessagePattern({
-    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentUpdated,
-    origin: 'rabbitmq',
   })
   public async onTransactionUpdateEvent(data: TransactionChangedDto): Promise<void> {
     this.logger.log({ text: 'PAYMENT.UPDATE', data });
@@ -58,9 +53,7 @@ export class TransactionEventsController {
   }
 
   @MessagePattern({
-    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentRemoved,
-    origin: 'rabbitmq',
   })
   public async onTransactionRemoveEvent(data: TransactionRemovedDto): Promise<void> {
     this.logger.log({ text: 'PAYMENT.REMOVE: Prepared transaction', data });
@@ -69,9 +62,7 @@ export class TransactionEventsController {
   }
 
   @MessagePattern({
-    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentSubmitted,
-    origin: 'rabbitmq',
   })
   public async onTransactionSubmittedEvent(data: TransactionChangedDto): Promise<void> {
     this.logger.log(data, 'PAYMENT.SUBMIT');
