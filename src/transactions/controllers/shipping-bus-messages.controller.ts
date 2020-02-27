@@ -1,15 +1,14 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { RabbitRoutingKeys } from '../../enums';
-import { environment } from '../../environments';
-import { ShippingLabelDownloadedDto, ShippingOrderProcessedMessageDto, ShippingSlipDownloadedDto } from '../dto';
-import { TransactionHistoryService, TransactionsService } from '../services';
 import { ShippingGoodsMailDtoConverter } from '../converter/mailer';
+import { ShippingLabelDownloadedDto, ShippingOrderProcessedMessageDto, ShippingSlipDownloadedDto } from '../dto';
 import { ShippingMailDto } from '../dto/mail';
-import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
-import { PaymentMailEventProducer } from '../producer';
-import { TransactionModel } from '../models';
 import { HistoryEventDataInterface } from '../interfaces/history-event-message';
+import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import { TransactionModel } from '../models';
+import { PaymentMailEventProducer } from '../producer';
+import { TransactionHistoryService, TransactionsService } from '../services';
 
 @Controller()
 export class ShippingBusMessagesController {
@@ -22,7 +21,6 @@ export class ShippingBusMessagesController {
 
   @MessagePattern({
     name: RabbitRoutingKeys.ShippingOrderProcessed,
-    origin: 'rabbitmq',
   })
   public async onShippingOrderProcessed(orderProcessedDto: ShippingOrderProcessedMessageDto): Promise<void> {
     const transaction: TransactionUnpackedDetailsInterface = await this.transactionsService.findUnpackedByUuid(
@@ -41,7 +39,6 @@ export class ShippingBusMessagesController {
 
   @MessagePattern({
     name: RabbitRoutingKeys.ShippingLabelDownloaded,
-    origin: 'rabbitmq',
   })
   public async onShippingLabelDownloaded(labelDownloadedDto: ShippingLabelDownloadedDto): Promise<void> {
     const transaction: TransactionModel = await this.transactionsService.findModelByParams({
@@ -64,7 +61,6 @@ export class ShippingBusMessagesController {
 
   @MessagePattern({
     name: RabbitRoutingKeys.ShippingSlipDownloaded,
-    origin: 'rabbitmq',
   })
   public async onShippingSlipDownloaded(slipDownloadedDto: ShippingSlipDownloadedDto): Promise<void> {
     const transaction: TransactionModel = await this.transactionsService.findModelByParams({
