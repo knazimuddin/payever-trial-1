@@ -67,15 +67,18 @@ spec:
             httpGet:
               path: /api/status
               port: {{ $values.service.statusPort }}
-            initialDelaySeconds: 90
-            periodSeconds: 15
+            initialDelaySeconds: 150
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
 
           readinessProbe:
             httpGet:
               path: /api/status
               port: {{ $values.service.statusPort }}
             initialDelaySeconds: 10
-            periodSeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
             failureThreshold: 15
 
           resources:
