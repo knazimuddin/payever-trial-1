@@ -7,6 +7,7 @@ import * as jwt from 'fastify-jwt';
 import * as qs from 'qs';
 import { AppModule } from './app.module';
 import { environment } from './environments';
+import { ConnectionMonitoring } from "@pe/nest-kit";
 
 async function bootstrap(): Promise<void> {
   const app: NestFastifyApplication = await NestFactory.create<NestFastifyApplication>(
@@ -36,6 +37,8 @@ async function bootstrap(): Promise<void> {
     .build();
   const document: SwaggerDocument = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api-docs', app, document);
+
+  ConnectionMonitoring.start(app, bootstrap);
 
   await app.listen(
     environment.port,

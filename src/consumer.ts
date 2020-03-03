@@ -1,6 +1,6 @@
 import { INestApplicationContext, INestMicroservice } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { RABBITMQ_SERVER } from '@pe/nest-kit';
+import { ConnectionMonitoring, RABBITMQ_SERVER } from '@pe/nest-kit';
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
 import { AppModule } from './app.module';
 
@@ -17,6 +17,8 @@ async function bootstrap(): Promise<void> {
 
   const logger: NestKitLogger = app.get(NestKitLogger);
   app.useLogger(logger);
+
+  ConnectionMonitoring.start(app, bootstrap);
 
   app.listen(() => logger.log(`Transactions consumer started`, 'NestApplication'));
 }
