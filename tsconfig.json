@@ -14,7 +14,7 @@
     "baseUrl": "./",
     "types": [
       "node",
-      "mongoose",
+      "mongoose"
     ]
   },
   "include": [
