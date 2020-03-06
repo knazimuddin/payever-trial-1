@@ -250,8 +250,7 @@ export class BusinessController {
 
   @Get('list')
   @HttpCode(HttpStatus.OK)
-  // @Roles(RolesEnum.merchant)
-  @Roles(RolesEnum.anonymous)
+  @Roles(RolesEnum.merchant)
   @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async getList(
     @Param('businessId') businessId: string,
@@ -281,8 +280,7 @@ export class BusinessController {
 
   @Get('export')
   @HttpCode(HttpStatus.OK)
-  // @Roles(RolesEnum.merchant)
-  @Roles(RolesEnum.anonymous)
+  @Roles(RolesEnum.merchant)
   @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async export(
     @Param('businessId') businessId: string,
