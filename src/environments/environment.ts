@@ -43,6 +43,12 @@ export const environment: any = {
     urls: [env.RABBITMQ_URL],
     vhost: env.RABBITMQ_VHOST,
 
+    isGlobalPrefetchCount: false,
+    prefetchCount: 10,
+    rsa: {
+      private: path.resolve(env.RABBITMQ_CERTIFICATE_PATH),
+    },
+
     exchanges: [
       {
         name: 'async_events',
@@ -61,12 +67,6 @@ export const environment: any = {
         ],
       },
     ],
-    isGlobalPrefetchCount: false,
-    prefetchCount: 10,
-
-    rsa: {
-      private: path.resolve(env.RABBITMQ_CERTIFICATE_PATH),
-    },
   },
   redis: {
     retryAttempts: env.REDIS_RETRY_ATTEMPTS,
