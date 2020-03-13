@@ -257,7 +257,7 @@ export class BusinessController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
-    const business: BusinessModel = await this.businessService.getBusinessCurrency(businessId);
+    const business: BusinessModel = await this.businessService.findBusinessById(businessId);
     listDto.currency = business ? business.currency : this.defaultCurrency;
 
     return this.elasticSearchService.getResult(listDto);
@@ -272,8 +272,8 @@ export class BusinessController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
-    const currency: BusinessModel = await this.businessService.getBusinessCurrency(businessId);
-    listDto.currency = currency ? currency.currency : this.defaultCurrency;
+    const business: BusinessModel = await this.businessService.findBusinessById(businessId);
+    listDto.currency = business ? business.currency : this.defaultCurrency;
 
     return this.mongoSearchService.getResult(listDto);
   }
@@ -291,7 +291,7 @@ export class BusinessController {
     exportDto.limit = 10000;
     exportDto.page = 1;
     exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
-    const business: BusinessModel = await this.businessService.getBusinessCurrency(businessId);
+    const business: BusinessModel = await this.businessService.findBusinessById(businessId);
     exportDto.currency = business ? business.currency : this.defaultCurrency;
     const result: PagingResultDto =  await this.elasticSearchService.getResult(exportDto);
     const format: ExportFormat = exportDto.format;
