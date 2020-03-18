@@ -86,6 +86,22 @@ export class BusinessController {
     return this.getDetails(transaction);
   }
 
+  @Get('detail/original_id/:original_id')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
+  public async getByOriginalId(
+    @ParamModel(
+      {
+        business_uuid: BusinessPlaceholder,
+        original_id: ':original_id',
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+  ): Promise<TransactionOutputInterface> {
+    return this.getDetails(transaction);
+  }
+
   @Get('detail/:uuid')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)

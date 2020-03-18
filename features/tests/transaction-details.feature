@@ -156,12 +156,13 @@ Feature: Transaction details for business
       }
       """
     Examples:
-      | uri                                                                                | token                                                                                                                     |
-      | /api/business/{{businessId}}/detail/ad738281-f9f0-4db7-a4f6-670b0dff5327           | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
-      | /api/business/{{businessId}}/detail/reference/f3d44333-21e2-4f0f-952b-72ac2dfb8fc9 | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
-      | /api/admin/detail/ad738281-f9f0-4db7-a4f6-670b0dff5327                             | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
-      | /api/admin/detail/reference/f3d44333-21e2-4f0f-952b-72ac2dfb8fc9                   | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
-      | /api/user/detail/ad738281-f9f0-4db7-a4f6-670b0dff5327                              | {"id":"08a3fac8-43ef-4998-99aa-cabc97a39261","email": "email@email.com","roles": [{"name": "user","permissions": []}]}    |
+      | uri                                                                                  | token                                                                                                                     |
+      | /api/business/{{businessId}}/detail/ad738281-f9f0-4db7-a4f6-670b0dff5327             | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | /api/business/{{businessId}}/detail/reference/f3d44333-21e2-4f0f-952b-72ac2dfb8fc9   | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | /api/business/{{businessId}}/detail/original_id/440ec879-7f02-48d4-9ffb-77adfaf79a06 | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | /api/admin/detail/ad738281-f9f0-4db7-a4f6-670b0dff5327                               | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
+      | /api/admin/detail/reference/f3d44333-21e2-4f0f-952b-72ac2dfb8fc9                     | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
+      | /api/user/detail/ad738281-f9f0-4db7-a4f6-670b0dff5327                                | {"id":"08a3fac8-43ef-4998-99aa-cabc97a39261","email": "email@email.com","roles": [{"name": "user","permissions": []}]}    |
 
   Scenario: Should cancel new transaction notification
     Given I authenticate as a user with the following data:
