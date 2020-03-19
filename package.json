@@ -30,7 +30,7 @@
   "dependencies": {
     "@elastic/elasticsearch": "^6.8.2",
     "@pe/common-sdk": "^1.6.0",
-    "@pe/nest-kit": "^4.19.17-beta",
+    "@pe/nest-kit": "^4.19.17",
     "@pe/notifications-sdk": "^3.6.0",
     "@types/mongoose": "5.5.20",
     "@types/node": "^11.11.6",
