@@ -1,7 +1,9 @@
 import { ApiModelProperty } from '@nestjs/swagger';
 import { IsDefined, IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import { Type } from 'class-transformer';
+import { DailyReportPaymentOptionDto } from './daily-report-payment-option.dto';
 
-export class DailyReportDto {
+export class DailyReportCurrencyDto {
   @ApiModelProperty()
   @IsNotEmpty()
   @IsDefined()
@@ -20,10 +22,14 @@ export class DailyReportDto {
   @IsNumber()
   public exchangeRate: number;
 
-
   @ApiModelProperty()
   @IsNotEmpty()
   @IsDefined()
   @IsNumber()
-  public overalTotal: number
+  public overallTotal: number;
+
+  @ApiModelProperty()
+  @IsDefined()
+  @Type(() => DailyReportPaymentOptionDto)
+  public paymentOption: DailyReportPaymentOptionDto[]
 }

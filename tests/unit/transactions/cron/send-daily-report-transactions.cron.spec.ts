@@ -9,7 +9,7 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as chai from 'chai';
 import { DailyReportTransactionsService } from '../../../../src/transactions/services';
-import { DailyReportDto } from '../../../../src/transactions/dto';
+import { DailyReportCurrencyDto, DailyReportPaymentOptionDto } from '../../../../src/transactions/dto';
 
 chai.use(sinonChai);
 
@@ -69,13 +69,14 @@ describe('Currency Updater Service', () => {
         {
           provide: DailyReportTransactionsService,
           useValue: {
-            getDailyReport: async (): Promise<DailyReportDto[]> => { return []; },
+            getDailyReportCurency: async (): Promise<DailyReportCurrencyDto[]> => { return []; },
+            getDailyReportPaymentOption: async (dailyReportCurrencyDto: DailyReportCurrencyDto[]): Promise<void> => { },
           },
         },
         {
           provide: DailyReportTransactionMailEventProducer,
           useValue: {
-            produceDailyReportTransactionEvent: async (dailyReportDto: DailyReportDto[]): Promise<void> => {},
+            produceDailyReportTransactionEvent: async (dailyReportCurrencyDto: DailyReportCurrencyDto[]): Promise<void> => {},
           },
         },
         {
@@ -103,12 +104,14 @@ describe('Currency Updater Service', () => {
 
   describe('Send daily report email', () => {
     it('should send daily report email', async () => {
-      sandbox.stub(dailyReportTransactionsService, 'getDailyReport').resolves([]);
+      sandbox.stub(dailyReportTransactionsService, 'getDailyReportCurency').resolves([]);
+      sandbox.stub(dailyReportTransactionsService, 'getDailyReportPaymentOption').withArgs([]);
       sandbox.stub(dailyReportTransactionMailEventProducer, 'produceDailyReportTransactionEvent').withArgs([]).resolves(null);
 
       await sendDailyReportTransactionsCron.sendDailyReportTransaction();
 
-      expect(dailyReportTransactionsService.getDailyReport).to.be.callCount(1);
+      expect(dailyReportTransactionsService.getDailyReportCurency).to.be.callCount(1);
+      expect(dailyReportTransactionsService.getDailyReportPaymentOption).to.be.callCount(1);
     });
   });
 });

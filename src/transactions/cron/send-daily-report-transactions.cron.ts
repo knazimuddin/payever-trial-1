@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as cron from 'node-cron';
 import { DailyReportTransactionsService } from '../services';
-import { DailyReportDto } from '../dto/report';
+import { DailyReportCurrencyDto, DailyReportPaymentOptionDto } from '../dto/report';
 import { DailyReportTransactionMailEventProducer } from '../producer';
 import { environment } from '../../environments';
 
@@ -23,10 +23,11 @@ export class SendDailyReportTransactionsCron implements OnModuleInit {
     this.logger.log('send daily report transaction...');
 
     try {
+      const mongoCurrencyReport: DailyReportCurrencyDto[] 
+        = await this.dailyReportTransactionsService.getDailyReportCurency();
+      await this.dailyReportTransactionsService.getDailyReportPaymentOption(mongoCurrencyReport);
 
-      const mongoReport: DailyReportDto[] = await this.dailyReportTransactionsService.getDailyReport();
-      
-      return this.dailyReportTransactionsMailProducer.produceDailyReportTransactionEvent(mongoReport);
+      return this.dailyReportTransactionsMailProducer.produceDailyReportTransactionEvent(mongoCurrencyReport);
     } catch (e) {
       this.logger.log(e.toString());
     }

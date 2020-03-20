@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { RabbitMqClient } from '@pe/nest-kit';
 import { DailyReportMailDtoConverter } from '../converter';
 
-import { DailyReportDto, DailyReportMailDto } from '../dto/report';
+import { DailyReportCurrencyDto, DailyReportMailDto, DailyReportPaymentOptionDto } from '../dto/report';
 
 @Injectable()
 export class DailyReportTransactionMailEventProducer {
@@ -10,8 +10,11 @@ export class DailyReportTransactionMailEventProducer {
     private readonly rabbitMqClient: RabbitMqClient,
   ) {}
 
-  public async produceDailyReportTransactionEvent(dailyReportDto: DailyReportDto[]): Promise<void> {
-    const mailDto: DailyReportMailDto = DailyReportMailDtoConverter.fromDailyReportDto(dailyReportDto);
+  public async produceDailyReportTransactionEvent(
+    dailyReportCurrencyDto: DailyReportCurrencyDto[],
+  ): Promise<void> {
+    const mailDto: DailyReportMailDto 
+      = DailyReportMailDtoConverter.fromDailyReportCurrencyDto(dailyReportCurrencyDto);
     
     return this.sendMailEvent(mailDto);
   }
