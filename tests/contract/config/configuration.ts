@@ -8,6 +8,7 @@ import { MessagingServiceMock } from "../mocks";
 import { MessagingService } from "../../../src/transactions/services";
 import { StatisticsMessagesMock } from '../providers/transactions-messages.pact.mock';
 import { PaymentMailMessagesProvider } from '../providers/payment-mail-message.mock';
+import { DailyReportTransactionsMailMessagesProvider } from '../providers/daily-report-transactions-mail-message.pact.mock';
 
 dotenv.config();
 const env: any = process.env;
@@ -36,7 +37,8 @@ export const pactConfiguration: PactConfigurationInterface = {
     providers: [],
     rabbitMessagesProviders: [
       StatisticsMessagesMock,
-      PaymentMailMessagesProvider
+      PaymentMailMessagesProvider,
+      DailyReportTransactionsMailMessagesProvider,
     ],
     states: [
       SantanderPaymentWithPanIdState,

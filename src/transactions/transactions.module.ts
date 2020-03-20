@@ -28,7 +28,12 @@ import {
   UserController,
 } from './controllers';
 import { EventListenersList } from './event-listeners/event-listeners.list';
-import { PaymentMailEventProducer, AuthEventsProducer, TransactionEventProducer } from './producer';
+import { 
+  AuthEventsProducer,
+  DailyReportTransactionMailEventProducer, 
+  PaymentMailEventProducer, 
+  TransactionEventProducer,
+} from './producer';
 import {
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,
@@ -46,6 +51,7 @@ import {
   BusinessPaymentOptionService,
   BusinessService,
   CurrencyExchangeService,
+  DailyReportTransactionsService,
   DtoValidationService,
   ElasticSearchService,
   MessagingService,
@@ -60,6 +66,7 @@ import {
   TransactionsService,
 } from './services';
 import { TransactionsNotifier } from './notifiers';
+import { SendDailyReportTransactionsCron } from './cron';
 
 @Module({
   controllers: [
@@ -105,6 +112,8 @@ import { TransactionsNotifier } from './notifiers';
     BusinessPaymentOptionService,
     BusinessService,
     CurrencyExchangeService,
+    DailyReportTransactionsService,
+    DailyReportTransactionMailEventProducer,
     DtoValidationService,
     ElasticSearchService,
     MessagingService,
@@ -112,6 +121,7 @@ import { TransactionsNotifier } from './notifiers';
     PaymentFlowService,
     PaymentMailEventProducer,
     PaymentsMicroService,
+    SendDailyReportTransactionsCron,
     StatisticsService,
     TransactionActionService,
     TransactionHistoryService,

@@ -20,7 +20,9 @@ export const environment: any = {
     },
   },
   applicationName: env.APP_NAME,
+  ccEmailDailyReport: env.CC_EMAIL_DAILY_REPORT,
   connectMicroUrlBase: env.MICRO_URL_CONNECT,
+  dailyReportExpression: env.SEND_DAILY_REPORT_EXPRESSION,
   defaultCurrency: env.DEFAULT_CURRENCY,
   elasticSearch: env.ELASTIC_HOST,
   jwtOptions: {
@@ -72,4 +74,5 @@ export const environment: any = {
   statusPort: env.STATUS_APP_PORT,
   stub: env.STUB === 'true',
   thirdPartyPaymentsMicroUrl: env.MICRO_URL_THIRD_PARTY_PAYMENTS,
+  toEmailDailyReport: env.TO_EMAIL_DAILY_REPORT,
 };
