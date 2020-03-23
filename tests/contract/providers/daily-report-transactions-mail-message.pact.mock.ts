@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PactRabbitMqMessageProvider, AbstractMessageMock } from '@pe/pact-kit';
-import { DailyReportTransactionMailEventProducer } from '../../../src/transactions/producer'
+import { DailyReportTransactionMailerReportEventProducer } from '../../../src/transactions/producer'
 
 @Injectable()
 export class DailyReportTransactionsMailMessagesProvider extends AbstractMessageMock {
   
-  @PactRabbitMqMessageProvider('payever.event.payment.email')
+  @PactRabbitMqMessageProvider('mailer-report.event.daily-report-data.sent')
   public async mockProduceDailyReportTransactionsEvent(): Promise<void> {
-    const producer: DailyReportTransactionMailEventProducer 
-      = await this.getProvider<DailyReportTransactionMailEventProducer>(DailyReportTransactionMailEventProducer);
+    const producer: DailyReportTransactionMailerReportEventProducer 
+      = await this.getProvider<DailyReportTransactionMailerReportEventProducer>(DailyReportTransactionMailerReportEventProducer);
     await producer.produceDailyReportTransactionEvent([
       {
         currency: 'EUR',

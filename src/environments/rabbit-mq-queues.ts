@@ -104,6 +104,10 @@ export const rabbitMqQueues: RabbitMqQueueConfigInterface[] = [
         routingKey: RabbitRoutingKeys.MailerPaymentMailSent,
         source: 'async_events',
       },
+      {
+        routingKey: RabbitRoutingKeys.MailerReportDailyReportRequested,
+        source: 'async_events',
+      },
     ],
   },
 ];

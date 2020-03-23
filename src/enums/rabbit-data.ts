@@ -38,4 +38,6 @@ export enum RabbitRoutingKeys {
 
   GetSellerName = 'auth.commands.get_user_data',
   SellerNamePropagated = 'auth.event.propagate_user_data',
+
+  MailerReportDailyReportRequested = 'mailer-report.event.daily-report-data.requested',
 }

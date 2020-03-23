@@ -3,35 +3,30 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { TransactionModel } from '../models';
 import { CurrencyExchangeService } from './currency-exchange.service';
-import { DailyReportCurrencyDto, DailyReportPaymentOptionDto } from '../dto/report';
+import { DailyReportCurrencyDto, DailyReportPaymentOptionDto, DailyReportFilterDto } from '../dto/report';
 import * as moment from 'moment';
 
 @Injectable()
 export class DailyReportTransactionsService {
-  private todayDate: Date = null;
-  
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly currencyExchangeService: CurrencyExchangeService,
   ) {}
 
-  public setTodayDate(): void {
-    this.todayDate = moment().subtract(1, 'day').toDate();
-  }
-  public async getDailyReportCurency(): Promise<DailyReportCurrencyDto[]> {
+  public async getDailyReportCurency(dailyReportFilterDto: DailyReportFilterDto): Promise<DailyReportCurrencyDto[]> {
     const result: DailyReportCurrencyDto[] = [];
-
+    const todayDate: Date = moment(dailyReportFilterDto.beginDate).toDate();
+    
     const todayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {"created_at": {"$gte": this.todayDate}} },
+        { $match: {"created_at": {"$gte": todayDate}} },
         {
           $group: {
             _id: '$currency',
             total: { $sum: '$total' },
           },
         },
-      ])
-    ;
+    ]);
 
     for (const currentVal of todayByCurrency) {
       result.push({
@@ -45,15 +40,14 @@ export class DailyReportTransactionsService {
 
     const beforeTodayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {"created_at": {"$lt": this.todayDate}} },
+        { $match: {"created_at": {"$lt": todayDate}} },
         {
           $group: {
             _id: '$currency',
             total: { $sum: '$total' },
           },
         },
-      ])
-    ;
+      ]);
 
     for (const currentVal of beforeTodayByCurrency) {
       const currentIndex: number = result.findIndex(
@@ -75,18 +69,22 @@ export class DailyReportTransactionsService {
     return result;
   }
 
-  public async getDailyReportPaymentOption(dailyReportCurrencyDto: DailyReportCurrencyDto[]): Promise<void> {
+  public async getDailyReportPaymentOption(
+    dailyReportFilterDto: DailyReportFilterDto, 
+    dailyReportCurrencyDto: DailyReportCurrencyDto[],
+  ): Promise<void> {
+    const todayDate: Date = moment(dailyReportFilterDto.beginDate).toDate();
+
     const todayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {"created_at": {"$gte": this.todayDate}} },
+        { $match: {"created_at": {"$gte": todayDate}} },
         {
           $group: {
             _id: {currency: '$currency', type: '$type'},
             total: { $sum: '$total' },
           },
         },
-      ])
-    ;
+      ]);
 
     for (const currentVal of todayByCurrency) {
       const currentIndex: number = dailyReportCurrencyDto.findIndex(
@@ -107,15 +105,14 @@ export class DailyReportTransactionsService {
 
     const beforeTodayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {"created_at": {"$lt": this.todayDate}} },
+        { $match: {"created_at": {"$lt": todayDate}} },
         {
           $group: {
             _id: {currency: '$currency', type: '$type'},
             total: { $sum: '$total' },
           },
         },
-      ])
-    ;
+      ]);
 
     for (const currentVal of beforeTodayByCurrency) {
       const currentIndex: number = dailyReportCurrencyDto.findIndex(

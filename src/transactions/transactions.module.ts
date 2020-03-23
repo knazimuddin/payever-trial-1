@@ -18,6 +18,7 @@ import {
   BpoEventsController,
   BusinessBusMessagesController,
   BusinessController,
+  DailyReportTransactionBusMessagesController,
   FlowEventsController,
   HistoryEventsController,
   MailerBusMessagesController,
@@ -30,7 +31,7 @@ import {
 import { EventListenersList } from './event-listeners/event-listeners.list';
 import { 
   AuthEventsProducer,
-  DailyReportTransactionMailEventProducer, 
+  DailyReportTransactionMailerReportEventProducer, 
   PaymentMailEventProducer, 
   TransactionEventProducer,
 } from './producer';
@@ -66,7 +67,6 @@ import {
   TransactionsService,
 } from './services';
 import { TransactionsNotifier } from './notifiers';
-import { SendDailyReportTransactionsCron } from './cron';
 
 @Module({
   controllers: [
@@ -74,6 +74,7 @@ import { SendDailyReportTransactionsCron } from './cron';
     BpoEventsController,
     BusinessBusMessagesController,
     BusinessController,
+    DailyReportTransactionBusMessagesController,
     FlowEventsController,
     HistoryEventsController,
     MigrateEventsController,
@@ -113,7 +114,7 @@ import { SendDailyReportTransactionsCron } from './cron';
     BusinessService,
     CurrencyExchangeService,
     DailyReportTransactionsService,
-    DailyReportTransactionMailEventProducer,
+    DailyReportTransactionMailerReportEventProducer,
     DtoValidationService,
     ElasticSearchService,
     MessagingService,
@@ -121,7 +122,6 @@ import { SendDailyReportTransactionsCron } from './cron';
     PaymentFlowService,
     PaymentMailEventProducer,
     PaymentsMicroService,
-    SendDailyReportTransactionsCron,
     StatisticsService,
     TransactionActionService,
     TransactionHistoryService,
