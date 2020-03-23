@@ -1,22 +1,29 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as cron from 'node-cron';
 import { DailyReportTransactionsService } from '../services';
-import { DailyReportCurrencyDto, DailyReportPaymentOptionDto } from '../dto/report';
+import { DailyReportCurrencyDto } from '../dto/report';
 import { DailyReportTransactionMailEventProducer } from '../producer';
+import { CustomTransportStrategy, Server } from '@nestjs/microservices';
 import { environment } from '../../environments';
 
 @Injectable()
-export class SendDailyReportTransactionsCron implements OnModuleInit {
+export class SendDailyReportTransactionsCron extends Server implements CustomTransportStrategy {
 
   constructor(
     private readonly dailyReportTransactionsService: DailyReportTransactionsService,
     private readonly dailyReportTransactionsMailProducer: DailyReportTransactionMailEventProducer,
-    private readonly logger: Logger,
-  ) {}
+    protected readonly logger: Logger,
+  ) {
+    super();
+  }
 
-  public async onModuleInit(): Promise<void> {
+  public async listen(callback: () => void): Promise<void> {
     await cron.schedule(environment.dailyReportExpression, () => this.sendDailyReportTransaction());
-    this.logger.log('Configured cron schedule.');
+    callback();
+  }
+
+  public async close(): Promise<void> {
+    return null;
   }
 
   public async sendDailyReportTransaction(): Promise<void> {

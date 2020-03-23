@@ -7,6 +7,8 @@
     "consume:prod": "node dist/src/consumer.js",
     "consumer": "nodemon --config nodemon-consumer.json",
     "consumer:debug": "nodemon --config nodemon-consumer-debug.json",
+    "cron:prod": "node dist/src/cron.js",
+    "cron": "ts-node src/cron.ts",
     "cucumber": "./node_modules/.bin/cucumber-js",
     "cucumber:all": "./node_modules/.bin/cucumber-js features/tests/",
     "cucumber:all:cov": "./node_modules/.bin/nyc --exclude-after-remap=false --reporter=text ./node_modules/.bin/cucumber-js features/tests/",

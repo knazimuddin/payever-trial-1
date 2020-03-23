@@ -8,19 +8,17 @@ import * as moment from 'moment';
 
 @Injectable()
 export class DailyReportTransactionsService {
+  private todayDate: Date = null;
   
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly currencyExchangeService: CurrencyExchangeService,
   ) {}
 
-  public todayDate: Date = null;
-
   public setTodayDate(): void {
     this.todayDate = moment().subtract(1, 'day').toDate();
   }
   public async getDailyReportCurency(): Promise<DailyReportCurrencyDto[]> {
-    console.log(this.todayDate);
     const result: DailyReportCurrencyDto[] = [];
 
     const todayByCurrency: any = await this.transactionsModel
@@ -78,9 +76,6 @@ export class DailyReportTransactionsService {
   }
 
   public async getDailyReportPaymentOption(dailyReportCurrencyDto: DailyReportCurrencyDto[]): Promise<void> {
-    
-    console.log(this.todayDate);
-
     const todayByCurrency: any = await this.transactionsModel
       .aggregate([
         { $match: {"created_at": {"$gte": this.todayDate}} },
