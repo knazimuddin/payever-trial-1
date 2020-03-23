@@ -23,6 +23,7 @@ export class SendDailyReportTransactionsCron implements OnModuleInit {
     this.logger.log('send daily report transaction...');
 
     try {
+      this.dailyReportTransactionsService.setTodayDate();
       const mongoCurrencyReport: DailyReportCurrencyDto[] 
         = await this.dailyReportTransactionsService.getDailyReportCurency();
       await this.dailyReportTransactionsService.getDailyReportPaymentOption(mongoCurrencyReport);

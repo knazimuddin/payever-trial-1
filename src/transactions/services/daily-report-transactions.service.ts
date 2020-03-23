@@ -8,19 +8,24 @@ import * as moment from 'moment';
 
 @Injectable()
 export class DailyReportTransactionsService {
-
+  
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly currencyExchangeService: CurrencyExchangeService,
   ) {}
 
+  public todayDate: Date = null;
+
+  public setTodayDate(): void {
+    this.todayDate = moment().subtract(1, 'day').toDate();
+  }
   public async getDailyReportCurency(): Promise<DailyReportCurrencyDto[]> {
-    const todayDate: Date = moment().startOf('day').toDate();
+    console.log(this.todayDate);
     const result: DailyReportCurrencyDto[] = [];
 
     const todayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {"created_at": {"$gte": todayDate}} },
+        { $match: {"created_at": {"$gte": this.todayDate}} },
         {
           $group: {
             _id: '$currency',
@@ -42,7 +47,7 @@ export class DailyReportTransactionsService {
 
     const beforeTodayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {"created_at": {"$lt": todayDate}} },
+        { $match: {"created_at": {"$lt": this.todayDate}} },
         {
           $group: {
             _id: '$currency',
@@ -73,11 +78,12 @@ export class DailyReportTransactionsService {
   }
 
   public async getDailyReportPaymentOption(dailyReportCurrencyDto: DailyReportCurrencyDto[]): Promise<void> {
-    const todayDate: Date = moment().startOf('day').toDate();
+    
+    console.log(this.todayDate);
 
     const todayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {"created_at": {"$gte": todayDate}} },
+        { $match: {"created_at": {"$gte": this.todayDate}} },
         {
           $group: {
             _id: {currency: '$currency', type: '$type'},
@@ -106,7 +112,7 @@ export class DailyReportTransactionsService {
 
     const beforeTodayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {"created_at": {"$lt": todayDate}} },
+        { $match: {"created_at": {"$lt": this.todayDate}} },
         {
           $group: {
             _id: {currency: '$currency', type: '$type'},
