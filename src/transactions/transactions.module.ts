@@ -1,7 +1,7 @@
 import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
-import { ElasticsearchModule, EventDispatcherModule, DelayRemoveClient } from '@pe/nest-kit';
+import { ElasticsearchModule, EventDispatcherModule, DelayRemoveClient, IntercomModule } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -54,6 +54,7 @@ import {
   PaymentFlowService,
   PaymentsMicroService,
   StatisticsService,
+  ThirdPartyCallerService,
   TransactionActionService,
   TransactionHistoryService,
   TransactionsExampleService,
@@ -80,6 +81,7 @@ import { TransactionsNotifier } from './notifiers';
   imports: [
     ConfigModule,
     HttpModule,
+    IntercomModule,
     MongooseModule.forFeature([
       { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
       { name: TransactionExampleSchemaName, schema: TransactionExampleSchema },
@@ -129,6 +131,7 @@ import { TransactionsNotifier } from './notifiers';
     TransactionsNotifier,
     PaymentMailEventProducer,
     TransactionEventProducer,
+    ThirdPartyCallerService,
     ...EventListenersList,
   ],
 })

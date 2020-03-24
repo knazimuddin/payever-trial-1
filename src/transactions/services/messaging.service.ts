@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { MessageBusService, MessageInterface, RabbitMqClient, RabbitMqRPCClient } from '@pe/nest-kit';
 import { TransactionConverter } from '../converter';
 import { NextActionDto } from '../dto';
-import { ActionItemInterface } from '../interfaces';
+import { ActionCallerInterface, ActionItemInterface } from '../interfaces';
 import { ActionPayloadInterface, FieldsInterface, UnwrappedFieldsInterface } from '../interfaces/action-payload';
 import {
   CheckoutRpcPayloadInterface,
@@ -18,7 +18,7 @@ import { TransactionsService } from './transactions.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class MessagingService {
+export class MessagingService implements ActionCallerInterface {
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly bpoService: BusinessPaymentOptionService,

@@ -34,7 +34,7 @@ export class AuthEventsController {
     }, {
       $match: {
         'paymentflow.seller_email': data.email,
-        sellerName: {$exists: false},
+        seller_name: {$exists: false},
       },
     }, {
       $project: {_id: 1},
@@ -50,8 +50,8 @@ export class AuthEventsController {
       .join(' ');
 
     await this.transactionModel.updateMany(
-      {_id: {$in: transactions.map((e: {_id: string}) => e._id)}, sellerName: {$exists: false}},
-      {sellerName},
+      {_id: {$in: transactions.map((e: {_id: string}) => e._id)}, seller_name: {$exists: false}},
+      {$set: {seller_name: sellerName, seller_email: data.email}},
     );
   }
 }

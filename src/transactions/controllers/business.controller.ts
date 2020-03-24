@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  NotFoundException,
   Body,
   Controller,
   Get,
@@ -23,6 +24,7 @@ import { BusinessDto, ExportQueryDto, ListQueryDto, PagingResultDto } from '../d
 import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { BusinessModel, TransactionModel } from '../models';
+import { TransactionsNotifier } from '../notifiers';
 import { TransactionSchemaName } from '../schemas';
 import {
   ActionsRetriever,
@@ -35,7 +37,6 @@ import {
   TransactionsService,
 } from '../services';
 import { BusinessFilter, Exporter, ExportFormat } from '../tools';
-import { TransactionsNotifier } from '../notifiers';
 import { ConfigService } from '@nestjs/config';
 
 const BusinessPlaceholder: string = ':businessId';
@@ -71,14 +72,34 @@ export class BusinessController {
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
   @Acl({microservice: 'transactions', action: AclActionsEnum.read})
   public async getDetailByReference(
+    @Param('businessId') businessId: string,
+    @Param('reference') reference: string,
+  ): Promise<TransactionOutputInterface>  {
+    const transaction: TransactionModel = await this.transactionsService.findModelByParams({
+      business_uuid: businessId,
+      reference: reference,
+    });
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by reference ${reference} not found`);
+    }
+
+    return this.getDetails(transaction);
+  }
+
+  @Get('detail/original_id/:original_id')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  @Acl({microservice: 'transactions', action: AclActionsEnum.read})
+  public async getByOriginalId(
     @ParamModel(
       {
         business_uuid: BusinessPlaceholder,
-        reference: ':reference',
+        original_id: ':original_id',
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
-  ): Promise<TransactionOutputInterface>  {
+  ): Promise<TransactionOutputInterface> {
     return this.getDetails(transaction);
   }
 

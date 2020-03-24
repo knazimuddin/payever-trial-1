@@ -31,13 +31,11 @@
   "dependencies": {
     "@elastic/elasticsearch": "^6.8.2",
     "@nestjs/config": "^0.1.0",
-    "@pe/common-sdk": "^1.4.0",
-    "@pe/nest-kit": "4.16.0",
-    "@pe/notifications-sdk": "^3.3.0",
-    "@types/dotenv": "^6.1.1",
+    "@pe/common-sdk": "^1.6.0",
+    "@pe/nest-kit": "^4.19.17",
+    "@pe/notifications-sdk": "^3.6.0",
     "@types/mongoose": "5.5.20",
     "@types/node": "^11.11.6",
-    "@types/uuid": "^3.4.4",
     "cors": "^2.8.5",
     "db-migrate": "^0.11.5",
     "db-migrate-mongodb": "^1.5.0",
@@ -50,13 +48,12 @@
     "php-unserialize": "0.0.1",
     "reflect-metadata": "^0.1.13",
     "swagger-ui-express": "^4.0.2",
-    "typescript": "^3.6.3",
     "uuid": "^3.3.2",
     "xlsx": "^0.15.0"
   },
   "devDependencies": {
     "@nestjs/testing": "^6.8.3",
-    "@pe/cucumber-sdk": "^0.9.0",
+    "@pe/cucumber-sdk": "^0.10.4",
     "@pe/dev-kit": "^0.1.6",
     "@pe/pact-kit": "^0.3.0",
     "@types/mocha": "^5.2.6",
@@ -74,7 +71,8 @@
     "ts-loader": "^4.5.0",
     "ts-node": "^8.3.0",
     "tsconfig-paths": "^3.8.0",
-    "tslint": "^5.14.0"
+    "tslint": "^5.14.0",
+    "typescript": "^3.6.3"
   },
   "peerDependencies": {
     "class-validator": "*"

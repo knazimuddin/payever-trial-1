@@ -7,3 +7,4 @@ export * from './channel-set.interface';
 export * from './currency.interface';
 export * from './payment-flow.interface';
 export * from './transaction';
+export * from './action-caller.interface';

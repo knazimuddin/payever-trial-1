@@ -39,7 +39,8 @@ export interface TransactionBasicInterface extends SantanderApplicationAwareInte
   shipping_method_name: string;
   shipping_option_name: string;
   shipping_order_id: string;
-  sellerName?: string;
+  seller_name?: string;
+  seller_email?: string;
   is_shipping_order_processed: boolean;
   specific_status: string;
   status: string;
