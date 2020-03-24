@@ -10,6 +10,7 @@ import { TransactionsService } from '../../../../src/transactions/services/trans
 import { DtoValidationService } from '../../../../src/transactions/services/dto-validation.service';
 import { MessagingService } from '../../../../src/transactions/services/messaging.service';
 import { TransactionsExampleService } from '../../../../src/transactions/services/transactions-example.service';
+import { ThirdPartyCallerService } from '../../../../src/transactions/services/third-party-caller.service';
 import { ActionPayloadDto } from '../../../../src/transactions/dto/action-payload';
 import { TransactionModel } from '../../../../src/transactions/models';
 import * as uuid from 'uuid';
@@ -27,6 +28,7 @@ describe('TransactonActionService()', () => {
   let messagingService: MessagingService;
   let logger: Logger;
   let exampleService: TransactionsExampleService;
+  let thirdPartyCallerService: ThirdPartyCallerService;
 
   const actionPayload: ActionPayloadDto = {
     fields: {
@@ -123,6 +125,7 @@ describe('TransactonActionService()', () => {
       transactionsService,
       dtoValidation,
       messagingService,
+      thirdPartyCallerService,
       logger,
       exampleService,
     );

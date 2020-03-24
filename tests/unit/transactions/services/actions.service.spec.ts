@@ -7,6 +7,7 @@ import * as sinonChai from 'sinon-chai';
 import { Logger } from '@nestjs/common';
 import { ActionsRetriever } from '../../../../src/transactions/services/actions.retriever';
 import { MessagingService } from '../../../../src/transactions/services/messaging.service';
+import { ThirdPartyCallerService } from '../../../../src/transactions/services/third-party-caller.service';
 import { ActionItemInterface } from '../../../../src/transactions/interfaces';
 import { TransactionUnpackedDetailsInterface } from '../../../../src/transactions/interfaces/transaction';
 
@@ -18,6 +19,7 @@ describe('ActionRetriver', () => {
   let sandbox: sinon.SinonSandbox;
   let testService: ActionsRetriever;
   let messagingService: MessagingService;
+  let thirdPartyCallerService: ThirdPartyCallerService;
   let logger: Logger;
 
   const actions: ActionItemInterface[] = [
@@ -40,7 +42,7 @@ describe('ActionRetriver', () => {
       error: (): any => { },
     } as any;
 
-    testService = new ActionsRetriever(messagingService, logger);
+    testService = new ActionsRetriever(messagingService, thirdPartyCallerService, logger);
   });
 
   beforeEach(() => {

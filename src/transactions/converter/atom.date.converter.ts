@@ -5,7 +5,7 @@ export class AtomDateConverter {
       /(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}).*/,
     );
 
-    return new Date(parsed[1]);
+    return new Date(`${parsed[1]}.000Z`);
   }
 
   public static fromDateToAtomFormat(incoming: Date): any {
