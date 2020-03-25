@@ -1,3 +1,4 @@
+/* tslint:disable:no-identical-functions */
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { BusinessDto, RemoveBusinessDto } from '../dto';
@@ -13,7 +14,6 @@ export class BusinessBusMessagesController {
 
   @MessagePattern({
     name: 'users.event.business.created',
-    origin: 'rabbitmq',
   })
   public async onBusinessCreate(businessDto: BusinessDto): Promise<void> {
     this.logger.log({
@@ -27,14 +27,26 @@ export class BusinessBusMessagesController {
   }
 
   @MessagePattern({
-    name: '(users.event.business.(updated|export))',
-    origin: 'rabbitmq',
+    name: 'users.event.business.updated',
   })
   public async onBusinessUpdate(businessDto: BusinessDto): Promise<void> {
     this.logger.log({
       context: 'BusinessBusMessagesController',
       data: businessDto,
-      message: 'received a business (updated|export) event',
+      message: 'received a business updated event',
+    });
+
+    await this.businessService.save(businessDto);
+  }
+
+  @MessagePattern({
+    name: 'users.event.business.export',
+  })
+  public async onBusinessExport(businessDto: BusinessDto): Promise<void> {
+    this.logger.log({
+      context: 'BusinessBusMessagesController',
+      data: businessDto,
+      message: 'received a business export event',
     });
 
     await this.businessService.save(businessDto);
@@ -42,7 +54,6 @@ export class BusinessBusMessagesController {
 
   @MessagePattern({
     name: 'users.event.business.removed',
-    origin: 'rabbitmq',
   })
   public async onBusinessRemovedEvent(businessDto: RemoveBusinessDto): Promise<void> {
     this.logger.log({

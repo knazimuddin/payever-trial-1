@@ -17,7 +17,6 @@ export class MigrateEventsController {
 
   @MessagePattern({
     name: RabbitRoutingKeys.PaymentMigrate,
-    origin: 'rabbitmq',
   })
   public async onActionMigrateEvent(data: any): Promise<void> {
     this.logger.log('ACTION.MIGRATE!', data.payment);

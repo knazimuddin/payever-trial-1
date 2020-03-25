@@ -12,17 +12,19 @@ import {
   StorageContext,
   WorldContext,
 } from '@pe/cucumber-sdk/module/';
+import { ElasticSearchProvider } from '@pe/cucumber-sdk/module/elasticsearch';
 import { RabbitMqProvider } from '@pe/cucumber-sdk/module/rabbit';
 import { RedisProvider } from '@pe/cucumber-sdk/module/redis';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { AppConfigurator } from './app.configurator';
-import { ElasticsearchProvider } from '@pe/cucumber-sdk/module/elasticsearch';
+import ProcessEnv = NodeJS.ProcessEnv;
 
 dotenv.config({});
-const env = process.env;
+const env: ProcessEnv = process.env;
 
 export const options: CucumberOptionsInterface = {
+  appConfigurator: AppConfigurator,
   contexts: [
     ElasticsearchContext,
     RabbitMqRpcContext,
@@ -35,13 +37,12 @@ export const options: CucumberOptionsInterface = {
     WorldContext,
   ],
   fixtures: path.resolve('./features/fixtures'),
-  appConfigurator: AppConfigurator,
+  mongodb: env.MONGODB_URL,
   providers: [
     InMemoryProvider,
-    ElasticsearchProvider,
+    ElasticSearchProvider,
     RabbitMqProvider,
     RedisProvider,
     HttpProvider,
   ],
-  mongodb: env.MONGODB_URL,
 };

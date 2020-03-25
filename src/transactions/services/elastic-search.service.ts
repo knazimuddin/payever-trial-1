@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
+import { ElasticSearchClient } from '@pe/elastic-kit';
 import { TransactionDoubleConverter } from '../converter';
 import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
 import { FiltersList } from '../elastic-filters/filters.list';
 import { ElasticTransactionEnum } from '../enum';
 import { TransactionBasicInterface } from '../interfaces/transaction';
 import { CurrencyExchangeService } from './currency-exchange.service';
-import { ElasticsearchClient } from '@pe/nest-kit';
 
 @Injectable()
 export class ElasticSearchService {
 
   constructor(
     private readonly currencyExchangeService: CurrencyExchangeService,
-    private readonly elasticSearchClient: ElasticsearchClient,
+    private readonly elasticSearchClient: ElasticSearchClient,
   ) {}
 
   public async getResult(listDto: ListQueryDto): Promise<PagingResultDto> {

@@ -1,6 +1,5 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import { rabbitMqQueues } from './rabbit-mq-queues';
 import ProcessEnv = NodeJS.ProcessEnv;
 
 dotenv.config();
@@ -41,21 +40,34 @@ export const environment: any = {
   port: env.APP_PORT,
   production: env.PRODUCTION_MODE === 'true',
   rabbitmq: {
+    managementUrl: env.RABBITMQ_MANAGEMENT_URL,
+    urls: [env.RABBITMQ_URL],
+    vhost: env.RABBITMQ_VHOST,
+
+    isGlobalPrefetchCount: false,
+    prefetchCount: 10,
+    rsa: {
+      private: path.resolve(env.RABBITMQ_CERTIFICATE_PATH),
+    },
+
     exchanges: [
       {
         name: 'async_events',
         options: { durable: true },
         type: 'direct',
+
+        queues: [
+          {
+            name: 'async_events_transactions_micro',
+            options: {
+              deadLetterExchange: 'async_events_fallback',
+              deadLetterRoutingKey: 'async_events_transactions_micro',
+              durable: true,
+            },
+          },
+        ],
       },
     ],
-    isGlobalPrefetchCount: false,
-    prefetchCount: 1,
-    queues: rabbitMqQueues,
-    urls: [env.RABBITMQ_URL],
-
-    rsa: {
-      private: path.resolve(env.RABBITMQ_CERTIFICATE_PATH),
-    },
   },
   redis: {
     retryAttempts: env.REDIS_RETRY_ATTEMPTS,
