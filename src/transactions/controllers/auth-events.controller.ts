@@ -4,8 +4,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { RabbitRoutingKeys } from '../../enums';
-import { PaymentFlowSchemaName, TransactionSchemaName } from '../schemas';
 import { TransactionModel } from '../models';
+import { TransactionSchemaName } from '../schemas';
 
 @Controller()
 export class AuthEventsController {
@@ -15,7 +15,6 @@ export class AuthEventsController {
 
   @MessagePattern({
     name: RabbitRoutingKeys.SellerNamePropagated,
-    origin: 'rabbitmq',
   })
   public async onSellerNamePropagated(
     data?: {_id?: string, first_name?: string, last_name?: string, email?: string},

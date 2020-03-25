@@ -1,7 +1,8 @@
 import { HttpModule, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
-import { ElasticsearchModule, EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
+import { ElasticSearchModule } from '@pe/elastic-kit';
+import { EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
 import {
@@ -14,7 +15,8 @@ import {
   TransactionsExportCommand,
 } from './commands';
 import {
-  AdminController, AuthEventsController,
+  AdminController,
+  AuthEventsController,
   BpoEventsController,
   BusinessBusMessagesController,
   BusinessController,
@@ -35,6 +37,7 @@ import {
   PaymentMailEventProducer, 
   TransactionEventProducer,
 } from './producer';
+import { TransactionsNotifier } from './notifiers';
 import {
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,
@@ -66,7 +69,6 @@ import {
   TransactionsExampleService,
   TransactionsService,
 } from './services';
-import { TransactionsNotifier } from './notifiers';
 
 @Module({
   controllers: [
@@ -103,7 +105,7 @@ import { TransactionsNotifier } from './notifiers';
       rsaPath: environment.rsa,
     }),
     EventDispatcherModule,
-    ElasticsearchModule.forRoot({
+    ElasticSearchModule.forRoot({
       host: environment.elasticSearch,
     }),
   ],

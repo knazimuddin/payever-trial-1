@@ -19,11 +19,11 @@ export class DailyReportTransactionMailerReportEventProducer {
   private async sendMailEvent(dailyReportCurrencyDto: DailyReportCurrencyDto[]): Promise<void> {
     await this.rabbitMqClient.send(
       {
-        channel: 'mailer-report.event.daily-report-data.sent',
+        channel: 'transactions.event.report.daily',
         exchange: 'async_events',
       },
       {
-        name: 'mailer-report.event.daily-report-data.sent',
+        name: 'transactions.event.report.daily',
         payload: dailyReportCurrencyDto,
       },
     );

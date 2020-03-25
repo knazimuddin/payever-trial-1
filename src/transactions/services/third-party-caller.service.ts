@@ -1,14 +1,14 @@
-import { Injectable, Logger, HttpException, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { IntercomService } from '@pe/nest-kit';
+import { AxiosError, AxiosResponse } from 'axios';
+import { Observable } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { environment } from '../../environments';
+import { ThirdPartyPaymentActionsEnum, TransactionActionsToThirdPartyActions } from '../enum';
 import { ActionCallerInterface, ActionItemInterface } from '../interfaces';
 import { ActionPayloadInterface } from '../interfaces/action-payload';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionsService } from './transactions.service';
-import { environment } from '../../environments';
-import { Observable } from 'rxjs';
-import { AxiosError, AxiosResponse } from 'axios';
-import { catchError, map } from 'rxjs/operators';
-import { ThirdPartyPaymentActionsEnum, TransactionActionsToThirdPartyActions } from '../enum';
-import { IntercomService } from '@pe/nest-kit';
 
 @Injectable()
 export class ThirdPartyCallerService implements ActionCallerInterface {
@@ -67,7 +67,8 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
     const integrationName: string = transaction.type;
 
     const url: string =
-      `${environment.thirdPartyPaymentsMicroUrl}/api/business/${businessId}/integration/${integrationName}/action/${action}`;
+      `${environment.thirdPartyPaymentsMicroUrl}`
+        + `/api/business/${businessId}/integration/${integrationName}/action/${action}`;
 
     this.logger.log({
       data: actionPayload,

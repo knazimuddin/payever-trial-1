@@ -14,7 +14,6 @@ export class DailyReportTransactionBusMessagesController {
 
   @MessagePattern({
     name: RabbitRoutingKeys.MailerReportDailyReportRequested,
-    origin: 'rabbitmq',
   })
   public async onMailerReportDailyReportRequested(dailyReportFilterDto: DailyReportFilterDto): Promise<void> {
 

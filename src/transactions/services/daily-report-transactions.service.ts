@@ -19,7 +19,7 @@ export class DailyReportTransactionsService {
     
     const todayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {"created_at": {"$gte": todayDate}} },
+        { $match: {created_at: {$gte: todayDate}} },
         {
           $group: {
             _id: '$currency',
@@ -40,7 +40,7 @@ export class DailyReportTransactionsService {
 
     const beforeTodayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {"created_at": {"$lt": todayDate}} },
+        { $match: {created_at: {$lt: todayDate}} },
         {
           $group: {
             _id: '$currency',
@@ -77,7 +77,7 @@ export class DailyReportTransactionsService {
 
     const todayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {"created_at": {"$gte": todayDate}} },
+        { $match: {created_at: {$gte: todayDate}} },
         {
           $group: {
             _id: {currency: '$currency', type: '$type'},
@@ -105,7 +105,7 @@ export class DailyReportTransactionsService {
 
     const beforeTodayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {"created_at": {"$lt": todayDate}} },
+        { $match: {created_at: {$lt: todayDate}} },
         {
           $group: {
             _id: {currency: '$currency', type: '$type'},

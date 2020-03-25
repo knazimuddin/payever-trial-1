@@ -4,7 +4,7 @@ Feature: Response Daily Report Transactions
     When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
       """
       {
-        "name": "mailer-report.event.daily-report-data.requested",
+        "name": "mailer-report.event.transactions-daily.request",
         "payload": {
           "beginDate": "2020-03-22T11:49:00.008Z"
         }
@@ -16,7 +16,7 @@ Feature: Response Daily Report Transactions
       """
       [
         {
-          "name": "mailer-report.event.daily-report-data.sent",
+          "name": "transactions.event.report.daily",
           "payload": {
           }
         }
