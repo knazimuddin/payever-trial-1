@@ -23,7 +23,11 @@ async function bootstrap(): Promise<void> {
 
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('/api');
-  app.enableCors({ maxAge: 600 });
+
+  if (environment.appCors) {
+    app.enableCors({ maxAge: 600 });
+  }
+
   app.enableShutdownHooks();
 
   const options: SwaggerBaseConfig = new DocumentBuilder()
