@@ -19,6 +19,7 @@ export const environment: any = {
       serviceName: env.ELASTIC_APM_SERVICE_NAME,
     },
   },
+  appCors: env.APP_CORS === 'true',
   applicationName: env.APP_NAME,
   connectMicroUrlBase: env.MICRO_URL_CONNECT,
   defaultCurrency: env.DEFAULT_CURRENCY,
