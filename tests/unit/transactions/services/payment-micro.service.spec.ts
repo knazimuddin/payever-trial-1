@@ -106,6 +106,12 @@ describe('PamentMicroService', () => {
   describe('getMicroName()', () => {
     it('should return microName', async () => {
       expect(
+        testService.getMicroName('santander_installment'),
+      ).eq('payment_santander_de');
+      expect(
+        testService.getMicroName('santander_ccp_installment'),
+      ).eq('payment_santander_de');
+      expect(
         testService.getMicroName('santander_pos_installment'),
       ).eq('payment_santander_de');
       expect(

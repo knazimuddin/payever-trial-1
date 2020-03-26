@@ -32,6 +32,15 @@ describe('StartsWithConditionFilter', () => {
           "keyword_2",
         ],
       }
+      
+      expect(_filter.value).to.have.length.above(0);
+      expect(_filter).to.not.be.null;
+      expect(_filter.value).to.not.be.null;
+      expect(_filter.value.length).to.not.be.null;
+      expect(_filter).to.not.be.undefined;
+      expect(_filter.value).to.not.be.undefined;
+      expect(_filter.value.length).to.not.be.undefined;
+      expect(_filter.value).to.have.ownProperty('length');
       StartsWithConditionFilter.apply(mongoFilters, field, _filter);
       expect(mongoFilters.$and).to.deep.equal(
         [{

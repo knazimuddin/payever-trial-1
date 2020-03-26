@@ -162,14 +162,13 @@ export class TransactionsService {
     return this.findModelByParams({ uuid: transactionUuid });
   }
 
-  //public async findModelByParams(params: any): Promise<TransactionModel> {
-  //  return this.transactionModel.findOne(params).sort({ created_at: -1 });
-  //}
   public async findModelByParams(params: any): Promise<TransactionModel> {
     const transactionModel: TransactionModel[] 
       = await this.transactionModel.find(params).sort({ created_at: -1 }).limit(1);
-    if(!transactionModel || !transactionModel.length)
+    if(!transactionModel || !transactionModel.length) {
       return null;
+    }
+    
     return transactionModel[0];
   }
 

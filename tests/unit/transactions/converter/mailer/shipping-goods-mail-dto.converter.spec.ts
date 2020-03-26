@@ -3,8 +3,8 @@ import 'mocha';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as sinonChai from 'sinon-chai';
-import { TransactionUnpackedDetailsInterface } from '../../../../../src/transactions/interfaces';
-import { ShippingOrderProcessedMessageDto } from '../../../../../src/transactions/dto';
+import { TransactionUnpackedDetailsInterface, AddressInterface } from '../../../../../src/transactions/interfaces';
+import { ShippingOrderProcessedMessageDto, ShippingMailDto } from '../../../../../src/transactions/dto';
 import { ShippingGoodsMailDtoConverter } from '../../../../../src/transactions/converter';
 
 chai.use(sinonChai);
@@ -101,7 +101,14 @@ describe('ShippingGoodsMailDtoConverter', () => {
         trackingUrl: 'www.dhl.de/tracking/12345',
       }
 
-      expect(ShippingGoodsMailDtoConverter.fromTransactionAndShippingOrder(transaction, dto))
+      const shippingMailDto: ShippingMailDto = ShippingGoodsMailDtoConverter.fromTransactionAndShippingOrder(transaction, dto);
+
+      expect(shippingMailDto.payment.address).to.be.oneOf([transaction.shipping_address, transaction.billing_address]);
+      expect(shippingMailDto.payment.address).to.satisfy(
+        function(item:AddressInterface) { return item === transaction.shipping_address || item === transaction.billing_address; }
+      );
+
+      expect(shippingMailDto)
         .to.deep.eq({
           cc: [],
           to: 'customer@payever.de',

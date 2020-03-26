@@ -6,7 +6,7 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as uuid from 'uuid';
 import { Logger } from '@nestjs/common';
-import { Model } from 'mongoose';
+import { Model, DocumentQuery } from 'mongoose';
 import { TransactionModel, TransactionHistoryEntryModel, PaymentFlowModel } from '../../../../src/transactions/models';
 import { NotificationsEmitter } from '@pe/notifications-sdk';
 import { ElasticsearchClient, DelayRemoveClient, RabbitMqClient } from '@pe/nest-kit';
@@ -236,7 +236,7 @@ describe('TransactionsService', () => {
 
   describe('findModelByUuid', () => {
     it('should return transaction Model by uuid', async () => {
-      sandbox.stub(testService, 'findModelByUuid').resolves(transaction);
+      //sandbox.stub(testService, 'findModelByUuid').resolves(transaction);
       sandbox.stub(testService, 'findModelByParams').resolves(transaction);
       expect(
         await testService.findModelByUuid(transaction.uuid),
@@ -246,11 +246,55 @@ describe('TransactionsService', () => {
 
   describe('findModelByParams', () => {
     it('should return transaction Model by uuid', async () => {
-      sandbox.stub(testService, 'findModelByParams').resolves(transaction);
+
+      let querySort: DocumentQuery<TransactionModel[], TransactionModel, {}> = {
+        sort: (): any => { },
+      } as any;
+      let queryLimit: DocumentQuery<TransactionModel[], TransactionModel, {}> = {
+        limit: (): any => { },
+      } as any;
+
+      sandbox.stub(transactionModel, 'find').returns(querySort);
+      sandbox.stub(querySort, 'sort').returns(queryLimit);
+      sandbox.stub(queryLimit, 'limit').resolves([transaction]);
       
       expect(
         await testService.findModelByParams({ id: transaction.id }),
       ).to.equal(transaction);
+    });
+
+    it('should return null transaction Model by uuid', async () => {
+      let querySort: DocumentQuery<TransactionModel[], TransactionModel, {}> = {
+        sort: (): any => { },
+      } as any;
+      let queryLimit: DocumentQuery<TransactionModel[], TransactionModel, {}> = {
+        limit: (): any => { },
+      } as any;
+
+      sandbox.stub(transactionModel, 'find').returns(querySort);
+      sandbox.stub(querySort, 'sort').returns(queryLimit);
+      sandbox.stub(queryLimit, 'limit').resolves(null);
+      
+      expect(
+        await testService.findModelByParams({ id: transaction.id }),
+      ).to.equal(null);
+    });
+
+    it('should return empty transaction Model by uuid', async () => {
+      let querySort: DocumentQuery<TransactionModel[], TransactionModel, {}> = {
+        sort: (): any => { },
+      } as any;
+      let queryLimit: DocumentQuery<TransactionModel[], TransactionModel, {}> = {
+        limit: (): any => { },
+      } as any;
+
+      sandbox.stub(transactionModel, 'find').returns(querySort);
+      sandbox.stub(querySort, 'sort').returns(queryLimit);
+      sandbox.stub(queryLimit, 'limit').resolves([]);
+      
+      expect(
+        await testService.findModelByParams({ id: transaction.id }),
+      ).to.equal(null);
     });
   });
 

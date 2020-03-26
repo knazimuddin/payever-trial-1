@@ -693,6 +693,7 @@ describe('MessagingService', () => {
       sandbox.stub(testService, 'externalCapture');
       sandbox.stub(flowService, 'findOneById').resolves(paymentFlow);
       sandbox.stub(transactionService, 'applyActionRpcResult');
+
       await testService.runAction(transactionUnpackedDetails, 'edit', actionPayload);
 
       expect(transactionService.applyActionRpcResult).calledOnceWithExactly(
@@ -788,9 +789,11 @@ describe('MessagingService', () => {
       sandbox.stub(bpoService, 'findOneById').throws({});
       sandbox.stub(testService, 'externalCapture');
       sandbox.stub(flowService, 'findOneById').resolves(null);
-      expect(
-        () => testService.runAction(transactionUnpackedDetails, 'edit', actionPayload),
-      ).to.throw;
+      const spy: sinon.SinonSpy = sandbox.spy(testService.runAction);
+      try {
+        await testService.runAction(transactionUnpackedDetails, 'edit', actionPayload);
+      } catch (e) { }
+      expect(spy.threw());
     });
   });
 
@@ -806,11 +809,70 @@ describe('MessagingService', () => {
       sandbox.stub(testService, 'getBusinessPaymentOption').throws({});
       sandbox.stub(testService, 'getPaymentFlow').resolves(paymentFlow);
       sandbox.stub(transactionService, 'applyRpcResult').resolves(null);
-      expect(
-        () => testService.updateStatus(transactionUnpackedDetails),
-      ).to.throw;
+
+      const spy: sinon.SinonSpy = sandbox.spy(testService.updateStatus);
+      try {
+        await testService.updateStatus(transactionUnpackedDetails);
+      } catch (e) { }
+      expect(spy.threw());
     });
 
+    it('should throw error Cannot resolve payment flow', async () => {
+      sandbox.stub(testService, 'getBusinessPaymentOption').resolves(bpoInstance);
+      sandbox.stub(testService, 'getPaymentFlow').throws({});
+      sandbox.stub(transactionService, 'applyRpcResult').throws({});
+      const spy: sinon.SinonSpy = sandbox.spy(testService.updateStatus);
+      try {
+        await testService.updateStatus(transactionUnpackedDetails);
+      } catch (e) { }
+      expect(spy.threw());
+    });
+
+    it('should throw error Cannot resolve payment flow', async () => {
+      sandbox.stub(testService, 'getBusinessPaymentOption').resolves(bpoInstance);
+      sandbox.stub(testService, 'getPaymentFlow').resolves(null);
+      sandbox.stub(transactionService, 'applyRpcResult').throws({});
+      const spy: sinon.SinonSpy = sandbox.spy(testService.updateStatus);
+      try {
+        await testService.updateStatus(transactionUnpackedDetails);
+      } catch (e) { }
+      expect(spy.threw());
+    });
+
+  });
+
+  describe('runNextAction()', () => {
+    it('should run Next Action action', async () => {
+      const rpcResult: any = {
+        next_action: {
+          next_action: {
+            type: 'action',
+          },
+        },
+      }
+
+      const spy: sinon.SinonSpy = sandbox.spy(testService.runNextAction);
+      await testService.runNextAction(transactionUnpackedDetails, rpcResult.next_action);
+      expect(spy.called);
+    });
+
+    it('should run Next Action external_capture', async () => {
+      const rpcResult: any = {
+        next_action: {
+          next_action: {
+            type: 'external_capture',
+            payment_method: 'paypal',
+            payload: {},
+          },
+        },
+      }
+
+      sandbox.stub(testService, 'externalCapture').resolves();
+      const spy: sinon.SinonSpy = sandbox.spy(testService.externalCapture);
+
+      await testService.runNextAction(transactionUnpackedDetails, rpcResult.next_action);
+      expect(spy.calledOnce);
+    });
   });
 
   describe('externalCapture()', () => {

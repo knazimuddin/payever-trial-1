@@ -61,6 +61,18 @@ describe('PaymentFlowService', () => {
     });
   });
 
+  describe('findOne()', () => {
+    it('find paymentFlow', async () => {
+      const paymentFlow: PaymentFlowModel = {
+        id: uuid.v4(),
+      } as any;
+      sandbox.stub(paymentFlowModel, 'findOne').resolves(paymentFlow)
+      expect(
+        await testService.findOne({id: paymentFlow.id}),
+      ).to.eq(paymentFlow);
+    });
+  });
+
   describe('findOneById()', () => {
     it('find paymentFlow by id', async () => {
       const paymentFlow: PaymentFlowModel = {
