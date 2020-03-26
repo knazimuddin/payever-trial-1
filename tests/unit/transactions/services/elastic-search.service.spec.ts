@@ -7,7 +7,7 @@ import * as sinonChai from 'sinon-chai';
 
 import { ElasticSearchService } from '../../../../src/transactions/services/elastic-search.service';
 import { CurrencyExchangeService } from '../../../../src/transactions/services/currency-exchange.service';
-import { ElasticsearchClient } from '@pe/nest-kit';
+import { ElasticSearchClient } from '@pe/elastic-kit';
 import { ListQueryDto, PagingResultDto } from '../../../../src/transactions/dto';
 import { TransactionCartItemInterface, TransactionBasicInterface } from '../../../../src/transactions/interfaces';
 import { ElasticTransactionEnum } from '../../../../src/transactions/enum';
@@ -20,7 +20,7 @@ describe('Elastic Search Service', () => {
   let sandbox: sinon.SinonSandbox;
   let testService: ElasticSearchService;
   let currencyExchangeService: CurrencyExchangeService;
-  let elasticSearchClient: ElasticsearchClient;
+  let elasticSearchClient: ElasticSearchClient;
 
   before(() => {
     currencyExchangeService = {

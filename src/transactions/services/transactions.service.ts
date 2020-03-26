@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
-import { DelayRemoveClient, ElasticsearchClient } from '@pe/nest-kit';
+import { DelayRemoveClient, ElasticSearchClient } from '@pe/elastic-kit';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
@@ -24,8 +24,8 @@ import {
 } from '../interfaces/transaction';
 import { PaymentFlowModel, TransactionHistoryEntryModel, TransactionModel } from '../models';
 import { TransactionsNotifier } from '../notifiers';
-import { TransactionSchemaName } from '../schemas';
 import { AuthEventsProducer } from '../producer';
+import { TransactionSchemaName } from '../schemas';
 import { PaymentFlowService } from './payment-flow.service';
 
 @Injectable()
@@ -35,7 +35,7 @@ export class TransactionsService {
     @InjectModel(TransactionSchemaName) private readonly transactionModel: Model<TransactionModel>,
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
     private readonly paymentFlowService: PaymentFlowService,
-    private readonly elasticSearchClient: ElasticsearchClient,
+    private readonly elasticSearchClient: ElasticSearchClient,
     private readonly logger: Logger,
     private readonly notifier: TransactionsNotifier,
     private readonly delayRemoveClient: DelayRemoveClient,

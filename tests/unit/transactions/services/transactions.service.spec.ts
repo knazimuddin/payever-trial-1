@@ -9,7 +9,8 @@ import { Logger } from '@nestjs/common';
 import { Model, DocumentQuery } from 'mongoose';
 import { TransactionModel, TransactionHistoryEntryModel, PaymentFlowModel } from '../../../../src/transactions/models';
 import { NotificationsEmitter } from '@pe/notifications-sdk';
-import { ElasticsearchClient, DelayRemoveClient, RabbitMqClient } from '@pe/nest-kit';
+import { ElasticSearchClient, DelayRemoveClient } from '@pe/elastic-kit';
+import { RabbitMqClient } from '@pe/nest-kit';
 import { TransactionsNotifier } from '../../../../src/transactions/notifiers';
 import { TransactionsService } from '../../../../src/transactions/services/transactions.service';
 import { TransactionPackedDetailsInterface, TransactionUnpackedDetailsInterface } from '../../../../src/transactions/interfaces';
@@ -29,7 +30,7 @@ describe('TransactionsService', () => {
   let transactionModel: Model<TransactionModel>
   let notificationsEmitter: NotificationsEmitter;
   let paymentFlowService: PaymentFlowService;
-  let elasticSearchClient: ElasticsearchClient;
+  let elasticSearchClient: ElasticSearchClient;
   let logger: Logger;
   let notifier: TransactionsNotifier;
   let delayRemoveClient: DelayRemoveClient;

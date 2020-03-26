@@ -60,7 +60,7 @@ describe('Business Service', () => {
   describe('getBusinessById()', () => {
     it('returns business with matching id', async () => {
       sandbox.stub(businessModel, 'findOne').resolves(businessModelInstance);
-      const result: BusinessModel = await testService.getBusinessById(businessModelInstance._id);
+      const result: BusinessModel = await testService.findBusinessById(businessModelInstance._id);
       expect(result).to.equal(businessModelInstance);
     });
   });

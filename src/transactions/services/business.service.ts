@@ -21,7 +21,7 @@ export class BusinessService {
     );
   }
 
-  public async getBusinessById(businessId: string): Promise<BusinessModel> {
+  public async findBusinessById(businessId: string): Promise<BusinessModel> {
     return this.businessModel.findOne({
       _id: businessId,
     });
