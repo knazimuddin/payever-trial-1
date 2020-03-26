@@ -7,6 +7,8 @@ import { Exporter } from '../../../../src/transactions/tools';
 import * as uuid from 'uuid';
 import { TransactionModel } from '../../../../src/transactions/models';
 import { FastifyReply } from 'fastify';
+import * as PdfMakePrinter from 'pdfmake/src/printer';
+import { EventEmitter } from 'events';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -14,8 +16,7 @@ const expect: Chai.ExpectStatic = chai.expect;
 
 describe('Exporter', () => {
   let sandbox: sinon.SinonSandbox;
-  let response: FastifyReply<any>;
-
+  
   const transaction: TransactionModel = {
     id: '4416ed60-93e4-4557-a4e8-5e57140ee88b',
     original_id: '627a3236-af6c-444a-836c-9f0d1d27c21a',
@@ -56,7 +57,7 @@ describe('Exporter', () => {
     status_color: 'yellow',
     store_id: '1b42fd1c-3b28-47cf-b7fb-01c4281dc7f7',
     store_name: 'XYZ Store',
-    total: 200,
+    //total: 200,
     type: 'type_1',
     updated_at: new Date('2020-12-12'),
     user_uuid: '6c08ca77-abb6-4d07-ae83-24653ea94a14',
@@ -68,10 +69,7 @@ describe('Exporter', () => {
   } as TransactionModel;
 
   before(() => {
-    response = {
-      header: (): any => { },
-      send: (): any => { },
-    } as any;
+    
   });
 
   beforeEach(() => {
@@ -84,23 +82,99 @@ describe('Exporter', () => {
   });
 
   describe('export', () => {
-    it('should perform export successfully', async () => {
+    it('should perform export xls successfully', async () => {
       
+      const response: FastifyReply<any> = {
+        header: (): any => { },
+        send: (): any => { },
+      } as any;
+
       sinon.stub(response, "header");
       sinon.stub(response, "send");
 
-      Exporter.export([transaction], response, "result.csv", [], 'csv');
+      Exporter.export([transaction], response, "result.csv", 
+        [{title:'Merchant',name:'merchant_name'},{title:'Status',name:'status'}],
+        'xls');
       expect(response.header).calledThrice;
       expect(response.send).calledOnce;
+    });
+
+    it('should perform export successfully no format', async () => {
+      
+      const response: FastifyReply<any> = {
+        header: (): any => { },
+        send: (): any => { },
+      } as any;
+
+      sinon.stub(response, "header");
+      sinon.stub(response, "send");
+
+      Exporter.export([transaction], response, "result.csv", 
+        [{title:'Merchant',name:'merchant_name'},{title:'Status',name:'status'}]);
+      expect(response.header).calledThrice;
+      expect(response.send).calledOnce;
+    });
+
+    it('should perform export successfully pdf', async () => {
+
+      const printer: PdfMakePrinter = {
+        createPdfKitDocument: (): any => { },
+      } as any;
+
+      const document: any = {
+        on: (): any => { },
+        end: (): any => { },
+      } as any;
+
+      const response: FastifyReply<any> = {
+        header: (): any => { },
+        send: (): any => { },
+      } as any;
+
+      sinon.stub(printer, "createPdfKitDocument").returns(document);
+
+      const emitter = new EventEmitter();
+      sinon.stub(document, "on").returns(emitter);
+      sinon.stub(document, "end");
+
+      emitter.emit('end');
+      document.end();
+      
+      Exporter.export([transaction, transaction], response, "result.pdf", 
+        [{title:'Merchant',name:'merchant_name'},{title:'Created',name:'created_at'},{title:'None',name:'none'}], 
+        'pdf');
+      expect(document.end).calledOnce;
     });
   });
 
   describe('export PDF', () => {
     it('should perform exportPDF successfully', async () => {
-      
+
+      const printer: PdfMakePrinter = {
+        createPdfKitDocument: (): any => { },
+      } as any;
+
+      const document: any = {
+        on: (): any => { },
+        end: (): any => { },
+      } as any;
+
+      const response: FastifyReply<any> = {
+        header: (): any => { },
+        send: (): any => { },
+      } as any;
+
+      sinon.stub(printer, "createPdfKitDocument").returns(document);
+
+      const emitter = new EventEmitter();
+      sinon.stub(document, "on").returns(emitter);
+      sinon.stub(document, "end");
+
+      emitter.emit('end');
+      document.end();
+
       Exporter.exportPDF([transaction], response, "result.pdf", []);
-      expect(response.header).calledThrice;
-      expect(response.send).calledOnce;
+      expect(document.end).calledOnce;
     });
   });
 });

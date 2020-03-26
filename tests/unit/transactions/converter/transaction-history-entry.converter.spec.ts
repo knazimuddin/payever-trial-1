@@ -36,6 +36,29 @@ describe('TransactionHistoryEntryConverter', () => {
     ],
   }
 
+  const historyEventDataDifferent: HistoryEventDataInterface = {
+    amount: 12,
+    payment_status: 'ACCEPTED',
+    reason: 'reason_1',
+    saved_data: [
+      {
+        type: 'type_1',
+        name: 'name_1',
+      },
+    ],
+    items_restocked: true,
+    mail_event: {
+      event_id: 'f01d7353-d56a-49af-b7cd-a1cead04fa44',
+      template_name: 'template_name_1',
+    },
+    refund_items: [
+      {
+        count: 4,
+        payment_item_id: '86b62cc1-cf75-4065-ac91-b1df6ccc6158',
+      },
+    ],
+  }
+
   const transaction: TransactionModel = {
     items: [
       {
@@ -152,6 +175,28 @@ describe('TransactionHistoryEntryConverter', () => {
         },
       );
     });
+
+    it('should complete message frm history refund different', () => {
+      const type: string = 'type_1';
+      const createdAt: Date = new Date('2009-11-04T18:55:41+00:00');
+
+      expect(TransactionHistoryEntryConverter.fromHistoryRefundCompletedMessage(
+        transaction,
+        type,
+        createdAt,
+        historyEventDataDifferent,
+      )).to.deep.equal(
+        {
+          action: type,
+          amount: 12,
+          created_at: createdAt,
+          is_restock_items: true,
+          payment_status: 'ACCEPTED',
+          reason: 'reason_1',
+          refund_items: [],
+        },
+      );
+    });
   });
 
   describe('fromCheckoutTransactionHistoryItem()', () => {
@@ -212,6 +257,33 @@ describe('TransactionHistoryEntryConverter', () => {
           params: {
             value: 'val',
           },
+        },
+      )
+    });
+
+    it('should return transactionHistoryentry from checkoutTransactionHistory without params', () => {
+      const type: string = 'type_1';
+      const createdAt: Date = new Date('2009-11-04T18:55:41+00:00');
+      const data: CheckoutTransactionHistoryItemInterface = {
+        action: 'action_1',
+        amount: 123,
+        created_at: new Date().toISOString(),
+        payment_status: 'REFUNDED',
+        reason: 'reason_1',
+        items_restocked: true,
+      }
+      expect(TransactionHistoryEntryConverter.fromCheckoutTransactionHistoryItem(
+        type,
+        createdAt,
+        data,
+      )).to.deep.equal(
+        {
+          action: type,
+          amount: 123,
+          created_at: createdAt,
+          payment_status: 'REFUNDED',
+          reason: 'reason_1',
+          is_restock_items: true,
         },
       )
     });

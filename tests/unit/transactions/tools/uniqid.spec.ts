@@ -17,6 +17,12 @@ describe('Uniqid', () => {
       expect(result).to.contains("test");
     });
 
+    it('should generate the uniqid without parameters', async () => {
+      
+      const result:string = Uniqid.generate();
+      expect(result).to.be.a("string");
+    });
+
     it('should generate the uniqid with entropy', async () => {
       
       const result:string = Uniqid.generate("test", true);

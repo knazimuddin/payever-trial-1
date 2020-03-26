@@ -7,6 +7,7 @@ import * as sinonChai from 'sinon-chai';
 import * as uuid from 'uuid';
 import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
+import { catchError, map as MapStub } from 'rxjs/operators';
 
 import { ThirdPartyCallerService, TransactionsService } from '../../../../src/transactions/services';
 import { IntercomService } from '@pe/nest-kit';
@@ -161,9 +162,7 @@ describe('CurrencyExchangeService', () => {
       let response: Observable<AxiosResponse<any>> = {
         pipe: (): any => { },
       } as any;
-      let responseData: Observable<any> = {
-        toPromise: (): any => { },
-      } as any;
+
       sandbox.stub(httpService, 'post').resolves(response);
       sandbox.stub(response, 'pipe').throws({});
       

@@ -61,6 +61,12 @@ describe('ActionRetriver', () => {
       expect(result).to.eq(actions);
     });
 
+    it('should retrieve actions type instant_payment', async () => {
+      sandbox.stub(messagingService, 'getActionsList').resolves(actions)
+      const result: ActionItemInterface[] = await testService.retrieve({type:'instant_payment'} as any);
+      expect(result).to.deep.eq([]);
+    });
+
     it('should return 0 actions when messaging service throws error', async () => {
       sandbox.stub(messagingService, 'getActionsList').throws({
         message: 'error occured',

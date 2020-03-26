@@ -48,5 +48,26 @@ describe('StartsWithConditionFilter', () => {
         }],
       );
     });
+
+    it('should apply the given feild to mongo filter', async () => {
+      const mongoFilters: any = {
+        $and: [],
+        $not: [],
+      }
+      const field: string = 'title';
+      const _filter: StringFilterInterface = {
+        value: [],
+      }
+      
+      expect(_filter).to.not.be.null;
+      expect(_filter.value).to.not.be.null;
+      expect(_filter.value.length).to.not.be.null;
+      expect(_filter).to.not.be.undefined;
+      expect(_filter.value).to.not.be.undefined;
+      expect(_filter.value.length).to.not.be.undefined;
+      expect(_filter.value).to.have.ownProperty('length');
+      StartsWithConditionFilter.apply(mongoFilters, field, _filter);
+      expect(mongoFilters.$and).to.deep.equal([]);
+    });
   });
 });

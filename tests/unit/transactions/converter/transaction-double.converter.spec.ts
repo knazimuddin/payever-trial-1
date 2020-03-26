@@ -42,6 +42,13 @@ describe('TransactionDoubleConverter', () => {
     ],
   } as any;
 
+  const transactionSimple: TransactionBasicInterface = {
+    amount: 123.288,
+    total: 456.29,
+    items: [],
+    history: [],
+  } as any;
+
   describe('pack()', () => {
     it('should pack transaction', async () => {
       expect(
@@ -83,6 +90,84 @@ describe('TransactionDoubleConverter', () => {
               amount: undefined,
             },
           ],
+        },
+      )
+    });
+
+    it('should pack transaction', async () => {
+      expect(
+        TransactionDoubleConverter.pack(transactionSimple),
+      ).to.deep.equal(
+        {
+          amount: 12328,
+          total: 45629,
+          delivery_fee: undefined,
+          down_payment: undefined,
+          payment_fee: undefined,
+          items: [],
+          history: [],
+        },
+      )
+    });
+  });
+
+  describe('unpack()', () => {
+    it('should unpack transaction', async () => {
+      expect(
+        TransactionDoubleConverter.unpack(transaction),
+      ).to.deep.equal(
+        {
+          amount: 123.28,
+          total: 456.29,
+          delivery_fee: 12.23,
+          down_payment: 23.42,
+          payment_fee: 2.9,
+          items: [
+            {
+              price: 400.2,
+              price_net: 399.23,
+              vat_rate: 13.52,
+              fixed_shipping_price: 4.29,
+              shipping_price: 3.92,
+              shipping_settings_rate: 5.5,
+              weight: 1,
+            },
+            {
+              price: undefined,
+              price_net: undefined,
+              vat_rate: undefined,
+              fixed_shipping_price: undefined,
+              shipping_price: undefined,
+              shipping_settings_rate: undefined,
+              weight: undefined,
+            },
+          ],
+          history: [
+            {
+              action: 'action_1',
+              amount: 51.23,
+            },
+            {
+              action: 'action_2',
+              amount: undefined,
+            },
+          ],
+        },
+      )
+    });
+
+    it('should unpack transaction', async () => {
+      expect(
+        TransactionDoubleConverter.unpack(transactionSimple),
+      ).to.deep.equal(
+        {
+          amount: 123.28,
+          total: 456.29,
+          delivery_fee: undefined,
+          down_payment: undefined,
+          payment_fee: undefined,
+          items: [],
+          history: [],
         },
       )
     });

@@ -117,6 +117,30 @@ describe('TransactionHistoryService', async () => {
       );
     });
 
+    it('should process history record for \'refund\' type', async () => {
+      const createdAt: Date = new Date('2020-10-10')
+      const historyEventData: HistoryEventDataInterface = {
+        amount: 123,
+        payment_status: 'paid',
+        reason: 'reason 1',
+      } as HistoryEventDataInterface;
+
+      sandbox.spy(transactionsService, 'pushHistoryRecord');
+
+      await testService.processHistoryRecord(transaction, 'refund', createdAt, historyEventData);
+      expect(transactionsService.pushHistoryRecord).calledWith(transaction,
+        {
+          action: 'refund',
+          amount: 123,
+          created_at: createdAt,
+          is_restock_items: false,
+          payment_status: 'paid',
+          reason: 'reason 1',
+          refund_items: [],
+        },
+      );
+    });
+
     it('should process history record for \'unknown\' type', async () => {
       const createdAt: Date = new Date('2020-10-10')
       const historyEventData: HistoryEventDataInterface = {

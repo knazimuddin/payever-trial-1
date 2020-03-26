@@ -852,7 +852,7 @@ describe('MessagingService', () => {
       }
 
       const spy: sinon.SinonSpy = sandbox.spy(testService.runNextAction);
-      await testService.runNextAction(transactionUnpackedDetails, rpcResult.next_action);
+      await testService.runNextAction(transactionUnpackedDetails, rpcResult.next_action.next_action);
       expect(spy.called);
     });
 
@@ -870,7 +870,7 @@ describe('MessagingService', () => {
       sandbox.stub(testService, 'externalCapture').resolves();
       const spy: sinon.SinonSpy = sandbox.spy(testService.externalCapture);
 
-      await testService.runNextAction(transactionUnpackedDetails, rpcResult.next_action);
+      await testService.runNextAction(transactionUnpackedDetails, rpcResult.next_action.next_action);
       expect(spy.calledOnce);
     });
   });
@@ -899,6 +899,71 @@ describe('MessagingService', () => {
       sandbox.stub(rabbitClient, 'send');
       sandbox.stub(messageBusService, 'createMessage').returns(message);
       await testService.sendTransactionUpdate(transactionUnpackedDetails);
+
+      expect(rabbitClient.send).calledOnceWithExactly(
+        { channel: 'transactions_app.payment.updated', exchange: 'async_events' },
+        message,
+      )
+    });
+
+    it('should send transaction update event', async () => {
+      
+      const transactionUnpackedDetailsSimple: TransactionUnpackedDetailsInterface = {
+        id: '0dcb9da7-3836-44cf-83b1-9e6c091d15dc',
+        history: [
+          {
+            action: 'action 1',
+            amount: 12,
+            created_at: new Date('2020-10-10'),
+            payment_status: 'PAYMENT_ACCAPTED',
+          },
+        ],
+        original_id: 'beab4573-e69c-45e2-afc0-5487b9e670ec',
+        type: 'santander_installment_dk',
+        uuid: '9e90b7d9-1920-4e5a-ba5f-f5aebb382e10',
+        billing_address: {},
+        created_at: new Date('2020-10-10'),
+        updated_at: new Date('2020-10-10'),
+        action_running: true,
+        amount: 123,
+        business_option_id: 12345,
+        business_uuid: 'd04c6e67-a824-47ef-957b-d4f0d6038ea1',
+        channel: 'channel-1',
+        channel_set_uuid: '7c969d07-fadd-486d-891f-e64eb6a2ce0b',
+        channel_uuid: 'a306a777-20a4-4760-b0b7-4e6055b5cbcc',
+        currency: 'EUR',
+        customer_name: 'Narayan Ghimire',
+        delivery_fee: 1.99,
+        down_payment: 100,
+        fee_accepted: true,
+        items: [
+          {
+            _id: '714d74ad-f30c-4377-880f-50e30834a9da',
+          },
+        ],
+        merchant_email: 'merchant1@payever.de',
+        merchant_name: 'Gabriel Gabriel',
+        payment_details: {
+          iban: 'DE89 3704 0044 0532 0130 00',
+        },
+        payment_fee: 1.23,
+        payment_flow_id: 'b2e14754-a931-433c-a9a8-3fdb32dfbf3e',
+        place: 'Bremen',
+        reference: 'reference_1',
+        santander_applications: ['Application 1'],
+        shipping_address: {
+          city: 'Hamburg',
+        },
+        shipping_category: 'Category 1',
+      } as TransactionUnpackedDetailsInterface;
+      
+      const message: MessageInterface = {
+        name: 'name',
+      } as MessageInterface;
+
+      sandbox.stub(rabbitClient, 'send');
+      sandbox.stub(messageBusService, 'createMessage').returns(message);
+      await testService.sendTransactionUpdate(transactionUnpackedDetailsSimple);
 
       expect(rabbitClient.send).calledOnceWithExactly(
         { channel: 'transactions_app.payment.updated', exchange: 'async_events' },

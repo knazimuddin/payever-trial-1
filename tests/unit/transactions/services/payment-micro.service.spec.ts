@@ -70,6 +70,17 @@ describe('PamentMicroService', () => {
         testService.createPaymentMicroMessage('santander_installment', 'messageIdentifier', {}, false),
       ).to.deep.equal(message);
     });
+
+    it('should create payment micro message when stub default', async () => {
+      const message: MessageInterface = {
+        name: 'message_name',
+        payload: {},
+      } as any;
+      sandbox.stub(messageBusService, 'createMessage').returns(message);
+      expect(
+        testService.createPaymentMicroMessage('santander_installment', 'messageIdentifier', {}),
+      ).to.deep.equal(message);
+    });
   });
 
   describe('getChannelByPaymentType()', () => {
@@ -84,6 +95,13 @@ describe('PamentMicroService', () => {
       sandbox.stub(testService, 'getMicroName').returns('payment_santander_invoice_de');
       expect(
         testService.getChannelByPaymentType('santander_installment', false),
+      ).to.eq('rpc_payment_santander_invoice_de');
+    });
+
+    it('should return channel name by payment type when stub default', async () => {
+      sandbox.stub(testService, 'getMicroName').returns('payment_santander_invoice_de');
+      expect(
+        testService.getChannelByPaymentType('santander_installment'),
       ).to.eq('rpc_payment_santander_invoice_de');
     });
 
@@ -114,19 +132,41 @@ describe('PamentMicroService', () => {
       expect(
         testService.getMicroName('santander_pos_installment'),
       ).eq('payment_santander_de');
+      
+      expect(
+        testService.getMicroName('santander_invoice_de'),
+      ).eq('payment_santander_invoice_de');
       expect(
         testService.getMicroName('santander_pos_invoice_de'),
       ).eq('payment_santander_invoice_de');
+
+      expect(
+        testService.getMicroName('santander_factoring_de'),
+      ).eq('payment_santander_factoring_de');
       expect(
         testService.getMicroName('santander_pos_factoring_de'),
       ).eq('payment_santander_factoring_de');
+
+      expect(
+        testService.getMicroName('santander_installment_no'),
+      ).eq('payment_santander_no');
+      expect(
+        testService.getMicroName('santander_pos_installment_no'),
+      ).eq('payment_santander_no');
+      expect(
+        testService.getMicroName('santander_invoice_no'),
+      ).eq('payment_santander_no');
       expect(
         testService.getMicroName('santander_pos_invoice_no'),
       ).eq('payment_santander_no');
+
       expect(
         testService.getMicroName('santander_installment_dk'),
       ).eq('payment_santander_dk');
 
+      expect(
+        testService.getMicroName('santander_installment_se'),
+      ).eq('payment_santander_se');
       expect(
         testService.getMicroName('santander_pos_installment_se'),
       ).eq('payment_santander_se');
@@ -140,9 +180,15 @@ describe('PamentMicroService', () => {
       ).eq('payment_paypal');
 
       expect(
+        testService.getMicroName('stripe'),
+      ).eq('payment_stripe');
+      expect(
         testService.getMicroName('stripe_directdebit'),
       ).eq('payment_stripe');
 
+      expect(
+        testService.getMicroName('payex_creditcard'),
+      ).eq('payment_payex');
       expect(
         testService.getMicroName('payex_faktura'),
       ).eq('payment_payex');
