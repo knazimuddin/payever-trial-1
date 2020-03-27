@@ -16,7 +16,7 @@ chai.use(sinonChai);
 chai.use(chaiAsPromised);
 const expect: Chai.ExpectStatic = chai.expect;
 
-describe('PaymentFlowService', () => {
+describe('StatisticsService', () => {
   let sandbox: sinon.SinonSandbox;
   let testService: StatisticsService;
   let transactionEventProducer: TransactionEventProducer;
