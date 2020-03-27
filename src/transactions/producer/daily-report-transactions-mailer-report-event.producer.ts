@@ -9,10 +9,7 @@ export class DailyReportTransactionMailerReportEventProducer {
     private readonly rabbitMqClient: RabbitMqClient,
   ) {}
 
-  public async produceDailyReportTransactionEvent(
-    dailyReportCurrencyDto: DailyReportCurrencyDto[],
-  ): Promise<void> {
-    
+  public async produceDailyReportTransactionEvent(dailyReportCurrencyDto: DailyReportCurrencyDto[]): Promise<void> {
     return this.sendMailEvent(dailyReportCurrencyDto);
   }
 

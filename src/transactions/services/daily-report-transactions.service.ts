@@ -54,8 +54,7 @@ export class DailyReportTransactionsService {
         (value: DailyReportCurrencyDto) => value.currency === currentVal._id ); 
       if(currentIndex !== -1) {
         result[currentIndex].overallTotal = currentVal.total;
-      }
-      else {
+      } else {
         result.push({
           currency: currentVal._id,
           exchangeRate: await this.currencyExchangeService.getCurrencyExchangeRate(currentVal._id),
@@ -116,18 +115,14 @@ export class DailyReportTransactionsService {
 
     for (const currentVal of beforeTodayByCurrency) {
       const currentIndex: number = dailyReportCurrencyDto.findIndex(
-        (value: DailyReportCurrencyDto) => 
-        (value.currency === currentVal._id.currency),
-      );
+        (value: DailyReportCurrencyDto) => value.currency === currentVal._id.currency);
       
       if(currentIndex === -1) {
         continue;
       }
 
       const currentPaymentIndex: number = dailyReportCurrencyDto[currentIndex].paymentOption.findIndex(
-        (value: DailyReportPaymentOptionDto) => 
-        (value.paymentOption === currentVal._id.type),
-      );
+        (value: DailyReportPaymentOptionDto) => value.paymentOption === currentVal._id.type);
 
       if(currentPaymentIndex !== -1) {
         dailyReportCurrencyDto[currentIndex].paymentOption[currentPaymentIndex].overallTotal = currentVal.total;
