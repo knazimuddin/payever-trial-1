@@ -2,9 +2,9 @@ import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { RabbitRoutingKeys } from '../../enums';
 import { PaymentMailSentDto } from '../dto';
-import { TransactionHistoryService, TransactionsService } from '../services';
-import { TransactionModel } from '../models';
 import { HistoryEventDataInterface } from '../interfaces/history-event-message';
+import { TransactionModel } from '../models';
+import { TransactionHistoryService, TransactionsService } from '../services';
 
 @Controller()
 export class MailerBusMessagesController {
@@ -16,7 +16,6 @@ export class MailerBusMessagesController {
 
   @MessagePattern({
     name: RabbitRoutingKeys.MailerPaymentMailSent,
-    origin: 'rabbitmq',
   })
   public async onPaymentMailSent(paymentMailSentDto: PaymentMailSentDto): Promise<void> {
     const transaction: TransactionModel = await this.transactionService.findModelByUuid(

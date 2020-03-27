@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Command, ElasticsearchClient, Positional } from '@pe/nest-kit';
+import { ElasticSearchClient } from '@pe/elastic-kit';
+import { Command, Positional } from '@pe/nest-kit';
 import { Model } from 'mongoose';
 import * as readline from 'readline';
 import { ListQueryDto, PagingResultDto } from '../dto';
@@ -17,7 +18,7 @@ export class TransactionsEsBusinessCheckCommand {
     @InjectModel(TransactionSchemaName) private readonly transactionsModel: Model<TransactionModel>,
     @InjectModel(BusinessSchemaName) private readonly businessModel: Model<BusinessModel>,
     private readonly elasticSearchService: ElasticSearchService,
-    private readonly elasticSearchClient: ElasticsearchClient,
+    private readonly elasticSearchClient: ElasticSearchClient,
   ) {}
 
   @Command({

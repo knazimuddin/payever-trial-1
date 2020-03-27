@@ -11,11 +11,7 @@
     "sourceMap": true,
     "allowJs": true,
     "outDir": "./dist",
-    "baseUrl": "./",
-    "types": [
-      "node",
-      "mongoose",
-    ]
+    "baseUrl": "./"
   },
   "include": [
     "src/**/*"
