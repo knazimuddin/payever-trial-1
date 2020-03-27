@@ -13,6 +13,7 @@ export * from './transaction.dto';
 export * from './transaction-cart-item.dto';
 export * from './payment-submitted.dto';
 export * from './mail';
+export * from './report';
 export * from './transaction-payment.dto';
 export * from './shipping-label-downloaded.dto';
 export * from './shipping-order-processed-message.dto';

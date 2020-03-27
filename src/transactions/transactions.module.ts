@@ -20,6 +20,7 @@ import {
   BpoEventsController,
   BusinessBusMessagesController,
   BusinessController,
+  DailyReportTransactionBusMessagesController,
   FlowEventsController,
   HistoryEventsController,
   MailerBusMessagesController,
@@ -30,8 +31,13 @@ import {
   UserController,
 } from './controllers';
 import { EventListenersList } from './event-listeners/event-listeners.list';
+import { 
+  AuthEventsProducer,
+  DailyReportTransactionMailerReportEventProducer, 
+  PaymentMailEventProducer, 
+  TransactionEventProducer,
+} from './producer';
 import { TransactionsNotifier } from './notifiers';
-import { AuthEventsProducer, PaymentMailEventProducer, TransactionEventProducer } from './producer';
 import {
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,
@@ -49,6 +55,7 @@ import {
   BusinessPaymentOptionService,
   BusinessService,
   CurrencyExchangeService,
+  DailyReportTransactionsService,
   DtoValidationService,
   ElasticSearchService,
   MessagingService,
@@ -69,6 +76,7 @@ import {
     BpoEventsController,
     BusinessBusMessagesController,
     BusinessController,
+    DailyReportTransactionBusMessagesController,
     FlowEventsController,
     HistoryEventsController,
     MigrateEventsController,
@@ -107,6 +115,8 @@ import {
     BusinessPaymentOptionService,
     BusinessService,
     CurrencyExchangeService,
+    DailyReportTransactionsService,
+    DailyReportTransactionMailerReportEventProducer,
     DtoValidationService,
     ElasticSearchService,
     MessagingService,
