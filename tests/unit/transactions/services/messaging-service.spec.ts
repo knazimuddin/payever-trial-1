@@ -380,6 +380,162 @@ describe('MessagingService', () => {
       expect(result).to.deep.equal([]);
       expect(logger.error).calledOnce;
     });
+
+    it('should return the list of actions when transaction type is not santander_installment_dk', async () => {
+      const businessPaymentOptionModelInstance: BusinessPaymentOptionModel = {
+        id: 1234,
+        credentials: {
+          key: 'value',
+        },
+      } as BusinessPaymentOptionModel;
+
+      const message: MessageInterface = {
+        name: 'message name',
+        uuid: uuid.v4(),
+      } as MessageInterface;
+
+      const actionsResponse: { [key: string]: boolean } = {
+        create: true,
+        edit: false,
+      }
+      const actionItems: ActionItemInterface[] = [
+        {
+          action: 'create',
+          enabled: true,
+        },
+        {
+          action: 'edit',
+          enabled: false,
+        },
+      ]
+
+      const transactionUnpackedDetailsOther: TransactionUnpackedDetailsInterface = {
+        id: '0dcb9da7-3836-44cf-83b1-9e6c091d15dc',
+        history: [
+          {
+            action: 'action 1',
+            amount: 12,
+            created_at: new Date('2020-10-10'),
+            payment_status: 'PAYMENT_ACCAPTED',
+            params: {},
+            reason: 'reason 1',
+            is_restock_items: true,
+            upload_items: [
+              {},
+            ],
+            refund_items: [
+              {},
+            ],
+          },
+        ],
+        original_id: 'beab4573-e69c-45e2-afc0-5487b9e670ec',
+        type: 'santander_installment_se',
+        uuid: '9e90b7d9-1920-4e5a-ba5f-f5aebb382e10',
+        billing_address: {},
+        created_at: new Date('2020-10-10'),
+        updated_at: new Date('2020-10-10'),
+        action_running: true,
+        amount: 123,
+        business_option_id: 12345,
+        business_uuid: 'd04c6e67-a824-47ef-957b-d4f0d6038ea1',
+        channel: 'channel-1',
+        channel_set_uuid: '7c969d07-fadd-486d-891f-e64eb6a2ce0b',
+        channel_uuid: 'a306a777-20a4-4760-b0b7-4e6055b5cbcc',
+        currency: 'EUR',
+        customer_name: 'Narayan Ghimire',
+        delivery_fee: 1.99,
+        down_payment: 100,
+        fee_accepted: true,
+        items: [
+          {
+            _id: '714d74ad-f30c-4377-880f-50e30834a9da',
+          },
+        ],
+        merchant_email: 'merchant1@payever.de',
+        merchant_name: 'Gabriel Gabriel',
+        payment_details: {
+          iban: 'DE89 3704 0044 0532 0130 00',
+        },
+        payment_fee: 1.23,
+        payment_flow_id: 'b2e14754-a931-433c-a9a8-3fdb32dfbf3e',
+        place: 'Bremen',
+        reference: 'reference_1',
+        santander_applications: ['Application 1'],
+        shipping_address: {
+          city: 'Hamburg',
+        },
+        shipping_category: 'Category 1',
+      } as TransactionUnpackedDetailsInterface;
+
+      sandbox.stub(bpoService, 'findOneById').resolves(businessPaymentOptionModelInstance);
+      sandbox.stub(flowService, 'findOneById').resolves(null);
+      sandbox.stub(logger, 'log');
+      sandbox.stub(logger, 'error');
+      sandbox.stub(paymentMicroService, 'getChannelByPaymentType').returns('channel_1');
+      sandbox.stub(paymentMicroService, 'createPaymentMicroMessage').returns(message);
+      sandbox.stub(messageBusService, 'unwrapRpcMessage').returns(actionsResponse);
+
+      const result: ActionItemInterface[] = await testService.getActionsList(transactionUnpackedDetailsOther);
+      expect(result).to.deep.equal(actionItems);
+      expect(logger.error).calledWith({
+        context: 'MessagingService',
+        message: `Transaction 9e90b7d9-1920-4e5a-ba5f-f5aebb382e10 -> Payment flow cannot be null`,
+        transaction: {
+          id: 'beab4573-e69c-45e2-afc0-5487b9e670ec',
+          uuid: '9e90b7d9-1920-4e5a-ba5f-f5aebb382e10',
+          address: {},
+          created_at: "2020-10-10T00:00:00+00:00",
+          updated_at: "2020-10-10T00:00:00+00:00",
+          action_running: true,
+          amount: 123,
+          business_option_id: 12345,
+          business_uuid: 'd04c6e67-a824-47ef-957b-d4f0d6038ea1',
+          channel: 'channel-1',
+          channel_set_uuid: '7c969d07-fadd-486d-891f-e64eb6a2ce0b',
+          channel_uuid: 'a306a777-20a4-4760-b0b7-4e6055b5cbcc',
+          currency: 'EUR',
+          customer_email: undefined,
+          customer_name: 'Narayan Ghimire',
+          delivery_fee: 1.99,
+          down_payment: 100,
+          fee_accepted: true,
+          history: [
+            {
+              action: 'action 1',
+              amount: 12,
+              created_at: "2020-10-10T00:00:00+00:00",
+              payment_status: 'PAYMENT_ACCAPTED',
+              params: {},
+              reason: 'reason 1',
+              is_restock_items: true,
+              upload_items: [{}],
+              refund_items: [{}],
+            },
+          ],
+          items: [{ _id: '714d74ad-f30c-4377-880f-50e30834a9da' }],
+          merchant_email: 'merchant1@payever.de',
+          merchant_name: 'Gabriel Gabriel',
+          payment_details: { iban: 'DE89 3704 0044 0532 0130 00' },
+          payment_fee: 1.23,
+          payment_flow_id: 'b2e14754-a931-433c-a9a8-3fdb32dfbf3e',
+          place: 'Bremen',
+          reference: 'reference_1',
+          santander_applications: ['Application 1'],
+          shipping_address: { city: 'Hamburg' },
+          shipping_category: 'Category 1',
+          shipping_method_name: undefined,
+          shipping_option_name: undefined,
+          specific_status: undefined,
+          status: undefined,
+          status_color: undefined,
+          store_id: undefined,
+          store_name: undefined,
+          total: undefined,
+          type: 'santander_installment_se',
+          user_uuid: undefined,
+        },
+      })
+    });
   });
 
   describe('runAction()', () => {
@@ -653,6 +809,189 @@ describe('MessagingService', () => {
       )
     });
 
+    it('should run CHANGE_AMOUNT action amount', async () => {
+      const actionPayload: ActionPayloadInterface = {
+        fields: {
+          capture_funds: {
+            amount: '1.23',
+          },
+          payment_change_amount: {
+          },
+          amount: 12,
+        },
+        files: [
+          {
+            url: 'www.payever.de',
+          },
+        ],
+      } as ActionPayloadInterface;
+
+      const rpcResult: any = {
+        next_action: {
+          next_action: {
+            type: 'external_capture',
+            payment_method: 'paypal',
+            payload: {},
+          },
+        },
+      }
+
+      sandbox.stub(paymentMicroService, 'getChannelByPaymentType').resolves('Channel 1');
+      sandbox.stub(paymentMicroService, 'createPaymentMicroMessage').resolves({} as any);
+      sandbox.stub(rabbitRpcClient, 'send').resolves({} as any);
+      sandbox.stub(transactionService, 'findUnpackedByUuid')
+      sandbox.stub(messageBusService, 'unwrapRpcMessage').resolves(rpcResult);
+      sandbox.stub(bpoService, 'findOneById').resolves(bpoInstance);
+      sandbox.stub(testService, 'externalCapture');
+      sandbox.stub(flowService, 'findOneById').resolves(paymentFlow)
+      sandbox.stub(transactionService, 'applyActionRpcResult');
+      await testService.runAction(transactionUnpackedDetails, 'change_amount', actionPayload);
+
+      expect(transactionService.applyActionRpcResult).calledOnceWithExactly(
+        {
+          id: '0dcb9da7-3836-44cf-83b1-9e6c091d15dc',
+          history: [
+            {
+              action: 'action 1',
+              amount: 12,
+              created_at: new Date('2020-10-10'),
+              payment_status: 'PAYMENT_ACCAPTED',
+              params: {},
+              reason: 'reason 1',
+              is_restock_items: true,
+              upload_items: [{}],
+              refund_items: [{}],
+            }
+          ],
+          original_id: 'beab4573-e69c-45e2-afc0-5487b9e670ec',
+          type: 'santander_installment_dk',
+          uuid: '9e90b7d9-1920-4e5a-ba5f-f5aebb382e10',
+          billing_address: {},
+          created_at: new Date('2020-10-10'),
+          updated_at: new Date('2020-10-10'),
+          action_running: true,
+          amount: 123,
+          business_option_id: 12345,
+          business_uuid: 'd04c6e67-a824-47ef-957b-d4f0d6038ea1',
+          channel: 'channel-1',
+          channel_set_uuid: '7c969d07-fadd-486d-891f-e64eb6a2ce0b',
+          channel_uuid: 'a306a777-20a4-4760-b0b7-4e6055b5cbcc',
+          currency: 'EUR',
+          customer_name: 'Narayan Ghimire',
+          delivery_fee: 1.99,
+          down_payment: 100,
+          fee_accepted: true,
+          items: [{ _id: '714d74ad-f30c-4377-880f-50e30834a9da' }],
+          merchant_email: 'merchant1@payever.de',
+          merchant_name: 'Gabriel Gabriel',
+          payment_details: { iban: 'DE89 3704 0044 0532 0130 00' },
+          payment_fee: 1.23,
+          payment_flow_id: 'b2e14754-a931-433c-a9a8-3fdb32dfbf3e',
+          place: 'Bremen',
+          reference: 'reference_1',
+          santander_applications: ['Application 1'],
+          shipping_address: { city: 'Hamburg' },
+          shipping_category: 'Category 1',
+        },
+        {
+          next_action: {
+            next_action: { type: 'external_capture', payment_method: 'paypal', payload: {} },
+          },
+        },
+      )
+    });
+
+    it('should run CHANGE_AMOUNT action amount', async () => {
+      const actionPayload: ActionPayloadInterface = {
+        fields: {
+          capture_funds: {
+            amount: '1.23',
+          },
+          payment_change_amount: {            
+          },
+        },
+        files: [
+          {
+            url: 'www.payever.de',
+          },
+        ],
+      } as ActionPayloadInterface;
+
+      const rpcResult: any = {
+        next_action: {
+          next_action: {
+            type: 'external_capture',
+            payment_method: 'paypal',
+            payload: {},
+          },
+        },
+      }
+
+      sandbox.stub(paymentMicroService, 'getChannelByPaymentType').resolves('Channel 1');
+      sandbox.stub(paymentMicroService, 'createPaymentMicroMessage').resolves({} as any);
+      sandbox.stub(rabbitRpcClient, 'send').resolves({} as any);
+      sandbox.stub(transactionService, 'findUnpackedByUuid')
+      sandbox.stub(messageBusService, 'unwrapRpcMessage').resolves(rpcResult);
+      sandbox.stub(bpoService, 'findOneById').resolves(bpoInstance);
+      sandbox.stub(testService, 'externalCapture');
+      sandbox.stub(flowService, 'findOneById').resolves(paymentFlow)
+      sandbox.stub(transactionService, 'applyActionRpcResult');
+      await testService.runAction(transactionUnpackedDetails, 'change_amount', actionPayload);
+
+      expect(transactionService.applyActionRpcResult).calledOnceWithExactly(
+        {
+          id: '0dcb9da7-3836-44cf-83b1-9e6c091d15dc',
+          history: [
+            {
+              action: 'action 1',
+              amount: 12,
+              created_at: new Date('2020-10-10'),
+              payment_status: 'PAYMENT_ACCAPTED',
+              params: {},
+              reason: 'reason 1',
+              is_restock_items: true,
+              upload_items: [{}],
+              refund_items: [{}],
+            }
+          ],
+          original_id: 'beab4573-e69c-45e2-afc0-5487b9e670ec',
+          type: 'santander_installment_dk',
+          uuid: '9e90b7d9-1920-4e5a-ba5f-f5aebb382e10',
+          billing_address: {},
+          created_at: new Date('2020-10-10'),
+          updated_at: new Date('2020-10-10'),
+          action_running: true,
+          amount: 123,
+          business_option_id: 12345,
+          business_uuid: 'd04c6e67-a824-47ef-957b-d4f0d6038ea1',
+          channel: 'channel-1',
+          channel_set_uuid: '7c969d07-fadd-486d-891f-e64eb6a2ce0b',
+          channel_uuid: 'a306a777-20a4-4760-b0b7-4e6055b5cbcc',
+          currency: 'EUR',
+          customer_name: 'Narayan Ghimire',
+          delivery_fee: 1.99,
+          down_payment: 100,
+          fee_accepted: true,
+          items: [{ _id: '714d74ad-f30c-4377-880f-50e30834a9da' }],
+          merchant_email: 'merchant1@payever.de',
+          merchant_name: 'Gabriel Gabriel',
+          payment_details: { iban: 'DE89 3704 0044 0532 0130 00' },
+          payment_fee: 1.23,
+          payment_flow_id: 'b2e14754-a931-433c-a9a8-3fdb32dfbf3e',
+          place: 'Bremen',
+          reference: 'reference_1',
+          santander_applications: ['Application 1'],
+          shipping_address: { city: 'Hamburg' },
+          shipping_category: 'Category 1',
+        },
+        {
+          next_action: {
+            next_action: { type: 'external_capture', payment_method: 'paypal', payload: {} },
+          },
+        },
+      )
+    });
+
     it('should run EDIT action', async () => {
       const actionPayload: ActionPayloadInterface = {
         fields: {
@@ -661,6 +1000,103 @@ describe('MessagingService', () => {
           },
           payment_update: {
             updatedData: {
+              deliveryFee: '123',
+              productLine: [],
+            },
+            reason: 'some reason',
+          },
+        },
+        files: [
+          {
+            url: 'www.payever.de',
+          },
+        ],
+      } as any;
+
+      const rpcResult: any = {
+        next_action: {
+          next_action: {
+            type: 'external_capture',
+            payment_method: 'paypal',
+            payload: {},
+          },
+        },
+      }
+
+      sandbox.stub(paymentMicroService, 'getChannelByPaymentType').resolves('Channel 1');
+      sandbox.stub(paymentMicroService, 'createPaymentMicroMessage').resolves({} as any);
+      sandbox.stub(rabbitRpcClient, 'send').resolves({} as any);
+      sandbox.stub(transactionService, 'findUnpackedByUuid')
+      sandbox.stub(messageBusService, 'unwrapRpcMessage').resolves(rpcResult);
+      sandbox.stub(bpoService, 'findOneById').resolves(bpoInstance);
+      sandbox.stub(testService, 'externalCapture');
+      sandbox.stub(flowService, 'findOneById').resolves(paymentFlow);
+      sandbox.stub(transactionService, 'applyActionRpcResult');
+
+      await testService.runAction(transactionUnpackedDetails, 'edit', actionPayload);
+
+      expect(transactionService.applyActionRpcResult).calledOnceWithExactly(
+        {
+          id: '0dcb9da7-3836-44cf-83b1-9e6c091d15dc',
+          history: [
+            {
+              action: 'action 1',
+              amount: 12,
+              created_at: new Date('2020-10-10'),
+              payment_status: 'PAYMENT_ACCAPTED',
+              params: {},
+              reason: 'reason 1',
+              is_restock_items: true,
+              upload_items: [{}],
+              refund_items: [{}],
+            }
+          ],
+          original_id: 'beab4573-e69c-45e2-afc0-5487b9e670ec',
+          type: 'santander_installment_dk',
+          uuid: '9e90b7d9-1920-4e5a-ba5f-f5aebb382e10',
+          billing_address: {},
+          created_at: new Date('2020-10-10'),
+          updated_at: new Date('2020-10-10'),
+          action_running: true,
+          amount: 123,
+          business_option_id: 12345,
+          business_uuid: 'd04c6e67-a824-47ef-957b-d4f0d6038ea1',
+          channel: 'channel-1',
+          channel_set_uuid: '7c969d07-fadd-486d-891f-e64eb6a2ce0b',
+          channel_uuid: 'a306a777-20a4-4760-b0b7-4e6055b5cbcc',
+          currency: 'EUR',
+          customer_name: 'Narayan Ghimire',
+          delivery_fee: 1.99,
+          down_payment: 100,
+          fee_accepted: true,
+          items: [{ _id: '714d74ad-f30c-4377-880f-50e30834a9da' }],
+          merchant_email: 'merchant1@payever.de',
+          merchant_name: 'Gabriel Gabriel',
+          payment_details: { iban: 'DE89 3704 0044 0532 0130 00' },
+          payment_fee: 1.23,
+          payment_flow_id: 'b2e14754-a931-433c-a9a8-3fdb32dfbf3e',
+          place: 'Bremen',
+          reference: 'reference_1',
+          santander_applications: ['Application 1'],
+          shipping_address: { city: 'Hamburg' },
+          shipping_category: 'Category 1'
+        }, {
+        next_action: {
+          next_action: { type: 'external_capture', payment_method: 'paypal', payload: {} },
+        },
+      },
+      )
+
+    });
+
+    it('should run EDIT action without updateData', async () => {
+      const actionPayload: ActionPayloadInterface = {
+        fields: {
+          capture_funds: {
+            amount: '1.23',
+          },
+          payment_update: {
+            updateData: {
               deliveryFee: '123',
               productLine: [],
             },
@@ -794,6 +1230,314 @@ describe('MessagingService', () => {
         await testService.runAction(transactionUnpackedDetails, 'edit', actionPayload);
       } catch (e) { }
       expect(spy.threw());
+    });
+
+    it('should not create payload', async () => {
+      const actionPayload: ActionPayloadInterface = {
+        fields: {
+          capture_funds: {
+            amount: '1.23',
+          },
+        },
+        files: [
+          {
+            url: 'www.payever.de',
+          },
+        ],
+      } as any;
+
+      const rpcResult: any = {
+        next_action: {
+          next_action: {
+            type: 'action',
+          },
+        },
+      }
+
+      sandbox.stub(paymentMicroService, 'getChannelByPaymentType').returns('channel.name');
+      sandbox.stub(paymentMicroService, 'createPaymentMicroMessage').returns({} as any);
+      sandbox.stub(rabbitRpcClient, 'send').resolves({} as any);
+      sandbox.stub(transactionService, 'findUnpackedByUuid')
+      sandbox.stub(transactionService, 'applyActionRpcResult')
+      sandbox.stub(messageBusService, 'unwrapRpcMessage').resolves(rpcResult);
+      sandbox.stub(bpoService, 'findOneById').resolves(bpoInstance);
+      sandbox.stub(flowService, 'findOneById').resolves(null)
+      await testService.runAction(transactionUnpackedDetails, 'capture', actionPayload);
+
+      expect(rabbitRpcClient.send).calledOnceWithExactly({
+        channel: 'channel.name',
+      }, {})
+      expect(transactionService.applyActionRpcResult).calledOnceWithExactly(
+        {
+          id: '0dcb9da7-3836-44cf-83b1-9e6c091d15dc',
+          history: [
+            {
+              action: 'action 1',
+              amount: 12,
+              created_at: new Date('2020-10-10'),
+              payment_status: 'PAYMENT_ACCAPTED',
+              params: {},
+              reason: 'reason 1',
+              is_restock_items: true,
+              upload_items: [{}],
+              refund_items: [{}],
+            },
+          ],
+          original_id: 'beab4573-e69c-45e2-afc0-5487b9e670ec',
+          type: 'santander_installment_dk',
+          uuid: '9e90b7d9-1920-4e5a-ba5f-f5aebb382e10',
+          billing_address: {},
+          created_at: new Date('2020-10-10'),
+          updated_at: new Date('2020-10-10'),
+          action_running: true,
+          amount: 123,
+          business_option_id: 12345,
+          business_uuid: 'd04c6e67-a824-47ef-957b-d4f0d6038ea1',
+          channel: 'channel-1',
+          channel_set_uuid: '7c969d07-fadd-486d-891f-e64eb6a2ce0b',
+          channel_uuid: 'a306a777-20a4-4760-b0b7-4e6055b5cbcc',
+          currency: 'EUR',
+          customer_name: 'Narayan Ghimire',
+          delivery_fee: 1.99,
+          down_payment: 100,
+          fee_accepted: true,
+          items: [{ _id: '714d74ad-f30c-4377-880f-50e30834a9da' }],
+          merchant_email: 'merchant1@payever.de',
+          merchant_name: 'Gabriel Gabriel',
+          payment_details: { iban: 'DE89 3704 0044 0532 0130 00' },
+          payment_fee: 1.23,
+          payment_flow_id: 'b2e14754-a931-433c-a9a8-3fdb32dfbf3e',
+          place: 'Bremen',
+          reference: 'reference_1',
+          santander_applications: ['Application 1'],
+          shipping_address: { city: 'Hamburg' },
+          shipping_category: 'Category 1',
+        },
+        { next_action: { next_action: { type: 'action' } } },
+      )
+      expect(transactionService.findUnpackedByUuid).calledOnceWithExactly('9e90b7d9-1920-4e5a-ba5f-f5aebb382e10');
+
+    });
+
+    it('should not get payload fields and files', async () => {
+      const transactionUnpackedDetailsOther: TransactionUnpackedDetailsInterface = {
+        id: '0dcb9da7-3836-44cf-83b1-9e6c091d15dc',
+        history: [
+          {
+            action: 'action 1',
+            amount: 12,
+            created_at: new Date('2020-10-10'),
+            payment_status: 'PAYMENT_ACCAPTED',
+            params: {},
+            reason: 'reason 1',
+            is_restock_items: true,
+            upload_items: [
+              {},
+            ],
+            refund_items: [
+              {},
+            ],
+          },
+        ],
+        original_id: 'beab4573-e69c-45e2-afc0-5487b9e670ec',
+        type: 'santander_installment_dk',
+        uuid: '9e90b7d9-1920-4e5a-ba5f-f5aebb382e10',
+        billing_address: {},
+        created_at: new Date('2020-10-10'),
+        updated_at: new Date('2020-10-10'),
+        action_running: true,
+        amount: 123,
+        business_option_id: 12345,
+        business_uuid: 'd04c6e67-a824-47ef-957b-d4f0d6038ea1',
+        channel: 'channel-1',
+        channel_set_uuid: '7c969d07-fadd-486d-891f-e64eb6a2ce0b',
+        channel_uuid: 'a306a777-20a4-4760-b0b7-4e6055b5cbcc',
+        currency: 'EUR',
+        customer_name: 'Narayan Ghimire',
+        delivery_fee: 1.99,
+        down_payment: 100,
+        fee_accepted: true,
+        items: [
+          {
+            _id: '714d74ad-f30c-4377-880f-50e30834a9da',
+          },
+        ],
+        merchant_email: 'merchant1@payever.de',
+        merchant_name: 'Gabriel Gabriel',
+        payment_details: {
+          iban: 'DE89 3704 0044 0532 0130 00',
+        },
+        payment_fee: 1.23,
+        payment_flow_id: null,
+        place: 'Bremen',
+        reference: 'reference_1',
+        santander_applications: ['Application 1'],
+        shipping_address: {
+          city: 'Hamburg',
+        },
+        shipping_category: 'Category 1',
+      } as TransactionUnpackedDetailsInterface;
+
+      const actionPayload: ActionPayloadInterface = {
+      } as any;
+
+      const rpcResult: any = {
+        next_action: {
+          next_action: {
+            type: 'action',
+          },
+        },
+      }
+
+      sandbox.stub(paymentMicroService, 'getChannelByPaymentType').returns('channel.name');
+      sandbox.stub(paymentMicroService, 'createPaymentMicroMessage').returns({} as any);
+      sandbox.stub(rabbitRpcClient, 'send').resolves({} as any);
+      sandbox.stub(transactionService, 'findUnpackedByUuid')
+      sandbox.stub(transactionService, 'applyActionRpcResult')
+      sandbox.stub(messageBusService, 'unwrapRpcMessage').resolves(rpcResult);
+      sandbox.stub(bpoService, 'findOneById').resolves(bpoInstance);
+      sandbox.stub(flowService, 'findOneById').resolves(paymentFlow)
+      await testService.runAction(transactionUnpackedDetailsOther, 'edit', actionPayload);
+
+      expect(rabbitRpcClient.send).calledOnceWithExactly({
+        channel: 'channel.name',
+      }, {})
+      expect(transactionService.applyActionRpcResult).calledOnceWithExactly(
+        {
+          id: '0dcb9da7-3836-44cf-83b1-9e6c091d15dc',
+          history: [
+            {
+              action: 'action 1',
+              amount: 12,
+              created_at: new Date('2020-10-10'),
+              payment_status: 'PAYMENT_ACCAPTED',
+              params: {},
+              reason: 'reason 1',
+              is_restock_items: true,
+              upload_items: [{}],
+              refund_items: [{}],
+            },
+          ],
+          original_id: 'beab4573-e69c-45e2-afc0-5487b9e670ec',
+          type: 'santander_installment_dk',
+          uuid: '9e90b7d9-1920-4e5a-ba5f-f5aebb382e10',
+          billing_address: {},
+          created_at: new Date('2020-10-10'),
+          updated_at: new Date('2020-10-10'),
+          action_running: true,
+          amount: 123,
+          business_option_id: 12345,
+          business_uuid: 'd04c6e67-a824-47ef-957b-d4f0d6038ea1',
+          channel: 'channel-1',
+          channel_set_uuid: '7c969d07-fadd-486d-891f-e64eb6a2ce0b',
+          channel_uuid: 'a306a777-20a4-4760-b0b7-4e6055b5cbcc',
+          currency: 'EUR',
+          customer_name: 'Narayan Ghimire',
+          delivery_fee: 1.99,
+          down_payment: 100,
+          fee_accepted: true,
+          items: [{ _id: '714d74ad-f30c-4377-880f-50e30834a9da' }],
+          merchant_email: 'merchant1@payever.de',
+          merchant_name: 'Gabriel Gabriel',
+          payment_details: { iban: 'DE89 3704 0044 0532 0130 00' },
+          payment_fee: 1.23,
+          payment_flow_id: null,
+          place: 'Bremen',
+          reference: 'reference_1',
+          santander_applications: ['Application 1'],
+          shipping_address: { city: 'Hamburg' },
+          shipping_category: 'Category 1',
+        },
+        { next_action: { next_action: { type: 'action' } } },
+      )
+      expect(transactionService.findUnpackedByUuid).calledOnceWithExactly('9e90b7d9-1920-4e5a-ba5f-f5aebb382e10');
+
+    });
+
+    it('should do not run next action', async () => {
+      const actionPayload: ActionPayloadInterface = {
+        fields: {
+          capture_funds: {
+            amount: '1.23',
+          },
+          payment_update: {
+            updatedData: {
+              deliveryFee: '123',
+              productLine: [],
+            },
+            reason: 'some reason',
+          },
+        },
+        files: [
+          {
+            url: 'www.payever.de',
+          },
+        ],
+      } as any;
+
+      const rpcResult: any = { }
+
+      sandbox.stub(paymentMicroService, 'getChannelByPaymentType').resolves('Channel 1');
+      sandbox.stub(paymentMicroService, 'createPaymentMicroMessage').resolves({} as any);
+      sandbox.stub(rabbitRpcClient, 'send').resolves({} as any);
+      sandbox.stub(transactionService, 'findUnpackedByUuid')
+      sandbox.stub(messageBusService, 'unwrapRpcMessage').resolves(rpcResult);
+      sandbox.stub(bpoService, 'findOneById').resolves(bpoInstance);
+      sandbox.stub(testService, 'externalCapture');
+      sandbox.stub(flowService, 'findOneById').resolves(paymentFlow);
+      sandbox.stub(transactionService, 'applyActionRpcResult');
+
+      await testService.runAction(transactionUnpackedDetails, 'edit', actionPayload);
+
+      expect(transactionService.applyActionRpcResult).calledOnceWithExactly(
+        {
+          id: '0dcb9da7-3836-44cf-83b1-9e6c091d15dc',
+          history: [
+            {
+              action: 'action 1',
+              amount: 12,
+              created_at: new Date('2020-10-10'),
+              payment_status: 'PAYMENT_ACCAPTED',
+              params: {},
+              reason: 'reason 1',
+              is_restock_items: true,
+              upload_items: [{}],
+              refund_items: [{}],
+            }
+          ],
+          original_id: 'beab4573-e69c-45e2-afc0-5487b9e670ec',
+          type: 'santander_installment_dk',
+          uuid: '9e90b7d9-1920-4e5a-ba5f-f5aebb382e10',
+          billing_address: {},
+          created_at: new Date('2020-10-10'),
+          updated_at: new Date('2020-10-10'),
+          action_running: true,
+          amount: 123,
+          business_option_id: 12345,
+          business_uuid: 'd04c6e67-a824-47ef-957b-d4f0d6038ea1',
+          channel: 'channel-1',
+          channel_set_uuid: '7c969d07-fadd-486d-891f-e64eb6a2ce0b',
+          channel_uuid: 'a306a777-20a4-4760-b0b7-4e6055b5cbcc',
+          currency: 'EUR',
+          customer_name: 'Narayan Ghimire',
+          delivery_fee: 1.99,
+          down_payment: 100,
+          fee_accepted: true,
+          items: [{ _id: '714d74ad-f30c-4377-880f-50e30834a9da' }],
+          merchant_email: 'merchant1@payever.de',
+          merchant_name: 'Gabriel Gabriel',
+          payment_details: { iban: 'DE89 3704 0044 0532 0130 00' },
+          payment_fee: 1.23,
+          payment_flow_id: 'b2e14754-a931-433c-a9a8-3fdb32dfbf3e',
+          place: 'Bremen',
+          reference: 'reference_1',
+          santander_applications: ['Application 1'],
+          shipping_address: { city: 'Hamburg' },
+          shipping_category: 'Category 1'
+        }, {
+        },
+      )
+
     });
   });
 
@@ -949,7 +1693,6 @@ describe('MessagingService', () => {
         payment_fee: 1.23,
         payment_flow_id: 'b2e14754-a931-433c-a9a8-3fdb32dfbf3e',
         place: 'Bremen',
-        reference: 'reference_1',
         santander_applications: ['Application 1'],
         shipping_address: {
           city: 'Hamburg',

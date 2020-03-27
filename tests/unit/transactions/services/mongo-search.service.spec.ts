@@ -255,6 +255,82 @@ describe('MongoSearchService', () => {
 
     });
 
+    it('should return result with No filter and search in listDto', async () => {
+      const listDto: ListQueryDto = new ListQueryDto();
+      listDto.filters = null;
+      listDto.search = null;
+      listDto.currency = null;
+
+      sandbox.stub(transactionModel, 'countDocuments').resolves(10);
+      sandbox.stub(testService, 'search').resolves({})
+      sandbox.stub(transactionModel, 'aggregate').resolves(null);
+
+      sandbox.stub(currencyExchangeService, 'getCurrencyExchangeRate').resolves(1.26)
+      sandbox.stub(transactionModel, 'distinct')
+        .onFirstCall().resolves([{ statuses: ['SUCEEDED'] }])
+        .onSecondCall().resolves([{ specific_statuses: ['PENDING'] }]);
+
+      const result: any = await testService.getResult(listDto);
+
+      const expectedFilter: any = { }
+
+      expect(transactionModel.countDocuments).calledOnceWithExactly(expectedFilter);
+      expect(transactionModel.aggregate).calledWithExactly(
+        [
+          { $match: expectedFilter },
+          { '$group': { _id: null, total: { '$sum': '$total' } } },
+        ],
+      )
+      expect(result).to.deep.eq(
+        {
+          collection: {},
+          filters: {},
+          pagination_data: { amount: 0, amount_currency: null, page: 1, total: 10 },
+          usage: { specific_statuses: [{ specific_statuses: ['PENDING'] }], statuses: [{ statuses: ['SUCEEDED'] }] },
+        });
+      expect(testService.search).calledOnceWith(expectedFilter);
+    });
+
+    it('should return result with No taxe rate', async () => {
+      const listDto: ListQueryDto = new ListQueryDto();
+      listDto.filters = null;
+      listDto.search = null;
+      listDto.currency = "EUR";
+
+      sandbox.stub(transactionModel, 'countDocuments').resolves(10);
+      sandbox.stub(testService, 'search').resolves({})
+      sandbox.stub(transactionModel, 'aggregate').resolves([
+        {
+          _id: '7eefae05-f504-4d28-9720-f5e5195227ff',
+          total: 12,
+        },
+      ]);
+
+      sandbox.stub(currencyExchangeService, 'getCurrencyExchangeRate').resolves(0)
+      sandbox.stub(transactionModel, 'distinct')
+        .onFirstCall().resolves([{ statuses: ['SUCEEDED'] }])
+        .onSecondCall().resolves([{ specific_statuses: ['PENDING'] }]);
+
+      const result: any = await testService.getResult(listDto);
+
+      const expectedFilter: any = { }
+
+      expect(transactionModel.countDocuments).calledOnceWithExactly(expectedFilter);
+      expect(transactionModel.aggregate).calledWithExactly(
+        [
+          { $match: expectedFilter },
+          { '$group': { _id: "$currency", total: { '$sum': '$total' } } },
+        ],
+      )
+      expect(result).to.deep.eq(
+        {
+          collection: {},
+          filters: {},
+          pagination_data: { amount: 12, amount_currency: "EUR", page: 1, total: 10 },
+          usage: { specific_statuses: [{ specific_statuses: ['PENDING'] }], statuses: [{ statuses: ['SUCEEDED'] }] },
+        });
+      expect(testService.search).calledOnceWith(expectedFilter);
+    });
   });
 
   describe('search()', () => {
@@ -267,6 +343,16 @@ describe('MongoSearchService', () => {
         new PagingDto(2, 4),
       );
       expect(transactionModel.find).calledOnceWith({ $and: { key1: 'value1' } })
+
+    });
+  });
+
+  describe('distinctFieldValues()', () => {
+    it('should find for transactions', async () => {
+      sandbox.spy(transactionModel, 'find')
+
+      await testService.distinctFieldValues("id");
+      expect(transactionModel.find).calledOnceWith({ })
 
     });
   });

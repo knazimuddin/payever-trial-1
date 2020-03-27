@@ -479,5 +479,26 @@ describe('TransactionConverter', () => {
         } ,
       )
     });
+
+    it('should convert transaction from checkout transaction simple', async () => {
+      const checkoutTransaction: CheckoutTransactionInterface = {
+        payment_type: 'type_2',
+        items: [],
+        created_at: '2020-01-27T09:27:41.241Z',
+        updated_at: '2020-01-27T09:27:41.241Z',
+        history: [],
+      } as CheckoutTransactionInterface;
+      expect(
+        TransactionConverter.fromCheckoutTransaction(checkoutTransaction),
+      ).to.deep.equal(
+        {
+          type: 'type_2',
+          payment_type: 'type_2',
+          items: [],
+          created_at: new Date('2020-01-27T09:27:41.000Z'),
+          updated_at: new Date('2020-01-27T09:27:41.000Z'),
+        } ,
+      )
+    });
   });
 });

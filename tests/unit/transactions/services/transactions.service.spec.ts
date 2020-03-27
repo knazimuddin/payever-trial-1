@@ -156,6 +156,22 @@ describe('TransactionsService', () => {
       } catch (e) { }
       expect(spy.threw());
     });
+
+    it('should create by simple transactionModel', async () => {
+      const transactionDto: TransactionPackedDetailsInterface = {
+        id: uuid.v4(),
+        uuid: uuid.v4(),
+      } as any;
+      const paymentFlow: PaymentFlowModel = {
+        id: uuid.v4()
+      } as any;
+
+      sandbox.stub(transactionModel, 'create').resolves(transaction);
+      sandbox.stub(paymentFlowService, 'findOne').resolves(paymentFlow);
+      expect(
+        await testService.create(transactionDto),
+      ).to.equal(transaction);
+    });
   });
 
   describe('updateByUuid()', () => {
@@ -219,6 +235,17 @@ describe('TransactionsService', () => {
         await testService.updateByUuid(transaction.id, transactionDto);
       } catch (e) { }
       expect(spy.threw());
+    });
+
+    it('should update simple transaction Model by uuid', async () => {
+      const transactionDto: TransactionPackedDetailsInterface = {
+        id: null,
+      } as any;
+
+      sandbox.stub(transactionModel, 'findOneAndUpdate').resolves(transaction);
+      expect(
+        await testService.updateByUuid(transaction.id, transactionDto),
+      ).to.equal(transaction);
     });
 
   });
@@ -445,6 +472,32 @@ describe('TransactionsService', () => {
         await testService.applyRpcResult(transactionUnpackedDetails, result);
       } catch (e) { }
       expect(spy.threw());
+    });
+
+    it('should apply payment properties without payment details', async () => {
+      const result: RpcResultDto = {
+        payment: {
+          amount: 123,
+          id: uuid.v4(),
+          uuid: uuid.v4(),
+          delivery_fee: 123,
+          status: 'in_process',
+          specific_status: 'IN_PROGRESS',
+          reference: 'reference',
+        },
+        workflow_state: 'Hamburg',
+      } as any;
+      const transactionUnpackedDetails: TransactionUnpackedDetailsInterface = {
+        id: uuid.v4(),
+        amount: 12,
+        total: 234,
+        items: [],
+        history: [],
+      } as any;
+
+      sandbox.stub(transactionModel, 'findOneAndUpdate').resolves(transaction);
+
+      await testService.applyRpcResult(transactionUnpackedDetails, result);
     });
   });
 

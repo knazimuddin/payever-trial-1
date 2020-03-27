@@ -479,6 +479,159 @@ describe('Elastic Search Service', () => {
       });
     });
 
+    it('should get Result simple', async () => {
+      const transactionBasic: TransactionBasicInterface = {
+        amount: 100,
+        delivery_fee: 2.99,
+        down_payment: 50,
+        history: [
+          {
+            amount: 70,
+          },
+        ],
+        items: [
+          {
+            fixed_shipping_price: 1.99,
+            price: 20,
+            price_net: 19,
+            shipping_price: 2.00,
+            shipping_settings_rate: 5,
+            vat_rate: 13,
+            weight: 200,
+          },
+        ],
+        payment_fee: 0.2,
+        total: 112,
+      } as TransactionBasicInterface;
+
+      const elasticSearchResult: any = {
+        body: {
+          aggregations: {
+            specific_status: {
+              buckets: [
+                {
+                  key: 'pending',
+                },
+              ],
+            },
+            status: {
+              buckets: [
+                {
+                  key: 'suceeded',
+                },
+              ],
+            },
+            total_amount: {
+              buckets: [
+                {
+                  key: 'NPR',
+                  total_amount: {
+                    value: 123,
+                  },
+                },
+              ],
+            },
+          },
+          hits: {
+            hits: [
+              {
+                _source: {
+                  mongoId: '5e2eeaab4c6f68dc49dbfdcd',
+                  ...transactionBasic,
+                },
+              },
+            ],
+            total: 1,
+          },
+        },
+      };
+
+      const listDto: ListQueryDto = new ListQueryDto();
+      listDto.filters = null;
+      listDto.query = null;
+      listDto.currency = 'EUR';
+      listDto.orderBy = 'created_at';
+      listDto.direction = 'asc';
+      listDto.page = 1;
+      listDto.limit = 10;
+
+      const currencyExchangeRate: number = 0;
+
+      sandbox.stub(elasticSearchClient, 'search').resolves(elasticSearchResult);
+      sandbox.stub(currencyExchangeService, 'getCurrencyExchangeRate').resolves(currencyExchangeRate);
+
+      const result: PagingResultDto = await testService.getResult(listDto);
+
+      expect(currencyExchangeService.getCurrencyExchangeRate)
+        .calledWith('NPR')
+        .calledWith('EUR');
+      expect(elasticSearchClient.search)
+        .calledWithExactly(ElasticTransactionEnum.index, {
+          aggs: {
+            status: {
+              terms: {
+                field: 'status',
+              },
+            },
+          },
+          from: 0,
+          query: {
+            bool: {
+              must: [],
+              must_not: [],
+            },
+          }
+        })
+        .calledWithExactly(ElasticTransactionEnum.index, {
+          aggs: {
+            specific_status: {
+              terms: {
+                field: 'specific_status',
+              },
+            },
+          },
+          from: 0,
+          query: {
+            bool: {
+              must: [],
+              must_not: [],
+            },
+          },
+        })
+      expect(result).to.deep.equal({
+        collection: [
+          {
+            _id: '5e2eeaab4c6f68dc49dbfdcd',
+            amount: 1,
+            delivery_fee: 0.029900000000000003,
+            down_payment: 0.5,
+            history: [{ amount: 0.7 }],
+            items: [
+              {
+                fixed_shipping_price: 0.0199,
+                price: 0.2,
+                price_net: 0.19,
+                shipping_price: 0.02,
+                shipping_settings_rate: 0.05,
+                vat_rate: 0.13,
+                weight: 2,
+              },
+            ],
+            payment_fee: 0.002,
+            total: 1.12,
+          },
+        ],
+        filters: {},
+        pagination_data: {
+          amount: 1.23,
+          amount_currency: 'EUR',
+          page: 1,
+          total: 1,
+        },
+        usage: { specific_statuses: ['PENDING'], statuses: ['SUCEEDED'] },
+      });
+    });
+
   });
 
 
