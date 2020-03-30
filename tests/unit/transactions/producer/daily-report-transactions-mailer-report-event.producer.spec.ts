@@ -7,9 +7,6 @@ import * as sinonChai from 'sinon-chai';
 import { DailyReportTransactionMailerReportEventProducer } from '../../../../src/transactions/producer';
 import { DailyReportCurrencyDto } from '../../../../src/transactions/dto';
 
-process.env.RABBITMQ_CERTIFICATE_PATH = process.env.RABBITMQ_CERTIFICATE_PATH || './rabbitcrypt/private/private.crt'
-import { environment } from '../../../../src/environments';
-
 chai.use(sinonChai);
 const expect = chai.expect;
 

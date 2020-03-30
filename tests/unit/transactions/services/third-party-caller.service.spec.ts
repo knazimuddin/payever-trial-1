@@ -15,6 +15,7 @@ import { Logger } from '@nestjs/common';
 import { TransactionUnpackedDetailsInterface, ActionItemInterface } from '../../../../src/transactions/interfaces';
 import { ActionPayloadInterface } from '../../../../src/transactions/interfaces/action-payload';
 import { PaymentActionsEnum } from '../../../../src/transactions/enum';
+import { ConfigService } from '@nestjs/config';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -26,6 +27,7 @@ describe('CurrencyExchangeService', () => {
   let transactionsService: TransactionsService;
   let httpService: IntercomService;
   let logger: Logger;
+  let configService: ConfigService;
 
   const transactionUnpackedDetails: TransactionUnpackedDetailsInterface = {
     id: '0dcb9da7-3836-44cf-83b1-9e6c091d15dc',
@@ -99,7 +101,11 @@ describe('CurrencyExchangeService', () => {
       log: (): any => { },
     } as any;
 
-    testService = new ThirdPartyCallerService(transactionsService, httpService, logger);
+    configService = {
+      get: (): any => true,
+    } as any
+
+    testService = new ThirdPartyCallerService(transactionsService, httpService, logger, configService);
   });
 
   beforeEach(() => {
