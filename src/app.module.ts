@@ -2,6 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ApmModule, CommandModule, JwtAuthModule, RabbitMqModule } from '@pe/nest-kit';
 import { NestKitLoggingModule } from '@pe/nest-kit/modules/logging';
+import { MutexModule } from '@pe/nest-kit/modules/mutex';
 import { StatusModule } from '@pe/nest-kit/modules/status';
 import { environment } from './environments';
 import { IntegrationModule } from './integration';
@@ -32,6 +33,7 @@ import { TransactionsModule } from './transactions/transactions.module';
     StatusModule.forRoot({
       sideAppPort: environment.statusPort,
     }),
+    MutexModule.forRoot(environment.redis),
     IntegrationModule,
     TransactionsModule,
   ],
