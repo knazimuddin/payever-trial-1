@@ -26,7 +26,7 @@ export const environment: any = {
   jwtOptions: {
     // this should be set to PEM encoded private key for RSA/ECDSA for production
     // @see https://github.com/auth0/node-jsonwebtoken#jwtsignpayload-secretorprivatekey-options-callback
-    secretOrPrivateKey: env.JWT_SECRET_TOKEN,
+    secret: env.JWT_SECRET_TOKEN,
     signOptions: {
       expiresIn: (
         isNumeric(env.JWT_EXPIRES_IN)
@@ -45,7 +45,7 @@ export const environment: any = {
     vhost: env.RABBITMQ_VHOST,
 
     isGlobalPrefetchCount: false,
-    prefetchCount: 10,
+    prefetchCount: 1,
     rsa: {
       private: path.resolve(env.RABBITMQ_CERTIFICATE_PATH),
     },

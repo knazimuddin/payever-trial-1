@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { DelayRemoveClient, ElasticSearchClient } from '@pe/elastic-kit';
+import { Mutex } from '@pe/nest-kit/modules/mutex';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 import { Model } from 'mongoose';
 import { v4 as uuid } from 'uuid';
@@ -28,17 +29,19 @@ import { AuthEventsProducer } from '../producer';
 import { TransactionSchemaName } from '../schemas';
 import { PaymentFlowService } from './payment-flow.service';
 
+const TransactionMutexKey: string = 'transactions-transaction';
+
 @Injectable()
 export class TransactionsService {
-
   constructor(
     @InjectModel(TransactionSchemaName) private readonly transactionModel: Model<TransactionModel>,
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
     private readonly paymentFlowService: PaymentFlowService,
-    private readonly elasticSearchClient: ElasticSearchClient,
-    private readonly logger: Logger,
-    private readonly notifier: TransactionsNotifier,
     private readonly transactionEventsProducer: AuthEventsProducer,
+    private readonly elasticSearchClient: ElasticSearchClient,
+    private readonly notifier: TransactionsNotifier,
+    private readonly mutex: Mutex,
+    private readonly logger: Logger,
   ) {}
 
   public async create(transactionDto: TransactionPackedDetailsInterface): Promise<TransactionModel> {
@@ -50,52 +53,46 @@ export class TransactionsService {
       transactionDto.uuid = uuid();
     }
 
-    try {
-      const created: TransactionModel = await this.transactionModel.create(transactionDto);
-      await this.elasticSearchClient.singleIndex(
-        ElasticTransactionEnum.index,
-        ElasticTransactionEnum.type,
-        TransactionDoubleConverter.pack(created.toObject()),
-      );
+    const created: TransactionModel = await this.mutex.lock(
+      TransactionMutexKey,
+      transactionDto.uuid,
+      async () => this.transactionModel.create(transactionDto),
+    );
 
-      await this.notifier.sendNewTransactionNotification(created);
-      const flow: PaymentFlowModel = await this.paymentFlowService.findOne({id: created.payment_flow_id});
-      if (flow && flow.seller_email) {
-        await this.transactionEventsProducer.getSellerName({email: flow.seller_email});
-      }
+    await this.elasticSearchClient.singleIndex(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      TransactionDoubleConverter.pack(created.toObject()),
+    );
 
-      return created;
-    } catch (err) {
-      if (err.name === 'MongoError' && err.code === 11000) {
-        this.logger.warn({
-          data: transactionDto,
-          text: `Attempting to create existing Transaction with uuid '${transactionDto.uuid}'`,
-        });
-
-        return this.transactionModel.findOne({ original_id: transactionDto.id });
-      } else {
-        throw err;
-      }
+    await this.notifier.sendNewTransactionNotification(created);
+    const flow: PaymentFlowModel = await this.paymentFlowService.findOne({id: created.payment_flow_id});
+    if (flow && flow.seller_email) {
+      await this.transactionEventsProducer.getSellerName({email: flow.seller_email});
     }
+
+    return created;
   }
 
   public async updateByUuid(
     transactionUuid: string,
     transactionDto: TransactionPackedDetailsInterface,
   ): Promise<TransactionModel> {
-    try {
-      const insertData: any = {
-        uuid: transactionUuid,
-      };
-      if (transactionDto.id) {
-        insertData.original_id = transactionDto.id;
-      }
+    const insertData: any = {
+      uuid: transactionUuid,
+    };
+    if (transactionDto.id) {
+      insertData.original_id = transactionDto.id;
+    }
 
-      delete transactionDto.id;
-      delete transactionDto.original_id;
-      delete transactionDto.uuid;
+    delete transactionDto.id;
+    delete transactionDto.original_id;
+    delete transactionDto.uuid;
 
-      const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
+    const updated: TransactionModel = await this.mutex.lock(
+      TransactionMutexKey,
+      transactionDto.uuid,
+      async () => this.transactionModel.findOneAndUpdate(
         {
           uuid: transactionUuid,
         },
@@ -107,45 +104,38 @@ export class TransactionsService {
           new: true,
           upsert: true,
         },
-      );
+      ),
+    );
 
-      await this.elasticSearchClient.singleIndex(
-        ElasticTransactionEnum.index,
-        ElasticTransactionEnum.type,
-        TransactionDoubleConverter.pack(updated.toObject()),
-      );
+    await this.elasticSearchClient.singleIndex(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      TransactionDoubleConverter.pack(updated.toObject()),
+    );
 
-      return updated;
-    } catch (err) {
-      if (err.name === 'MongoError' && err.code === 11000) {
-        this.logger.warn({
-          data: transactionDto,
-          text: `Simultaneous update caused error, transaction uuid '${transactionDto.uuid}'`,
-        });
-
-        return this.transactionModel.findOne({ original_id: transactionDto.id });
-      } else {
-        throw err;
-      }
-    }
+    return updated;
   }
 
   public async updateHistoryByUuid(
     transactionUuid: string,
     transactionHistory: TransactionHistoryEntryModel[],
   ): Promise<TransactionModel> {
-    const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
-      {
-        uuid: transactionUuid,
-      },
-      {
-        $set: {
-          history: transactionHistory,
+    const updated: TransactionModel = await this.mutex.lock(
+      TransactionMutexKey,
+      transactionUuid,
+      async () => this.transactionModel.findOneAndUpdate(
+        {
+          uuid: transactionUuid,
         },
-      },
-      {
-        new: true,
-      },
+        {
+          $set: {
+            history: transactionHistory,
+          },
+        },
+        {
+          new: true,
+        },
+      ),
     );
 
     await this.elasticSearchClient.singleIndex(
@@ -211,16 +201,20 @@ export class TransactionsService {
     transaction: TransactionModel,
     history: TransactionHistoryEntryInterface,
   ): Promise<void> {
-    const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
-      { uuid: transaction.uuid },
-      {
-        $push: {
-          history: history,
+    const updated: TransactionModel = await this.mutex.lock(
+      TransactionMutexKey,
+      transaction.uuid,
+      async () => this.transactionModel.findOneAndUpdate(
+        { uuid: transaction.uuid },
+        {
+          $push: {
+            history: history,
+          },
         },
-      },
-      {
-        new: true,
-      },
+        {
+          new: true,
+        },
+      ),
     );
 
     await this.elasticSearchClient.singleIndex(
@@ -233,16 +227,20 @@ export class TransactionsService {
   public async setShippingOrderProcessed(
     transactionId: string,
   ): Promise<TransactionModel> {
-    return this.transactionModel.findOneAndUpdate(
-      { uuid: transactionId },
-      {
-        $set: {
-          is_shipping_order_processed: true,
+    return this.mutex.lock(
+      TransactionMutexKey,
+      transactionId,
+      async () => this.transactionModel.findOneAndUpdate(
+        { uuid: transactionId },
+        {
+          $set: {
+            is_shipping_order_processed: true,
+          },
         },
-      },
-      {
-        new: true,
-      },
+        {
+          new: true,
+        },
+      ),
     );
   }
 
@@ -290,16 +288,21 @@ export class TransactionsService {
       updateResult: updating,
     });
 
-    const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
-      {
-        uuid: transaction.uuid,
-      },
-      {
-        $set: updating,
-      },
-      {
-        new: true,
-      },
+
+    const updated: TransactionModel = await this.mutex.lock(
+      TransactionMutexKey,
+      transaction.uuid,
+      async () => this.transactionModel.findOneAndUpdate(
+        {
+          uuid: transaction.uuid,
+        },
+        {
+          $set: updating,
+        },
+        {
+          new: true,
+        },
+      ),
     );
 
     await this.elasticSearchClient.singleIndex(
@@ -316,18 +319,22 @@ export class TransactionsService {
     const items: TransactionCartItemInterface[] =
       TransactionCartConverter.fromCheckoutTransactionCart(result.payment_items, transaction.business_uuid);
 
-    const updated: TransactionModel = await this.transactionModel.findOneAndUpdate(
-      {
-        uuid: transaction.uuid,
-      },
-      {
-        $set: {
-          items,
+    const updated: TransactionModel = await this.mutex.lock(
+      TransactionMutexKey,
+      transaction.uuid,
+      async () => this.transactionModel.findOneAndUpdate(
+        {
+          uuid: transaction.uuid,
         },
-      },
-      {
-        new: true,
-      },
+        {
+          $set: {
+            items,
+          },
+        },
+        {
+          new: true,
+        },
+      ),
     );
 
     await this.elasticSearchClient.singleIndex(

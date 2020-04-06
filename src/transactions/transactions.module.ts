@@ -31,13 +31,13 @@ import {
   UserController,
 } from './controllers';
 import { EventListenersList } from './event-listeners/event-listeners.list';
-import { 
+import { TransactionsNotifier } from './notifiers';
+import {
   AuthEventsProducer,
-  DailyReportTransactionMailerReportEventProducer, 
-  PaymentMailEventProducer, 
+  DailyReportTransactionMailerReportEventProducer,
+  PaymentMailEventProducer,
   TransactionEventProducer,
 } from './producer';
-import { TransactionsNotifier } from './notifiers';
 import {
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,
