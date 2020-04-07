@@ -1,13 +1,13 @@
-import 'mocha';
+import { NotificationsEmitter } from '@pe/notifications-sdk';
 
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
+import 'mocha';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as uuid from 'uuid';
-import { TransactionsNotifier } from '../../../../src/transactions/notifiers';
-import { NotificationsEmitter } from '@pe/notifications-sdk';
 import { TransactionModel } from '../../../../src/transactions/models';
+import { TransactionsNotifier } from '../../../../src/transactions/notifiers';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -53,6 +53,7 @@ describe('TransactionsNoifier', () => {
         },
         `notification.transactions.title.new_transaction`,
         {
+          transaction: transaction,
           transactionId: transaction.uuid,
         },
       );

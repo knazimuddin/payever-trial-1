@@ -1,24 +1,24 @@
-import 'mocha';
-
+import { Logger } from '@nestjs/common';
+import { DelayRemoveClient, ElasticSearchClient } from '@pe/elastic-kit';
+import { RabbitMqClient } from '@pe/nest-kit';
+import { Mutex } from '@pe/nest-kit/modules/mutex';
+import { NotificationsEmitter } from '@pe/notifications-sdk';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
+import 'mocha';
+import { DocumentQuery, Model } from 'mongoose';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as uuid from 'uuid';
-import { Logger } from '@nestjs/common';
-import { Model, DocumentQuery } from 'mongoose';
-import { TransactionModel, TransactionHistoryEntryModel, PaymentFlowModel } from '../../../../src/transactions/models';
-import { NotificationsEmitter } from '@pe/notifications-sdk';
-import { ElasticSearchClient, DelayRemoveClient } from '@pe/elastic-kit';
-import { RabbitMqClient } from '@pe/nest-kit';
-import { TransactionsNotifier } from '../../../../src/transactions/notifiers';
-import { TransactionsService } from '../../../../src/transactions/services/transactions.service';
-import { TransactionPackedDetailsInterface, TransactionUnpackedDetailsInterface } from '../../../../src/transactions/interfaces';
 import { RpcResultDto } from '../../../../src/transactions/dto';
+import {
+  TransactionPackedDetailsInterface,
+  TransactionUnpackedDetailsInterface,
+} from '../../../../src/transactions/interfaces';
+import { PaymentFlowModel, TransactionHistoryEntryModel, TransactionModel } from '../../../../src/transactions/models';
+import { TransactionsNotifier } from '../../../../src/transactions/notifiers';
 import { AuthEventsProducer } from '../../../../src/transactions/producer';
-import { PaymentFlowService } from '../../../../src/transactions/services/payment-flow.service';
-import { AnyARecord } from 'dns';
-import { RpcException } from '@nestjs/microservices';
+import { PaymentFlowService, TransactionsService } from '../../../../src/transactions/services';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -27,15 +27,16 @@ const expect: Chai.ExpectStatic = chai.expect;
 describe('TransactionsService', () => {
   let sandbox: sinon.SinonSandbox;
   let testService: TransactionsService;
-  let transactionModel: Model<TransactionModel>
+  let transactionModel: Model<TransactionModel>;
   let notificationsEmitter: NotificationsEmitter;
   let paymentFlowService: PaymentFlowService;
   let elasticSearchClient: ElasticSearchClient;
-  let logger: Logger;
   let notifier: TransactionsNotifier;
   let delayRemoveClient: DelayRemoveClient;
   let authEventsProducer: AuthEventsProducer;
   let rabbitClient: RabbitMqClient;
+  let mutex: Mutex;
+  let logger: Logger;
 
   const transaction: TransactionModel = {
     id: uuid.v4(),
@@ -62,11 +63,6 @@ describe('TransactionsService', () => {
       singleIndex: (): any => { },
     } as any;
 
-    logger = {
-      log: (): any => { },
-      warn: (): any => { },
-    } as any;
-
     notifier = {
       sendNewTransactionNotification: (): any => { },
     } as any;
@@ -87,15 +83,25 @@ describe('TransactionsService', () => {
       getSellerName: (): any => { },
     } as any;
 
+    mutex = {
+      lock: (namespace: string, id: string, callback: () => Promise<any>): any => callback(),
+    } as any;
+
+    logger = {
+      log: (): any => { },
+      warn: (): any => { },
+    } as any;
+
     testService = new TransactionsService(
       transactionModel,
       notificationsEmitter,
       paymentFlowService,
+      authEventsProducer,
       elasticSearchClient,
-      logger,
       notifier,
       delayRemoveClient,
-      authEventsProducer,
+      mutex,
+      logger,
     );
   });
 
@@ -116,7 +122,7 @@ describe('TransactionsService', () => {
       } as any;
       const paymentFlow: PaymentFlowModel = {
         id: uuid.v4(),
-        seller_email: 'test@test.com'
+        seller_email: 'test@test.com',
       } as any;
 
       sandbox.stub(transactionModel, 'create').resolves(transaction);
@@ -126,21 +132,6 @@ describe('TransactionsService', () => {
       ).to.equal(transaction);
     });
 
-    it('should throw MOngoError error while creating transactionModel', async () => {
-      const transactionDto: TransactionPackedDetailsInterface = {
-      } as any;
-
-      sandbox.stub(transactionModel, 'create').throws({
-        code: 11000,
-        name: 'MongoError',
-      })
-      sandbox.stub(transactionModel, 'findOne').resolves(transaction);
-
-      expect(
-        await testService.create(transactionDto),
-      ).to.deep.equal(transaction);
-    });
-
     it('should throw  error while creating transactionModel', async () => {
       const transactionDto: TransactionPackedDetailsInterface = {
       } as any;
@@ -148,7 +139,7 @@ describe('TransactionsService', () => {
       sandbox.stub(transactionModel, 'create').throws({
         code: 123,
         name: 'SomeError',
-      })
+      });
       sandbox.stub(transactionModel, 'findOne').resolves(transaction);
       const spy: sinon.SinonSpy = sandbox.spy(testService, 'create');
       try {
@@ -163,7 +154,7 @@ describe('TransactionsService', () => {
         uuid: uuid.v4(),
       } as any;
       const paymentFlow: PaymentFlowModel = {
-        id: uuid.v4()
+        id: uuid.v4(),
       } as any;
 
       sandbox.stub(transactionModel, 'create').resolves(transaction);
@@ -184,30 +175,6 @@ describe('TransactionsService', () => {
       expect(
         await testService.updateByUuid(transaction.id, transactionDto),
       ).to.equal(transaction);
-    });
-    it('should occur MongoError while updating transaction Model by uuid', async () => {
-      const transactionDto: TransactionPackedDetailsInterface = {
-        id: uuid.v4(),
-      } as any;
-
-      const transaction: TransactionModel = {
-        id: transactionDto.id,
-        uuid: uuid.v4(),
-        amount: 1,
-        total: 12,
-        toObject(): any { return this },
-        items: [],
-        history: [],
-      } as any;
-
-      sandbox.stub(transactionModel, 'findOneAndUpdate').throws({
-        code: 11000,
-        name: 'MongoError',
-      });
-
-      expect(
-        await testService.updateByUuid(transaction.id, transactionDto),
-      ).to.equal(undefined);
     });
 
     it('should should throw error', async () => {
@@ -285,7 +252,7 @@ describe('TransactionsService', () => {
       sandbox.stub(transactionModel, 'find').returns(querySort);
       sandbox.stub(querySort, 'sort').returns(queryLimit);
       sandbox.stub(queryLimit, 'limit').resolves([transaction]);
-      
+
       expect(
         await testService.findModelByParams({ id: transaction.id }),
       ).to.equal(transaction);
@@ -302,7 +269,7 @@ describe('TransactionsService', () => {
       sandbox.stub(transactionModel, 'find').returns(querySort);
       sandbox.stub(querySort, 'sort').returns(queryLimit);
       sandbox.stub(queryLimit, 'limit').resolves(null);
-      
+
       expect(
         await testService.findModelByParams({ id: transaction.id }),
       ).to.equal(null);
@@ -319,7 +286,7 @@ describe('TransactionsService', () => {
       sandbox.stub(transactionModel, 'find').returns(querySort);
       sandbox.stub(querySort, 'sort').returns(queryLimit);
       sandbox.stub(queryLimit, 'limit').resolves([]);
-      
+
       expect(
         await testService.findModelByParams({ id: transaction.id }),
       ).to.equal(null);

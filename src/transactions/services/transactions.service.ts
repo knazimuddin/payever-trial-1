@@ -37,11 +37,10 @@ export class TransactionsService {
     @InjectModel(TransactionSchemaName) private readonly transactionModel: Model<TransactionModel>,
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
     private readonly paymentFlowService: PaymentFlowService,
-    private readonly transactionEventsProducer: AuthEventsProducer,
+    private readonly authEventsProducer: AuthEventsProducer,
     private readonly elasticSearchClient: ElasticSearchClient,
     private readonly notifier: TransactionsNotifier,
     private readonly delayRemoveClient: DelayRemoveClient,
-    private readonly authEventsProducer: AuthEventsProducer,
     private readonly mutex: Mutex,
     private readonly logger: Logger,
   ) {}
