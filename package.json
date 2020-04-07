@@ -21,11 +21,9 @@
     "test:pact:publish": "ts-node -r tsconfig-paths/register pact.publish.ts",
     "test:pact:verify": "mocha -r ts-node/register ./tests/contract/verify.ts --timeout 60000 --exit",
     "test:cov": "nyc mocha -r ts-node/register --recursive ./tests/unit/**/*.spec.ts",
-    "test:covf": "nyc mocha -r ts-node/register --recursive ./tests/unit/transactions/services/transactions.service.spec.ts",
     "test:unit": "mocha -r ts-node/register --recursive ./tests/unit/**/*.spec.ts"
   },
   "dependencies": {
-    "@nestjs/config": "^0.1.0",
     "@pe/common-sdk": "*",
     "@pe/elastic-kit": "*",
     "@pe/nest-kit": "*",
