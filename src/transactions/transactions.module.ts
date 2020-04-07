@@ -1,11 +1,11 @@
 import { HttpModule, Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
-import { ElasticSearchModule, DelayRemoveClient } from '@pe/elastic-kit';
+import { DelayRemoveClient, ElasticSearchModule } from '@pe/elastic-kit';
 import { EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import {
   BpoFixCommand,
   TransactionsEsBusinessCheckCommand,
@@ -32,13 +32,13 @@ import {
   UserController,
 } from './controllers';
 import { EventListenersList } from './event-listeners/event-listeners.list';
-import { 
+import { TransactionsNotifier } from './notifiers';
+import {
   AuthEventsProducer,
-  DailyReportTransactionMailerReportEventProducer, 
-  PaymentMailEventProducer, 
+  DailyReportTransactionMailerReportEventProducer,
+  PaymentMailEventProducer,
   TransactionEventProducer,
 } from './producer';
-import { TransactionsNotifier } from './notifiers';
 import {
   BusinessPaymentOptionSchema,
   BusinessPaymentOptionSchemaName,

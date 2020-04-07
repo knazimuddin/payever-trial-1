@@ -2,12 +2,12 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerBaseConfig, SwaggerDocument, SwaggerModule } from '@nestjs/swagger';
+import { ConnectionMonitoring } from '@pe/nest-kit';
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
 import * as jwt from 'fastify-jwt';
 import * as qs from 'qs';
 import { AppModule } from './app.module';
 import { environment } from './environments';
-import { ConnectionMonitoring } from "@pe/nest-kit";
 
 async function bootstrap(): Promise<void> {
   const app: NestFastifyApplication = await NestFactory.create<NestFastifyApplication>(
@@ -18,7 +18,7 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  app.register(jwt, {secret: environment.jwtOptions.secretOrPrivateKey});
+  app.register(jwt, {secret: environment.jwtOptions.secret});
   const logger: NestKitLogger = app.get(NestKitLogger);
   app.useLogger(logger);
 
