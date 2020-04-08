@@ -3,7 +3,7 @@ import { IntercomService } from '@pe/nest-kit';
 import { AxiosError, AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { environment } from '../../environments';
+import { ConfigService } from '@nestjs/config';
 import { ThirdPartyPaymentActionsEnum, TransactionActionsToThirdPartyActions } from '../enum';
 import { ActionCallerInterface, ActionItemInterface } from '../interfaces';
 import { ActionPayloadInterface } from '../interfaces/action-payload';
@@ -12,11 +12,15 @@ import { TransactionsService } from './transactions.service';
 
 @Injectable()
 export class ThirdPartyCallerService implements ActionCallerInterface {
+  private thirdPartyPaymentsMicroUrl: string;
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly httpService: IntercomService,
     private readonly logger: Logger,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.thirdPartyPaymentsMicroUrl = this.configService.get<string>('MICRO_URL_THIRD_PARTY_PAYMENTS');
+  }
 
   public async getActionsList(
     transaction: TransactionUnpackedDetailsInterface,
@@ -67,7 +71,7 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
     const integrationName: string = transaction.type;
 
     const url: string =
-      `${environment.thirdPartyPaymentsMicroUrl}`
+      `${this.thirdPartyPaymentsMicroUrl}`
         + `/api/business/${businessId}/integration/${integrationName}/action/${action}`;
 
     this.logger.log({

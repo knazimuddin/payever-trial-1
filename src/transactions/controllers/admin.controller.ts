@@ -13,7 +13,6 @@ import {
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { ParamModel, QueryDto } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-import { environment } from '../../environments';
 import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
 import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
@@ -29,6 +28,7 @@ import {
   TransactionsService,
 } from '../services';
 import { IsNotExampleFilter } from '../tools';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('admin')
 @ApiUseTags('admin')
@@ -48,8 +48,9 @@ export class AdminController {
     private readonly actionsRetriever: ActionsRetriever,
     private readonly transactionActionService: TransactionActionService,
     private readonly logger: Logger,
+    private readonly configService: ConfigService,
   ) {
-    this.defaultCurrency = environment.defaultCurrency;
+    this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
   }
 
   @Get('list')

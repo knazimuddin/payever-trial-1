@@ -37,9 +37,10 @@ export class TransactionsService {
     @InjectModel(TransactionSchemaName) private readonly transactionModel: Model<TransactionModel>,
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
     private readonly paymentFlowService: PaymentFlowService,
-    private readonly transactionEventsProducer: AuthEventsProducer,
+    private readonly authEventsProducer: AuthEventsProducer,
     private readonly elasticSearchClient: ElasticSearchClient,
     private readonly notifier: TransactionsNotifier,
+    private readonly delayRemoveClient: DelayRemoveClient,
     private readonly mutex: Mutex,
     private readonly logger: Logger,
   ) {}
@@ -65,11 +66,11 @@ export class TransactionsService {
       TransactionDoubleConverter.pack(created.toObject()),
     );
 
-    await this.notifier.sendNewTransactionNotification(created);
-    const flow: PaymentFlowModel = await this.paymentFlowService.findOne({id: created.payment_flow_id});
-    if (flow && flow.seller_email) {
-      await this.transactionEventsProducer.getSellerName({email: flow.seller_email});
-    }
+      await this.notifier.sendNewTransactionNotification(created);
+      const flow: PaymentFlowModel = await this.paymentFlowService.findOne({id: created.payment_flow_id});
+      if (flow && flow.seller_email) {
+        await this.authEventsProducer.getSellerName({ email: flow.seller_email });
+      }
 
     return created;
   }
@@ -152,7 +153,13 @@ export class TransactionsService {
   }
 
   public async findModelByParams(params: any): Promise<TransactionModel> {
-    return this.transactionModel.findOne(params).sort({ created_at: -1 });
+    const transactionModel: TransactionModel[]
+      = await this.transactionModel.find(params).sort({ created_at: -1 }).limit(1);
+    if(!transactionModel || !transactionModel.length) {
+      return null;
+    }
+
+    return transactionModel[0];
   }
 
   public async findCollectionByParams(params: any): Promise<TransactionModel[]> {
@@ -183,8 +190,7 @@ export class TransactionsService {
       return;
     }
 
-    const delayRemoveClient: DelayRemoveClient = new DelayRemoveClient(this.elasticSearchClient, this.logger);
-    await delayRemoveClient.deleteByQuery(
+    await this.delayRemoveClient.deleteByQuery(
       ElasticTransactionEnum.index,
       ElasticTransactionEnum.type,
       {

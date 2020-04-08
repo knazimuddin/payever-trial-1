@@ -4,6 +4,7 @@ import * as sinonChai from 'sinon-chai';
 import { OderInvoiceMailDtoConverter } from '../../../../src/transactions/converter';
 import { TransactionCartItemDto } from '../../../../src/transactions/dto';
 import { TransactionChangedDto } from '../../../../src/transactions/dto/checkout-rabbit';
+import { AddressTypeEnum } from '../../../../src/transactions/enum';
 chai.use(sinonChai);
 const expect = chai.expect;
 
@@ -71,34 +72,98 @@ describe('PaymentMailDtoConverter ', () => {
     });
 
     it('should set proper template name', () => {
-      const templateName = 'order_invoice_template';
-
       const paymentSubmittedDto: TransactionChangedDto = {
         payment: {
-          id: '',
+          id: '74461861-b40d-4d69-b22e-f97d995ed70c',
+          uuid: 'e210d66d-4e17-46fe-bfe9-32020f74b979',
           amount: 2,
-          currency: 'cur',
+          business: {
+            uuid: '64a26d47-c4bd-4082-8cdf-c39149b0a08e',
+          },
+          address: {
+            company: 'payever',
+            country: 'Germany',
+            country_name: 'Deutscheland',
+            email: 'narayan@payever.de',
+            fax: '0123456789',
+            first_name: 'Narayan',
+            last_name: 'Ghimire',
+            mobile_phone: '+4915908134242',
+            salutation: 'Dr.',
+            street: 'street name',
+            type: AddressTypeEnum.Billing,
+          },
+          currency: 'EUR',
           reference: '123',
           total: 100,
           created_at: '2019-07-11',
           channel: 'channelName',
-          business: {
-            uuid: 'business_id',
-          },
-          items: [],
-          customer_email: 'test customer email',
+          items: [{
+            vat_rate: 13,
+            price: 100,
+            quantity: 5,
+            name: 'iphone X',
+            options: [{ key: 'Value' }],
+            thumbnail: 'thumbnail_1.png',
+            uuid: 'ae48cb90-598e-4d43-85db-d667af1101ba',
+          }],
+          customer_email: 'hello@world.com',
           customer_name: 'test customer name',
-          address: {
-            street: 'street name',
-          },
+          delivery_fee: 1.09,
+          payment_type: 'santandar_installment',
+
         },
       } as TransactionChangedDto;
 
       expect(
-        OderInvoiceMailDtoConverter.fromTransactionChangedDto(paymentSubmittedDto).template_name,
-      ).to.eql(
-        templateName,
-      );
+        OderInvoiceMailDtoConverter.fromTransactionChangedDto(paymentSubmittedDto),
+      ).to.deep.eq({
+        cc: [],
+        to: 'hello@world.com',
+        business: {
+          uuid: '64a26d47-c4bd-4082-8cdf-c39149b0a08e',
+        },
+        template_name: 'order_invoice_template',
+
+        payment: {
+          id: '74461861-b40d-4d69-b22e-f97d995ed70c',
+          uuid: 'e210d66d-4e17-46fe-bfe9-32020f74b979',
+          amount: 2,
+          created_at: '2019-07-11',
+          reference: '123',
+          currency: 'EUR',
+          total: 100,
+          vat_rate: 65,
+          address: {
+            company: 'payever',
+            country: 'Germany',
+            country_name: 'Deutscheland',
+            email: 'narayan@payever.de',
+            fax: '0123456789',
+            first_name: 'Narayan',
+            last_name: 'Ghimire',
+            mobile_phone: '+4915908134242',
+            salutation: 'Dr.',
+            street: 'street name',
+            type: AddressTypeEnum.Billing,
+          },
+          customer_email: 'hello@world.com',
+          customer_name: 'test customer name',
+          delivery_fee: 1.09,
+          payment_option: {
+            payment_method: 'santandar_installment',
+          },
+        },
+        payment_items: [{
+          vat_rate: 13,
+          price: 100,
+          quantity: 5,
+          name: 'iphone X',
+          options: [{ key: 'Value' }],
+          thumbnail: 'thumbnail_1.png',
+          uuid: 'ae48cb90-598e-4d43-85db-d667af1101ba',
+        }],
+      });
     });
 
     it('should calculate tax, based on items vat rate amount', () => {
