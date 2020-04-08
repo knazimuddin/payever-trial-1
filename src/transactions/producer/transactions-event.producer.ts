@@ -6,6 +6,8 @@ import { TransactionModel } from '../models';
 import { RabbitRoutingKeys } from '../../enums';
 import { TransactionPaymentInterface } from '../interfaces/transaction/transaction-payment.interface';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
+import { TransactionMigrateBusinessDto, TransactionMigrateChannelSetDto, TransactionMigrateDto } from '../dto';
+import { plainToClass } from 'class-transformer';
 
 @Injectable()
 export class TransactionEventProducer {
@@ -67,6 +69,22 @@ export class TransactionEventProducer {
     };
 
     await this.send(RabbitRoutingKeys.TransactionsPaymentRemoved, payload);
+  }
+
+  public async produceTransactionMigrateEvent(transactionModel: TransactionModel): Promise<void> {
+    const transactionMigrateDto: TransactionMigrateDto =
+      plainToClass<TransactionMigrateDto, TransactionModel>(TransactionMigrateDto, transactionModel);
+
+    transactionMigrateDto.business =
+      plainToClass<TransactionMigrateBusinessDto, TransactionModel>(TransactionMigrateBusinessDto, transactionModel);
+
+    transactionMigrateDto.channel_set =
+      plainToClass<TransactionMigrateChannelSetDto, TransactionModel>(
+        TransactionMigrateChannelSetDto,
+        transactionModel,
+      );
+
+    await this.send(RabbitRoutingKeys.TransactionsMigrate, { payment: transactionMigrateDto });
   }
 
   private async send(eventName: string, payload: any): Promise<void> {
