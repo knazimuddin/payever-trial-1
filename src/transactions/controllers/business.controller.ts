@@ -19,7 +19,6 @@ import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
 import { createReadStream, readFileSync, ReadStream, Stats, statSync } from 'fs';
 import * as path from 'path';
-import { environment } from '../../environments';
 import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
 import { BusinessDto, ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
@@ -38,6 +37,7 @@ import {
   TransactionsService,
 } from '../services';
 import { BusinessFilter, Exporter, ExportFormat } from '../tools';
+import { ConfigService } from '@nestjs/config';
 
 const BusinessPlaceholder: string = ':businessId';
 const UuidPlaceholder: string = ':uuid';
@@ -62,8 +62,9 @@ export class BusinessController {
     private readonly businessService: BusinessService,
     private readonly exampleService: TransactionsExampleService,
     private readonly transactionsNotifier: TransactionsNotifier,
+    private readonly configService: ConfigService,
   ) {
-    this.defaultCurrency = environment.defaultCurrency;
+    this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
   }
 
   @Get('detail/reference/:reference')

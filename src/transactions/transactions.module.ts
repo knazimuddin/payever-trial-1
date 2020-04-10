@@ -1,7 +1,8 @@
 import { HttpModule, Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
-import { ElasticSearchModule } from '@pe/elastic-kit';
+import { DelayRemoveClient, ElasticSearchModule } from '@pe/elastic-kit';
 import { EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { environment } from '../environments';
@@ -89,6 +90,7 @@ import {
     AuthEventsController,
   ],
   imports: [
+    ConfigModule,
     HttpModule,
     IntercomModule,
     MongooseModule.forFeature([
@@ -116,9 +118,11 @@ import {
     BusinessPaymentOptionService,
     BusinessService,
     CurrencyExchangeService,
+    ConfigService,
     DailyReportTransactionsService,
     DailyReportTransactionMailerReportEventProducer,
     DtoValidationService,
+    DelayRemoveClient,
     ElasticSearchService,
     MessagingService,
     MongoSearchService,
@@ -145,4 +149,4 @@ import {
     ...EventListenersList,
   ],
 })
-export class TransactionsModule {}
+export class TransactionsModule { }
