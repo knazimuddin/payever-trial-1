@@ -77,15 +77,21 @@ export class TransactionEventProducer {
     }
     
     const transactionExportDto: TransactionExportDto =
-      plainToClass<TransactionExportDto, TransactionModel>(TransactionExportDto, transactionModel);
+      plainToClass<TransactionExportDto, TransactionPackedDetailsInterface>(
+        TransactionExportDto,
+        transactionModel.toObject() as TransactionPackedDetailsInterface,
+      );
 
     transactionExportDto.business =
-      plainToClass<TransactionExportBusinessDto, TransactionModel>(TransactionExportBusinessDto, transactionModel);
+      plainToClass<TransactionExportBusinessDto, TransactionPackedDetailsInterface>(
+        TransactionExportBusinessDto,
+        transactionModel.toObject() as TransactionPackedDetailsInterface,
+      );
 
     transactionExportDto.channel_set =
-      plainToClass<TransactionExportChannelSetDto, TransactionModel>(
+      plainToClass<TransactionExportChannelSetDto, TransactionPackedDetailsInterface>(
         TransactionExportChannelSetDto,
-        transactionModel,
+        transactionModel.toObject() as TransactionPackedDetailsInterface,
       );
 
     await this.send(RabbitRoutingKeys.TransactionsMigrate, { payment: transactionExportDto });
