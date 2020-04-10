@@ -19,3 +19,8 @@ export * from './shipping-label-downloaded.dto';
 export * from './shipping-order-processed-message.dto';
 export * from './shipping-slip-downloaded.dto';
 export * from './payment-mail-sent.dto';
+export * from './transactions-export/transaction-export-address.dto';
+export * from './transactions-export/transaction-export-business.dto';
+export * from './transactions-export/transaction-export-item.dto';
+export * from './transactions-export/transaction-export-channel-set.dto';
+export * from './transactions-export/transaction-export.dto';

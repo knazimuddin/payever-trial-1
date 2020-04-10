@@ -6,7 +6,7 @@ import { TransactionModel } from '../models';
 import { StatisticsService } from '../services';
 
 @Injectable()
-export class TransactionsExportCommand {
+export class TransactionsExportForWidgetsCommand {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly statisticsService: StatisticsService,
