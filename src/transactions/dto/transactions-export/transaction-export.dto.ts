@@ -1,12 +1,12 @@
 import { IsDateString, IsNumber, IsString } from 'class-validator';
-import { TransactionMigrateAddressDto } from './transaction-migrate-address.dto';
-import { TransactionMigrateBusinessDto } from './transaction-migrate-business.dto';
-import { TransactionMigrateChannelSetDto } from './transaction-migrate-channel-set.dto';
-import { TransactionMigrateItemDto } from './transaction-migrate-item.dto';
+import { TransactionExportAddressDto } from './transaction-export-address.dto';
+import { TransactionExportBusinessDto } from './transaction-export-business.dto';
+import { TransactionExportChannelSetDto } from './transaction-export-channel-set.dto';
+import { TransactionExportItemDto } from './transaction-export-item.dto';
 import { Exclude, Expose, Type } from 'class-transformer';
 
 @Exclude()
-export class TransactionMigrateDto {
+export class TransactionExportDto {
   @IsString()
   @Expose({ name: 'original_id' })
   public id: string;
@@ -31,17 +31,17 @@ export class TransactionMigrateDto {
   @Expose()
   public total: number;
 
-  @Type(() => TransactionMigrateBusinessDto)
+  @Type(() => TransactionExportBusinessDto)
   @Expose()
-  public business: TransactionMigrateBusinessDto;
+  public business: TransactionExportBusinessDto;
 
   @IsString()
   @Expose()
   public channel: string;
 
-  @Type(() => TransactionMigrateChannelSetDto)
+  @Type(() => TransactionExportChannelSetDto)
   @Expose()
-  public channel_set: TransactionMigrateChannelSetDto;
+  public channel_set: TransactionExportChannelSetDto;
 
   @IsString()
   @Expose()
@@ -63,17 +63,17 @@ export class TransactionMigrateDto {
   @Expose()
   public status: string;
 
-  @Type(() => TransactionMigrateAddressDto)
+  @Type(() => TransactionExportAddressDto)
   @Expose({ name: 'billing_address' })
-  public address: TransactionMigrateAddressDto;
+  public address: TransactionExportAddressDto;
 
-  @Type(() => TransactionMigrateAddressDto)
+  @Type(() => TransactionExportAddressDto)
   @Expose()
-  public shipping_address?: TransactionMigrateAddressDto;
+  public shipping_address?: TransactionExportAddressDto;
 
-  @Type(() => TransactionMigrateItemDto)
+  @Type(() => TransactionExportItemDto)
   @Expose()
-  public items: TransactionMigrateItemDto[];
+  public items: TransactionExportItemDto[];
 
   @IsDateString()
   @Expose()

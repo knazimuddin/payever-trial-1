@@ -2,7 +2,7 @@ import { IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
-export class TransactionMigrateBusinessDto {
+export class TransactionExportBusinessDto {
   @IsString()
   @Expose({ name: 'business_uuid' })
   public uuid: string;

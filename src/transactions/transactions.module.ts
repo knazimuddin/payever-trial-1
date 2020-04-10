@@ -12,8 +12,8 @@ import {
   TransactionsEsCompareCommand,
   TransactionsEsExportCommand,
   TransactionsEsSetupCommand,
-  TransactionsExportCommand,
-  TransactionsMigrateCommand,
+  TransactionsExportForWidgetsCommand,
+  TransactionsExportForBlankMigrateCommand,
 } from './commands';
 import {
   AdminController,
@@ -135,8 +135,8 @@ import {
     TransactionsEsSetupCommand,
     AuthEventsProducer,
     TransactionsExampleService,
-    TransactionsExportCommand,
-    TransactionsMigrateCommand,
+    TransactionsExportForWidgetsCommand,
+    TransactionsExportForBlankMigrateCommand,
     TransactionsService,
     TransactionsNotifier,
     PaymentMailEventProducer,

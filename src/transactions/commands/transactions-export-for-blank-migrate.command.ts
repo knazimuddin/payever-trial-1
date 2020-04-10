@@ -6,13 +6,13 @@ import { TransactionModel } from '../models';
 import { TransactionEventProducer } from '../producer';
 
 @Injectable()
-export class TransactionsMigrateCommand {
+export class TransactionsExportForBlankMigrateCommand {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly transactionsEventProducer: TransactionEventProducer,
   ) {}
 
-  @Command({ command: 'transactions:migrate', describe: 'Migrate transactions' })
+  @Command({ command: 'transactions:export:blank-migrate', describe: 'Migrate transactions to fill new services' })
   public async transactionsMigrate(): Promise<void> {
     const count: number = await this.transactionsModel.estimatedDocumentCount();
     const limit: number = 1000;
@@ -26,7 +26,7 @@ export class TransactionsMigrateCommand {
       processed += transactions.length;
 
       for (const transactionModel of transactions) {
-        await this.transactionsEventProducer.produceTransactionMigrateEvent(transactionModel);
+        await this.transactionsEventProducer.produceTransactionBlankMigrateEvent(transactionModel);
       }
 
       Logger.log(`Migrated ${processed} of ${count}`);

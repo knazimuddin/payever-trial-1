@@ -2,7 +2,7 @@ import { IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
-export class TransactionMigrateAddressDto {
+export class TransactionExportAddressDto {
   @IsString()
   @Expose()
   public city: string;

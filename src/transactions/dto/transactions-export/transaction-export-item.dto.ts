@@ -2,7 +2,7 @@ import { IsString, IsNumber, IsDateString, IsArray } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
-export class TransactionMigrateItemDto {
+export class TransactionExportItemDto {
   @IsDateString()
   @Expose()
   public created_at: Date;

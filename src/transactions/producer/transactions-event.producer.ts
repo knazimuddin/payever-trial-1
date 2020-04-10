@@ -6,7 +6,7 @@ import { TransactionModel } from '../models';
 import { RabbitRoutingKeys } from '../../enums';
 import { TransactionPaymentInterface } from '../interfaces/transaction/transaction-payment.interface';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
-import { TransactionMigrateBusinessDto, TransactionMigrateChannelSetDto, TransactionMigrateDto } from '../dto';
+import { TransactionExportBusinessDto, TransactionExportChannelSetDto, TransactionExportDto } from '../dto';
 import { plainToClass } from 'class-transformer';
 
 @Injectable()
@@ -71,20 +71,24 @@ export class TransactionEventProducer {
     await this.send(RabbitRoutingKeys.TransactionsPaymentRemoved, payload);
   }
 
-  public async produceTransactionMigrateEvent(transactionModel: TransactionModel): Promise<void> {
-    const transactionMigrateDto: TransactionMigrateDto =
-      plainToClass<TransactionMigrateDto, TransactionModel>(TransactionMigrateDto, transactionModel);
+  public async produceTransactionBlankMigrateEvent(transactionModel: TransactionModel): Promise<void> {
+    if (!transactionModel.original_id) {
+      transactionModel.original_id = transactionModel.uuid;
+    }
+    
+    const transactionExportDto: TransactionExportDto =
+      plainToClass<TransactionExportDto, TransactionModel>(TransactionExportDto, transactionModel);
 
-    transactionMigrateDto.business =
-      plainToClass<TransactionMigrateBusinessDto, TransactionModel>(TransactionMigrateBusinessDto, transactionModel);
+    transactionExportDto.business =
+      plainToClass<TransactionExportBusinessDto, TransactionModel>(TransactionExportBusinessDto, transactionModel);
 
-    transactionMigrateDto.channel_set =
-      plainToClass<TransactionMigrateChannelSetDto, TransactionModel>(
-        TransactionMigrateChannelSetDto,
+    transactionExportDto.channel_set =
+      plainToClass<TransactionExportChannelSetDto, TransactionModel>(
+        TransactionExportChannelSetDto,
         transactionModel,
       );
 
-    await this.send(RabbitRoutingKeys.TransactionsMigrate, { payment: transactionMigrateDto });
+    await this.send(RabbitRoutingKeys.TransactionsMigrate, { payment: transactionExportDto });
   }
 
   private async send(eventName: string, payload: any): Promise<void> {
