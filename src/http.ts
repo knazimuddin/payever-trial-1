@@ -2,7 +2,6 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerBaseConfig, SwaggerDocument, SwaggerModule } from '@nestjs/swagger';
-import { ConnectionMonitoring } from '@pe/nest-kit';
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
 import * as jwt from 'fastify-jwt';
 import * as qs from 'qs';
@@ -41,8 +40,6 @@ async function bootstrap(): Promise<void> {
     .build();
   const document: SwaggerDocument = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api-docs', app, document);
-
-  ConnectionMonitoring.start(app, bootstrap);
 
   await app.listen(
     environment.port,
