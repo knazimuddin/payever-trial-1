@@ -34,7 +34,6 @@ export const environment: any = {
         : env.JWT_EXPIRES_IN
       ),
     },
-    useOldTokens: env.USE_OLD_TOKENS === 'true',
   },
   mongodb: env.MONGODB_URL,
   port: env.APP_PORT,

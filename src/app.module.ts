@@ -1,6 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ApmModule, CommandModule, JwtAuthModule, RabbitMqModule, RedisModule } from '@pe/nest-kit';
+import { ApmModule, CommandModule, DefaultMongooseConfig, JwtAuthModule, RabbitMqModule, RedisModule } from '@pe/nest-kit';
 import { NestKitLoggingModule } from '@pe/nest-kit/modules/logging';
 import { MutexModule } from '@pe/nest-kit/modules/mutex';
 import { StatusModule } from '@pe/nest-kit/modules/status';
@@ -19,12 +19,7 @@ import { TransactionsModule } from './transactions/transactions.module';
     RedisModule.forRoot(environment.redis),
     MongooseModule.forRoot(
       environment.mongodb,
-      {
-        useCreateIndex: true,
-        useFindAndModify: false,
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      },
+      DefaultMongooseConfig,
     ),
     NestKitLoggingModule.forRoot({
       applicationName: environment.applicationName,
