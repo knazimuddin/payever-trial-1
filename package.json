@@ -11,13 +11,12 @@
     "migrations": "db-migrate",
     "migrations:prod": "db-migrate --migrations-dir=dist/migrations",
     "probe-mongo": "pe-probe-mongo",
-    "test": "mocha -r ts-node/register --recursive ./tests/**/*.spec.ts",
+    "test:cov": "nyc mocha -r ts-node/register --recursive ./tests/unit/**/*.spec.ts",
     "test:e2e": "./node_modules/.bin/cucumber-js",
-    "test:pact": "mocha -r ts-node/register --recursive ./tests/**/*.spec.pact.ts --exit",
+    "test:pact": "mocha -r ts-node/register --recursive ./tests/contract/**/*.spec.pact.ts --exit",
     "test:pact:can-i-deploy": "./node_modules/.bin/pact-broker can-i-deploy --pacticipant 'nodejs-backend-transactions' --latest --broker-base-url $PACT_BROKER_BASE_URL --broker-username $PACT_BROKER_USERNAME --broker-password $PACT_BROKER_PASSWORD",
     "test:pact:publish": "ts-node -r tsconfig-paths/register pact.publish.ts",
     "test:pact:verify": "mocha -r ts-node/register ./tests/contract/verify.ts --timeout 60000 --exit",
-    "test:cov": "nyc mocha -r ts-node/register --recursive ./tests/unit/**/*.spec.ts",
     "test:unit": "mocha -r ts-node/register --recursive ./tests/unit/**/*.spec.ts"
   },
   "dependencies": {
