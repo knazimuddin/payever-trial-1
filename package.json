@@ -11,7 +11,6 @@
     "migrations": "db-migrate",
     "migrations:prod": "db-migrate --migrations-dir=dist/migrations",
     "probe-mongo": "pe-probe-mongo",
-    "test": "mocha -r ts-node/register --recursive ./tests/**/*.spec.ts",
     "test:cov": "nyc mocha -r ts-node/register --recursive ./tests/unit/**/*.spec.ts",
     "test:e2e": "./node_modules/.bin/cucumber-js",
     "test:pact": "mocha -r ts-node/register --recursive ./tests/contract/**/*.spec.pact.ts --exit",
