@@ -2,7 +2,7 @@
 {{ $values := .Values }}
 {{ $appName := $chartName }}
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 
 metadata:
@@ -11,14 +11,14 @@ metadata:
 
   labels:
     app: {{ $appName }}
-    tier: app
-    layer: nodejs-backend
+    tier: nodejs
+    type: http
 
   annotations:
-    {{ $appName }}/deploy-timestamp: {{ now }}
+    "werf.io/set-replicas-only-on-creation": "true"
 
 spec:
-  replicas: {{ $values.replicaCount }}
+  replicas: {{ $values.replicas.http }}
 
   strategy:
     type: RollingUpdate
@@ -35,14 +35,14 @@ spec:
     metadata:
       labels:
         app: {{ $appName }}
-        tier: app
-        layer: nodejs-backend
+        tier: nodejs
+        type: http
 
       annotations:
         seccomp.security.alpha.kubernetes.io/pod: 'runtime/default'
 
     spec:
-      priorityClassName: app-9stars
+      priorityClassName: {{ $values.priorityClass }}
 
       affinity:
         nodeAffinity:
@@ -50,9 +50,7 @@ spec:
             nodeSelectorTerms:
             - matchExpressions:
               - key: node_worker
-                operator: In
-                values:
-                - "true"
+                operator: Exists
 
       imagePullSecrets:
         - name: {{ $values.image.pullSecretName }}
@@ -86,23 +84,19 @@ spec:
             httpGet:
               path: /api/status
               port: {{ $values.service.statusPort }}
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            initialDelaySeconds: 5
+            periodSeconds: 5
             timeoutSeconds: 3
             failureThreshold: 15
 
           resources:
-            requests:
-              cpu: {{ $values.resources.requests.cpu }}
-              memory: {{ $values.resources.requests.memory }}
+{{ toYaml $values.resources | indent 12 }}
 
           envFrom:
             - configMapRef:
                 name: {{ $chartName }}
-
             - configMapRef:
                 name: micro-url-map
-
             - secretRef:
                 name: {{ $chartName }}
 
