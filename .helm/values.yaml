@@ -1,9 +1,13 @@
 namespace: default
+priorityClass: app-9stars
 
-replicaCount: 1
+replicas:
+  http: 1
+  consumer: 1
+  cron: 1
 
 image:
-  nodejs: payeverk8sregistry.azurecr.io/nodejs-backend/transactions/master
+  nodejs: registry.devpayever.com/nodejs-backend/transactions
   pullSecretName: regsecret
 
 service:
@@ -14,4 +18,7 @@ service:
 resources:
   requests:
     cpu: 32m
-    memory: 128m
+    memory: 128Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi

@@ -1,6 +1,7 @@
 {{ $chartName := .Chart.Name }}
 {{ $values := .Values }}
 {{ $appName := printf "%s-job" $chartName }}
+
 apiVersion: batch/v1
 kind: Job
 
@@ -9,31 +10,27 @@ metadata:
   namespace: {{ $values.namespace }}
 
   labels:
-    app: {{ $appName}}
-    tier: job
-    layer: backend
+    app: {{ $appName }}
+    tier: nodejs
     type: job
 
   annotations:
-    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "1"
-    "werf.io/track": "true"
 
 spec:
-  ttlSecondsAfterFinished: 30
+  backoffLimit: 1
 
   template:
     metadata:
       labels:
         app: {{ $appName }}
-        tier: job
-        layer: backend
+        tier: nodejs
         type: job
 
     spec:
+      priorityClassName: {{ $values.priorityClass }}
       restartPolicy: Never
-
-      priorityClassName: app-8stars
 
       affinity:
         nodeAffinity:
@@ -41,9 +38,7 @@ spec:
             nodeSelectorTerms:
             - matchExpressions:
               - key: node_worker
-                operator: In
-                values:
-                  - "true"
+                operator: Exists
 
       imagePullSecrets:
         - name: {{ $values.image.pullSecretName }}
@@ -54,13 +49,14 @@ spec:
           imagePullPolicy: IfNotPresent
           command: [ "/bin/bash", "-c", "/payever/deploy/job.sh" ]
 
+          resources:
+{{ toYaml $values.resources | indent 12 }}
+
           envFrom:
             - configMapRef:
                 name: {{ $chartName }}
-
             - configMapRef:
                 name: micro-url-map
-
             - secretRef:
                 name: {{ $chartName }}
 
