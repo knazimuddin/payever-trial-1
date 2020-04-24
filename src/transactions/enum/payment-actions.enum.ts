@@ -4,6 +4,7 @@ export enum PaymentActionsEnum {
   Refund = 'refund',
   Return = 'return',
   Authorize = 'authorize',
+  Capture = 'capture',
   ChangeAmount = 'change_amount',
   Collection= 'collection',
   LatePayment = 'late_payment',
