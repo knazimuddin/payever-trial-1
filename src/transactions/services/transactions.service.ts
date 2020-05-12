@@ -66,11 +66,11 @@ export class TransactionsService {
       TransactionDoubleConverter.pack(created.toObject()),
     );
 
-      await this.notifier.sendNewTransactionNotification(created);
-      const flow: PaymentFlowModel = await this.paymentFlowService.findOne({id: created.payment_flow_id});
-      if (flow && flow.seller_email) {
-        await this.authEventsProducer.getSellerName({ email: flow.seller_email });
-      }
+    await this.notifier.sendNewTransactionNotification(created);
+    const flow: PaymentFlowModel = await this.paymentFlowService.findOne({id: created.payment_flow_id});
+    if (flow && flow.seller_email) {
+      await this.authEventsProducer.getSellerName({ email: flow.seller_email });
+    }
 
     return created;
   }
