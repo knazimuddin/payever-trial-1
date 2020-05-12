@@ -14,7 +14,7 @@ export class BetweenConditionFilter {
     const from: number[] = _filter.value.map((elem: { from: string }) => parseInt(elem.from, 10));
     const to: number[] = _filter.value.map((elem: { to: string }) => parseInt(elem.to, 10));
 
-    const condition: {} = {
+    const condition: { } = {
       range: {
         [field]: {
           gte: Math.max(...from),

@@ -13,7 +13,7 @@ export class TransactionsEsExportCommand {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly elasticSearchClient: ElasticSearchClient,
-  ) {}
+  ) { }
 
   @Command({ command: 'transactions:es:export', describe: 'Export transactions for ElasticSearch' })
   public async export(
@@ -27,9 +27,9 @@ export class TransactionsEsExportCommand {
       name: 'business',
     }) business_uuid: string,
   ): Promise<void> {
-    const criteria: any = {};
+    const criteria: any = { };
     if (before || after) {
-      criteria.updated_at = {};
+      criteria.updated_at = { };
     }
     if (before) {
       criteria.updated_at.$lte = new Date(before);

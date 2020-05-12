@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { RabbitMqClient } from '@pe/nest-kit';
-
-import { DailyReportCurrencyDto} from '../dto/report';
+import { DailyReportCurrencyDto } from '../dto/report';
 
 @Injectable()
 export class DailyReportTransactionMailerReportEventProducer {
   constructor(
     private readonly rabbitMqClient: RabbitMqClient,
-  ) {}
+  ) { }
 
   public async produceDailyReportTransactionEvent(dailyReportCurrencyDto: DailyReportCurrencyDto[]): Promise<void> {
     return this.sendMailEvent(dailyReportCurrencyDto);

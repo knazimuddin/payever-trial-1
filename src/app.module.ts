@@ -1,6 +1,13 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ApmModule, CommandModule, DefaultMongooseConfig, JwtAuthModule, RabbitMqModule, RedisModule } from '@pe/nest-kit';
+import {
+  ApmModule,
+  CommandModule,
+  DefaultMongooseConfig,
+  JwtAuthModule,
+  RabbitMqModule,
+  RedisModule,
+} from '@pe/nest-kit';
 import { NestKitLoggingModule } from '@pe/nest-kit/modules/logging';
 import { MutexModule } from '@pe/nest-kit/modules/mutex';
 import { StatusModule } from '@pe/nest-kit/modules/status';
@@ -37,5 +44,5 @@ import { TransactionsModule } from './transactions/transactions.module';
   ],
 })
 export class AppModule implements NestModule {
-  public configure(): MiddlewareConsumer | void {}
+  public configure(): MiddlewareConsumer | void { }
 }

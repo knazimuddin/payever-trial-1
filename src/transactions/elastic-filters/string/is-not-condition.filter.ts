@@ -12,7 +12,7 @@ export class IsNotConditionFilter {
     _filter: StringFilterInterface,
   ): void {
     for (const value of _filter.value) {
-      const condition: {} = {
+      const condition: { } = {
         match_phrase: {
           [field]: value,
         },

@@ -12,7 +12,7 @@ export class MailerBusMessagesController {
     private readonly logger: Logger,
     private readonly transactionService: TransactionsService,
     private readonly historyService: TransactionHistoryService,
-  ) {}
+  ) { }
 
   @MessagePattern({
     name: RabbitRoutingKeys.MailerPaymentMailSent,

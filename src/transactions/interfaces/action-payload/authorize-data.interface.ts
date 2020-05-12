@@ -1,1 +1,1 @@
-export interface AuthorizeDataInterface {}
+export interface AuthorizeDataInterface { }

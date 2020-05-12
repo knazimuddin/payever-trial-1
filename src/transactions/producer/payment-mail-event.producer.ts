@@ -2,15 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { RabbitMqClient } from '@pe/nest-kit';
 import { OderInvoiceMailDtoConverter } from '../converter';
 import { PaymentMailDto } from '../dto';
-import { PaymentStatusesEnum } from '../enum';
-import { ShippingMailDto } from '../dto/mail';
 import { TransactionChangedDto, TransactionDto } from '../dto/checkout-rabbit';
+import { ShippingMailDto } from '../dto/mail';
+import { PaymentStatusesEnum } from '../enum';
 
 @Injectable()
 export class PaymentMailEventProducer {
   constructor(
     private readonly rabbitMqClient: RabbitMqClient,
-  ) {}
+  ) { }
 
   public async produceOrderInvoiceEvent(paymentSubmittedDto: TransactionChangedDto): Promise<void> {
 

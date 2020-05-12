@@ -12,5 +12,5 @@ export interface HistoryEventDataInterface {
   mail_event?: {
     event_id: string;
     template_name: string;
-  }
+  };
 }

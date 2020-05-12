@@ -13,7 +13,7 @@ export class MigrateEventsController {
     private readonly transactionsService: TransactionsService,
     private readonly statisticsService: StatisticsService,
     private readonly logger: Logger,
-  ) {}
+  ) { }
 
   @MessagePattern({
     name: RabbitRoutingKeys.PaymentMigrate,

@@ -1,13 +1,13 @@
-import { IsString, IsDefined, IsOptional, ValidateNested, IsBoolean, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
+import { IsBoolean, IsDefined, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { CheckoutTransactionInterface } from '../../interfaces/checkout';
 import { AddressDto } from './address.dto';
-import { TransactionBusinessDto } from './transaction-business.dto';
 import { ChannelSetUuidReferenceDto } from './channel-set-uuid-reference.dto';
 import { PaymentFlowDto } from './payment-flow.dto';
+import { TransactionBusinessDto } from './transaction-business.dto';
+import { TransactionCartItemDto } from './transaction-cart-item.dto';
 import { TransactionHistoryItemDto } from './transaction-history-item.dto';
 import { TransactionPaymentDetailsDto } from './transaction-payment-details.dto';
-import { TransactionCartItemDto } from './transaction-cart-item.dto';
 
 export class TransactionDto implements CheckoutTransactionInterface {
   @IsString()
@@ -79,12 +79,12 @@ export class TransactionDto implements CheckoutTransactionInterface {
   public fee_accepted: boolean;
 
   @IsOptional()
-  @ValidateNested({each: true})
+  @ValidateNested({ each: true })
   @Type(() => TransactionHistoryItemDto)
   public history: TransactionHistoryItemDto[];
 
   @IsOptional()
-  @ValidateNested({each: true})
+  @ValidateNested({ each: true })
   @Type(() => TransactionCartItemDto)
   public items: TransactionCartItemDto[];
 
@@ -106,7 +106,7 @@ export class TransactionDto implements CheckoutTransactionInterface {
   @IsString()
   public reference: string;
 
-  @IsString({each: true})
+  @IsString({ each: true })
   @IsOptional()
   public santander_applications: string[];
 

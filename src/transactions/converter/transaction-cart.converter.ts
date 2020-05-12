@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { Types } from 'mongoose';
 import { TransactionCartItemDto } from '../dto';
 import { CheckoutTransactionCartItemInterface } from '../interfaces/checkout';
-import { TransactionCartItemInterface } from '../interfaces/transaction';
+import { TransactionCartItemModel } from '../models';
 import { ProductUuid } from '../tools';
 
 @Injectable()
@@ -10,8 +11,8 @@ export class TransactionCartConverter {
   public static fromCheckoutTransactionCart(
     cartItems: CheckoutTransactionCartItemInterface[],
     businessId: string,
-  ): TransactionCartItemInterface[] {
-    const newCart: TransactionCartItemInterface[] = [];
+  ): Types.DocumentArray<TransactionCartItemModel> {
+    const newCart: Types.DocumentArray<TransactionCartItemModel> = new Types.DocumentArray();
 
     for (const cartItem of cartItems) {
       const newCartItem: TransactionCartItemDto = {

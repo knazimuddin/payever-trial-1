@@ -12,7 +12,7 @@ export class StartsWithConditionFilter {
     _filter: StringFilterInterface,
   ): void {
     for (const value of _filter.value) {
-      const condition: {} = {
+      const condition: { } = {
         query_string: {
           fields: [
             `${field}^1`,

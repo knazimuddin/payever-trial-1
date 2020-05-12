@@ -17,7 +17,7 @@ export class ShippingBusMessagesController {
     private readonly transactionsService: TransactionsService,
     private readonly eventProducer: PaymentMailEventProducer,
     private readonly historyService: TransactionHistoryService,
-  ) {}
+  ) { }
 
   @MessagePattern({
     name: RabbitRoutingKeys.ShippingOrderProcessed,
@@ -55,7 +55,7 @@ export class ShippingBusMessagesController {
       transaction,
       'shipping-label-downloaded',
       new Date(),
-      {} as HistoryEventDataInterface,
+      { } as HistoryEventDataInterface,
     );
   }
 
@@ -77,7 +77,7 @@ export class ShippingBusMessagesController {
       transaction,
       'shipping-slip-downloaded',
       new Date(),
-      {} as HistoryEventDataInterface,
+      { } as HistoryEventDataInterface,
     );
   }
 }

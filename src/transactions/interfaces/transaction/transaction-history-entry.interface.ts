@@ -6,7 +6,7 @@ export interface TransactionHistoryEntryInterface {
   amount: number;
   payment_status: string;
   created_at: Date;
-  params?: {};
+  params?: { };
   reason?: string;
   is_restock_items?: boolean;
   upload_items?: TransactionUploadItemInterface[];
@@ -14,5 +14,5 @@ export interface TransactionHistoryEntryInterface {
   mail_event?: {
     event_id: string,
     template_name: string,
-  }
+  };
 }

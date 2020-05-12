@@ -10,4 +10,4 @@ async function bootstrap(): Promise<void> {
 
   service.exec();
 }
-bootstrap().then();
+bootstrap().catch();

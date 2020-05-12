@@ -15,7 +15,7 @@ export class TransactionsEsCompareCommand {
     @InjectModel(BusinessSchemaName) private readonly businessModel: Model<BusinessModel>,
     private readonly elastic: ElasticSearchService,
     private readonly mongo: MongoSearchService,
-  ) {}
+  ) { }
 
   @Command({
     command: 'transactions:es:compare',
@@ -26,7 +26,7 @@ export class TransactionsEsCompareCommand {
       name: 'business',
     }) business_uuid: string,
   ): Promise<void> {
-    const criteria: any = {};
+    const criteria: any = { };
     if (business_uuid) {
       criteria._id = business_uuid;
     }
@@ -75,7 +75,7 @@ export class TransactionsEsCompareCommand {
     Logger.log(`Compared ${processed} of ${total}.`);
   }
 
-  private async getWithLimit(start: number, limit: number, criteria: any = {}): Promise<BusinessModel[]> {
+  private async getWithLimit(start: number, limit: number, criteria: any = { }): Promise<BusinessModel[]> {
     return this.businessModel.find(
       criteria,
       null,

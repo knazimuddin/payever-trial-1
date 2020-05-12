@@ -35,7 +35,7 @@ export class TransactionPaymentDetailsConverter {
       items: transaction.items,
       merchant_email: transaction.merchant_email,
       merchant_name: transaction.merchant_name,
-      payment_details: {},
+      payment_details: { },
       payment_fee: transaction.payment_fee,
       payment_flow_id: transaction.payment_flow_id,
       place: transaction.place,
@@ -65,7 +65,7 @@ export class TransactionPaymentDetailsConverter {
       unpacked.payment_details =
         transaction.payment_details
         ? JSON.parse(transaction.payment_details)
-        : {}
+        : { }
       ;
     } catch (e) {
       /** just skipping payment_details */

@@ -16,7 +16,7 @@ export class ThirdPartyEventsController {
     private readonly actionsRetriever: ActionsRetriever,
     private readonly transactionService: TransactionsService,
     private readonly logger: Logger,
-  ) {}
+  ) { }
 
   @MessagePattern({
     name: RabbitRoutingKeys.ThirdPartyPaymentActionRequested,

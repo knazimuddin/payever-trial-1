@@ -10,7 +10,7 @@ export class BusinessPaymentOptionService {
   constructor(
     @InjectModel('BusinessPaymentOption') private readonly model: Model<BusinessPaymentOptionModel>,
     private readonly logger: Logger,
-  ) {}
+  ) { }
 
   public async createOrUpdate(
     businessPaymentOptionDto: BusinessPaymentOptionInterface,
@@ -58,7 +58,7 @@ export class BusinessPaymentOptionService {
 
   private wrap(bpo: BusinessPaymentOptionInterface): BusinessPaymentOptionInterface {
     if (Array.isArray(bpo.credentials)) {
-      bpo.credentials = {};
+      bpo.credentials = { };
     }
 
     if (bpo.options) {

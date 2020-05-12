@@ -1,1 +1,1 @@
-export interface ShippingGoodsDataInterface {}
+export interface ShippingGoodsDataInterface { }

@@ -1,1 +1,1 @@
-export class ShippingGoodsDataDto {}
+export class ShippingGoodsDataDto { }

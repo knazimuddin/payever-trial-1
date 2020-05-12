@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { MessageBusService, MessageInterface, RabbitMqClient, RabbitMqRPCClient } from '@pe/nest-kit';
 import { TransactionConverter } from '../converter';
 import { NextActionDto } from '../dto';
@@ -15,7 +16,6 @@ import { BusinessPaymentOptionService } from './business-payment-option.service'
 import { PaymentFlowService } from './payment-flow.service';
 import { PaymentsMicroService } from './payments-micro.service';
 import { TransactionsService } from './transactions.service';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MessagingService implements ActionCallerInterface {
@@ -221,7 +221,7 @@ export class MessagingService implements ActionCallerInterface {
   //   transaction: TransactionModel,
   //   rpcResult: RpcResultDto,
   // ): CheckoutTransactionInterface {
-  //   const updatedTransaction: any = Object.assign({}, transaction, rpcResult.payment);
+  //   const updatedTransaction: any = Object.assign({ }, transaction, rpcResult.payment);
   //   updatedTransaction.payment_details = this.checkRPCResponsePropertyExists(rpcResult.payment_details)
   //     ? rpcResult.payment_details
   //     : transaction.payment_details

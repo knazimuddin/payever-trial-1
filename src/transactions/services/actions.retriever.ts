@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ThirdPartyPaymentsEnum } from '../enum';
 import { ActionCallerInterface, ActionItemInterface } from '../interfaces';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { MessagingService } from './messaging.service';
 import { ThirdPartyCallerService } from './third-party-caller.service';
-import { ThirdPartyPaymentsEnum } from '../enum';
 
 @Injectable()
 export class ActionsRetriever {
@@ -12,10 +12,10 @@ export class ActionsRetriever {
     private readonly messagingService: MessagingService,
     private readonly thirdPartyCallerService: ThirdPartyCallerService,
     private readonly logger: Logger,
-  ) {}
+  ) { }
 
   public async retrieve(unpackedTransaction: TransactionUnpackedDetailsInterface): Promise<ActionItemInterface[]> {
-    let actions: ActionItemInterface[] = [];
+    let actions: ActionItemInterface[];
 
     try {
       const actionCallerService: ActionCallerInterface = this.chooseActionCallerService(unpackedTransaction);

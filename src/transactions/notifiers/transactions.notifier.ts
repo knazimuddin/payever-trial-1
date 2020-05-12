@@ -4,7 +4,7 @@ import { TransactionModel } from '../models';
 export class TransactionsNotifier {
   constructor(
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
-  ) {}
+  ) { }
 
   public async sendNewTransactionNotification(transaction: TransactionModel): Promise<void> {
     await this.notificationsEmitter.sendNotification(

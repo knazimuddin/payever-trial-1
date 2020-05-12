@@ -17,6 +17,6 @@ export const IntegrationSchema: Schema = new Schema(
     },
   },
   {
-    timestamps: {},
+    timestamps: { },
   },
 );

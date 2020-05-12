@@ -13,7 +13,7 @@ export class IsDateConditionFilter {
     _filter: StringFilterInterface,
   ): void {
     for (const value of _filter.value) {
-      const condition: {} = {
+      const condition: { } = {
         range: {
           [field]: {
             gte: DateStringHelper.getDateStart(value),

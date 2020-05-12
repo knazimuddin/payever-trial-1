@@ -12,10 +12,10 @@ export class MongoSearchService {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly currencyExchangeService: CurrencyExchangeService,
-  ) {}
+  ) { }
 
   public async getResult(listDto: ListQueryDto): Promise<PagingResultDto> {
-    const mongoFilters: any = {};
+    const mongoFilters: any = { };
     if (listDto.filters) {
       this.addFilters(mongoFilters, listDto.filters);
     }
@@ -37,7 +37,7 @@ export class MongoSearchService {
       .then((res: any) => {
         return {
           collection: res[0],
-          filters: {},
+          filters: { },
           pagination_data: {
             amount: res[2] ? res[2] : 0,
             amount_currency: listDto.currency,
@@ -70,7 +70,7 @@ export class MongoSearchService {
     return this.transactionsModel.countDocuments(filters);
   }
 
-  public async total(filters: any = {}, currency?: string): Promise<number> {
+  public async total(filters: any = { }, currency?: string): Promise<number> {
     let result: any;
     if (!currency) {
       result = await this.transactionsModel
@@ -122,7 +122,7 @@ export class MongoSearchService {
     return result;
   }
 
-  public async distinctFieldValues(field: string, filters: any = {}): Promise<Array<{ [key: string]: number}>> {
+  public async distinctFieldValues(field: string, filters: any = { }): Promise<Array<{ [key: string]: number}>> {
     return this.transactionsModel
       .find(filters)
       .distinct(field)

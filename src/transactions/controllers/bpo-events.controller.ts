@@ -9,7 +9,7 @@ export class BpoEventsController {
   constructor(
     private readonly bpoService: BusinessPaymentOptionService,
     private readonly logger: Logger,
-  ) {}
+  ) { }
 
   @MessagePattern({
     name: RabbitRoutingKeys.BpoCreated,

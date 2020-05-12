@@ -10,7 +10,7 @@ export class PaymentsMicroService {
   constructor(
     private readonly logger: Logger,
     private readonly messageBusService: MessageBusService,
-  ) {}
+  ) { }
 
   public createPaymentMicroMessage(
     paymentType: string,

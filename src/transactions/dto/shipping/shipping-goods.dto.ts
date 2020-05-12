@@ -29,5 +29,5 @@ export class ShippingGoodsDto {
   @IsNotEmpty()
   @IsDefined()
   @IsString()
-  public shippingOrderId: string
+  public shippingOrderId: string;
 }

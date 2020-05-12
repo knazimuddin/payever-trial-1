@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { RabbitMqClient } from '@pe/nest-kit';
+import { plainToClass } from 'class-transformer';
+import { RabbitRoutingKeys } from '../../enums';
+import { TransactionExportBusinessDto, TransactionExportChannelSetDto, TransactionExportDto } from '../dto';
 
 import { TransactionPackedDetailsInterface } from '../interfaces';
-import { TransactionModel } from '../models';
-import { RabbitRoutingKeys } from '../../enums';
-import { TransactionPaymentInterface } from '../interfaces/transaction/transaction-payment.interface';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
-import { TransactionExportBusinessDto, TransactionExportChannelSetDto, TransactionExportDto } from '../dto';
-import { plainToClass } from 'class-transformer';
+import { TransactionPaymentInterface } from '../interfaces/transaction';
+import { TransactionModel } from '../models';
 
 @Injectable()
 export class TransactionEventProducer {
@@ -75,7 +75,7 @@ export class TransactionEventProducer {
     if (!transactionModel.original_id) {
       transactionModel.original_id = transactionModel.uuid;
     }
-    
+
     const transactionExportDto: TransactionExportDto =
       plainToClass<TransactionExportDto, TransactionPackedDetailsInterface>(
         TransactionExportDto,
@@ -107,6 +107,6 @@ export class TransactionEventProducer {
         name: eventName,
         payload: payload,
       },
-    )
+    );
   }
 }
