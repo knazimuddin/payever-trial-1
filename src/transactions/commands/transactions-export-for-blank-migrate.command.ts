@@ -10,7 +10,7 @@ export class TransactionsExportForBlankMigrateCommand {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly transactionsEventProducer: TransactionEventProducer,
-  ) {}
+  ) { }
 
   @Command({ command: 'transactions:export:blank-migrate', describe: 'Migrate transactions to fill new services' })
   public async transactionsMigrate(): Promise<void> {
@@ -35,7 +35,7 @@ export class TransactionsExportForBlankMigrateCommand {
 
   private async getWithLimit(start: number, limit: number): Promise<TransactionModel[]> {
     return this.transactionsModel.find(
-      {},
+      { },
       null,
       {
         limit: limit,

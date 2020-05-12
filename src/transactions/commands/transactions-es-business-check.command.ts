@@ -19,7 +19,7 @@ export class TransactionsEsBusinessCheckCommand {
     @InjectModel(BusinessSchemaName) private readonly businessModel: Model<BusinessModel>,
     private readonly elasticSearchService: ElasticSearchService,
     private readonly elasticSearchClient: ElasticSearchClient,
-  ) {}
+  ) { }
 
   @Command({
     command: 'transactions:es:business-check',

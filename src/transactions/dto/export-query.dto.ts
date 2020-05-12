@@ -1,7 +1,7 @@
 import { ApiModelProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsNumber, Min, Max } from 'class-validator';
-import { ListQueryDto } from './list-query.dto';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { ExportFormat } from '../tools';
+import { ListQueryDto } from './list-query.dto';
 
 export class ExportQueryDto extends ListQueryDto {
   @ApiModelProperty()
@@ -16,7 +16,7 @@ export class ExportQueryDto extends ListQueryDto {
 
   @ApiModelProperty()
   @IsNotEmpty()
-  public columns: any = {};
+  public columns: any = { };
 
   @ApiModelProperty()
   @IsOptional()

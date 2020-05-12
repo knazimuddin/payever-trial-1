@@ -7,7 +7,7 @@ export class CurrencyExchangeService {
 
   constructor(
     private readonly currencyService: CurrencyService,
-  ) {}
+  ) { }
 
   public async getCurrencyExchangeRate(currencyCode: string): Promise<number>  {
     if (!this.currenciesRates) {

@@ -8,7 +8,7 @@ import { BusinessPaymentOptionModel } from '../models';
 export class BpoFixCommand {
   constructor(
     @InjectModel('BusinessPaymentOption') private readonly bpoModel: Model<BusinessPaymentOptionModel>,
-  ) {}
+  ) { }
 
   @Command({ command: 'bpo:fix', describe: 'Fix BPO _ids' })
   public async transactionsEsExport(): Promise<void> {
@@ -40,7 +40,7 @@ export class BpoFixCommand {
 
   private async getWithLimit(start: number, limit: number): Promise<BusinessPaymentOptionModel[]> {
     return this.bpoModel.find(
-      {},
+      { },
       null,
       {
         limit: limit,

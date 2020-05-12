@@ -1,1 +1,1 @@
-export class VoidDataDto {}
+export class VoidDataDto { }

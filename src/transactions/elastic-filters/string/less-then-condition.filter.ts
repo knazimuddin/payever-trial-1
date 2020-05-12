@@ -12,7 +12,7 @@ export class LessThenConditionFilter {
     _filter: StringFilterInterface,
   ): void {
     for (const value of _filter.value) {
-      const condition: {} = {
+      const condition: { } = {
         range: {
           [field]: {
             lt: value,

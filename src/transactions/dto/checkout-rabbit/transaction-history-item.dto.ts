@@ -1,5 +1,5 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
+import { IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { CheckoutTransactionHistoryItemInterface } from '../../interfaces/checkout';
 import { HistoryEventUploadItemDto } from '../payment-micro/history-event-upload-item.dto';
 import { TransactionHistoryEventRefundItemDto } from './transaction-history-event-refund-item.dto';
@@ -12,7 +12,7 @@ export class TransactionHistoryItemDto implements CheckoutTransactionHistoryItem
   @IsNumber()
   public amount: number;
   @IsOptional()
-  public params?: {};
+  public params?: { };
   @IsString()
   @IsOptional()
   public reason?: string;

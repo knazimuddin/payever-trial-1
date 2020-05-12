@@ -4,9 +4,8 @@ import { Model } from 'mongoose';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
-import { TransactionSchemaName } from '../schemas';
 import { TransactionEventProducer } from '../producer';
-import { TransactionPaymentInterface } from '../interfaces/transaction/transaction-payment.interface';
+import { TransactionSchemaName } from '../schemas';
 
 @Injectable()
 export class StatisticsService {
@@ -14,7 +13,7 @@ export class StatisticsService {
   constructor(
     @InjectModel(TransactionSchemaName) private readonly transactionsModel: Model<TransactionModel>,
     private readonly transactionsEventProducer: TransactionEventProducer,
-  ) {}
+  ) { }
 
   /**
    * This method should be called right before updating transaction

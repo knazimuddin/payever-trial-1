@@ -1,1 +1,1 @@
-export class AuthorizeDataDto {}
+export class AuthorizeDataDto { }

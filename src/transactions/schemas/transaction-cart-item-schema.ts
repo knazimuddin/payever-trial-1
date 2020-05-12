@@ -11,7 +11,7 @@ export const TransactionCartItemSchema: Schema = new Schema({
   identifier: String,
   item_type: String,
   name: String,
-  options: [{_id: String, name: String, value: String}],
+  options: [{ _id: String, name: String, value: String }],
   price: Number,
   price_net: Number,
   product_variant_uuid: String,

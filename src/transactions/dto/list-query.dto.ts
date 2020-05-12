@@ -34,7 +34,7 @@ export class ListQueryDto {
 
   @ApiModelProperty()
   @IsNotEmpty()
-  public filters: any = {};
+  public filters: any = { };
 
   @ApiModelProperty()
   @IsOptional()

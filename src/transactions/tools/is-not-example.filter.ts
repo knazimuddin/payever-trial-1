@@ -1,6 +1,6 @@
 export class IsNotExampleFilter {
   public static apply(
-    filters: any = {},
+    filters: any = { },
   ): any {
     filters.example = [{
       condition: 'isNot',

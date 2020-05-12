@@ -15,7 +15,7 @@ export class AfterDateConditionFilter {
     const timeStamps: number[] = _filter.value.map(
       (elem: string) => (new Date(DateStringHelper.getDateStart(elem))).getTime(),
     );
-    const condition: {} = {
+    const condition: { } = {
       range: {
         [field]: {
           gte: (new Date(Math.max(...timeStamps))).toISOString(),

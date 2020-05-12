@@ -13,7 +13,7 @@ export class ElasticSearchService {
   constructor(
     private readonly currencyExchangeService: CurrencyExchangeService,
     private readonly elasticSearchClient: ElasticSearchClient,
-  ) {}
+  ) { }
 
   public async getResult(listDto: ListQueryDto): Promise<PagingResultDto> {
     const elasticFilters: any = this.createFiltersBody();
@@ -34,7 +34,7 @@ export class ElasticSearchService {
       .then((res: any) => {
         return {
           collection: res[0].collection,
-          filters: {},
+          filters: { },
           pagination_data: {
             amount: res[1],
             amount_currency: listDto.currency,
@@ -85,7 +85,7 @@ export class ElasticSearchService {
   }
 
   private async totalAmount(
-    elasticFilters: any = {},
+    elasticFilters: any = { },
     currency: string = null,
   ): Promise<number> {
     return currency
@@ -94,7 +94,7 @@ export class ElasticSearchService {
     ;
   }
 
-  private async calculateAmountSingleCurrency(filters: any = {}): Promise<number> {
+  private async calculateAmountSingleCurrency(filters: any = { }): Promise<number> {
     const body: any = {
       aggs : {
         total_amount: {
@@ -116,7 +116,7 @@ export class ElasticSearchService {
   }
 
   private async calculateAmountMultiCurrency(
-    filters: any = {},
+    filters: any = { },
     currency: string,
   ): Promise<number> {
     const body: any = {
@@ -162,7 +162,7 @@ export class ElasticSearchService {
 
   private async distinctFieldValues(
     field: string,
-    filters: any = {},
+    filters: any = { },
   ): Promise<number> {
     const body: any = {
       aggs: {

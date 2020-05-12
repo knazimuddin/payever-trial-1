@@ -1,25 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import * as moment from 'moment';
 import { Model } from 'mongoose';
+import { DailyReportCurrencyDto, DailyReportFilterDto, DailyReportPaymentOptionDto } from '../dto/report';
 import { TransactionModel } from '../models';
 import { CurrencyExchangeService } from './currency-exchange.service';
-import { DailyReportCurrencyDto, DailyReportPaymentOptionDto, DailyReportFilterDto } from '../dto/report';
-import * as moment from 'moment';
 
 @Injectable()
 export class DailyReportTransactionsService {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly currencyExchangeService: CurrencyExchangeService,
-  ) {}
+  ) { }
 
   public async getDailyReportCurency(dailyReportFilterDto: DailyReportFilterDto): Promise<DailyReportCurrencyDto[]> {
     const result: DailyReportCurrencyDto[] = [];
     const todayDate: Date = moment(dailyReportFilterDto.beginDate).toDate();
-    
+
     const todayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {created_at: {$gte: todayDate}} },
+        { $match: { created_at: { $gte: todayDate }} },
         {
           $group: {
             _id: '$currency',
@@ -40,7 +40,7 @@ export class DailyReportTransactionsService {
 
     const beforeTodayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {created_at: {$lt: todayDate}} },
+        { $match: { created_at: { $lt: todayDate }}},
         {
           $group: {
             _id: '$currency',
@@ -51,8 +51,8 @@ export class DailyReportTransactionsService {
 
     for (const currentVal of beforeTodayByCurrency) {
       const currentIndex: number = result.findIndex(
-        (value: DailyReportCurrencyDto) => value.currency === currentVal._id ); 
-      if(currentIndex !== -1) {
+        (value: DailyReportCurrencyDto) => value.currency === currentVal._id );
+      if (currentIndex !== -1) {
         result[currentIndex].overallTotal = currentVal.total;
       } else {
         result.push({
@@ -69,17 +69,17 @@ export class DailyReportTransactionsService {
   }
 
   public async getDailyReportPaymentOption(
-    dailyReportFilterDto: DailyReportFilterDto, 
+    dailyReportFilterDto: DailyReportFilterDto,
     dailyReportCurrencyDto: DailyReportCurrencyDto[],
   ): Promise<void> {
     const todayDate: Date = moment(dailyReportFilterDto.beginDate).toDate();
 
     const todayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {created_at: {$gte: todayDate}} },
+        { $match: { created_at: { $gte: todayDate}}},
         {
           $group: {
-            _id: {currency: '$currency', type: '$type'},
+            _id: { currency: '$currency', type: '$type' },
             total: { $sum: '$total' },
           },
         },
@@ -87,11 +87,11 @@ export class DailyReportTransactionsService {
 
     for (const currentVal of todayByCurrency) {
       const currentIndex: number = dailyReportCurrencyDto.findIndex(
-        (value: DailyReportCurrencyDto) => 
+        (value: DailyReportCurrencyDto) =>
         (value.currency === currentVal._id.currency),
       );
-      
-      if(currentIndex === -1) {
+
+      if (currentIndex === -1) {
         continue;
       }
 
@@ -104,10 +104,10 @@ export class DailyReportTransactionsService {
 
     const beforeTodayByCurrency: any = await this.transactionsModel
       .aggregate([
-        { $match: {created_at: {$lt: todayDate}} },
+        { $match: { created_at: { $lt: todayDate }}},
         {
           $group: {
-            _id: {currency: '$currency', type: '$type'},
+            _id: { currency: '$currency', type: '$type'},
             total: { $sum: '$total' },
           },
         },
@@ -116,15 +116,15 @@ export class DailyReportTransactionsService {
     for (const currentVal of beforeTodayByCurrency) {
       const currentIndex: number = dailyReportCurrencyDto.findIndex(
         (value: DailyReportCurrencyDto) => value.currency === currentVal._id.currency);
-      
-      if(currentIndex === -1) {
+
+      if (currentIndex === -1) {
         continue;
       }
 
       const currentPaymentIndex: number = dailyReportCurrencyDto[currentIndex].paymentOption.findIndex(
         (value: DailyReportPaymentOptionDto) => value.paymentOption === currentVal._id.type);
 
-      if(currentPaymentIndex !== -1) {
+      if (currentPaymentIndex !== -1) {
         dailyReportCurrencyDto[currentIndex].paymentOption[currentPaymentIndex].overallTotal = currentVal.total;
       } else {
         dailyReportCurrencyDto[currentIndex].paymentOption.push({

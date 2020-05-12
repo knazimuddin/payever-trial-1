@@ -35,7 +35,7 @@ export const PaymentFlowSchema: Schema = new Schema(
   },
   {
     id: false,
-    timestamps: {},
+    timestamps: { },
   },
 );
 

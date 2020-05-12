@@ -14,7 +14,7 @@ export class HistoryEventsController {
     private readonly historyService: TransactionHistoryService,
     private readonly logger: Logger,
     private readonly eventDispatcher: EventDispatcher,
-  ) {}
+  ) { }
 
   @MessagePattern({
     name: RabbitRoutingKeys.PaymentActionCompleted,

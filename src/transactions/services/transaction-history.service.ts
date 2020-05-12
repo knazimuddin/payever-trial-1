@@ -11,7 +11,7 @@ export class TransactionHistoryService {
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly logger: Logger,
-  ) {}
+  ) { }
 
   public async processHistoryRecord(
     transaction: TransactionModel,

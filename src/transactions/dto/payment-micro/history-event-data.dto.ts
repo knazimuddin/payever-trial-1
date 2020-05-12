@@ -1,7 +1,7 @@
-import { IsNumber, IsString, IsBoolean, IsOptional, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { HistoryEventUploadItemDto } from './history-event-upload-item.dto';
+import { IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { HistoryEventRefundItemDto } from './history-event-refund-item.dto';
+import { HistoryEventUploadItemDto } from './history-event-upload-item.dto';
 
 export class HistoryEventDataDto {
   @IsNumber()
@@ -21,12 +21,12 @@ export class HistoryEventDataDto {
   public items_restocked: boolean;
 
   @IsOptional()
-  @ValidateNested({each: true})
+  @ValidateNested({ each: true })
   @Type(() => HistoryEventRefundItemDto)
   public refund_items?: HistoryEventRefundItemDto[];
 
   @IsOptional()
-  @ValidateNested({each: true})
+  @ValidateNested({ each: true })
   @Type(() => HistoryEventUploadItemDto)
   public saved_data?: HistoryEventUploadItemDto[];
 }

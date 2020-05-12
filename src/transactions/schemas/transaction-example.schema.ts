@@ -40,7 +40,7 @@ export const TransactionExampleSchema: Schema = new Schema({
   santander_applications: [String],
 
   status: String,
-  status_color: {type: String},
+  status_color: { type: String },
   store_id: String,
   store_name: String,
   total: Number,

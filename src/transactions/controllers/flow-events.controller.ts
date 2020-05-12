@@ -9,7 +9,7 @@ export class FlowEventsController {
   constructor(
     private readonly flowService: PaymentFlowService,
     private readonly logger: Logger,
-  ) {}
+  ) { }
 
   @MessagePattern({
     name: RabbitRoutingKeys.PaymentFlowCreated,

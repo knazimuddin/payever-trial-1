@@ -13,7 +13,7 @@ export class TransactionsEsBusinessUpdateCommand {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly elasticSearchClient: ElasticSearchClient,
-  ) {}
+  ) { }
 
   @Command({
     command: 'transactions:es:business-update',
@@ -28,7 +28,7 @@ export class TransactionsEsBusinessUpdateCommand {
       throw new Error('This command should run only with "business" option.');
     }
 
-    const criteria: any = {};
+    const criteria: any = { };
     criteria.business_uuid = business_uuid;
 
     Logger.log(`Clearing "${business_uuid}" transactions from ElasticSearch.`);

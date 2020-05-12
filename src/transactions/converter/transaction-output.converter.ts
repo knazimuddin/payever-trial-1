@@ -13,7 +13,7 @@ export class TransactionOutputConverter {
     transaction: TransactionUnpackedDetailsInterface,
     actions: ActionItemInterface[],
   ): TransactionOutputInterface {
-    const details: UnpackedDetailsInterface = Object.assign({}, transaction.payment_details);
+    const details: UnpackedDetailsInterface = Object.assign({ }, transaction.payment_details);
     delete details.finance_id;
     delete details.application_no;
     delete details.application_number;

@@ -15,7 +15,7 @@ export class BeforeDateConditionFilter {
     const timeStamps: number[] = _filter.value.map(
       (elem: string) => (new Date(DateStringHelper.getTomorrowDateStart(elem))).getTime(),
     );
-    const condition: {} = {
+    const condition: { } = {
       range: {
         [field]: {
           lt: (new Date(Math.min(...timeStamps))).toISOString(),

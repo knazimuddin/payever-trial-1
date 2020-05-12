@@ -77,7 +77,7 @@ export class TransactionHistoryEntryConverter {
 
     if (data.params) {
       item.params = Array.isArray(data.params)
-        ? {}
+        ? { }
         : data.params
       ;
     }

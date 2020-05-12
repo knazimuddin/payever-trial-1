@@ -7,7 +7,7 @@ import { ElasticMappingFieldsConfig, ElasticTransactionEnum } from '../enum';
 export class TransactionsEsSetupCommand {
   constructor(
     private readonly elasticSearchClient: ElasticSearchClient,
-  ) {}
+  ) { }
 
   @Command({
     command: 'transactions:es:setup',

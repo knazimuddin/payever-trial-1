@@ -21,5 +21,5 @@ export class Uniqid {
         ? new Array(1 + (w - seed.length)).join('0') + seed
         : seed
       ;
-  };
+  }
 }

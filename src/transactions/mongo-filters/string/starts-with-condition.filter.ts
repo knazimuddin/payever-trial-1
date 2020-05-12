@@ -16,7 +16,7 @@ export class StartsWithConditionFilter {
       _filter.value.forEach((elem: string) => {
         regex.push(new RegExp(`^${elem}`, 'i'));
       });
-      const condition: {} = {
+      const condition: { } = {
         [field]: {
           $in: regex,
         },

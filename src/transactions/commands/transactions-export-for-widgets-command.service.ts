@@ -10,7 +10,7 @@ export class TransactionsExportForWidgetsCommand {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly statisticsService: StatisticsService,
-  ) {}
+  ) { }
 
   @Command({ command: 'transactions:export', describe: 'Export transactions for widgets' })
   public async businessExport(): Promise<void> {

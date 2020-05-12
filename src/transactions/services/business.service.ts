@@ -7,7 +7,7 @@ import { BusinessSchemaName } from '../schemas';
 export class BusinessService {
   constructor(
     @InjectModel(BusinessSchemaName) private readonly businessModel: Model<BusinessModel>,
-  ) {}
+  ) { }
 
   public async save(businessDto: BusinessDto): Promise<BusinessModel> {
     return this.businessModel.findOneAndUpdate(

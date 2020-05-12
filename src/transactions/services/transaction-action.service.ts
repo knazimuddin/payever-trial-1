@@ -1,16 +1,16 @@
-import { Logger, Injectable, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { TransactionPaymentDetailsConverter } from '../converter';
+import { ActionPayloadDto } from '../dto/action-payload';
+import { ThirdPartyPaymentsEnum } from '../enum';
+import { ActionCallerInterface } from '../interfaces';
+import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 
 import { TransactionModel } from '../models';
-import { ActionPayloadDto } from '../dto/action-payload';
-import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
-import { TransactionPaymentDetailsConverter } from '../converter';
-import { TransactionsService } from './transactions.service';
 import { DtoValidationService } from './dto-validation.service';
 import { MessagingService } from './messaging.service';
-import { TransactionsExampleService } from './transactions-example.service';
-import { ActionCallerInterface } from '../interfaces';
-import { ThirdPartyPaymentsEnum } from '../enum';
 import { ThirdPartyCallerService } from './third-party-caller.service';
+import { TransactionsExampleService } from './transactions-example.service';
+import { TransactionsService } from './transactions.service';
 
 @Injectable()
 export class TransactionActionService {
@@ -21,7 +21,7 @@ export class TransactionActionService {
     private readonly thirdPartyCallerService: ThirdPartyCallerService,
     private readonly logger: Logger,
     private readonly exampleService: TransactionsExampleService,
-  ) {}
+  ) { }
 
   public async doAction(
     transaction: TransactionModel,

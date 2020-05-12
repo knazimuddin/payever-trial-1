@@ -19,7 +19,7 @@ export class BetweenDatesConditionFilter {
       (elem: { to: string }) => (new Date(DateStringHelper.getTomorrowDateStart(elem.to))).getTime(),
     );
 
-    const condition: {} = {
+    const condition: { } = {
       range: {
         [field]: {
           gte: (new Date(Math.max(...from))).toISOString(),

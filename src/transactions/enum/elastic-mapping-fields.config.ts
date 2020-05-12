@@ -1,4 +1,4 @@
-export const ElasticMappingFieldsConfig: { [field: string]: {} } = {
+export const ElasticMappingFieldsConfig: { [field: string]: { } } = {
   amount: {
     type: 'long',
   },

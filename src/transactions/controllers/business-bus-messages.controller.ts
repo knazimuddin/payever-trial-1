@@ -10,7 +10,7 @@ export class BusinessBusMessagesController {
     private readonly logger: Logger,
     private readonly businessService: BusinessService,
     private readonly exampleService: TransactionsExampleService,
-  ) {}
+  ) { }
 
   @MessagePattern({
     name: 'users.event.business.created',

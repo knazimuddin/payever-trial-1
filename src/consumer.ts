@@ -21,4 +21,4 @@ async function bootstrap(): Promise<void> {
   app.listen(() => logger.log(`Transactions consumer started`, 'NestApplication'));
 }
 
-bootstrap().then();
+bootstrap().catch();

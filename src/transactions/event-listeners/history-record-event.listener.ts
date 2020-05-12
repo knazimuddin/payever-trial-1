@@ -9,7 +9,7 @@ import { TransactionHistoryService } from '../services';
 export class HistoryRecordEventListener {
   constructor(
     private readonly historyService: TransactionHistoryService,
-  ) {}
+  ) { }
 
   @EventListener(PaymentActionEventEnum.PaymentActionCompleted)
   public async handlePaymentCompleted(

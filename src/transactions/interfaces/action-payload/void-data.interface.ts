@@ -1,1 +1,1 @@
-export interface VoidDataInterface {}
+export interface VoidDataInterface { }

@@ -5,5 +5,5 @@ export class ShippingMailDto extends PaymentMailDto {
     trackingNumber: string;
     trackingUrl: string;
     deliveryDate: string;
-  }
+  };
 }

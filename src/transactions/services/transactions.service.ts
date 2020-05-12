@@ -42,7 +42,7 @@ export class TransactionsService {
     private readonly delayRemoveClient: DelayRemoveClient,
     private readonly mutex: Mutex,
     private readonly logger: Logger,
-  ) {}
+  ) { }
 
   public async create(transactionDto: TransactionPackedDetailsInterface): Promise<TransactionModel> {
     if (transactionDto.id) {
@@ -66,7 +66,7 @@ export class TransactionsService {
     );
 
     await this.notifier.sendNewTransactionNotification(created);
-    const flow: PaymentFlowModel = await this.paymentFlowService.findOne({id: created.payment_flow_id});
+    const flow: PaymentFlowModel = await this.paymentFlowService.findOne({ id: created.payment_flow_id });
     if (flow && flow.seller_email) {
       await this.authEventsProducer.getSellerName({ email: flow.seller_email });
     }
@@ -180,7 +180,7 @@ export class TransactionsService {
   }
 
   public async findAll(businessId: string): Promise<TransactionModel[]> {
-    return this.transactionModel.find({business_uuid: businessId});
+    return this.transactionModel.find({ business_uuid: businessId });
   }
 
   public async removeByUuid(transactionId: string): Promise<void> {
@@ -269,7 +269,7 @@ export class TransactionsService {
     result: RpcResultDto,
   ): Promise<void> {
     const paymentResult: CheckoutTransactionInterface = result.payment;
-    const updating: CheckoutTransactionRpcUpdateInterface = {};
+    const updating: CheckoutTransactionRpcUpdateInterface = { };
 
     if (!paymentResult.amount || paymentResult.amount <= 0) {
       throw new RpcException(`Can not apply empty or negative amount for transaction #${transaction.id}`);
