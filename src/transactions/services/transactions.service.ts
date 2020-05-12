@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { DelayRemoveClient, ElasticSearchClient } from '@pe/elastic-kit';
 import { Mutex } from '@pe/nest-kit/modules/mutex';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { v4 as uuid } from 'uuid';
 
 import {
@@ -18,12 +18,11 @@ import { ElasticTransactionEnum } from '../enum';
 import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
 import {
   TransactionBasicInterface,
-  TransactionCartItemInterface,
   TransactionHistoryEntryInterface,
   TransactionPackedDetailsInterface,
   TransactionUnpackedDetailsInterface,
 } from '../interfaces/transaction';
-import { PaymentFlowModel, TransactionHistoryEntryModel, TransactionModel } from '../models';
+import { PaymentFlowModel, TransactionCartItemModel, TransactionHistoryEntryModel, TransactionModel } from '../models';
 import { TransactionsNotifier } from '../notifiers';
 import { AuthEventsProducer } from '../producer';
 import { TransactionSchemaName } from '../schemas';
@@ -98,7 +97,7 @@ export class TransactionsService {
           uuid: transactionUuid,
         },
         {
-          $set: transactionDto,
+          $set: transactionDto as any,
           $setOnInsert: insertData,
         },
         {
@@ -130,7 +129,7 @@ export class TransactionsService {
         },
         {
           $set: {
-            history: transactionHistory,
+            history: transactionHistory as any,
           },
         },
         {
@@ -155,7 +154,7 @@ export class TransactionsService {
   public async findModelByParams(params: any): Promise<TransactionModel> {
     const transactionModel: TransactionModel[]
       = await this.transactionModel.find(params).sort({ created_at: -1 }).limit(1);
-    if(!transactionModel || !transactionModel.length) {
+    if (!transactionModel || !transactionModel.length) {
       return null;
     }
 
@@ -322,7 +321,7 @@ export class TransactionsService {
     transaction: TransactionBasicInterface,
     result: RpcResultDto,
   ): Promise<void> {
-    const items: TransactionCartItemInterface[] =
+    const items: Types.DocumentArray<TransactionCartItemModel> =
       TransactionCartConverter.fromCheckoutTransactionCart(result.payment_items, transaction.business_uuid);
 
     const updated: TransactionModel = await this.mutex.lock(
@@ -334,7 +333,7 @@ export class TransactionsService {
         },
         {
           $set: {
-            items,
+            items: items,
           },
         },
         {
