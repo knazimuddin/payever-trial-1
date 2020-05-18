@@ -5,6 +5,7 @@ import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
 import { FiltersList } from '../elastic-filters/filters.list';
 import { ElasticTransactionEnum } from '../enum';
 import { TransactionBasicInterface } from '../interfaces/transaction';
+import { DoubleValueProcessor } from '../tools';
 import { CurrencyExchangeService } from './currency-exchange.service';
 
 @Injectable()
@@ -230,18 +231,20 @@ export class ElasticSearchService {
 
       return;
     }
-
     if (filter && !filter.length) {
       filter = [filter];
     }
 
-    for (const _filter of filter) {
+    for (let _filter of filter) {
       if (!_filter.value) {
         return;
       }
       if (!Array.isArray(_filter.value)) {
         _filter.value = [_filter.value];
       }
+
+      _filter = DoubleValueProcessor.process(field, _filter);
+
       for (const elasticFilter of FiltersList) {
         if (_filter.condition === elasticFilter.getName()) {
           elasticFilter.apply(elasticFilters, field, _filter);
