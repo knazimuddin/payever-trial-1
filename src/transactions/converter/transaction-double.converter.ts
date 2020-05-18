@@ -3,7 +3,6 @@ import { TransactionBasicInterface, TransactionCartItemInterface } from '../inte
 
 @Injectable()
 export class TransactionDoubleConverter {
-
   public static pack(transaction: TransactionBasicInterface): TransactionBasicInterface {
     transaction.amount = Math.trunc(transaction.amount * 100);
     transaction.total = Math.trunc(transaction.total * 100);
@@ -21,7 +20,7 @@ export class TransactionDoubleConverter {
     ;
 
     for (const item of transaction.items) {
-      this.handleItem1(item);
+      this.handleItemUnpack(item);
     }
 
     for (const record of transaction.history) {
@@ -51,7 +50,7 @@ export class TransactionDoubleConverter {
     ;
 
     for (const item of transaction.items) {
-      this.handleItem(item);
+      this.handleItemPack(item);
     }
 
     for (const record of transaction.history) {
@@ -64,38 +63,7 @@ export class TransactionDoubleConverter {
     return transaction;
   }
 
-  private static handleItem1(item: TransactionCartItemInterface): void {
-    item.price = item.price
-      ? Math.trunc(item.price * 100)
-      : item.price
-    ;
-    item.price_net = item.price_net
-      ? Math.trunc(item.price_net * 100)
-      : item.price_net
-    ;
-    item.vat_rate = item.vat_rate
-      ? Math.trunc(item.vat_rate * 100)
-      : item.vat_rate
-    ;
-    item.fixed_shipping_price = item.fixed_shipping_price
-      ? Math.trunc(item.fixed_shipping_price * 100)
-      : item.fixed_shipping_price
-    ;
-    item.shipping_price = item.shipping_price
-      ? Math.trunc(item.shipping_price * 100)
-      : item.shipping_price
-    ;
-    item.shipping_settings_rate = item.shipping_settings_rate
-      ? Math.trunc(item.shipping_settings_rate * 100)
-      : item.shipping_settings_rate
-    ;
-    item.weight = item.weight
-      ? Math.trunc(item.weight * 100)
-      : item.weight
-    ;
-  }
-
-  private static handleItem(item: TransactionCartItemInterface): void {
+  private static handleItemPack(item: TransactionCartItemInterface): void {
     item.price = item.price
       ? item.price / 100
       : item.price
@@ -122,6 +90,37 @@ export class TransactionDoubleConverter {
     ;
     item.weight = item.weight
       ? item.weight / 100
+      : item.weight
+    ;
+  }
+
+  private static handleItemUnpack(item: TransactionCartItemInterface): void {
+    item.price = item.price
+      ? Math.trunc(item.price * 100)
+      : item.price
+    ;
+    item.price_net = item.price_net
+      ? Math.trunc(item.price_net * 100)
+      : item.price_net
+    ;
+    item.vat_rate = item.vat_rate
+      ? Math.trunc(item.vat_rate * 100)
+      : item.vat_rate
+    ;
+    item.fixed_shipping_price = item.fixed_shipping_price
+      ? Math.trunc(item.fixed_shipping_price * 100)
+      : item.fixed_shipping_price
+    ;
+    item.shipping_price = item.shipping_price
+      ? Math.trunc(item.shipping_price * 100)
+      : item.shipping_price
+    ;
+    item.shipping_settings_rate = item.shipping_settings_rate
+      ? Math.trunc(item.shipping_settings_rate * 100)
+      : item.shipping_settings_rate
+    ;
+    item.weight = item.weight
+      ? Math.trunc(item.weight * 100)
       : item.weight
     ;
   }

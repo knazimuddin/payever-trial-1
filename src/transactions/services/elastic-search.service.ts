@@ -3,7 +3,7 @@ import { ElasticSearchClient } from '@pe/elastic-kit';
 import { TransactionDoubleConverter } from '../converter';
 import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
 import { FiltersList } from '../elastic-filters/filters.list';
-import { ElasticTransactionEnum } from '../enum';
+import { ElasticMappingFieldsConfig, ElasticTransactionEnum } from '../enum';
 import { TransactionBasicInterface } from '../interfaces/transaction';
 import { CurrencyExchangeService } from './currency-exchange.service';
 
@@ -229,6 +229,10 @@ export class ElasticSearchService {
       });
 
       return;
+    }
+
+    if (ElasticMappingFieldsConfig[field] && ElasticMappingFieldsConfig[field].type === 'long') {
+      filter.value[0] = filter.value[0] * 100;
     }
 
     if (filter && !filter.length) {
