@@ -3,7 +3,7 @@ import { ElasticSearchClient } from '@pe/elastic-kit';
 import { TransactionDoubleConverter } from '../converter';
 import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
 import { FiltersList } from '../elastic-filters/filters.list';
-import { ElasticMappingFieldsConfig, ElasticTransactionEnum } from '../enum';
+import { ElasticTransactionEnum } from '../enum';
 import { TransactionBasicInterface } from '../interfaces/transaction';
 import { DoubleValueProcessor } from '../tools';
 import { CurrencyExchangeService } from './currency-exchange.service';
@@ -219,9 +219,6 @@ export class ElasticSearchService {
     for (const key of Object.keys(inputFilters)) {
       this.addFilter(elasticFilters, key, inputFilters[key]);
     }
-
-    console.log(JSON.stringify(elasticFilters));
-
   }
 
   private addFilter(elasticFilters: any, field: string, filter: any): void {
@@ -234,10 +231,6 @@ export class ElasticSearchService {
 
       return;
     }
-
-    console.log('===================================');
-    console.log(ElasticMappingFieldsConfig[field]);
-
     if (filter && !filter.length) {
       filter = [filter];
     }
@@ -250,8 +243,6 @@ export class ElasticSearchService {
         _filter.value = [_filter.value];
       }
 
-      console.log(_filter);
-
       _filter = DoubleValueProcessor.process(field, _filter);
 
       for (const elasticFilter of FiltersList) {
@@ -261,7 +252,5 @@ export class ElasticSearchService {
         }
       }
     }
-
-    console.log('===================================');
   }
 }

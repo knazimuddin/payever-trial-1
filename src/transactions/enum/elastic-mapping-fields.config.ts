@@ -3,7 +3,7 @@ type fieldConfig = {
   fielddata?: boolean,
 };
 
-export const ElasticMappingFieldsConfig: {[field: string]: fieldConfig } = {
+export const ElasticMappingFieldsConfig: { [field: string]: fieldConfig } = {
   amount: {
     type: 'long',
   },
