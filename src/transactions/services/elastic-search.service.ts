@@ -5,6 +5,7 @@ import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
 import { FiltersList } from '../elastic-filters/filters.list';
 import { ElasticMappingFieldsConfig, ElasticTransactionEnum } from '../enum';
 import { TransactionBasicInterface } from '../interfaces/transaction';
+import { DoubleValueProcessor } from '../tools';
 import { CurrencyExchangeService } from './currency-exchange.service';
 
 @Injectable()
@@ -218,6 +219,9 @@ export class ElasticSearchService {
     for (const key of Object.keys(inputFilters)) {
       this.addFilter(elasticFilters, key, inputFilters[key]);
     }
+
+    console.log(JSON.stringify(elasticFilters));
+
   }
 
   private addFilter(elasticFilters: any, field: string, filter: any): void {
@@ -231,21 +235,25 @@ export class ElasticSearchService {
       return;
     }
 
-    if (ElasticMappingFieldsConfig[field] && ElasticMappingFieldsConfig[field].type === 'long') {
-      filter.value[0] = filter.value[0] * 100;
-    }
+    console.log('===================================');
+    console.log(ElasticMappingFieldsConfig[field]);
 
     if (filter && !filter.length) {
       filter = [filter];
     }
 
-    for (const _filter of filter) {
+    for (let _filter of filter) {
       if (!_filter.value) {
         return;
       }
       if (!Array.isArray(_filter.value)) {
         _filter.value = [_filter.value];
       }
+
+      console.log(_filter);
+
+      _filter = DoubleValueProcessor.process(field, _filter);
+
       for (const elasticFilter of FiltersList) {
         if (_filter.condition === elasticFilter.getName()) {
           elasticFilter.apply(elasticFilters, field, _filter);
@@ -253,5 +261,7 @@ export class ElasticSearchService {
         }
       }
     }
+
+    console.log('===================================');
   }
 }

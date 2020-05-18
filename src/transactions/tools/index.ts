@@ -1,4 +1,5 @@
 export * from './business.filter';
+export * from './double-value-processor';
 export * from './exporter';
 export * from './is-not-example.filter';
 export * from './product-uuid';
