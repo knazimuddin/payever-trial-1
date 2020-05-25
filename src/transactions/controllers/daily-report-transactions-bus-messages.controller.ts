@@ -18,7 +18,7 @@ export class DailyReportTransactionBusMessagesController {
   public async onMailerReportDailyReportRequested(dailyReportFilterDto: DailyReportFilterDto): Promise<void> {
 
     const mongoCurrencyReport: DailyReportCurrencyDto[]
-      = await this.dailyReportTransactionsService.getDailyReportCurency(dailyReportFilterDto);
+      = await this.dailyReportTransactionsService.getDailyReportCurrency(dailyReportFilterDto);
     await this.dailyReportTransactionsService.getDailyReportPaymentOption(dailyReportFilterDto, mongoCurrencyReport);
 
     await this.dailyReportTransactionMailerReportEventProducer.produceDailyReportTransactionEvent(mongoCurrencyReport);

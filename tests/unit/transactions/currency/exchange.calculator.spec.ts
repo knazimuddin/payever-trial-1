@@ -1,29 +1,28 @@
-import 'mocha';
+import { CurrencyModel, CurrencyService } from '@pe/common-sdk';
 
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
+import 'mocha';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
-import * as uuid from 'uuid';
 
-import { CurrencyExchangeService } from '../../../../src/transactions/services/currency-exchange.service';
-import { CurrencyService, CurrencyModel } from '@pe/common-sdk';
+import { ExchangeCalculator } from '../../../../src/transactions/currency';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
 const expect: Chai.ExpectStatic = chai.expect;
 
-describe('CurrencyExchangeService', () => {
+describe('ExchangeCalculator', () => {
   let sandbox: sinon.SinonSandbox;
-  let testService: CurrencyExchangeService;
+  let testService: ExchangeCalculator;
   let currencyService: CurrencyService;
 
   before(() => {
     currencyService = {
-      findAll: (): any => { },
+      getCurrencyByCode: (): any => { },
     } as any;
 
-    testService = new CurrencyExchangeService(currencyService);
+    testService = new ExchangeCalculator(currencyService);
   });
 
   beforeEach(() => {
@@ -37,17 +36,19 @@ describe('CurrencyExchangeService', () => {
 
   describe('getCurrencyExchangeRate()', () => {
     it('should return currency exchange rate', async () => {
-      const dataList: CurrencyModel[] = [
-        {
-          id: 'EUR',
-          rate: 1.23,
-        } as any,
-        {
-          id: 'USD',
-          rate: 1.10,
-        } as any,
-      ];
-      sandbox.stub(currencyService, 'findAll').resolves(dataList);
+      const eurCurrency: CurrencyModel = {
+        id: 'EUR',
+        rate: 1.23,
+      } as any;
+      const usdCurrency: CurrencyModel = {
+        id: 'USD',
+        rate: 1.10,
+      } as any;
+
+      sandbox.stub(currencyService, 'getCurrencyByCode')
+        .onFirstCall().resolves(eurCurrency)
+        .onSecondCall().resolves(usdCurrency)
+      ;
       expect(
         await testService.getCurrencyExchangeRate('EUR'),
       ).to.eq(1.23);

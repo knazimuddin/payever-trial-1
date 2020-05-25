@@ -1,15 +1,16 @@
-import 'mocha';
-
+/* tslint:disable:no-big-function */
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
+import 'mocha';
+import * as moment from 'moment';
+import { Model } from 'mongoose';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
-import { Model, DocumentQuery } from 'mongoose';
+import { ExchangeCalculator, ExchangeCalculatorFactory } from '../../../../src/transactions/currency';
+import { DailyReportCurrencyDto, DailyReportFilterDto } from '../../../../src/transactions/dto';
 
 import { TransactionModel } from '../../../../src/transactions/models';
-import { DailyReportTransactionsService, CurrencyExchangeService } from '../../../../src/transactions/services';
-import { DailyReportFilterDto, DailyReportCurrencyDto } from '../../../../src/transactions/dto';
-import * as moment from 'moment';
+import { DailyReportTransactionsService } from '../../../../src/transactions/services';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -18,26 +19,29 @@ const expect: Chai.ExpectStatic = chai.expect;
 describe('DailyReportTransactionsService', () => {
   let sandbox: sinon.SinonSandbox;
   let testService: DailyReportTransactionsService;
-  let currencyExchangeService: CurrencyExchangeService;
+  let exchangeCalculator: ExchangeCalculator;
+  let exchangeCalculatorFactory: ExchangeCalculatorFactory;
   let transactionModel: Model<TransactionModel>;
 
   before(() => {
-
-    currencyExchangeService = {
+    exchangeCalculator = {
       getCurrencyExchangeRate: (): any => { },
+    } as any;
+    exchangeCalculatorFactory = {
+      create: (): any => { },
     } as any;
 
     transactionModel = {
-      find(): any { return this },
-      limit(): any { return this },
-      skip(): any { return this },
-      sort(): any { return this },
-      aggregate(): any { return this },
+      find(): any { return this; },
+      limit(): any { return this; },
+      skip(): any { return this; },
+      sort(): any { return this; },
+      aggregate(): any { return this; },
       countDocuments(): any { },
       distinct(): any { },
     } as any;
 
-    testService = new DailyReportTransactionsService(transactionModel, currencyExchangeService);
+    testService = new DailyReportTransactionsService(transactionModel, exchangeCalculatorFactory);
   });
 
   beforeEach(() => {
@@ -49,7 +53,7 @@ describe('DailyReportTransactionsService', () => {
     sandbox = undefined;
   });
 
-  describe('getDailyReportCurency()', () => {
+  describe('getDailyReportCurrency()', () => {
     it('should process successfully daily report transaction', async () => {
 
       const dailyReportFilterDto: DailyReportFilterDto = {
@@ -57,24 +61,25 @@ describe('DailyReportTransactionsService', () => {
       };
       const todayDate: Date = moment(dailyReportFilterDto.beginDate).toDate();
       const todayFilter: any[] = [
-        { $match: {created_at: {$gte: todayDate}} },
+        { $match: { created_at: { $gte: todayDate}} },
         { '$group': { _id: '$currency', total: { '$sum': '$total' } } },
       ];
-      const beforetodayFilter: any[] = [
-        { $match: {created_at: {$lt: todayDate}} },
+      const beforeTodayFilter: any[] = [
+        { $match: { created_at: { $lt: todayDate}} },
         { '$group': { _id: '$currency', total: { '$sum': '$total' } } },
       ];
 
       const todayPaymentFilter: any[] = [
-        { $match: {created_at: {$gte: todayDate}} },
-        { '$group': { _id: {currency: '$currency', type: '$type'}, total: { '$sum': '$total' } } },
+        { $match: { created_at: { $gte: todayDate}} },
+        { '$group': { _id: { currency: '$currency', type: '$type'}, total: { '$sum': '$total' } } },
       ];
-      const beforetodayPaymentFilter: any[] = [
-        { $match: {created_at: {$lt: todayDate}} },
-        { '$group': { _id: {currency: '$currency', type: '$type'}, total: { '$sum': '$total' } } },
+      const beforeTodayPaymentFilter: any[] = [
+        { $match: { created_at: { $lt: todayDate}} },
+        { '$group': { _id: { currency: '$currency', type: '$type'}, total: { '$sum': '$total' } } },
       ];
 
-      sandbox.stub(currencyExchangeService, 'getCurrencyExchangeRate')
+      sandbox.stub(exchangeCalculatorFactory, 'create').returns(exchangeCalculator);
+      sandbox.stub(exchangeCalculator, 'getCurrencyExchangeRate')
       .onFirstCall().resolves(1)
       .onSecondCall().resolves(11.1523)
       .onThirdCall().resolves(11.9745);
@@ -191,20 +196,20 @@ describe('DailyReportTransactionsService', () => {
         },
       ]);
 
-      const mongoCurrencyReport: DailyReportCurrencyDto[] = await testService.getDailyReportCurency(dailyReportFilterDto);
-      await testService.getDailyReportPaymentOption(dailyReportFilterDto, mongoCurrencyReport);
+      const currencyReport: DailyReportCurrencyDto[] = await testService.getDailyReportCurrency(dailyReportFilterDto);
+      await testService.getDailyReportPaymentOption(dailyReportFilterDto, currencyReport);
 
-      expect(currencyExchangeService.getCurrencyExchangeRate)
+      expect(exchangeCalculator.getCurrencyExchangeRate)
         .calledWith('EUR')
         .calledWith('SEK')
         .calledWith('NOK');
-      
-      expect(transactionModel.aggregate).calledWithExactly(todayFilter);
-      expect(transactionModel.aggregate).calledWithExactly(beforetodayFilter);
-      expect(transactionModel.aggregate).calledWithExactly(todayPaymentFilter);
-      expect(transactionModel.aggregate).calledWithExactly(beforetodayPaymentFilter);
 
-      expect(mongoCurrencyReport).to.deep.equal([
+      expect(transactionModel.aggregate).calledWithExactly(todayFilter);
+      expect(transactionModel.aggregate).calledWithExactly(beforeTodayFilter);
+      expect(transactionModel.aggregate).calledWithExactly(todayPaymentFilter);
+      expect(transactionModel.aggregate).calledWithExactly(beforeTodayPaymentFilter);
+
+      expect(currencyReport).to.deep.equal([
         {
           currency: 'EUR',
           exchangeRate: 1,
@@ -212,46 +217,46 @@ describe('DailyReportTransactionsService', () => {
           paymentOption: [
             {
               overallTotal: 10000,
-              paymentOption: "stripe",
+              paymentOption: 'stripe',
               todayTotal: 500,
             }, {
               overallTotal: 10000,
-              paymentOption: "santander_pos_invoice_de",
+              paymentOption: 'santander_pos_invoice_de',
               todayTotal: 0,
-            }
+            },
           ],
           todayTotal: 1000,
-        },{
+        }, {
           currency: 'SEK',
           exchangeRate: 11.1523,
           overallTotal: 200000,
           paymentOption: [
             {
               overallTotal: 100000,
-              paymentOption: "stripe",
+              paymentOption: 'stripe',
               todayTotal: 50000,
             }, {
               overallTotal: 100000,
-              paymentOption: "paymill_creditcard",
+              paymentOption: 'paymill_creditcard',
               todayTotal: 0,
-            }
+            },
           ],
           todayTotal: 50000,
-        },{
+        }, {
           currency: 'NOK',
           exchangeRate: 11.9745,
           overallTotal: 150000,
           paymentOption: [
             {
               overallTotal: 150000,
-              paymentOption: "stripe",
+              paymentOption: 'stripe',
               todayTotal: 0,
-            }
+            },
           ],
           todayTotal: 0,
-        }
+        },
       ]);
     });
   });
-  
+
 });

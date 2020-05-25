@@ -2,20 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as moment from 'moment';
 import { Model } from 'mongoose';
+import { ExchangeCalculator, ExchangeCalculatorFactory } from '../currency';
 import { DailyReportCurrencyDto, DailyReportFilterDto, DailyReportPaymentOptionDto } from '../dto/report';
 import { TransactionModel } from '../models';
-import { CurrencyExchangeService } from './currency-exchange.service';
 
 @Injectable()
 export class DailyReportTransactionsService {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
-    private readonly currencyExchangeService: CurrencyExchangeService,
+    private readonly exchangeCalculatorFactory: ExchangeCalculatorFactory,
   ) { }
 
-  public async getDailyReportCurency(dailyReportFilterDto: DailyReportFilterDto): Promise<DailyReportCurrencyDto[]> {
+  public async getDailyReportCurrency(dailyReportFilterDto: DailyReportFilterDto): Promise<DailyReportCurrencyDto[]> {
     const result: DailyReportCurrencyDto[] = [];
     const todayDate: Date = moment(dailyReportFilterDto.beginDate).toDate();
+    const calculator: ExchangeCalculator = this.exchangeCalculatorFactory.create();
 
     const todayByCurrency: any = await this.transactionsModel
       .aggregate([
@@ -31,7 +32,7 @@ export class DailyReportTransactionsService {
     for (const currentVal of todayByCurrency) {
       result.push({
         currency: currentVal._id,
-        exchangeRate: await this.currencyExchangeService.getCurrencyExchangeRate(currentVal._id),
+        exchangeRate: await calculator.getCurrencyExchangeRate(currentVal._id),
         overallTotal: 0,
         paymentOption: [],
         todayTotal: currentVal.total,
@@ -57,7 +58,7 @@ export class DailyReportTransactionsService {
       } else {
         result.push({
           currency: currentVal._id,
-          exchangeRate: await this.currencyExchangeService.getCurrencyExchangeRate(currentVal._id),
+          exchangeRate: await calculator.getCurrencyExchangeRate(currentVal._id),
           overallTotal: currentVal.total,
           paymentOption: [],
           todayTotal: 0,

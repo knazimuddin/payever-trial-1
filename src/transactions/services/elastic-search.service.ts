@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { ElasticSearchClient } from '@pe/elastic-kit';
 import { TransactionDoubleConverter } from '../converter';
+import { ExchangeCalculator, ExchangeCalculatorFactory } from '../currency';
 import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
 import { FiltersList } from '../elastic-filters/filters.list';
 import { ElasticTransactionEnum } from '../enum';
 import { TransactionBasicInterface } from '../interfaces/transaction';
 import { DoubleValueProcessor } from '../tools';
-import { CurrencyExchangeService } from './currency-exchange.service';
 
 @Injectable()
 export class ElasticSearchService {
 
   constructor(
-    private readonly currencyExchangeService: CurrencyExchangeService,
     private readonly elasticSearchClient: ElasticSearchClient,
+    private readonly exchangeCalculatorFactory: ExchangeCalculatorFactory,
   ) { }
 
   public async getResult(listDto: ListQueryDto): Promise<PagingResultDto> {
@@ -147,14 +147,16 @@ export class ElasticSearchService {
         .then((results: any) => results.body.aggregations.total_amount.buckets)
     ;
     let totalPerCurrency: number = 0;
-    for (const transaction of amounts) {
-      const currencyRate: number = await this.currencyExchangeService.getCurrencyExchangeRate(transaction.key);
+    const calculator: ExchangeCalculator = this.exchangeCalculatorFactory.create();
+
+    for (const amount of amounts) {
+      const currencyRate: number = await calculator.getCurrencyExchangeRate(amount.key);
       totalPerCurrency += currencyRate
-        ? transaction.total_amount.value / currencyRate
-        : transaction.total_amount.value
+        ? amount.total_amount.value / currencyRate
+        : amount.total_amount.value
       ;
     }
-    const rate: number = await this.currencyExchangeService.getCurrencyExchangeRate(currency);
+    const rate: number = await calculator.getCurrencyExchangeRate(currency);
 
     return rate
       ? Number(((totalPerCurrency * rate) / 100).toFixed(2))

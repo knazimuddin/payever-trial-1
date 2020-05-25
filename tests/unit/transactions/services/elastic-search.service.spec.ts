@@ -1,16 +1,17 @@
-import 'mocha';
+/* tslint:disable:no-duplicate-string no-big-function */
+import { ElasticSearchClient } from '@pe/elastic-kit';
 
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
+import 'mocha';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
-
-import { ElasticSearchService } from '../../../../src/transactions/services/elastic-search.service';
-import { CurrencyExchangeService } from '../../../../src/transactions/services/currency-exchange.service';
-import { ElasticSearchClient } from '@pe/elastic-kit';
+import { ExchangeCalculator, ExchangeCalculatorFactory } from '../../../../src/transactions/currency';
 import { ListQueryDto, PagingResultDto } from '../../../../src/transactions/dto';
-import { TransactionCartItemInterface, TransactionBasicInterface } from '../../../../src/transactions/interfaces';
 import { ElasticTransactionEnum } from '../../../../src/transactions/enum';
+import { TransactionBasicInterface } from '../../../../src/transactions/interfaces';
+
+import { ElasticSearchService } from '../../../../src/transactions/services';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -19,18 +20,22 @@ const expect: Chai.ExpectStatic = chai.expect;
 describe('Elastic Search Service', () => {
   let sandbox: sinon.SinonSandbox;
   let testService: ElasticSearchService;
-  let currencyExchangeService: CurrencyExchangeService;
+  let exchangeCalculator: ExchangeCalculator;
+  let exchangeCalculatorFactory: ExchangeCalculatorFactory;
   let elasticSearchClient: ElasticSearchClient;
 
   before(() => {
-    currencyExchangeService = {
+    exchangeCalculator = {
       getCurrencyExchangeRate: (): any => { },
+    } as any;
+    exchangeCalculatorFactory = {
+      create: (): any => { },
     } as any;
     elasticSearchClient = {
       search: (): any => { },
     } as any;
 
-    testService = new ElasticSearchService(currencyExchangeService, elasticSearchClient);
+    testService = new ElasticSearchService(elasticSearchClient, exchangeCalculatorFactory);
   });
 
   beforeEach(() => {
@@ -117,23 +122,23 @@ describe('Elastic Search Service', () => {
           value: '1f5fdd26-0ae5-4653-a524-5ac5d4dfbf52',
         },
         channel_set_uuid: {
-          value: ["0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0"],
+          value: ['0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0'],
         },
         uuid: [
           {
             condition: 'random_condition',
             value: [
-              "0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0",
+              '0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0',
             ],
           },
           {
             condition: 'is',
-            value: "0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0",
+            value: '0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0',
           },
-          {},
+          { },
         ],
-      }
-      listDto.query = "title=iphone";
+      };
+      listDto.query = 'title=iphone';
       listDto.currency = 'EUR';
       listDto.orderBy = 'created_at';
       listDto.direction = 'asc';
@@ -143,11 +148,12 @@ describe('Elastic Search Service', () => {
       const currencyExchangeRate: number = 1.23;
 
       sandbox.stub(elasticSearchClient, 'search').resolves(elasticSearchResult);
-      sandbox.stub(currencyExchangeService, 'getCurrencyExchangeRate').resolves(currencyExchangeRate);
+      sandbox.stub(exchangeCalculator, 'getCurrencyExchangeRate').resolves(currencyExchangeRate);
+      sandbox.stub(exchangeCalculatorFactory, 'create').returns(exchangeCalculator);
 
       const result: PagingResultDto = await testService.getResult(listDto);
 
-      expect(currencyExchangeService.getCurrencyExchangeRate)
+      expect(exchangeCalculator.getCurrencyExchangeRate)
         .calledWith('NPR')
         .calledWith('EUR');
       expect(elasticSearchClient.search)
@@ -226,7 +232,7 @@ describe('Elastic Search Service', () => {
               must_not: [],
             },
           },
-        })
+        });
       expect(result).to.deep.equal({
         collection: [
           {
@@ -250,7 +256,7 @@ describe('Elastic Search Service', () => {
             total: 1.12,
           },
         ],
-        filters: {},
+        filters: { },
         pagination_data: {
           amount: 1.23,
           amount_currency: 'EUR',
@@ -336,23 +342,23 @@ describe('Elastic Search Service', () => {
           value: '1f5fdd26-0ae5-4653-a524-5ac5d4dfbf52',
         },
         channel_set_uuid: {
-          value: ["0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0"],
+          value: ['0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0'],
         },
         uuid: [
           {
             condition: 'random_condition',
             value: [
-              "0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0",
+              '0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0',
             ],
           },
           {
             condition: 'is',
-            value: "0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0",
+            value: '0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0',
           },
-          {},
+          { },
         ],
-      }
-      listDto.query = "title=iphone";
+      };
+      listDto.query = 'title=iphone';
       listDto.orderBy = 'created_at';
       listDto.direction = 'asc';
       listDto.page = 1;
@@ -361,11 +367,12 @@ describe('Elastic Search Service', () => {
       const currencyExchangeRate: number = 1.23;
 
       sandbox.stub(elasticSearchClient, 'search').resolves(elasticSearchResult);
-      sandbox.stub(currencyExchangeService, 'getCurrencyExchangeRate').resolves(currencyExchangeRate);
+      sandbox.stub(exchangeCalculatorFactory, 'create').returns(exchangeCalculator);
+      sandbox.stub(exchangeCalculator, 'getCurrencyExchangeRate').resolves(currencyExchangeRate);
 
       const result: PagingResultDto = await testService.getResult(listDto);
 
-      expect(currencyExchangeService.getCurrencyExchangeRate)
+      expect(exchangeCalculator.getCurrencyExchangeRate)
         .not.calledWith('NPR')
         .not.calledWith('EUR');
       expect(elasticSearchClient.search)
@@ -444,7 +451,7 @@ describe('Elastic Search Service', () => {
               must_not: [],
             },
           },
-        })
+        });
       expect(result).to.deep.equal({
         collection: [
           {
@@ -468,7 +475,7 @@ describe('Elastic Search Service', () => {
             total: 1.12,
           },
         ],
-        filters: {},
+        filters: { },
         pagination_data: {
           amount: 2,
           amount_currency: undefined,
@@ -558,11 +565,12 @@ describe('Elastic Search Service', () => {
       const currencyExchangeRate: number = 0;
 
       sandbox.stub(elasticSearchClient, 'search').resolves(elasticSearchResult);
-      sandbox.stub(currencyExchangeService, 'getCurrencyExchangeRate').resolves(currencyExchangeRate);
+      sandbox.stub(exchangeCalculatorFactory, 'create').returns(exchangeCalculator);
+      sandbox.stub(exchangeCalculator, 'getCurrencyExchangeRate').resolves(currencyExchangeRate);
 
       const result: PagingResultDto = await testService.getResult(listDto);
 
-      expect(currencyExchangeService.getCurrencyExchangeRate)
+      expect(exchangeCalculator.getCurrencyExchangeRate)
         .calledWith('NPR')
         .calledWith('EUR');
       expect(elasticSearchClient.search)
@@ -580,7 +588,7 @@ describe('Elastic Search Service', () => {
               must: [],
               must_not: [],
             },
-          }
+          },
         })
         .calledWithExactly(ElasticTransactionEnum.index, {
           aggs: {
@@ -597,7 +605,7 @@ describe('Elastic Search Service', () => {
               must_not: [],
             },
           },
-        })
+        });
       expect(result).to.deep.equal({
         collection: [
           {
@@ -621,7 +629,7 @@ describe('Elastic Search Service', () => {
             total: 1.12,
           },
         ],
-        filters: {},
+        filters: { },
         pagination_data: {
           amount: 1.23,
           amount_currency: 'EUR',
@@ -631,8 +639,5 @@ describe('Elastic Search Service', () => {
         usage: { specific_statuses: ['PENDING'], statuses: ['SUCEEDED'] },
       });
     });
-
   });
-
-
 });
