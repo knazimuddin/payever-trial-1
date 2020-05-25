@@ -12,9 +12,11 @@ export class ExchangeCalculator {
 
     if (!this.ratesCache.has(currencyCode)) {
       const currency: CurrencyModel = await this.currencyService.getCurrencyByCode(currencyCode);
-      this.ratesCache.set(currency.id, currency.rate);
+      if (currency) {
+        this.ratesCache.set(currency.id, currency.rate);
+      }
     }
 
-    return this.ratesCache.get(currencyCode.toUpperCase());
+    return this.ratesCache.get(currencyCode);
   }
 }
