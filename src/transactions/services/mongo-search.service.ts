@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { ExchangeCalculator, ExchangeCalculatorFactory } from '../currency';
 import { ListQueryDto, PagingDto, PagingResultDto } from '../dto';
 import { TransactionModel } from '../models';
 import { FiltersList } from '../mongo-filters/filters.list';
-import { CurrencyExchangeService } from './currency-exchange.service';
 
 @Injectable()
 export class MongoSearchService {
 
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
-    private readonly currencyExchangeService: CurrencyExchangeService,
+    private readonly exchangeCalculatorFactory: ExchangeCalculatorFactory,
   ) { }
 
   public async getResult(listDto: ListQueryDto): Promise<PagingResultDto> {
@@ -103,16 +103,17 @@ export class MongoSearchService {
       ;
 
       let totalPerCurrency: number = 0;
+      const calculator: ExchangeCalculator = this.exchangeCalculatorFactory.create();
 
       for (const currentVal of result) {
-        const filteredRate: number = await this.currencyExchangeService.getCurrencyExchangeRate(currentVal._id);
+        const filteredRate: number = await calculator.getCurrencyExchangeRate(currentVal._id);
 
         totalPerCurrency += filteredRate
           ? currentVal.total / filteredRate
           : currentVal.total;
       }
 
-      const rate: number = await this.currencyExchangeService.getCurrencyExchangeRate(currency);
+      const rate: number = await calculator.getCurrencyExchangeRate(currency);
 
       return rate
         ? Number((totalPerCurrency * rate).toFixed(2))
