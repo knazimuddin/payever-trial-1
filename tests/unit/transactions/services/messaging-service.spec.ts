@@ -7,11 +7,13 @@ import { Logger } from '@nestjs/common';
 import * as uuid from 'uuid';
 import { MessageBusService, RabbitMqClient, RabbitMqRPCClient, MessageInterface } from '@pe/nest-kit';
 
-import { MessagingService } from '../../../../src/transactions/services/messaging.service';
-import { TransactionsService } from '../../../../src/transactions/services/transactions.service';
-import { BusinessPaymentOptionService } from '../../../../src/transactions/services/business-payment-option.service';
-import { PaymentFlowService } from '../../../../src/transactions/services/payment-flow.service';
-import { PaymentsMicroService } from '../../../../src/transactions/services/payments-micro.service';
+import {
+  MessagingService,
+  TransactionsService,
+  BusinessPaymentOptionService,
+  PaymentFlowService,
+  PaymentsMicroService,
+} from '../../../../src/transactions/services';
 import {
   TransactionBasicInterface,
   TransactionUnpackedDetailsInterface,
@@ -242,64 +244,6 @@ describe('MessagingService', () => {
 
       const result: ActionItemInterface[] = await testService.getActionsList(transactionUnpackedDetails);
       expect(result).to.deep.equal(actionItems);
-      expect(logger.error).calledWith({
-        context: 'MessagingService',
-        message: `Transaction 9e90b7d9-1920-4e5a-ba5f-f5aebb382e10 -> Payment flow cannot be null`,
-        transaction: {
-          id: 'beab4573-e69c-45e2-afc0-5487b9e670ec',
-          uuid: '9e90b7d9-1920-4e5a-ba5f-f5aebb382e10',
-          address: {},
-          created_at: "2020-10-10T00:00:00+00:00",
-          updated_at: "2020-10-10T00:00:00+00:00",
-          action_running: true,
-          amount: 123,
-          business_option_id: 12345,
-          business_uuid: 'd04c6e67-a824-47ef-957b-d4f0d6038ea1',
-          channel: 'channel-1',
-          channel_set_uuid: '7c969d07-fadd-486d-891f-e64eb6a2ce0b',
-          channel_uuid: 'a306a777-20a4-4760-b0b7-4e6055b5cbcc',
-          currency: 'EUR',
-          customer_email: undefined,
-          customer_name: 'Narayan Ghimire',
-          delivery_fee: 1.99,
-          down_payment: 100,
-          fee_accepted: true,
-          history: [
-            {
-              action: 'action 1',
-              amount: 12,
-              created_at: "2020-10-10T00:00:00+00:00",
-              payment_status: 'PAYMENT_ACCAPTED',
-              params: {},
-              reason: 'reason 1',
-              is_restock_items: true,
-              upload_items: [{}],
-              refund_items: [{}],
-            },
-          ],
-          items: [{ _id: '714d74ad-f30c-4377-880f-50e30834a9da' }],
-          merchant_email: 'merchant1@payever.de',
-          merchant_name: 'Gabriel Gabriel',
-          payment_details: { iban: 'DE89 3704 0044 0532 0130 00' },
-          payment_fee: 1.23,
-          payment_flow_id: 'b2e14754-a931-433c-a9a8-3fdb32dfbf3e',
-          place: 'Bremen',
-          reference: 'reference_1',
-          santander_applications: ['Application 1'],
-          shipping_address: { city: 'Hamburg' },
-          shipping_category: 'Category 1',
-          shipping_method_name: undefined,
-          shipping_option_name: undefined,
-          specific_status: undefined,
-          status: undefined,
-          status_color: undefined,
-          store_id: undefined,
-          store_name: undefined,
-          total: undefined,
-          type: 'santander_installment_dk',
-          user_uuid: undefined,
-        },
-      })
     });
 
     it('should return empty array when \'unwrapRpcMessage\' return null ', async () => {
@@ -477,64 +421,6 @@ describe('MessagingService', () => {
 
       const result: ActionItemInterface[] = await testService.getActionsList(transactionUnpackedDetailsOther);
       expect(result).to.deep.equal(actionItems);
-      expect(logger.error).calledWith({
-        context: 'MessagingService',
-        message: `Transaction 9e90b7d9-1920-4e5a-ba5f-f5aebb382e10 -> Payment flow cannot be null`,
-        transaction: {
-          id: 'beab4573-e69c-45e2-afc0-5487b9e670ec',
-          uuid: '9e90b7d9-1920-4e5a-ba5f-f5aebb382e10',
-          address: {},
-          created_at: "2020-10-10T00:00:00+00:00",
-          updated_at: "2020-10-10T00:00:00+00:00",
-          action_running: true,
-          amount: 123,
-          business_option_id: 12345,
-          business_uuid: 'd04c6e67-a824-47ef-957b-d4f0d6038ea1',
-          channel: 'channel-1',
-          channel_set_uuid: '7c969d07-fadd-486d-891f-e64eb6a2ce0b',
-          channel_uuid: 'a306a777-20a4-4760-b0b7-4e6055b5cbcc',
-          currency: 'EUR',
-          customer_email: undefined,
-          customer_name: 'Narayan Ghimire',
-          delivery_fee: 1.99,
-          down_payment: 100,
-          fee_accepted: true,
-          history: [
-            {
-              action: 'action 1',
-              amount: 12,
-              created_at: "2020-10-10T00:00:00+00:00",
-              payment_status: 'PAYMENT_ACCAPTED',
-              params: {},
-              reason: 'reason 1',
-              is_restock_items: true,
-              upload_items: [{}],
-              refund_items: [{}],
-            },
-          ],
-          items: [{ _id: '714d74ad-f30c-4377-880f-50e30834a9da' }],
-          merchant_email: 'merchant1@payever.de',
-          merchant_name: 'Gabriel Gabriel',
-          payment_details: { iban: 'DE89 3704 0044 0532 0130 00' },
-          payment_fee: 1.23,
-          payment_flow_id: 'b2e14754-a931-433c-a9a8-3fdb32dfbf3e',
-          place: 'Bremen',
-          reference: 'reference_1',
-          santander_applications: ['Application 1'],
-          shipping_address: { city: 'Hamburg' },
-          shipping_category: 'Category 1',
-          shipping_method_name: undefined,
-          shipping_option_name: undefined,
-          specific_status: undefined,
-          status: undefined,
-          status_color: undefined,
-          store_id: undefined,
-          store_name: undefined,
-          total: undefined,
-          type: 'santander_installment_se',
-          user_uuid: undefined,
-        },
-      })
     });
   });
 
