@@ -7,7 +7,7 @@ import {
   ActionCallerInterface,
   ActionItemInterface,
   BusinessPaymentOptionInterface,
-  PaymentFlowInterface
+  PaymentFlowInterface,
 } from '../interfaces';
 import { ActionPayloadInterface, FieldsInterface, UnwrappedFieldsInterface } from '../interfaces/action-payload';
 import {
@@ -345,9 +345,8 @@ export class MessagingService implements ActionCallerInterface {
           },
         );
 
-        dto.payment_flow = {
-          business_payment_option: await this.getBusinessPaymentOption(transaction) as BusinessPaymentOptionInterface,
-        } as PaymentFlowInterface;
+        dto.payment_flow = { } as PaymentFlowInterface;
+        dto.payment_flow.business_payment_option = await this.getBusinessPaymentOption(transaction);
       }
     } catch (e) {
       this.logger.log(
