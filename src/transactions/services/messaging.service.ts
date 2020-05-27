@@ -3,7 +3,12 @@ import { ConfigService } from '@nestjs/config';
 import { MessageBusService, MessageInterface, RabbitMqClient, RabbitMqRPCClient } from '@pe/nest-kit';
 import { TransactionConverter } from '../converter';
 import { NextActionDto } from '../dto';
-import { ActionCallerInterface, ActionItemInterface } from '../interfaces';
+import {
+  ActionCallerInterface,
+  ActionItemInterface,
+  BusinessPaymentOptionInterface,
+  PaymentFlowInterface,
+} from '../interfaces';
 import { ActionPayloadInterface, FieldsInterface, UnwrappedFieldsInterface } from '../interfaces/action-payload';
 import {
   CheckoutRpcPayloadInterface,
@@ -279,6 +284,16 @@ export class MessagingService implements ActionCallerInterface {
       payment_details: transaction.payment_details,
     };
 
+    await this.applyBusinessPaymentOptionToRpcPayload(dto, transaction);
+    await this.applyPaymentFlowToRpcPayload(dto, transaction);
+
+    return dto;
+  }
+
+  private async applyBusinessPaymentOptionToRpcPayload(
+    dto: CheckoutTransactionRpcActionInterface,
+    transaction: TransactionUnpackedDetailsInterface,
+  ): Promise<void> {
     try {
       const businessPaymentOption: BusinessPaymentOptionModel = await this.getBusinessPaymentOption(transaction);
       dto.credentials = businessPaymentOption.credentials;
@@ -286,47 +301,65 @@ export class MessagingService implements ActionCallerInterface {
       this.logger.log(
         {
           context: 'MessagingService',
-          credentials: dto.credentials,
-          message: `Transaction ${transaction.uuid} dto credentials`,
-          transaction: payload,
+          message: 'Successfully applied business payment option credentials to payload',
+          transactionId: transaction.uuid,
+          transactionOriginalId: transaction.original_id,
         },
       );
     } catch (e) {
+      this.logger.log(
+        {
+          context: 'MessagingService',
+          error: e.message,
+          message: 'Failed to apply business payment option credentials to payload',
+          transactionId: transaction.uuid,
+          transactionOriginalId: transaction.original_id,
+        },
+      );
+
       throw new Error(`Transaction:${transaction.uuid} -> Cannot resolve business payment option: ${e}`);
+    }
+  }
+
+  private async applyPaymentFlowToRpcPayload(
+    dto: CheckoutTransactionRpcActionInterface,
+    transaction: TransactionUnpackedDetailsInterface,
+  ): Promise<void> {
+    if (!transaction.payment_flow_id) {
+      return;
     }
 
     try {
       const paymentFlow: PaymentFlowModel = await this.getPaymentFlow(transaction.payment_flow_id);
-      if (!paymentFlow) {
-        this.logger.error(
+      if (paymentFlow) {
+        dto.payment_flow = paymentFlow.toObject();
+        dto.payment_flow.business_payment_option = await this.getBusinessPaymentOption(transaction);
+      } else {
+        this.logger.log(
           {
             context: 'MessagingService',
-            message: `Transaction ${transaction.uuid} -> Payment flow cannot be null`,
-            transaction: payload,
+            flowId: transaction.payment_flow_id,
+            message: 'Could not apply flow to payload - Payment flow not found',
+            transactionId: transaction.uuid,
+            transactionOriginalId: transaction.original_id,
           },
         );
 
-        return;
-      }
-
-      if (payload.payment_flow_id) {
-        dto.payment_flow = paymentFlow.toObject();
+        dto.payment_flow = { } as PaymentFlowInterface;
         dto.payment_flow.business_payment_option = await this.getBusinessPaymentOption(transaction);
       }
     } catch (e) {
-      this.logger.error(
+      this.logger.log(
         {
           context: 'MessagingService',
-          error: e,
-          message: `Transaction ${transaction.uuid} -> Cannot resolve payment flow`,
-          transaction: payload,
+          error: e.message,
+          flowId: transaction.payment_flow_id,
+          message: 'Failed to apply payment flow to payload',
+          transactionId: transaction.uuid,
+          transactionOriginalId: transaction.original_id,
         },
       );
-
-      return;
     }
-
-    return dto;
   }
 
   private prepareActionFields(
