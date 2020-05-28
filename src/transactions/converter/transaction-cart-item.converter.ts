@@ -32,7 +32,7 @@ export class TransactionCartItemConverter {
         shipping_settings_rate: null, //cartItem.shipping_settings_rate,
         shipping_settings_rate_type: null, //cartItem.shipping_settings_rate_type,
         shipping_type: null, //cartItem.shipping_type,
-        thumbnail: sample.images.length > 0 ? sample.images.shift() : "",
+        thumbnail: sample.images.length > 0 ? sample.images[0] : "",
         updated_at: sample.updated_at,
         url: null, //cartItem.url,
         vat_rate: sample.vat_rate,
