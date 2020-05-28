@@ -39,9 +39,9 @@ export class TransactionsExampleService {
 
       if (sampleProducts.length) {
         delete raw.items;
-        for (const sp of sampleProducts) {
-          sp.images = await this.productCopyImageService.importImages(sp.images,business._id,false);
-        }
+        //for (const sp of sampleProducts) {
+        //  sp.images = await this.productCopyImageService.importImages(sp.images,business._id,false);
+        //}
 
         raw.items = TransactionCartItemConverter.fromSampleProducts(sampleProducts);
       }
