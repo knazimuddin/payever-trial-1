@@ -25,6 +25,7 @@
     "@pe/elastic-kit": "*",
     "@pe/nest-kit": "*",
     "@pe/notifications-sdk": "*",
+    "@pe/migration-kit": "*",
     "moment": "^2.24.0",
     "pdfmake": "^0.1.58",
     "php-serialize": "^2.1.0",

@@ -2,6 +2,7 @@ export * from './address.model';
 export * from './business.model';
 export * from './business-payment-option.model';
 export * from './payment-flow.model';
+export * from './sample-products.model';
 export * from './transaction.model';
 export * from './transaction-example.model';
 export * from './transaction-history-entry.model';

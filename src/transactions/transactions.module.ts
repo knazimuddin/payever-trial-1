@@ -5,6 +5,7 @@ import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
 import { DelayRemoveClient, ElasticSearchModule } from '@pe/elastic-kit';
 import { EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
+import { MigrationModule } from '@pe/migration-kit';
 import { environment } from '../environments';
 import {
   BpoFixCommand,
@@ -52,6 +53,8 @@ import {
   TransactionExampleSchemaName,
   TransactionSchema,
   TransactionSchemaName,
+  SampleProductSchema,
+  SampleProductSchemaName,
 } from './schemas';
 import {
   ActionsRetriever,
@@ -70,6 +73,8 @@ import {
   TransactionHistoryService,
   TransactionsExampleService,
   TransactionsService,
+  SampleProductsService,
+  SampleProductCopyImageService,
 } from './services';
 
 @Module({
@@ -99,6 +104,7 @@ import {
       { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
       { name: TransactionSchemaName, schema: TransactionSchema },
       { name: BusinessSchemaName, schema: BusinessSchema },
+      { name: SampleProductSchemaName, schema: SampleProductSchema },
     ]),
     NotificationsSdkModule,
     CommonSdkModule.forRoot({
@@ -111,6 +117,7 @@ import {
     ElasticSearchModule.forRoot({
       host: environment.elasticSearch,
     }),
+    MigrationModule,
   ],
   providers: [
     ActionsRetriever,
@@ -132,6 +139,8 @@ import {
     PaymentMailEventProducer,
     PaymentsMicroService,
     StatisticsService,
+    SampleProductsService,
+    SampleProductCopyImageService,
     ThirdPartyCallerService,
     TransactionActionService,
     TransactionEventProducer,

@@ -1,6 +1,7 @@
 export * from './business.dto';
 export * from './remove-business.dto';
 export * from './code-updated.dto';
+export * from './company-details.dto';
 export * from './list-query.dto';
 export * from './export-query.dto';
 export * from './next-action.dto';
@@ -15,6 +16,7 @@ export * from './payment-submitted.dto';
 export * from './mail';
 export * from './report';
 export * from './transaction-payment.dto';
+export * from './sample-product.dto';
 export * from './shipping-label-downloaded.dto';
 export * from './shipping-order-processed-message.dto';
 export * from './shipping-slip-downloaded.dto';
