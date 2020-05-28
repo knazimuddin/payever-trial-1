@@ -1,0 +1,97 @@
+import { SampleProductDto } from '../../../src/transactions/dto';
+import * as uuid from 'uuid';
+
+const BRANCHE_CARE: SampleProductDto[] = [
+  {
+    _id: uuid.v4(),
+    industry: 'BRANCHE_CARE',
+    product: 'BUSINESS_PRODUCT_RETAIL_B2C',
+    images: [
+      'https://payeverproduction.blob.core.windows.net/products/4b6808b5-bec7-43f4-bf87-b822e0d8e1e1-FIG_YARROW_Cleansing_Nectar_4oz_1000x1000',
+    ],
+    name: 'Purifier ',
+    description: 'dasds',
+    price: 35.99,
+    uuid: uuid.v4(),
+    identifier:  '',
+    price_net: 0,
+    quantity: 1,
+    vat_rate: 19,
+    created_at: new Date(),
+    updated_at: new Date(),
+  },
+  {
+    _id: uuid.v4(),
+    industry: 'BRANCHE_CARE',
+    product: 'BUSINESS_PRODUCT_RETAIL_B2C',
+    images: [
+      'https://payeverproduction.blob.core.windows.net/products/749dc210-9046-470a-a7d4-1dd62b1df046-WEBSITE_Camomille_Nu_1000x1000',
+    ],
+    name: 'Facial Oil',
+    description: 'forge',
+    price: 39.99,
+    uuid: uuid.v4(),
+    identifier:  '',
+    price_net: 0,
+    quantity: 1,
+    vat_rate: 19,
+    created_at: new Date(),
+    updated_at: new Date(),
+  },
+  {
+    _id: uuid.v4(),
+    industry: 'BRANCHE_CARE',
+    product: 'BUSINESS_PRODUCT_RETAIL_B2C',
+    images: [
+      'https://payeverproduction.blob.core.windows.net/products/8d0b546a-85b0-46d5-93a4-a22f055f3cc5-WEBSITE_Amla_Shampoo_1000x1000',
+    ],
+    name: 'Shower gel',
+    description: 'gage',
+    price: 25.99,
+    uuid: uuid.v4(),
+    identifier:  '',
+    price_net: 0,
+    quantity: 1,
+    vat_rate: 19,
+    created_at: new Date(),
+    updated_at: new Date(),
+  },
+  {
+    _id: uuid.v4(),
+    industry: 'BRANCHE_CARE',
+    product: 'BUSINESS_PRODUCT_RETAIL_B2C',
+    images: [
+      'https://payeverproduction.blob.core.windows.net/products/e6a9fba9-5838-4044-8afb-3868bf8bcb10-WEBSITE_Brighten_Mask_1000x1000(1)',
+    ],
+    name: 'Face cream',
+    description: 'adfe',
+    price: 49.99,
+    uuid: uuid.v4(),
+    identifier:  '',
+    price_net: 0,
+    quantity: 1,
+    vat_rate: 19,
+    created_at: new Date(),
+    updated_at: new Date(),
+  },
+  {
+    _id: uuid.v4(),
+    industry: 'BRANCHE_CARE',
+    product: 'BUSINESS_PRODUCT_RETAIL_B2C',
+    images: [
+      'https://payeverproduction.blob.core.windows.net/products/1f3405b9-d0af-40e0-8a08-c641ff523574-WEBSITE_Char_Essence_1000x1000',
+    ],
+    name: 'Body Oil',
+    description: 'ergrge',
+    price: 35.99,
+    uuid: uuid.v4(),
+    identifier:  '',
+    price_net: 0,
+    quantity: 1,
+    vat_rate: 19,
+    created_at: new Date(),
+    updated_at: new Date(),
+  }
+];
+
+export { BRANCHE_CARE };

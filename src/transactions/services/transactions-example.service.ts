@@ -7,10 +7,11 @@ import { v4 as uuid } from 'uuid';
 import { RabbitRoutingKeys } from '../../enums';
 import { BusinessDto } from '../dto';
 import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
-import { TransactionExampleModel, TransactionModel } from '../models';
+import { TransactionExampleModel, TransactionModel, SampleProductsModel } from '../models';
 import { TransactionEventProducer } from '../producer';
 import { TransactionExampleSchemaName } from '../schemas';
-import { TransactionsService } from './transactions.service';
+import { SampleProductsService, TransactionsService } from '../services';
+import { TransactionCartItemConverter } from '../converter';
 
 @Injectable()
 export class TransactionsExampleService {
@@ -20,15 +21,26 @@ export class TransactionsExampleService {
     private readonly transactionsService: TransactionsService,
     private readonly transactionEventProducer: TransactionEventProducer,
     private readonly rabbitClient: RabbitMqClient,
+    private readonly sampleProductsService: SampleProductsService,
   ) { }
 
   public async createBusinessExamples(business: BusinessDto): Promise<void> {
     const country: string = business.companyAddress.country;
+    const industry: string = business.companyDetails ? business.companyDetails.industry : null;
+    const product: string = business.companyDetails ? business.companyDetails.product : null;
+
     const examples: TransactionExampleModel[] = await this.transactionExampleModel.find({ country });
+    const sampleProducts: SampleProductsModel[] = await this.sampleProductsService.getSampleProducts(industry, product);
 
     for (const example of examples) {
       const raw: any = example.toObject();
       delete raw._id;
+
+      if (sampleProducts.length) {
+        delete raw.items;
+        raw.items = TransactionCartItemConverter.fromSampleProducts(sampleProducts);
+      }
+
       const transactionDto: TransactionPackedDetailsInterface = {
         ...raw,
         original_id: uuid().split('-').join(''),

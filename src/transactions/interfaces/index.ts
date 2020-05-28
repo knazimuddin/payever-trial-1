@@ -8,3 +8,4 @@ export * from './currency.interface';
 export * from './payment-flow.interface';
 export * from './transaction';
 export * from './action-caller.interface';
+export * from './sample-product.interface';

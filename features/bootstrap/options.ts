@@ -18,10 +18,12 @@ import { RedisProvider } from '@pe/cucumber-sdk/module/redis';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { AppConfigurator } from './app.configurator';
+import { environment } from '../../src/environments';
 import ProcessEnv = NodeJS.ProcessEnv;
 
 dotenv.config({});
 const env: ProcessEnv = process.env;
+environment.microUrlMedia = 'http://media-micro.url';
 
 export const options: CucumberOptionsInterface = {
   appConfigurator: AppConfigurator,
