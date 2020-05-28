@@ -15,6 +15,7 @@ import { RabbitMqClient } from '@pe/nest-kit';
 import { TransactionsService } from '../../../../src/transactions/services/transactions.service';
 import { BusinessDto } from '../../../../src/transactions/dto';
 import { RabbitRoutingKeys } from '../../../../src/enums';
+import { SampleProductsService } from '../../../../src/transactions/services';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -26,6 +27,7 @@ describe('TransactionsExampleService', () => {
   let transactionExampleModel: Model<TransactionExampleModel>;
   let notificationsEmitter: NotificationsEmitter;
   let transactionsService: TransactionsService;
+  let sampleProductService: SampleProductsService;
   let transactionEventProducer: TransactionEventProducer;
   let rabbitClient: RabbitMqClient;
 
@@ -38,6 +40,10 @@ describe('TransactionsExampleService', () => {
       create: (): any => { },
       findCollectionByParams: (): any => { },
       removeByUuid: (): any => { },
+    } as any;
+
+    sampleProductService = {
+      getSampleProducts: (): any => { },
     } as any;
 
     rabbitClient = {
@@ -58,6 +64,7 @@ describe('TransactionsExampleService', () => {
       transactionsService,
       transactionEventProducer,
       rabbitClient,
+      sampleProductService,
     );
 
   });
@@ -103,6 +110,7 @@ describe('TransactionsExampleService', () => {
       } as TransactionModel;
       sandbox.stub(transactionExampleModel, 'find').resolves(examples);
       sandbox.stub(transactionsService, 'create').resolves(transaction);
+      sandbox.stub(sampleProductService, 'getSampleProducts').resolves([]);
       sandbox.spy(rabbitClient, 'send');
 
       await testService.createBusinessExamples(dto)
