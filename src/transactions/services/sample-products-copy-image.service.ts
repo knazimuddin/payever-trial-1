@@ -39,7 +39,8 @@ export class SampleProductCopyImageService {
       return uploadResponse.data.blobName;
     } catch (e) {
       this.logger.error({
-        message: `Failed downloading image: ${imageUrl}, businessUuid: ${businessUuid}`,
+        message: `Failed downloading image: ${imageUrl}, businessUuid: ${businessUuid}, 
+        post image: ${environment.microUrlMedia}/api/image/business/${businessUuid}/products`,
         e,
         context: 'SampleProductCopyImageService',
       });
