@@ -14,7 +14,7 @@ export class TransactionCartItemConverter {
 
     for (const sample of sampleProducts) {
       const newCartItem: TransactionCartItemDto = {
-        _id: sample.id,
+        _id: sample._id,
         uuid: sample.uuid,
 
         created_at: sample.created_at,
