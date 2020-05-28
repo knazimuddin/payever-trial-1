@@ -74,7 +74,6 @@ import {
   TransactionsExampleService,
   TransactionsService,
   SampleProductsService,
-  SampleProductCopyImageService,
 } from './services';
 
 @Module({
@@ -140,7 +139,6 @@ import {
     PaymentsMicroService,
     StatisticsService,
     SampleProductsService,
-    SampleProductCopyImageService,
     ThirdPartyCallerService,
     TransactionActionService,
     TransactionEventProducer,
