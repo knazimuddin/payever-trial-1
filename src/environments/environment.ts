@@ -35,8 +35,8 @@ export const environment: any = {
       ),
     },
   },
-  mongodb: env.MONGODB_URL,
   microUrlMedia: env.MICRO_URL_MEDIA,
+  mongodb: env.MONGODB_URL,
   port: env.APP_PORT,
   production: env.PRODUCTION_MODE === 'true',
   rabbitmq: {

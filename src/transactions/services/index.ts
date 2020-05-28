@@ -9,7 +9,6 @@ export * from './mongo-search.service';
 export * from './payment-flow.service';
 export * from './payments-micro.service';
 export * from './statistics.service';
-export * from './sample-products-copy-image.service';
 export * from './sample-products.service';
 export * from './transaction-history.service';
 export * from './transactions.service';

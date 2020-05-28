@@ -10,26 +10,28 @@ export class SampleProductsService {
   private static readonly MAX_RANDOM: number = 10;
   constructor(
     @InjectModel(SampleProductSchemaName) private readonly sampleProductsModel: Model<SampleProductsModel>,
-  ) {}
+  ) { }
 
   public async getSampleProducts(industry: string, businessProduct: string): Promise<SampleProductsModel[]> {
     const sampleByIndustry: SampleProductsModel[] = await this.sampleProductsModel.find({
-      product: businessProduct,
       industry: industry,
+      product: businessProduct,
     });
     
     if (!sampleByIndustry.length) {
       if (industry !== 'BRANCHE_OTHER') {
         return [];
       }
-      return await this.getSampleRandomProducts(businessProduct);
+
+      return this.getSampleRandomProducts(businessProduct);
     }
 
     return sampleByIndustry.map((product: SampleProductsModel) => product.toObject());
   }
 
   private async getSampleRandomProducts(businessProduct: string): Promise<SampleProductsModel[]> {
-    const sampleByBusinessProduct: SampleProductsModel[] = await this.sampleProductsModel.find({ product: businessProduct });
+    const sampleByBusinessProduct: SampleProductsModel[] 
+      = await this.sampleProductsModel.find({ product: businessProduct });
     if (!sampleByBusinessProduct.length) {
       return [];
     }
@@ -39,9 +41,9 @@ export class SampleProductsService {
     }
 
     const sampleProductRandom: SampleProductsModel[] = [];
-    for (let index = 0; index <= SampleProductsService.MAX_RANDOM; index++) {
-      const randomNumber = Math.floor(Math.random() * sampleByBusinessProduct.length);
-      const sample = sampleByBusinessProduct[randomNumber];
+    for (let index: number = 0; index <= SampleProductsService.MAX_RANDOM; index++) {
+      const randomNumber: number = Math.floor(Math.random() * sampleByBusinessProduct.length);
+      const sample: SampleProductsModel = sampleByBusinessProduct[randomNumber];
       sampleByBusinessProduct.splice(randomNumber, 1);
 
       sampleProductRandom.push(sample);

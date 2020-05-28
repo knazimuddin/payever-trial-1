@@ -10,7 +10,7 @@ import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionExampleModel, TransactionModel, SampleProductsModel } from '../models';
 import { TransactionEventProducer } from '../producer';
 import { TransactionExampleSchemaName } from '../schemas';
-import { SampleProductsService, SampleProductCopyImageService, TransactionsService } from '../services';
+import { SampleProductsService, TransactionsService } from '../services';
 import { TransactionCartItemConverter } from '../converter';
 
 @Injectable()
@@ -22,7 +22,6 @@ export class TransactionsExampleService {
     private readonly transactionEventProducer: TransactionEventProducer,
     private readonly rabbitClient: RabbitMqClient,
     private readonly sampleProductsService: SampleProductsService,
-    private readonly productCopyImageService: SampleProductCopyImageService,
   ) { }
 
   public async createBusinessExamples(business: BusinessDto): Promise<void> {

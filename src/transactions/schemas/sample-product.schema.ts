@@ -5,14 +5,13 @@ export const SampleProductSchemaName: string = 'SampleProducts';
 export const SampleProductSchema: Schema = new Schema(
   {
     _id: { 
-      default: uuid, type: String 
+      default: uuid, 
+      type: String,
     },
-    industry: String,
-    product: String,
-    uuid: String,
     description: String,
     identifier: String,
     images: [String],
+    industry: String,
     name: String,
     price: {
       index: true,
@@ -20,7 +19,9 @@ export const SampleProductSchema: Schema = new Schema(
       type: Number,
     },
     price_net: Number,
+    product: String,
     quantity: Number,
+    uuid: String,
     vat_rate: Number,    
   },
   { timestamps: true },
