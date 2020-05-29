@@ -88,12 +88,13 @@ Feature: Handling business events
     """
       {
         "business_uuid": "42bf8f24-d383-4e5a-ba18-e17d2e03bb0e",
-         "customer_name": "Customer 1"
+        "customer_name": "Customer 1"
       }
     """
     And stored value "transactions1" should contain json:
     """
       {
+        "amount": 800,
         "customer_name": "Customer 1",
         "items": [
           {
@@ -112,12 +113,13 @@ Feature: Handling business events
     """
       {
         "business_uuid": "42bf8f24-d383-4e5a-ba18-e17d2e03bb0e",
-         "customer_name": "Customer 2"
+        "customer_name": "Customer 2"
       }
     """
     And stored value "transactions2" should contain json:
     """
       {
+        "amount": 800,
         "customer_name": "Customer 2",
         "items": [
           {
