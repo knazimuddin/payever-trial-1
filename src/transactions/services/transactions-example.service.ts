@@ -12,6 +12,7 @@ import { TransactionEventProducer } from '../producer';
 import { TransactionExampleSchemaName } from '../schemas';
 import { SampleProductsService, TransactionsService } from '../services';
 import { TransactionCartItemConverter } from '../converter';
+import { TransactionCartItemAmountCalculator } from '../helpers';
 
 @Injectable()
 export class TransactionsExampleService {
@@ -39,6 +40,8 @@ export class TransactionsExampleService {
       if (sampleProducts.length) {
         delete raw.items;
         raw.items = TransactionCartItemConverter.fromSampleProducts(sampleProducts);
+        raw.amount = TransactionCartItemAmountCalculator.calculate(raw.items);
+        raw.total = raw.amount + raw.delivery_fee;
       }
 
       const transactionDto: TransactionPackedDetailsInterface = {

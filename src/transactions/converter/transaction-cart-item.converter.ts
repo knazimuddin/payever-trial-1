@@ -24,7 +24,7 @@ export class TransactionCartItemConverter {
         item_type: null,
         name: sample.name,
         price: sample.price,
-        price_net: sample.price_net,
+        price_net: sample.price,
         product_variant_uuid: null,
         quantity: sample.quantity,
         shipping_price: null,
