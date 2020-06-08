@@ -110,10 +110,9 @@ describe('TransactionsExampleService', () => {
       } as TransactionModel;
       sandbox.stub(transactionExampleModel, 'find').resolves(examples);
       sandbox.stub(transactionsService, 'create').resolves(transaction);
-      sandbox.stub(sampleProductService, 'getSampleProducts').resolves([]);
       sandbox.spy(rabbitClient, 'send');
 
-      await testService.createBusinessExamples(dto)
+      await testService.createBusinessExamples(dto, [])
 
       expect(transactionsService.create).calledTwice;
       expect(rabbitClient.send).calledTwice;

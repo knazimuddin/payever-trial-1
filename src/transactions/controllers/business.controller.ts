@@ -347,7 +347,7 @@ export class BusinessController {
   public async triggerExample(
     @Body() businessDto: BusinessDto,
   ): Promise<any> {
-    return this.exampleService.createBusinessExamples(businessDto);
+    return this.exampleService.createBusinessExamples(businessDto, []);
   }
 
   private async getDetails(transaction: TransactionModel): Promise<TransactionOutputInterface>  {

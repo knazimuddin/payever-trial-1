@@ -17,6 +17,7 @@ export * from './mail';
 export * from './report';
 export * from './transaction-payment.dto';
 export * from './sample-product.dto';
+export * from './sample-product-payload.dto';
 export * from './shipping-label-downloaded.dto';
 export * from './shipping-order-processed-message.dto';
 export * from './shipping-slip-downloaded.dto';

@@ -23,7 +23,6 @@ export class BusinessBusMessagesController {
     });
 
     await this.businessService.save(businessDto);
-    await this.exampleService.createBusinessExamples(businessDto);
   }
 
   @MessagePattern({
