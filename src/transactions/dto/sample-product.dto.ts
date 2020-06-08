@@ -13,4 +13,7 @@ export interface SampleProductDto {
   product: string;
   created_at: Date;
   updated_at: Date;
+  title?: string;
+  vatRate?: number;
+  sku?: string;
 }

@@ -28,6 +28,7 @@ import {
   HistoryEventsController,
   MailerBusMessagesController,
   MigrateEventsController,
+  SampleProductsBusMessagesController,
   ShippingBusMessagesController,
   ThirdPartyEventsController,
   TransactionEventsController,
@@ -92,6 +93,7 @@ import {
     ShippingBusMessagesController,
     MailerBusMessagesController,
     AuthEventsController,
+    SampleProductsBusMessagesController,
   ],
   imports: [
     ConfigModule,

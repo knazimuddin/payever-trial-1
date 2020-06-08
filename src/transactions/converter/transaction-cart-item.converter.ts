@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { TransactionCartItemDto } from '../dto';
+import { SampleProductDto, TransactionCartItemDto } from '../dto';
 import { TransactionCartItemModel, SampleProductsModel } from '../models';
 import { ProductUuid } from '../tools';
 
@@ -8,7 +8,7 @@ import { ProductUuid } from '../tools';
 export class TransactionCartItemConverter {
 
   public static fromSampleProducts(
-    sampleProducts: SampleProductsModel[],
+    sampleProducts: SampleProductDto[],
   ): Types.DocumentArray<TransactionCartItemModel> {
     const newCart: Types.DocumentArray<TransactionCartItemModel> = new Types.DocumentArray();
 
@@ -20,13 +20,13 @@ export class TransactionCartItemConverter {
         created_at: sample.created_at,
         description: sample.description,
         fixed_shipping_price: null,
-        identifier: sample.identifier,
+        identifier: sample.sku,
         item_type: null,
-        name: sample.name,
+        name: sample.title,
         price: sample.price,
         price_net: sample.price,
         product_variant_uuid: null,
-        quantity: sample.quantity,
+        quantity: 1,
         shipping_price: null,
         shipping_settings_rate: null,
         shipping_settings_rate_type: null,
@@ -34,7 +34,7 @@ export class TransactionCartItemConverter {
         thumbnail: sample.images.length > 0 ? sample.images[0] : '',
         updated_at: sample.updated_at,
         url: null,
-        vat_rate: sample.vat_rate,
+        vat_rate: sample.vatRate,
         weight: null,
       };
       newCart.push(newCartItem);

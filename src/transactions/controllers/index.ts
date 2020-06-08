@@ -12,3 +12,4 @@ export * from './third-party-events.controller';
 export * from './shipping-bus-messages.controller';
 export * from './mailer-bus-messages.controller';
 export * from './auth-events.controller';
+export * from './sample-products-bus-messages.controller';
