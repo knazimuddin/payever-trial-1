@@ -1,4 +1,4 @@
-import { BusinessDto, SampleProductDto } from "../dto";
+import { BusinessDto, SampleProductDto } from '../dto';
 
 export interface SampleProductPayloadDto {
   business: BusinessDto;
