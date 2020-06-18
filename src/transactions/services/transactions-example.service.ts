@@ -44,10 +44,10 @@ export class TransactionsExampleService {
 
       const transactionDto: TransactionPackedDetailsInterface = {
         ...raw,
-        original_id: uuid().split('-').join(''),
-        uuid: uuid(),
         country: country,
         currency: currency,
+        original_id: uuid().split('-').join(''),
+        uuid: uuid(),
 
         business_uuid: business._id,
         merchant_email: business.contactEmails.shift(),
