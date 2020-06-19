@@ -27,9 +27,10 @@ export class TransactionsExampleService {
 
   public async createBusinessExamples(business: BusinessDto, sampleProductsDto: SampleProductDto[]): Promise<void> {
     const country: string = business.companyAddress.country;
+    const currency: string = business.currency;
     
-    const examples: TransactionExampleModel[] = await this.transactionExampleModel.find({ country });
-    
+    const examples: TransactionExampleModel[] = await this.transactionExampleModel.find({ });
+
     for (const example of examples) {
       const raw: any = example.toObject();
       delete raw._id;
@@ -43,6 +44,8 @@ export class TransactionsExampleService {
 
       const transactionDto: TransactionPackedDetailsInterface = {
         ...raw,
+        country: country,
+        currency: currency,
         original_id: uuid().split('-').join(''),
         uuid: uuid(),
 
