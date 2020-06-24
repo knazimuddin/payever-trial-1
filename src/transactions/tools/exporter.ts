@@ -171,7 +171,7 @@ export class Exporter {
       transactions.map((t: TransactionModel) => t.items ? t.items.length : 0),
     );
     for (let i: number = 0; i < maxItems; i++) {
-      productColumns = [...productColumns, productColumnsFunc(i)];
+      productColumns = [...productColumns, ...productColumnsFunc(i)];
     }
 
     return productColumns;
