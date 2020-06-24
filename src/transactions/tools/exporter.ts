@@ -164,16 +164,14 @@ export class Exporter {
     doc.end();
   }
 
-  private static getProductColumns(
-    transactions: TransactionModel[],
-  ): Array<{ index: number, title: string, name: string }> {
-    const productColumns: any[] = [];
+  private static getProductColumns(transactions: TransactionModel[]): any[] {
+    let productColumns: any[] = [];
     const maxItems: number = Math.max.apply(
       Math, 
       transactions.map((t: TransactionModel) => t.items ? t.items.length : 0),
     );
     for (let i: number = 0; i < maxItems; i++) {
-      productColumns.push(productColumnsFunc(i));
+      productColumns = [...productColumns, productColumnsFunc(i)];
     }
 
     return productColumns;
