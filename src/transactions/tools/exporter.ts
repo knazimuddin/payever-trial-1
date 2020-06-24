@@ -48,12 +48,11 @@ export class Exporter {
         ...[t.channel, t.original_id, t.total],
         ...shippingsColumns
           .map((c: { title: string, name: string }) => {
-            return t.shipping_address && t.shipping_address[c.name] ? t.shipping_address[c.name] : ''; 
+            return t.shipping_address && c.name in t.shipping_address ? t.shipping_address[c.name] : ''; 
           }),
         ...productColumns
           .map((c: { index: number, title: string, name: string }) => {
-            return t.items[c.index] && t.items[c.index][c.name] ? t.items[c.index][c.name] : 
-              JSON.stringify(t.items[c.index]);
+            return c.index in t.items && c.name in t.items[c.index] ? t.items[c.index][c.name] : '';
           }),
         ...columns
           .map((c: { title: string, name: string }) => t[c.name] ),
@@ -88,12 +87,11 @@ export class Exporter {
           .map((e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 })),
         ...shippingsColumns
           .map((c: { title: string, name: string }) => {
-            return t.shipping_address && t.shipping_address[c.name] ? t.shipping_address[c.name] : ''; 
+            return t.shipping_address && c.name in t.shipping_address ? t.shipping_address[c.name] : ''; 
           }),
         ...productColumns
           .map((c: { index: number, title: string, name: string }) => {
-            return t.items[c.index] && t.items[c.index][c.name] ? t.items[c.index][c.name] : 
-              JSON.stringify(t.items[c.index]);
+            return c.index in t.items && c.name in t.items[c.index] ? t.items[c.index][c.name] : '';
           }),
         ...columns
           .map((c: { title: string, name: string }) => t[c.name] ),
