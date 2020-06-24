@@ -19,11 +19,11 @@ export class Exporter {
       return this.exportPDF(transactions, res, fileName, columns);
     }
     const header: string[] = [
-      ...['CHANNEL', 'ID', 'TOTAL'],
+      ...['CHANNEL', 'ID', 'TOTAL', 'SHIPPING ADDRESS', 'ITEMS'],
       ...columns.map((c: { title: string, name: string }) => c.title )];
     const data: string[][] = transactions
       .map((t: TransactionModel) => [
-        ...[t.channel, t.original_id, t.total],
+        ...[t.channel, t.original_id, t.total, JSON.stringify(t.shipping_address), JSON.stringify(t.items)],
         ...columns
           .map((c: { title: string, name: string }) => t[c.name] ),
       ]);
@@ -44,13 +44,13 @@ export class Exporter {
     columns: Array<{ title: string, name: string }>,
   ): void {
     const header: any[] = [
-      ...['CHANNEL', 'ID', 'TOTAL'],
+      ...['CHANNEL', 'ID', 'TOTAL', 'SHIPPING ADDRESS', 'ITEMS'],
       ...columns.map((c: { title: string, name: string }) => c.title )]
       .map((h: string) => ({ text: h, style: 'tableHeader'}));
 
     const data: any[][] = transactions
       .map((t: TransactionModel) => [
-        ...[t.channel, t.original_id, t.total]
+        ...[t.channel, t.original_id, t.total, JSON.stringify(t.shipping_address), JSON.stringify(t.items)]
           .map((e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 })),
         ...columns
           .map((c: { title: string, name: string }) =>
