@@ -80,6 +80,8 @@ export class Exporter {
       ...productColumns.map((c: { index: number, title: string, name: string }) => c.title ),
       ...columns.map((c: { title: string, name: string }) => c.title )]
       .map((h: string) => ({ text: h, style: 'tableHeader'}));
+
+    const formatValue: any = (e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 });
       
     const data: any[][] = transactions
       .map((t: TransactionModel) => [
@@ -87,14 +89,12 @@ export class Exporter {
           .map((e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 })),
         ...shippingsColumns
           .map((c: { title: string, name: string }) => {
-            return t.shipping_address && c.name in t.shipping_address ? t.shipping_address[c.name] : ''; 
+            return t.shipping_address && c.name in t.shipping_address ? formatValue(t.shipping_address) : ''; 
           }),
         ...productColumns
           .map((c: { index: number, title: string, name: string }) => {
-            return c.index in t.items && c.name in t.items[c.index] ? t.items[c.index][c.name] : '';
+            return c.index in t.items && c.name in t.items[c.index] ? formatValue(t.items[c.index][c.name]) : '';
           }),
-        ...columns
-          .map((c: { title: string, name: string }) => t[c.name] ),
         ...columns
           .map((c: { title: string, name: string }) =>
             c.name === 'created_at'
@@ -103,7 +103,8 @@ export class Exporter {
           )
           .map((e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 })),
       ]);
-    const cp: number = 100 / (columns.length + 2);
+
+    const cp: number = 100 / (shippingsColumns.length + productColumns.length + columns.length + 2);
     const docDefinition: any = {
       content: [
         { text: 'Transactions', fontSize: 14, bold: true, margin: [0, 10, 0, 8] },
@@ -121,7 +122,10 @@ export class Exporter {
               ...data,
             ],
             headerRows: 1,
-            widths: [ `${cp / 2}%`, `${cp}%`, `${cp / 2}%`, ...columns.map(() => `${cp}%`)],
+            widths: [ 
+              `${cp / 2}%`, `${cp}%`, `${cp / 2}%`,
+               ...[...shippingsColumns, ...productColumns, ...columns].map(() => `${cp}%`),
+              ],
           },
 
         },
@@ -129,7 +133,7 @@ export class Exporter {
       pageMargins: [40, 40 , 40, 40],
       pageSize: {
         height: 'auto',
-        width: (columns.length + 2) * 120,
+        width: (shippingsColumns.length + productColumns.length + columns.length + 2) * 120,
       },
       styles: {
         tableHeader: {
@@ -151,6 +155,7 @@ export class Exporter {
         normal: path.resolve('./assets/fonts/Roboto-Regular.ttf'),
       },
     };
+
     const printer: PdfMakePrinter = new PdfMakePrinter(fonts);
     const doc: any = printer.createPdfKitDocument(docDefinition);
     const chunks: any[] = [];
