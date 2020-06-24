@@ -52,7 +52,8 @@ export class Exporter {
           }),
         ...productColumns
           .map((c: { index: number, title: string, name: string }) => {
-            t.items[c.index] && t.items[c.index][c.name] ? t.items[c.index][c.name] : '';
+            return t.items[c.index] && t.items[c.index][c.name] ? t.items[c.index][c.name] : 
+              JSON.stringify(t.items[c.index]);
           }),
         ...columns
           .map((c: { title: string, name: string }) => t[c.name] ),
@@ -91,7 +92,8 @@ export class Exporter {
           }),
         ...productColumns
           .map((c: { index: number, title: string, name: string }) => {
-            t.items[c.index] && t.items[c.index][c.name] ? t.items[c.index][c.name] : '';
+            return t.items[c.index] && t.items[c.index][c.name] ? t.items[c.index][c.name] : 
+              JSON.stringify(t.items[c.index]);
           }),
         ...columns
           .map((c: { title: string, name: string }) => t[c.name] ),
