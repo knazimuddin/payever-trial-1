@@ -16,15 +16,13 @@ const shippingsColumns: Array<{ title: string, name: string }> = [
   { title: 'Shipping Zip', name: 'zip_code' },
 ];
 
-const productColumnsFunc = (key: number): Array<{ index: number, title: string, name: string }> => {
-    return [
-      { index: key, title: `Lineitem${key + 1} identifier`, name: 'uuid' },
-      { index: key, title: `Lineitem${key + 1} name`, name: 'name' },
-      { index: key, title: `Lineitem${key + 1} price`, name: 'price' },
-      { index: key, title: `Lineitem${key + 1} vat`, name: 'vat_rate' },
-      { index: key, title: `Lineitem${key + 1} quantity`, name: 'quantity' },
-  ]
-};
+const productColumnsFunc: any = (key: number): Array<{ index: number, title: string, name: string }> => [
+  { index: key, title: `Lineitem${key + 1} identifier`, name: 'uuid' },
+  { index: key, title: `Lineitem${key + 1} name`, name: 'name' },
+  { index: key, title: `Lineitem${key + 1} price`, name: 'price' },
+  { index: key, title: `Lineitem${key + 1} vat`, name: 'vat_rate' },
+  { index: key, title: `Lineitem${key + 1} quantity`, name: 'quantity' },
+];
 
 export class Exporter {
   public static export(
@@ -38,7 +36,7 @@ export class Exporter {
       return this.exportPDF(transactions, res, fileName, columns);
     }
 
-    const productColumns = this.getProductColumns(transactions);
+    const productColumns: Array<{ index: number, title: string, name: string }> = this.getProductColumns(transactions);
     
     const header: string[] = [
       ...['CHANNEL', 'ID', 'TOTAL'],
@@ -49,9 +47,13 @@ export class Exporter {
       .map((t: TransactionModel) => [
         ...[t.channel, t.original_id, t.total],
         ...shippingsColumns
-          .map((c: { title: string, name: string }) => t.shipping_address[c.name] ),
+          .map((c: { title: string, name: string }) => {
+            return t.shipping_address && t.shipping_address[c.name] ? t.shipping_address[c.name] : ''; 
+          }),
         ...productColumns
-          .map((c: { index: number, title: string, name: string }) => t.items[c.index] ? t.items[c.index][c.name]: '' ),
+          .map((c: { index: number, title: string, name: string }) => {
+            t.items[c.index] && t.items[c.index][c.name] ? t.items[c.index][c.name] : '';
+          }),
         ...columns
           .map((c: { title: string, name: string }) => t[c.name] ),
       ]);
@@ -71,22 +73,26 @@ export class Exporter {
     fileName: string,
     columns: Array<{ title: string, name: string }>,
   ): void {
-    const productColumns = this.getProductColumns(transactions);
+    const productColumns: Array<{ index: number, title: string, name: string }> = this.getProductColumns(transactions);
     const header: any[] = [
       ...['CHANNEL', 'ID', 'TOTAL'],
       ...shippingsColumns.map((c: { title: string, name: string }) => c.title ),
       ...productColumns.map((c: { index: number, title: string, name: string }) => c.title ),
       ...columns.map((c: { title: string, name: string }) => c.title )]
       .map((h: string) => ({ text: h, style: 'tableHeader'}));
-
+      
     const data: any[][] = transactions
       .map((t: TransactionModel) => [
         ...[t.channel, t.original_id, t.total]
           .map((e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 })),
         ...shippingsColumns
-          .map((c: { title: string, name: string }) => t.shipping_address[c.name] ),
+          .map((c: { title: string, name: string }) => {
+            return t.shipping_address && t.shipping_address[c.name] ? t.shipping_address[c.name] : ''; 
+          }),
         ...productColumns
-          .map((c: { index: number, title: string, name: string }) => t.items[c.index] ? t.items[c.index][c.name]: '' ),
+          .map((c: { index: number, title: string, name: string }) => {
+            t.items[c.index] && t.items[c.index][c.name] ? t.items[c.index][c.name] : '';
+          }),
         ...columns
           .map((c: { title: string, name: string }) => t[c.name] ),
         ...columns
@@ -158,12 +164,18 @@ export class Exporter {
     doc.end();
   }
 
-  private static getProductColumns(transactions: TransactionModel[]): Array<{ index: number, title: string, name: string }> {
-    const productColumns = [];
-    const maxItems: number = Math.max.apply(Math, transactions.map((t) => t.items ? t.items.length : 0));
-    for (let i = 0; i < maxItems; i++) {
+  private static getProductColumns(
+    transactions: TransactionModel[],
+  ): Array<{ index: number, title: string, name: string }> {
+    const productColumns: any[] = [];
+    const maxItems: number = Math.max.apply(
+      Math, 
+      transactions.map((t: TransactionModel) => t.items ? t.items.length : 0),
+    );
+    for (let i: number = 0; i < maxItems; i++) {
       productColumns.push(productColumnsFunc(i));
     }
+
     return productColumns;
   }
 }
