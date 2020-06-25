@@ -43,20 +43,7 @@ export class Exporter {
       ...shippingsColumns.map((c: { title: string, name: string }) => c.title ),
       ...productColumns.map((c: { index: number, title: string, name: string }) => c.title ),
       ...columns.map((c: { title: string, name: string }) => c.title )];
-    const data: string[][] = transactions
-      .map((t: TransactionModel) => [
-        ...[t.channel, t.original_id, t.total],
-        ...shippingsColumns
-          .map((c: { title: string, name: string }) => {
-            return t.shipping_address && c.name in t.shipping_address ? t.shipping_address[c.name] : ''; 
-          }),
-        ...productColumns
-          .map((c: { index: number, title: string, name: string }) => {
-            return c.index in t.items && c.name in t.items[c.index] ? t.items[c.index][c.name] : '';
-          }),
-        ...columns
-          .map((c: { title: string, name: string }) => t[c.name] ),
-      ]);
+    const data: string[][] = this.getTransactionData(transactions, productColumns, columns);
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([header, ...data]);
     XLSX.utils.book_append_sheet(wb, ws, `${fileName}`.slice(0, 30));
@@ -81,30 +68,11 @@ export class Exporter {
       ...columns.map((c: { title: string, name: string }) => c.title )]
       .map((h: string) => ({ text: h, style: 'tableHeader'}));
 
-    const formatValue: any = (e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 });
-      
-    const data: any[][] = transactions
-      .map((t: TransactionModel) => [
-        ...[t.channel, t.original_id, t.total]
-          .map((e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 })),
-        ...shippingsColumns
-          .map((c: { title: string, name: string }) => {
-            return t.shipping_address && c.name in t.shipping_address ? formatValue(t.shipping_address) : ''; 
-          }),
-        ...productColumns
-          .map((c: { index: number, title: string, name: string }) => {
-            return c.index in t.items && c.name in t.items[c.index] ? formatValue(t.items[c.index][c.name]) : '';
-          }),
-        ...columns
-          .map((c: { title: string, name: string }) =>
-            c.name === 'created_at'
-              ? new Date(t[c.name]).toUTCString()
-              : t[c.name],
-          )
-          .map((e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 })),
-      ]);
+    const data: any[][] = this.getTransactionData(transactions, productColumns, columns, true)
+      .map((entity: any) => entity.map((e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 })));
 
-    const cp: number = 100 / (shippingsColumns.length + productColumns.length + columns.length + 2);
+    const allColumns: any[] = [...shippingsColumns, ...productColumns, ...columns];
+    const cp: number = 100 / (allColumns.length + 2);
     const docDefinition: any = {
       content: [
         { text: 'Transactions', fontSize: 14, bold: true, margin: [0, 10, 0, 8] },
@@ -122,10 +90,7 @@ export class Exporter {
               ...data,
             ],
             headerRows: 1,
-            widths: [ 
-              `${cp / 2}%`, `${cp}%`, `${cp / 2}%`,
-              ...[...shippingsColumns, ...productColumns, ...columns].map(() => `${cp}%`),
-            ],
+            widths: [ `${cp / 2}%`, `${cp}%`, `${cp / 2}%`, ...allColumns.map(() => `${cp}%`)],
           },
 
         },
@@ -133,7 +98,7 @@ export class Exporter {
       pageMargins: [40, 40 , 40, 40],
       pageSize: {
         height: 'auto',
-        width: (shippingsColumns.length + productColumns.length + columns.length + 2) * 120,
+        width: (allColumns.length + 2) * 120,
       },
       styles: {
         tableHeader: {
@@ -180,5 +145,31 @@ export class Exporter {
     }
 
     return productColumns;
+  }
+
+  private static getTransactionData(
+    transactions: TransactionModel[], 
+    productColumns: Array<{ index: number, title: string, name: string }>, 
+    columns: Array<{ title: string, name: string }>,
+    isFormatDate: boolean = false,
+  ): any[] {
+    return transactions
+      .map((t: TransactionModel) => [
+        ...[t.channel, t.original_id, t.total],
+        ...shippingsColumns
+          .map((c: { title: string, name: string }) => {
+            return t.shipping_address && c.name in t.shipping_address ? t.shipping_address[c.name] : ''; 
+          }),
+        ...productColumns
+          .map((c: { index: number, title: string, name: string }) => {
+            return c.index in t.items && c.name in t.items[c.index] ? t.items[c.index][c.name] : '';
+          }),
+        ...columns
+          .map((c: { title: string, name: string }) =>
+            isFormatDate && c.name === 'created_at'
+                ? new Date(t[c.name]).toUTCString()
+                : t[c.name],
+          ),
+      ]);
   }
 }
