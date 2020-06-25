@@ -7,6 +7,23 @@ import { TransactionModel } from '../models';
 
 export type ExportFormat = 'xlsx' | 'xls' | 'csv' | 'ods' | 'pdf';
 
+const shippingsColumns: Array<{ title: string, name: string }> = [
+  { title: 'Shipping City', name: 'city' },
+  { title: 'Shipping Company', name: 'company' },
+  { title: 'Shipping Country', name: 'country_name' },
+  { title: 'Shipping Phone', name: 'phone' },
+  { title: 'Shipping Street', name: 'street' },
+  { title: 'Shipping Zip', name: 'zip_code' },
+];
+
+const productColumnsFunc: any = (key: number): Array<{ index: number, title: string, name: string }> => [
+  { index: key, title: `Lineitem${key + 1} identifier`, name: 'uuid' },
+  { index: key, title: `Lineitem${key + 1} name`, name: 'name' },
+  { index: key, title: `Lineitem${key + 1} price`, name: 'price' },
+  { index: key, title: `Lineitem${key + 1} vat`, name: 'vat_rate' },
+  { index: key, title: `Lineitem${key + 1} quantity`, name: 'quantity' },
+];
+
 export class Exporter {
   public static export(
     transactions: TransactionModel[],
@@ -18,12 +35,25 @@ export class Exporter {
     if (format === 'pdf') {
       return this.exportPDF(transactions, res, fileName, columns);
     }
+
+    const productColumns: Array<{ index: number, title: string, name: string }> = this.getProductColumns(transactions);
+    
     const header: string[] = [
       ...['CHANNEL', 'ID', 'TOTAL'],
+      ...shippingsColumns.map((c: { title: string, name: string }) => c.title ),
+      ...productColumns.map((c: { index: number, title: string, name: string }) => c.title ),
       ...columns.map((c: { title: string, name: string }) => c.title )];
     const data: string[][] = transactions
       .map((t: TransactionModel) => [
         ...[t.channel, t.original_id, t.total],
+        ...shippingsColumns
+          .map((c: { title: string, name: string }) => {
+            return t.shipping_address && c.name in t.shipping_address ? t.shipping_address[c.name] : ''; 
+          }),
+        ...productColumns
+          .map((c: { index: number, title: string, name: string }) => {
+            return c.index in t.items && c.name in t.items[c.index] ? t.items[c.index][c.name] : '';
+          }),
         ...columns
           .map((c: { title: string, name: string }) => t[c.name] ),
       ]);
@@ -43,15 +73,28 @@ export class Exporter {
     fileName: string,
     columns: Array<{ title: string, name: string }>,
   ): void {
+    const productColumns: Array<{ index: number, title: string, name: string }> = this.getProductColumns(transactions);
     const header: any[] = [
       ...['CHANNEL', 'ID', 'TOTAL'],
+      ...shippingsColumns.map((c: { title: string, name: string }) => c.title ),
+      ...productColumns.map((c: { index: number, title: string, name: string }) => c.title ),
       ...columns.map((c: { title: string, name: string }) => c.title )]
       .map((h: string) => ({ text: h, style: 'tableHeader'}));
 
+    const formatValue: any = (e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 });
+      
     const data: any[][] = transactions
       .map((t: TransactionModel) => [
         ...[t.channel, t.original_id, t.total]
           .map((e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 })),
+        ...shippingsColumns
+          .map((c: { title: string, name: string }) => {
+            return t.shipping_address && c.name in t.shipping_address ? formatValue(t.shipping_address) : ''; 
+          }),
+        ...productColumns
+          .map((c: { index: number, title: string, name: string }) => {
+            return c.index in t.items && c.name in t.items[c.index] ? formatValue(t.items[c.index][c.name]) : '';
+          }),
         ...columns
           .map((c: { title: string, name: string }) =>
             c.name === 'created_at'
@@ -60,7 +103,8 @@ export class Exporter {
           )
           .map((e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 })),
       ]);
-    const cp: number = 100 / (columns.length + 2);
+
+    const cp: number = 100 / (shippingsColumns.length + productColumns.length + columns.length + 2);
     const docDefinition: any = {
       content: [
         { text: 'Transactions', fontSize: 14, bold: true, margin: [0, 10, 0, 8] },
@@ -78,7 +122,10 @@ export class Exporter {
               ...data,
             ],
             headerRows: 1,
-            widths: [ `${cp / 2}%`, `${cp}%`, `${cp / 2}%`, ...columns.map(() => `${cp}%`)],
+            widths: [ 
+              `${cp / 2}%`, `${cp}%`, `${cp / 2}%`,
+              ...[...shippingsColumns, ...productColumns, ...columns].map(() => `${cp}%`),
+            ],
           },
 
         },
@@ -86,7 +133,7 @@ export class Exporter {
       pageMargins: [40, 40 , 40, 40],
       pageSize: {
         height: 'auto',
-        width: (columns.length + 2) * 120,
+        width: (shippingsColumns.length + productColumns.length + columns.length + 2) * 120,
       },
       styles: {
         tableHeader: {
@@ -108,6 +155,7 @@ export class Exporter {
         normal: path.resolve('./assets/fonts/Roboto-Regular.ttf'),
       },
     };
+
     const printer: PdfMakePrinter = new PdfMakePrinter(fonts);
     const doc: any = printer.createPdfKitDocument(docDefinition);
     const chunks: any[] = [];
@@ -119,5 +167,18 @@ export class Exporter {
       res.send(   Buffer.concat(chunks));
     });
     doc.end();
+  }
+
+  private static getProductColumns(transactions: TransactionModel[]): any[] {
+    let productColumns: any[] = [];
+    const maxItems: number = Math.max.apply(
+      Math, 
+      transactions.map((t: TransactionModel) => t.items ? t.items.length : 0),
+    );
+    for (let i: number = 0; i < maxItems; i++) {
+      productColumns = [...productColumns, ...productColumnsFunc(i)];
+    }
+
+    return productColumns;
   }
 }
