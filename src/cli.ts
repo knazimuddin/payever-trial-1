@@ -7,6 +7,7 @@ async function bootstrap(): Promise<void> {
   const app: INestApplicationContext = await NestFactory.createApplicationContext(AppModule);
   const service: CommandService = app.select(CommandModule)
     .get(CommandService);
+  const aa = 'sss';
 
   service.exec();
 }
