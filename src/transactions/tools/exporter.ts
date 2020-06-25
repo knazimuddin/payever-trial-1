@@ -124,8 +124,8 @@ export class Exporter {
             headerRows: 1,
             widths: [ 
               `${cp / 2}%`, `${cp}%`, `${cp / 2}%`,
-               ...[...shippingsColumns, ...productColumns, ...columns].map(() => `${cp}%`),
-              ],
+              ...[...shippingsColumns, ...productColumns, ...columns].map(() => `${cp}%`),
+            ],
           },
 
         },
