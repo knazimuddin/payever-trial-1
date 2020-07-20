@@ -1,9 +1,7 @@
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { Consumer } from '@pe/nest-kit';
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
-import { ArgvQueueNameExtractor, ProviderNameTransformer } from '@pe/nest-kit/modules/rabbit-mq';
 import { useContainer } from 'class-validator';
 import { AppModule } from './app.module';
 import { environment } from './environments';
@@ -32,20 +30,12 @@ async function bootstrap(): Promise<void> {
     ),
   );
 
-  const queueName: string = ArgvQueueNameExtractor.extract(process.argv);
-  const consumerName: string = ProviderNameTransformer.transform(queueName);
-  const server: Consumer = app.get(consumerName);
-
-  app.connectMicroservice({
-    strategy: server,
-  });
-
   await app.startAllMicroservicesAsync();
 
   await app.listen(
     environment.port,
     '0.0.0.0',
-    () => logger.log(`Transactions WebSocket instance started`, 'NestApplication'),
+    () => logger.log(`Transactions WebSocket instance started at port [${environment.webSocket.port}]`, 'NestApplication'),
   );
 }
 bootstrap().catch();

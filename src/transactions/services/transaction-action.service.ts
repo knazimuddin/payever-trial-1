@@ -61,6 +61,59 @@ export class TransactionActionService {
     return updatedTransaction;
   }
 
+  public async updateStatus(
+    transaction: TransactionModel,
+  ): Promise<TransactionUnpackedDetailsInterface> {
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
+
+    // TODO: add check if update status is supported
+
+    const oldStatus: string = unpackedTransaction.status;
+    const oldSpecificStatus: string = unpackedTransaction.specific_status;
+
+    try {
+      await this.messagingService.updateStatus(unpackedTransaction);
+    } catch (e) {
+      this.logger.error(
+        {
+          context: 'TransactionActionService',
+          error: e.message,
+          message: `Error occurred during status update`,
+          paymentId: unpackedTransaction.original_id,
+          paymentUuid: unpackedTransaction.id,
+        },
+      );
+      throw new BadRequestException(`Error occurred during status update. Please try again later. ${e.message}`);
+    }
+
+    const updatedTransaction: TransactionUnpackedDetailsInterface =
+      await this.transactionsService.findUnpackedByUuid(transaction.uuid);
+
+    const newStatus: string = updatedTransaction.status;
+    const newSpecificStatus: string = updatedTransaction.specific_status;
+
+    if (newStatus !== oldStatus || newSpecificStatus !== oldSpecificStatus) {
+      /** Send update to checkout-php */
+      try {
+        await this.messagingService.sendTransactionUpdate(updatedTransaction);
+      } catch (e) {
+        this.logger.error(
+          {
+            context: 'TransactionActionService',
+            error: e.message,
+            message: 'Error occurred while sending transaction update',
+            paymentId: unpackedTransaction.original_id,
+            paymentUuid: unpackedTransaction.id,
+          },
+        );
+      }
+    }
+
+    return updatedTransaction;
+  }
+
   public async doFakeAction(
     transaction: TransactionModel,
     actionPayload: ActionPayloadDto,

@@ -19,8 +19,8 @@
     "test:pact:verify": "mocha -r ts-node/register ./tests/contract/verify.ts --timeout 60000 --exit",
     "test:unit": "mocha -r ts-node/register --recursive ./tests/unit/**/*.spec.ts",
     "test:unit:single": "mocha -r ts-node/register --recursive",
-    "ws": "tsc-watch -p tsconfig.build.json --onSuccess \"node dist/ws.js --queue=async_events_onboarding_processed_micro\"",
-    "ws:prod": "node dist/ws.js"
+    "ws": "tsc-watch -p tsconfig.build.json --onSuccess \"node dist/src/ws.js\"",
+    "ws:prod": "node dist/src/ws.js"
   },
   "dependencies": {
     "@nestjs/platform-socket.io": "6.8.5",
