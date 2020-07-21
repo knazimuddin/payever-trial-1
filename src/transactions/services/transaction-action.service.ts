@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { TransactionPaymentDetailsConverter } from '../converter';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { ThirdPartyPaymentsEnum } from '../enum';
+import {AllowedUpdateStatusPaymentMethodsEnum, ThirdPartyPaymentsEnum} from '../enum';
 import { ActionCallerInterface } from '../interfaces';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 
@@ -68,7 +68,11 @@ export class TransactionActionService {
       transaction.toObject({ virtuals: true }),
     );
 
-    // TODO: add check if update status is supported
+    if (!Object.values(AllowedUpdateStatusPaymentMethodsEnum).includes(
+      unpackedTransaction.type,
+    )) {
+      return unpackedTransaction;
+    }
 
     const oldStatus: string = unpackedTransaction.status;
     const oldSpecificStatus: string = unpackedTransaction.specific_status;
