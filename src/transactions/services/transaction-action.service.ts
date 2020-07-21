@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { TransactionPaymentDetailsConverter } from '../converter';
 import { ActionPayloadDto } from '../dto/action-payload';
-import {AllowedUpdateStatusPaymentMethodsEnum, ThirdPartyPaymentsEnum} from '../enum';
+import { AllowedUpdateStatusPaymentMethodsEnum, ThirdPartyPaymentsEnum } from '../enum';
 import { ActionCallerInterface } from '../interfaces';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 

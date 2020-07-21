@@ -1,22 +1,22 @@
-import {Injectable, Logger} from '@nestjs/common';
-import {ConfigService} from '@nestjs/config';
-import {MessageBusService, MessageInterface, RabbitMqClient, RabbitMqRPCClient} from '@pe/nest-kit';
-import {TransactionConverter} from '../converter';
-import {NextActionDto} from '../dto';
-import {ActionCallerInterface, ActionItemInterface, PaymentFlowInterface,} from '../interfaces';
-import {ActionPayloadInterface, FieldsInterface, UnwrappedFieldsInterface} from '../interfaces/action-payload';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { MessageBusService, MessageInterface, RabbitMqClient, RabbitMqRPCClient } from '@pe/nest-kit';
+import { TransactionConverter } from '../converter';
+import { NextActionDto } from '../dto';
+import { ActionCallerInterface, ActionItemInterface, PaymentFlowInterface } from '../interfaces';
+import { ActionPayloadInterface, FieldsInterface, UnwrappedFieldsInterface } from '../interfaces/action-payload';
 import {
   CheckoutRpcPayloadInterface,
   CheckoutTransactionInterface,
   CheckoutTransactionRpcActionInterface,
 } from '../interfaces/checkout';
-import {TransactionBasicInterface, TransactionUnpackedDetailsInterface} from '../interfaces/transaction';
-import {BusinessPaymentOptionModel, PaymentFlowModel} from '../models';
-import {BusinessPaymentOptionService} from './business-payment-option.service';
-import {PaymentFlowService} from './payment-flow.service';
-import {PaymentsMicroService} from './payments-micro.service';
-import {TransactionsService} from './transactions.service';
-import {AllowedUpdateStatusPaymentMethodsEnum, RpcMessageIdentifierEnum} from "../enum";
+import { TransactionBasicInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import { BusinessPaymentOptionModel, PaymentFlowModel } from '../models';
+import { BusinessPaymentOptionService } from './business-payment-option.service';
+import { PaymentFlowService } from './payment-flow.service';
+import { PaymentsMicroService } from './payments-micro.service';
+import { TransactionsService } from './transactions.service';
+import { AllowedUpdateStatusPaymentMethodsEnum, RpcMessageIdentifierEnum } from '../enum';
 
 @Injectable()
 export class MessagingService implements ActionCallerInterface {
