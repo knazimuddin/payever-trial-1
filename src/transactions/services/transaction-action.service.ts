@@ -69,7 +69,7 @@ export class TransactionActionService {
     );
 
     if (!Object.values(AllowedUpdateStatusPaymentMethodsEnum).includes(
-      unpackedTransaction.type,
+      unpackedTransaction.type as AllowedUpdateStatusPaymentMethodsEnum,
     )) {
       return unpackedTransaction;
     }

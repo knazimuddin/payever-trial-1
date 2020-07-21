@@ -7,7 +7,7 @@ import {
   ConnectPayloadInterface,
   ConnectResponseInterface,
   UpdateStatusPayloadInterface,
-  UpdateStatusResponseInterface
+  UpdateStatusResponseInterface,
 } from '../interfaces/ws';
 import { TransactionActionService, TransactionsService } from '../services';
 import { TransactionModel } from '../models';
@@ -26,7 +26,7 @@ export class EventsGateway {
   public async onConnectEvent(client: WebSocket, payload: ConnectPayloadInterface): Promise<ConnectResponseInterface> {
     return {
       name: MessageNameEnum.CONNECT,
-      result: this.verify(payload.token),
+      result: this.verifyToken(payload.token),
     };
   }
 
@@ -35,40 +35,39 @@ export class EventsGateway {
     client: WebSocket,
     payload: UpdateStatusPayloadInterface,
   ): Promise<UpdateStatusResponseInterface> {
-    const transactionUuid: string = payload.uuid;
+    const transactionId: string = payload.id;
 
     const updateStatusResponse: UpdateStatusResponseInterface = {
+      id: transactionId,
       name: MessageNameEnum.UPDATE_STATUS,
       result: false,
-      uuid: transactionUuid,
     };
 
-    if (!this.verify(payload.token)) {
+    if (!this.verifyToken(payload.token)) {
       return updateStatusResponse;
     }
 
-    let updatedTransaction: TransactionUnpackedDetailsInterface;
-
     try {
-      const transactionModel: TransactionModel = await this.transactionService.findModelByUuid(transactionUuid);
+      const transactionModel: TransactionModel = await this.transactionService.findModelByUuid(transactionId);
 
       if (!transactionModel) {
         return updateStatusResponse;
       }
 
-      updatedTransaction = await this.transactionActionService.updateStatus(transactionModel);
+      const updatedTransaction: TransactionUnpackedDetailsInterface
+        = await this.transactionActionService.updateStatus(transactionModel);
+
+      updateStatusResponse.status = updatedTransaction.status;
+      updateStatusResponse.specificStatus = updatedTransaction.specific_status;
+      updateStatusResponse.result = true;
     } catch (error) {
       return updateStatusResponse;
     }
 
-    updateStatusResponse.status = updatedTransaction.status;
-    updateStatusResponse.specificStatus = updatedTransaction.specific_status;
-    updateStatusResponse.result = true;
-
     return updateStatusResponse;
   }
 
-  private verify(token: string): boolean {
+  private verifyToken(token: string): boolean {
     try {
       jwtVerify(token, environment.jwtOptions.secret);
     } catch (e) {

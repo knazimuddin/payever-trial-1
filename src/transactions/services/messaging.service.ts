@@ -1,26 +1,22 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { MessageBusService, MessageInterface, RabbitMqClient, RabbitMqRPCClient } from '@pe/nest-kit';
-import { TransactionConverter } from '../converter';
-import { NextActionDto } from '../dto';
-import {
-  ActionCallerInterface,
-  ActionItemInterface,
-  BusinessPaymentOptionInterface,
-  PaymentFlowInterface,
-} from '../interfaces';
-import { ActionPayloadInterface, FieldsInterface, UnwrappedFieldsInterface } from '../interfaces/action-payload';
+import {Injectable, Logger} from '@nestjs/common';
+import {ConfigService} from '@nestjs/config';
+import {MessageBusService, MessageInterface, RabbitMqClient, RabbitMqRPCClient} from '@pe/nest-kit';
+import {TransactionConverter} from '../converter';
+import {NextActionDto} from '../dto';
+import {ActionCallerInterface, ActionItemInterface, PaymentFlowInterface,} from '../interfaces';
+import {ActionPayloadInterface, FieldsInterface, UnwrappedFieldsInterface} from '../interfaces/action-payload';
 import {
   CheckoutRpcPayloadInterface,
   CheckoutTransactionInterface,
   CheckoutTransactionRpcActionInterface,
 } from '../interfaces/checkout';
-import { TransactionBasicInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
-import { BusinessPaymentOptionModel, PaymentFlowModel } from '../models';
-import { BusinessPaymentOptionService } from './business-payment-option.service';
-import { PaymentFlowService } from './payment-flow.service';
-import { PaymentsMicroService } from './payments-micro.service';
-import { TransactionsService } from './transactions.service';
+import {TransactionBasicInterface, TransactionUnpackedDetailsInterface} from '../interfaces/transaction';
+import {BusinessPaymentOptionModel, PaymentFlowModel} from '../models';
+import {BusinessPaymentOptionService} from './business-payment-option.service';
+import {PaymentFlowService} from './payment-flow.service';
+import {PaymentsMicroService} from './payments-micro.service';
+import {TransactionsService} from './transactions.service';
+import {AllowedUpdateStatusPaymentMethodsEnum, RpcMessageIdentifierEnum} from "../enum";
 
 @Injectable()
 export class MessagingService implements ActionCallerInterface {
@@ -69,7 +65,8 @@ export class MessagingService implements ActionCallerInterface {
       return [];
     }
 
-    const actionsResponse: { [key: string]: boolean } = await this.runPaymentRpc(transaction, payload, 'action');
+    const actionsResponse: { [key: string]: boolean } =
+      await this.runPaymentRpc(transaction, payload, RpcMessageIdentifierEnum.Action);
     if (!actionsResponse) {
       return [];
     }
@@ -127,7 +124,7 @@ export class MessagingService implements ActionCallerInterface {
       throw new Error(`Cannot prepare dto for run action: ${e}`);
     }
 
-    const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
+    const rpcResult: any = await this.runPaymentRpc(transaction, payload, RpcMessageIdentifierEnum.Action);
     this.logger.log({
       action: action,
       actionPayload: actionPayload,
@@ -174,7 +171,7 @@ export class MessagingService implements ActionCallerInterface {
       throw new Error(`Cannot prepare dto for update status: ${e}`);
     }
 
-    const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'payment');
+    const rpcResult: any = await this.runPaymentRpc(transaction, payload, RpcMessageIdentifierEnum.Payment);
     this.logger.log({
       context: 'MessagingService',
       message: 'RPC status update result',
@@ -254,12 +251,23 @@ export class MessagingService implements ActionCallerInterface {
   private async runPaymentRpc(
     transaction: TransactionUnpackedDetailsInterface,
     payload: CheckoutRpcPayloadInterface,
-    messageIdentifier: string,
+    messageIdentifier: RpcMessageIdentifierEnum,
   ): Promise<any> {
     const stub: boolean = this.configService.get<string>('STUB') === 'true';
+    let channel: string = this.paymentMicroService.getChannelByPaymentType(transaction.type, stub);
+
+    if (messageIdentifier === RpcMessageIdentifierEnum.Payment
+      && Object.values(AllowedUpdateStatusPaymentMethodsEnum).includes(
+        transaction.type as AllowedUpdateStatusPaymentMethodsEnum,
+      )
+    ) {
+      // status update uses separate channel
+      channel += '_status';
+    }
+
     const result: any = await this.rabbitRpcClient.send(
       {
-        channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, stub),
+        channel,
       },
       this.paymentMicroService.createPaymentMicroMessage(
         transaction.type,
