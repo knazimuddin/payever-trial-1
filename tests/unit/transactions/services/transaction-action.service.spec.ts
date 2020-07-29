@@ -15,7 +15,7 @@ import { ActionPayloadDto } from '../../../../src/transactions/dto/action-payloa
 import { TransactionModel } from '../../../../src/transactions/models';
 import * as uuid from 'uuid';
 import { TransactionUnpackedDetailsInterface } from '../../../../src/transactions/interfaces';
-import {EventDispatcher} from "@pe/nest-kit";
+import { EventDispatcher } from '@pe/nest-kit';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
