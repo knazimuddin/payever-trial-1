@@ -31,13 +31,15 @@ export class BusinessPaymentOptionService {
     return this.findOneById(businessPaymentOptionDto.id);
   }
 
-  public async findOneByBusinessAndPaymentType(
+  public async findOneByBusinessAndPaymentTypeAndEnabled(
     businessUuid: string,
     paymentType: string,
   ): Promise<BusinessPaymentOptionModel> {
     return this.model.findOne({
       business_uuid: businessUuid,
+      completed: true,
       payment_method: paymentType,
+      status: 'enabled',
     });
   }
 

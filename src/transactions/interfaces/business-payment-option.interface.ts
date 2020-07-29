@@ -1,6 +1,8 @@
 export interface BusinessPaymentOptionInterface {
   id: number;
   uuid: string;
+  business_uuid: string;
+  payment_method: string;
   payment_option_id: number;
   accept_fee: boolean;
   status: string;

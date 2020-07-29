@@ -7,7 +7,7 @@ import { ActionPayloadDto } from '../dto/action-payload';
 import { PaymentActionsEnum, PaymentTypesEnum } from '../enum';
 
 @Injectable()
-export class BeforeActionEventListener {
+export class BeforeSantanderSeShippingGoodsEventListener {
   constructor(
     private readonly bpoService: BusinessPaymentOptionService,
   ) { }
@@ -27,13 +27,13 @@ export class BeforeActionEventListener {
       return;
     }
 
-    const bpo: BusinessPaymentOptionModel = await this.bpoService.findOneByBusinessAndPaymentType(
+    const bpo: BusinessPaymentOptionModel = await this.bpoService.findOneByBusinessAndPaymentTypeAndEnabled(
       transaction.business_uuid,
       PaymentTypesEnum.payExCreditCard,
     );
 
     if (bpo && bpo.credentials) {
-      actionPayload.payex_credentials = bpo.credentials;
+      actionPayload.fields.payex_credentials = bpo.credentials;
     }
   }
 }
