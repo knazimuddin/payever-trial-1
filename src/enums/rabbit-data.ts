@@ -13,6 +13,7 @@ export enum RabbitRoutingKeys {
 
   BpoCreated = 'checkout.event.business-payment-option.created',
   BpoUpdated = 'checkout.event.business-payment-option.updated',
+  BpoMigrate = 'checkout.event.business-payment-option.migrate',
 
   PaymentFlowCreated = 'checkout.event.payment-flow.created',
   PaymentFlowUpdated = 'checkout.event.payment-flow.updated',
