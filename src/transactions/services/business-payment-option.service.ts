@@ -31,6 +31,16 @@ export class BusinessPaymentOptionService {
     return this.findOneById(businessPaymentOptionDto.id);
   }
 
+  public async findOneByBusinessAndPaymentType(
+    businessUuid: string,
+    paymentType: string,
+  ): Promise<BusinessPaymentOptionModel> {
+    return this.model.findOne({
+      business_uuid: businessUuid,
+      payment_method: paymentType,
+    });
+  }
+
   public async findOneById(id: number): Promise<BusinessPaymentOptionModel> {
     const bpo: BusinessPaymentOptionModel = await this.model.findOne({ id });
 
