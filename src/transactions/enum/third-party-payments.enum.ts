@@ -1,5 +1,6 @@
 export enum ThirdPartyPaymentsEnum {
   instantPayment = 'instant_payment',
+  sofort = 'sofort',
   stripeCreditCard = 'stripe',
   stripeDirectDebit = 'stripe_directdebit',
   santanderNLInstallment = 'santander_installment_nl',
