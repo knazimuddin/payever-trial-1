@@ -25,7 +25,7 @@
       "specific_status": "PAID",
       "status": "STATUS_PAID",
       "total": 100,
-      "type": "paypal"
+      "type": "payex_creditcard"
     },
     "payment_flow": {
       "id": "2",
