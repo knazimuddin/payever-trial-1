@@ -33,21 +33,21 @@ Feature: Run payment action
       | /api/admin/{{transactionId}}/action/test                   | {"email": "email@email.com","roles": [{"name": "user","permissions": []}]}                                                                      |
 
 
-  Scenario Outline: Run paypal payment action
+  Scenario Outline: Run payex_creditcard payment action
     Given I authenticate as a user with the following data:
       """
       <token>
       """
     Given I use DB fixture "transactions/run-actions"
-    And I get file "features/fixtures/json/run-test-action-paypal-request.payload.json" content and remember as "requestPayloadPayPal"
-    And I mock RPC request "payment_option.paypal.action" to "rpc_payment_paypal" with:
+    And I get file "features/fixtures/json/run-test-action-payex-request.payload.json" content and remember as "requestPayloadPayex"
+    And I mock RPC request "payment_option.payex_creditcard.action" to "rpc_payment_payex" with:
       """
       {
-        "requestPayload": {{requestPayloadPayPal}},
+        "requestPayload": {{requestPayloadPayex}},
         "responsePayload": "s:82:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"payment\":{\"amount\":100},\"payment_items\":[]}}}\";"
       }
       """
-    And I mock RPC request "payment_option.paypal.action" to "rpc_payment_paypal" with:
+    And I mock RPC request "payment_option.payex_creditcard.action" to "rpc_payment_payex" with:
       """
       {
         "requestPayload": {

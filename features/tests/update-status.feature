@@ -47,7 +47,7 @@ Feature: Update transaction status
       """
       <token>
       """
-    When I mock RPC request "payment_option.paypal.payment" to "rpc_payment_paypal" with:
+    When I mock RPC request "payment_option.payex_creditcard.payment" to "rpc_payment_payex" with:
       """
       {
         "requestPayload": {
@@ -70,7 +70,7 @@ Feature: Update transaction status
       """
       <token>
       """
-    And I mock RPC request "payment_option.paypal.payment" to "rpc_payment_paypal" with:
+    And I mock RPC request "payment_option.payex_creditcard.payment" to "rpc_payment_payex" with:
       """
       {
         "requestPayload": {
@@ -94,7 +94,7 @@ Feature: Update transaction status
         "result": {}
       }
       """
-    And I mock RPC request "payment_option.paypal.action" to "rpc_payment_paypal" with:
+    And I mock RPC request "payment_option.payex_creditcard.action" to "rpc_payment_payex" with:
       """
       {
         "requestPayload": {

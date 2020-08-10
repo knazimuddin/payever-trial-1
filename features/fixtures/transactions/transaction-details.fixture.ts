@@ -48,7 +48,7 @@ class TransactionDetailsFixture extends BaseFixture {
       channel_set_uuid: '7c2298a7-a172-4048-8977-dbff24dec100',
       channel: 'pos',
       reference: 'f3d44333-21e2-4f0f-952b-72ac2dfb8fc9',
-      type: 'paypal',
+      type: 'payex_creditcard',
       amount: 50,
       total: 50,
       items : [
