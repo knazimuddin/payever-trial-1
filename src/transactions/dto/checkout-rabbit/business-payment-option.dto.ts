@@ -11,8 +11,16 @@ export class BusinessPaymentOptionDto implements BusinessPaymentOptionInterface 
   public uuid: string;
 
   @IsNotEmpty()
+  @IsString()
+  public business_uuid: string;
+
+  @IsNotEmpty()
   @IsNumber()
   public payment_option_id: number;
+
+  @IsNotEmpty()
+  @IsString()
+  public payment_method: string;
 
   @IsBoolean()
   public accept_fee: boolean;

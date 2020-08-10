@@ -25,6 +25,13 @@ export class BpoEventsController {
     return this.createOrUpdate('UPDATE', data);
   }
 
+  @MessagePattern({
+    name: RabbitRoutingKeys.BpoMigrate,
+  })
+  public async onBpoMigrateEvent(data: BusinessPaymentOptionChangedDto): Promise<void> {
+    return this.createOrUpdate('MIGRATE', data);
+  }
+
   public async createOrUpdate(
     createOrUpdate: string,
     data: BusinessPaymentOptionChangedDto,
