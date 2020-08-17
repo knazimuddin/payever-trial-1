@@ -3,7 +3,7 @@ import { EventListener } from '@pe/nest-kit';
 import { PaymentActionEventEnum } from '../enum/events';
 import { BusinessPaymentOptionModel, TransactionModel } from '../models';
 import { BusinessPaymentOptionService } from '../services';
-import { ActionPayloadDto } from '../dto/action-payload';
+import {ActionPayloadDto, FieldsDto} from '../dto/action-payload';
 import { PaymentActionsEnum, PaymentTypesEnum } from '../enum';
 
 @Injectable()
@@ -33,6 +33,9 @@ export class BeforeSantanderSeShippingGoodsEventListener {
     );
 
     if (bpo && bpo.credentials) {
+      if (!actionPayload.fields) {
+        actionPayload.fields = { } as FieldsDto;
+      }
       actionPayload.fields.payex_credentials = bpo.credentials;
     }
   }
