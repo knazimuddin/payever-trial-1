@@ -3,7 +3,7 @@ import { EventListener } from '@pe/nest-kit';
 import { PaymentActionEventEnum } from '../enum/events';
 import { BusinessPaymentOptionModel, TransactionModel } from '../models';
 import { BusinessPaymentOptionService } from '../services';
-import {ActionPayloadDto, FieldsDto} from '../dto/action-payload';
+import { ActionPayloadDto, FieldsDto } from '../dto/action-payload';
 import { PaymentActionsEnum, PaymentTypesEnum } from '../enum';
 
 @Injectable()
