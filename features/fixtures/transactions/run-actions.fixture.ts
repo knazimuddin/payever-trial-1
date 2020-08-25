@@ -34,7 +34,7 @@ export class RunActionsFixture extends BaseFixture {
       payment_flow_id: paymentFlowId,
       channel_set_uuid: '7c2298a7-a172-4048-8977-dbff24dec100',
       reference: 'f3d44333-21e2-4f0f-952b-72ac2dfb8fc9',
-      type: 'paypal',
+      type: 'payex_creditcard',
       amount: 50,
     }));
 

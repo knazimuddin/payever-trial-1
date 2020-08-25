@@ -36,7 +36,7 @@ Feature: Transaction details for business
       <token>
       """
     And I use DB fixture "transactions/transaction-details"
-    And I mock RPC request "payment_option.paypal.action" to "rpc_payment_paypal" with:
+    And I mock RPC request "payment_option.payex_creditcard.action" to "rpc_payment_payex" with:
       """
       {
         "requestPayload": {
@@ -128,7 +128,7 @@ Feature: Transaction details for business
            "down_payment": 0,
            "id": 1,
            "payment_fee": 0,
-           "type": "paypal"
+           "type": "payex_creditcard"
          },
          "shipping": {
            "address": {
@@ -170,7 +170,7 @@ Feature: Transaction details for business
       {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
       """
     And I use DB fixture "transactions/transaction-details"
-    And I mock RPC request "payment_option.paypal.action" to "rpc_payment_paypal" with:
+    And I mock RPC request "payment_option.payex_creditcard.action" to "rpc_payment_payex" with:
       """
       {
         "requestPayload": {
@@ -206,7 +206,7 @@ Feature: Transaction details for business
       <token>
       """
     And I use DB fixture "transactions/transaction-details-reference"
-    And I mock RPC request "payment_option.paypal.action" to "rpc_payment_paypal" with:
+    And I mock RPC request "payment_option.payex_creditcard.action" to "rpc_payment_payex" with:
       """
       {
         "requestPayload": {
@@ -298,7 +298,7 @@ Feature: Transaction details for business
            "down_payment": 0,
            "id": 1,
            "payment_fee": 0,
-           "type": "paypal"
+           "type": "payex_creditcard"
          },
          "shipping": {
            "address": {
