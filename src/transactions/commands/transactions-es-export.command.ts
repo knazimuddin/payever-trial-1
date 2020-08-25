@@ -26,6 +26,9 @@ export class TransactionsEsExportCommand {
     @Positional({
       name: 'business',
     }) business_uuid: string,
+    @Positional({
+      name: 'remove_old',
+    }) remove_old: boolean,
   ): Promise<void> {
     const criteria: any = { };
     if (before || after) {
@@ -56,6 +59,20 @@ export class TransactionsEsExportCommand {
 
       for (const transaction of transactions) {
         prepared.push(TransactionDoubleConverter.pack(transaction.toObject()));
+
+        if (remove_old) {
+          await this.elasticSearchClient.deleteByQuery(
+            ElasticTransactionEnum.index,
+            ElasticTransactionEnum.type,
+            {
+              query: {
+                match_phrase: {
+                  uuid: transaction.uuid,
+                },
+              },
+            },
+          );
+        }
       }
 
       await this.elasticSearchClient.bulkIndex(
