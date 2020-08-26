@@ -1,5 +1,5 @@
 import { AddressInterface } from '../../interfaces';
-import { TransactionPaymentDetailsDto } from "../checkout-rabbit/transaction-payment-details.dto";
+import { TransactionPaymentDetailsDto } from '../checkout-rabbit/transaction-payment-details.dto';
 
 export class PaymentDto {
   public id: string;
