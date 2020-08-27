@@ -58,6 +58,7 @@ describe('PaymentMailDtoConverter ', () => {
           address: paymentSubmittedDto.payment.address,
           vat_rate: 0,
           payment_option: {
+            payment_details: paymentSubmittedDto.payment.payment_details,
             payment_method: paymentSubmittedDto.payment.payment_type,
           }
         },
@@ -151,6 +152,7 @@ describe('PaymentMailDtoConverter ', () => {
           customer_name: 'test customer name',
           delivery_fee: 1.09,
           payment_option: {
+            payment_details: undefined,
             payment_method: 'santandar_installment',
           },
         },

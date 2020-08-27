@@ -1,4 +1,5 @@
 import { AddressInterface } from '../../interfaces';
+import { TransactionPaymentDetailsDto } from '../checkout-rabbit/transaction-payment-details.dto';
 
 export class PaymentDto {
   public id: string;
@@ -15,5 +16,6 @@ export class PaymentDto {
   public vat_rate: number;
   public payment_option: {
     payment_method: string;
+    payment_details?: TransactionPaymentDetailsDto;
   };
 }
