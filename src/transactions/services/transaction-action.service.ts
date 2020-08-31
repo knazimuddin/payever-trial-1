@@ -11,6 +11,8 @@ import { MessagingService } from './messaging.service';
 import { ThirdPartyCallerService } from './third-party-caller.service';
 import { TransactionsExampleService } from './transactions-example.service';
 import { TransactionsService } from './transactions.service';
+import { EventDispatcher } from '@pe/nest-kit';
+import { PaymentActionEventEnum } from '../enum/events';
 
 @Injectable()
 export class TransactionActionService {
@@ -21,6 +23,7 @@ export class TransactionActionService {
     private readonly thirdPartyCallerService: ThirdPartyCallerService,
     private readonly logger: Logger,
     private readonly exampleService: TransactionsExampleService,
+    private readonly eventDispatcher: EventDispatcher,
   ) { }
 
   public async doAction(
@@ -35,6 +38,13 @@ export class TransactionActionService {
 
     try {
       const actionCallerService: ActionCallerInterface = this.chooseActionCallerService(unpackedTransaction);
+
+      await this.eventDispatcher.dispatch(
+        PaymentActionEventEnum.PaymentActionBefore,
+        transaction,
+        actionPayload,
+        action,
+      );
 
       await actionCallerService.runAction(unpackedTransaction, action, actionPayload);
     } catch (e) {

@@ -33,21 +33,21 @@ Feature: Run payment action
       | /api/admin/{{transactionId}}/action/test                   | {"email": "email@email.com","roles": [{"name": "user","permissions": []}]}                                                                      |
 
 
-  Scenario Outline: Run paypal payment action
+  Scenario Outline: Run payex_creditcard payment action
     Given I authenticate as a user with the following data:
       """
       <token>
       """
     Given I use DB fixture "transactions/run-actions"
-    And I get file "features/fixtures/json/run-test-action-paypal-request.payload.json" content and remember as "requestPayloadPayPal"
-    And I mock RPC request "payment_option.paypal.action" to "rpc_payment_paypal" with:
+    And I get file "features/fixtures/json/run-test-action-payex-request.payload.json" content and remember as "requestPayloadPayex"
+    And I mock RPC request "payment_option.payex_creditcard.action" to "rpc_payment_payex" with:
       """
       {
-        "requestPayload": {{requestPayloadPayPal}},
+        "requestPayload": {{requestPayloadPayex}},
         "responsePayload": "s:82:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"payment\":{\"amount\":100},\"payment_items\":[]}}}\";"
       }
       """
-    And I mock RPC request "payment_option.paypal.action" to "rpc_payment_paypal" with:
+    And I mock RPC request "payment_option.payex_creditcard.action" to "rpc_payment_payex" with:
       """
       {
         "requestPayload": {
@@ -433,3 +433,220 @@ Feature: Run payment action
       ]
     ]
     """
+
+  Scenario Outline: Run santander se shipping goods action
+    Given I authenticate as a user with the following data:
+      """
+      <token>
+      """
+    Given I use DB fixture "transactions/run-actions-santander-se"
+    And I get file "features/fixtures/json/run-santander-se-shipping-goods-request.payload.json" content and remember as "requestPayloadSantanderSE"
+    And I mock RPC request "payment_option.santander_installment_se.action" to "rpc_payment_santander_se" with:
+      """
+      {
+        "requestPayload": {{requestPayloadSantanderSE}},
+        "responsePayload": "s:82:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"payment\":{\"amount\":100},\"payment_items\":[]}}}\";"
+      }
+      """
+    And I mock RPC request "payment_option.santander_installment_se.action" to "rpc_payment_santander_se" with:
+      """
+      {
+        "requestPayload": {
+          "action": "action.list"
+        },
+        "responsePayload": "s:75:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"refund\":true,\"shipping_goods\":false}}}\";"
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "transactions",
+          "transaction",
+          {
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "{{transactionId}}"
+          }
+         ],
+        "result": {}
+      }
+      """
+    When I send a POST request to "<path>" with json:
+      """
+        {
+          "fields": {}
+        }
+      """
+    Then print last response
+    And the response status code should be 200
+    And the response should contain json:
+      """
+        {
+           "actions": [
+             {
+               "action": "refund",
+               "enabled": true
+             },
+             {
+               "action": "shipping_goods",
+               "enabled": false
+             }
+           ],
+           "transaction": {
+             "uuid": "{{transactionId}}",
+             "amount": 100
+           },
+           "business": {
+             "uuid": "{{businessId}}"
+           },
+           "cart": {
+             "available_refund_items": [],
+             "items": []
+           }
+         }
+      """
+    And RabbitMQ exchange "async_events" should contain following ordered messages:
+    """
+    [
+      {
+        "name": "transactions_app.payment.updated",
+        "payload": {
+          "payment": {
+            "uuid": "{{transactionId}}",
+            "amount": 100
+          }
+        }
+      }
+    ]
+    """
+    And print Elasticsearch calls
+    And Elasticsearch calls stack should contain following ordered messages:
+    """
+    [
+      [
+        "singleIndex",
+        [
+          "transactions",
+          "transaction",
+          {
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "{{transactionId}}"
+          }
+        ]
+      ]
+    ]
+    """
+    Examples:
+      | path                                                                 | token                                                                                                                     |
+      | /api/business/{{businessId}}/{{transactionId}}/action/shipping_goods | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | /api/admin/{{transactionId}}/action/shipping_goods                   | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
+
+
+  Scenario Outline: Run santander se shipping goods action with missing "fields" param
+    Given I authenticate as a user with the following data:
+      """
+      <token>
+      """
+    Given I use DB fixture "transactions/run-actions-santander-se"
+    And I get file "features/fixtures/json/run-santander-se-shipping-goods-request.payload.json" content and remember as "requestPayloadSantanderSE"
+    And I mock RPC request "payment_option.santander_installment_se.action" to "rpc_payment_santander_se" with:
+      """
+      {
+        "requestPayload": {{requestPayloadSantanderSE}},
+        "responsePayload": "s:82:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"payment\":{\"amount\":100},\"payment_items\":[]}}}\";"
+      }
+      """
+    And I mock RPC request "payment_option.santander_installment_se.action" to "rpc_payment_santander_se" with:
+      """
+      {
+        "requestPayload": {
+          "action": "action.list"
+        },
+        "responsePayload": "s:75:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"refund\":true,\"shipping_goods\":false}}}\";"
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "transactions",
+          "transaction",
+          {
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "{{transactionId}}"
+          }
+         ],
+        "result": {}
+      }
+      """
+    When I send a POST request to "<path>" with json:
+      """
+        {}
+      """
+    Then print last response
+    And the response status code should be 200
+    And the response should contain json:
+      """
+        {
+           "actions": [
+             {
+               "action": "refund",
+               "enabled": true
+             },
+             {
+               "action": "shipping_goods",
+               "enabled": false
+             }
+           ],
+           "transaction": {
+             "uuid": "{{transactionId}}",
+             "amount": 100
+           },
+           "business": {
+             "uuid": "{{businessId}}"
+           },
+           "cart": {
+             "available_refund_items": [],
+             "items": []
+           }
+         }
+      """
+    And RabbitMQ exchange "async_events" should contain following ordered messages:
+    """
+    [
+      {
+        "name": "transactions_app.payment.updated",
+        "payload": {
+          "payment": {
+            "uuid": "{{transactionId}}",
+            "amount": 100
+          }
+        }
+      }
+    ]
+    """
+    And print Elasticsearch calls
+    And Elasticsearch calls stack should contain following ordered messages:
+    """
+    [
+      [
+        "singleIndex",
+        [
+          "transactions",
+          "transaction",
+          {
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "{{transactionId}}"
+          }
+        ]
+      ]
+    ]
+    """
+    Examples:
+      | path                                                                 | token                                                                                                                     |
+      | /api/business/{{businessId}}/{{transactionId}}/action/shipping_goods | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | /api/admin/{{transactionId}}/action/shipping_goods                   | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |

@@ -31,6 +31,7 @@ export class OderInvoiceMailDtoConverter extends AbstractPaymentMailDtoConverter
         customer_name: paymentSubmittedDto.payment.customer_name,
         delivery_fee: paymentSubmittedDto.payment.delivery_fee,
         payment_option: {
+          payment_details: paymentSubmittedDto.payment.payment_details,
           payment_method: paymentSubmittedDto.payment.payment_type,
         },
       },

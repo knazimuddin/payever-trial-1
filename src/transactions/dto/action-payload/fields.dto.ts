@@ -10,8 +10,9 @@ import { ShippingGoodsDataDto } from './shipping-goods-data.dto';
 import { UpdateDataDto } from './update-data.dto';
 import { UploadDataDto } from './upload-data.dto';
 import { VoidDataDto } from './void-data.dto';
+import { GenericDto } from '../generic.dto';
 
-export class FieldsDto implements FieldsInterface, UnwrappedFieldsInterface {
+export class FieldsDto extends GenericDto implements FieldsInterface, UnwrappedFieldsInterface {
   /* Remove this layer of wrapping */
   @IsOptional()
   @ValidateNested()

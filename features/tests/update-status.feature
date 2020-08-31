@@ -47,7 +47,7 @@ Feature: Update transaction status
       """
       <token>
       """
-    When I mock RPC request "payment_option.santander_installment.payment" to "rpc_payment_santander_de_status" with:
+    When I mock RPC request "payment_option.payex_creditcard.payment" to "rpc_payment_payex" with:
       """
       {
         "requestPayload": {
@@ -56,7 +56,7 @@ Feature: Update transaction status
         "responsePayload": "s:228:\"{\"payload\":{\"status\":\"ERROR\",\"result\":{\"payment\":{\"amount\":50, \"delivery_fee\":2, \"status\":\"Status paid\", \"specific_status\": \"Specific status paid\", \"reference\": \"f3d44333-21e2-4f0f-952b-72ac2dfb8fc9\"},\"workflow_state\": \"paid\"}}}\";"
       }
       """
-    And I use DB fixture "transactions/transaction-status-update"
+    And I use DB fixture "transactions/transaction-details"
     When I send a GET request to "<path>"
     And print last response
     Then the response status code should be 400
@@ -70,7 +70,7 @@ Feature: Update transaction status
       """
       <token>
       """
-    And I mock RPC request "payment_option.santander_installment.payment" to "rpc_payment_santander_de_status" with:
+    And I mock RPC request "payment_option.payex_creditcard.payment" to "rpc_payment_payex" with:
       """
       {
         "requestPayload": {
@@ -94,7 +94,7 @@ Feature: Update transaction status
         "result": {}
       }
       """
-    And I mock RPC request "payment_option.santander_installment.action" to "rpc_payment_santander_de" with:
+    And I mock RPC request "payment_option.payex_creditcard.action" to "rpc_payment_payex" with:
       """
       {
         "requestPayload": {
@@ -103,7 +103,7 @@ Feature: Update transaction status
         "responsePayload": "s:80:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"test_action\":true,\"another_action\":false}}}\";"
       }
       """
-    And I use DB fixture "transactions/transaction-status-update"
+    And I use DB fixture "transactions/transaction-details"
     When I send a GET request to "<path>"
     And print last response
     Then the response status code should be 200

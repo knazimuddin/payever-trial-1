@@ -15,6 +15,7 @@ import { ActionPayloadDto } from '../../../../src/transactions/dto/action-payloa
 import { TransactionModel } from '../../../../src/transactions/models';
 import * as uuid from 'uuid';
 import { TransactionUnpackedDetailsInterface } from '../../../../src/transactions/interfaces';
+import { EventDispatcher } from '@pe/nest-kit';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -28,6 +29,7 @@ describe('TransactonActionService()', () => {
   let messagingService: MessagingService;
   let logger: Logger;
   let exampleService: TransactionsExampleService;
+  let eventDispatcher: EventDispatcher;
   let thirdPartyCallerService: ThirdPartyCallerService;
 
   const actionPayload: ActionPayloadDto = {
@@ -172,6 +174,10 @@ describe('TransactonActionService()', () => {
       refundExample: (): any => { },
     } as any;
 
+    eventDispatcher = {
+      dispatch: (): any => { },
+    } as any;
+
     testService = new TransactionActionService(
       transactionsService,
       dtoValidation,
@@ -179,6 +185,7 @@ describe('TransactonActionService()', () => {
       thirdPartyCallerService,
       logger,
       exampleService,
+      eventDispatcher,
     );
   });
 
