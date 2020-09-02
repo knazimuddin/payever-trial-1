@@ -260,6 +260,7 @@ export class MessagingService implements ActionCallerInterface {
       && Object.values(AllowedUpdateStatusPaymentMethodsEnum).includes(
         transaction.type as AllowedUpdateStatusPaymentMethodsEnum,
       )
+      && !stub
     ) {
       // status update uses separate channel
       channel += '_status';
