@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import * as WebSocket from 'ws';
 import { MessageNameEnum } from './enums/message-name.enum';
@@ -20,10 +21,15 @@ export class EventsGateway {
   public constructor(
     private readonly transactionService: TransactionsService,
     private readonly transactionActionService: TransactionActionService,
+    private readonly logger: Logger,
   ) { }
 
   @SubscribeMessage(MessageNameEnum.CONNECT)
   public async onConnectEvent(client: WebSocket, payload: ConnectPayloadInterface): Promise<ConnectResponseInterface> {
+    this.logger.log({
+      message: 'Received connect websocket message',
+    });
+
     return {
       name: MessageNameEnum.CONNECT,
       result: this.verifyToken(payload.token),
@@ -35,6 +41,11 @@ export class EventsGateway {
     client: WebSocket,
     payload: UpdateStatusPayloadInterface,
   ): Promise<UpdateStatusResponseInterface> {
+    this.logger.log({
+      message: 'Received update status websocket message',
+      payload,
+    });
+
     const transactionId: string = payload.id;
 
     const updateStatusResponse: UpdateStatusResponseInterface = {
