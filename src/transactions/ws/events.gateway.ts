@@ -83,6 +83,11 @@ export class EventsGateway {
       return commonResponse;
     }
 
+    this.logger.log({
+      commonResponse,
+      message: 'Sending update status websocket response',
+    });
+
     return commonResponse;
   }
 
