@@ -40,12 +40,13 @@ export class EventsGateway {
   public async onUpdateStatusEvent(
     client: WebSocket,
     payload: UpdateStatusPayloadInterface,
-  ): Promise<UpdateStatusResponseInterface> {
+  ): Promise<any> {
     this.logger.log({
       message: 'Received update status websocket message',
       payload,
     });
 
+    const event: string = MessageNameEnum.UPDATE_STATUS;
     const transactionId: string = payload.id;
 
     const updateStatusResponse: UpdateStatusResponseInterface = {
@@ -54,15 +55,20 @@ export class EventsGateway {
       result: false,
     };
 
+    const commonResponse: any = {
+      data: updateStatusResponse,
+      event,
+    };
+
     if (!this.verifyToken(payload.token)) {
-      return updateStatusResponse;
+      return commonResponse;
     }
 
     try {
       const transactionModel: TransactionModel = await this.transactionService.findModelByUuid(transactionId);
 
       if (!transactionModel) {
-        return updateStatusResponse;
+        return commonResponse;
       }
 
       const updatedTransaction: TransactionUnpackedDetailsInterface
@@ -71,11 +77,13 @@ export class EventsGateway {
       updateStatusResponse.status = updatedTransaction.status;
       updateStatusResponse.specificStatus = updatedTransaction.specific_status;
       updateStatusResponse.result = true;
+
+      commonResponse.data = updateStatusResponse;
     } catch (error) {
-      return updateStatusResponse;
+      return commonResponse;
     }
 
-    return updateStatusResponse;
+    return commonResponse;
   }
 
   private verifyToken(token: string): boolean {
