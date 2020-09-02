@@ -76,6 +76,7 @@ import {
   TransactionsService,
   SampleProductsService,
 } from './services';
+import { EventsGateway } from './ws';
 
 @Module({
   controllers: [
@@ -156,6 +157,7 @@ import {
     TransactionsNotifier,
     TransactionsService,
     ...EventListenersList,
+    EventsGateway,
   ],
 })
 export class TransactionsModule { }

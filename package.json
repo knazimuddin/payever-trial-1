@@ -18,9 +18,14 @@
     "test:pact:publish": "ts-node -r tsconfig-paths/register pact.publish.ts",
     "test:pact:verify": "mocha -r ts-node/register ./tests/contract/verify.ts --timeout 60000 --exit",
     "test:unit": "mocha -r ts-node/register --recursive ./tests/unit/**/*.spec.ts",
-    "test:unit:single": "mocha -r ts-node/register --recursive"
+    "test:unit:single": "mocha -r ts-node/register --recursive",
+    "ws": "tsc-watch -p tsconfig.build.json --onSuccess \"node dist/src/ws.js\"",
+    "ws:prod": "node dist/src/ws.js"
   },
   "dependencies": {
+    "@nestjs/platform-socket.io": "6.8.5",
+    "@nestjs/platform-ws": "6.8.5",
+    "@nestjs/websockets": "6.8.5",
     "@pe/common-sdk": "*",
     "@pe/elastic-kit": "*",
     "@pe/migration-kit": "*",

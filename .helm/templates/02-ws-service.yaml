@@ -1,0 +1,25 @@
+{{ $chartName := .Chart.Name }}
+{{ $values := .Values }}
+{{ $appName := printf "%s-ws" $chartName }}
+
+apiVersion: v1
+kind: Service
+
+metadata:
+  name: {{ $appName }}
+  namespace: {{ $values.namespace }}
+
+  labels:
+    app: {{ $appName }}
+
+spec:
+  type: ClusterIP
+
+  selector:
+    app: {{ $appName }}
+
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.wsPort }}
+      targetPort: {{ .Values.service.wsPort }}
+      name: tcp

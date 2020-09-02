@@ -1,6 +1,6 @@
 {{ $chartName := .Chart.Name }}
 {{ $values := .Values }}
-{{ $appName := $chartName }}
+{{ $appName := printf "%s-ws" $chartName }}
 
 apiVersion: apps/v1
 kind: Deployment
@@ -12,13 +12,13 @@ metadata:
   labels:
     app: {{ $appName }}
     tier: nodejs
-    type: http
+    type: ws
 
   annotations:
     "werf.io/set-replicas-only-on-creation": "true"
 
 spec:
-  replicas: {{ $values.replicas.http }}
+  replicas: {{ $values.replicas.ws }}
 
   strategy:
     type: RollingUpdate
@@ -36,7 +36,7 @@ spec:
       labels:
         app: {{ $appName }}
         tier: nodejs
-        type: http
+        type: ws
 
       annotations:
         seccomp.security.alpha.kubernetes.io/pod: 'runtime/default'
@@ -59,7 +59,7 @@ spec:
         - name: node
           image: {{ $values.image.nodejs }}
           imagePullPolicy: IfNotPresent
-          command: [ "/bin/bash", "-c", "/payever/deploy/deploy.sh" ]
+          command: [ "/bin/bash", "-c", "/payever/deploy/websocket.sh" ]
 
           lifecycle:
             preStop:
@@ -67,13 +67,9 @@ spec:
                 command: ["sleep", "15"]
 
           ports:
-            - containerPort: {{ $values.service.containerPort }}
+            - containerPort: {{ $values.service.wsPort }}
               protocol: TCP
               name: http
-
-            - containerPort: 8080
-              protocol: TCP
-              name: tcp
 
           livenessProbe:
             httpGet:

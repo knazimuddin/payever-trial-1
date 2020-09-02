@@ -85,4 +85,7 @@ export const environment: any = {
   statusPort: env.STATUS_APP_PORT,
   stub: env.STUB === 'true',
   thirdPartyPaymentsMicroUrl: env.MICRO_URL_THIRD_PARTY_PAYMENTS,
+  webSocket: {
+    port: env.WS_PORT,
+  },
 };
