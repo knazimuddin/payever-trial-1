@@ -6,4 +6,5 @@ export interface UnpackedDetailsInterface {
   pan_id?: string;
   iban?: string;
   bank_i_b_a_n?: string;
+  authorization_code?: string;
 }

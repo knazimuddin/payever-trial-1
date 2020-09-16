@@ -16,7 +16,7 @@ import { BusinessPaymentOptionService } from './business-payment-option.service'
 import { PaymentFlowService } from './payment-flow.service';
 import { PaymentsMicroService } from './payments-micro.service';
 import { TransactionsService } from './transactions.service';
-import { AllowedUpdateStatusPaymentMethodsEnum, RpcMessageIdentifierEnum } from '../enum';
+import {AllowedUpdateStatusPaymentMethodsEnum, NextActionTypesEnum, RpcMessageIdentifierEnum} from '../enum';
 
 @Injectable()
 export class MessagingService implements ActionCallerInterface {
@@ -151,7 +151,7 @@ export class MessagingService implements ActionCallerInterface {
       case 'action':
         /** stub for action behaviour */
         break;
-      case 'external_capture':
+      case NextActionTypesEnum.externalCapture:
         await this.externalCapture(nextAction.payment_method, nextAction.payload);
         break;
     }
@@ -171,7 +171,7 @@ export class MessagingService implements ActionCallerInterface {
       throw new Error(`Cannot prepare dto for update status: ${e}`);
     }
 
-    const rpcResult: any = await this.runPaymentRpc(transaction, payload, RpcMessageIdentifierEnum.Payment);
+    const rpcResult: any = await this.runPaymentRpc(transaction, payload, RpcMessageIdentifierEnum.UpdateStatus);
     this.logger.log({
       context: 'MessagingService',
       message: 'RPC status update result',
@@ -192,7 +192,7 @@ export class MessagingService implements ActionCallerInterface {
       },
       this.paymentMicroService.createPaymentMicroMessage(
         paymentMethod,
-        'external_capture',
+        NextActionTypesEnum.externalCapture,
         payload,
         stub,
       ),
@@ -256,7 +256,7 @@ export class MessagingService implements ActionCallerInterface {
     const stub: boolean = this.configService.get<string>('STUB') === 'true';
     let channel: string = this.paymentMicroService.getChannelByPaymentType(transaction.type, stub);
 
-    if (messageIdentifier === RpcMessageIdentifierEnum.Payment
+    if (messageIdentifier === RpcMessageIdentifierEnum.UpdateStatus
       && Object.values(AllowedUpdateStatusPaymentMethodsEnum).includes(
         transaction.type as AllowedUpdateStatusPaymentMethodsEnum,
       )

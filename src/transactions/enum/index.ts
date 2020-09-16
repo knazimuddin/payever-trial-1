@@ -3,6 +3,7 @@ export * from './allowed-update-status-payment-methods.enum';
 export * from './elastic-mapping-fields.config';
 export * from './elastic-transaction.enum';
 export * from './filter-condition.enum';
+export * from './next-action-types.enum';
 export * from './payment-statuses.enum';
 export * from './payment-actions.enum';
 export * from './rpc-message-identifier.enum';
