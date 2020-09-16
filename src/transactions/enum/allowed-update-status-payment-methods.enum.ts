@@ -7,6 +7,5 @@ export enum AllowedUpdateStatusPaymentMethodsEnum {
   santanderDKInstallment = 'santander_installment_dk',
   santanderDEInvoice = 'santander_invoice_de',
   santanderDEInvoicePOS = 'santander_pos_invoice_de',
-  sofort = 'sofort',
   payexCreditCard = 'payex_creditcard',
 }

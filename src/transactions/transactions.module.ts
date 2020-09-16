@@ -16,6 +16,7 @@ import {
   TransactionsEsSetupCommand,
   TransactionsExportForBlankMigrateCommand,
   TransactionsExportForWidgetsCommand,
+  TriggerPayexCaptureCommand,
 } from './commands';
 import {
   AdminController,
@@ -156,6 +157,7 @@ import { EventsGateway } from './ws';
     TransactionsExportForWidgetsCommand,
     TransactionsNotifier,
     TransactionsService,
+    TriggerPayexCaptureCommand,
     ...EventListenersList,
     EventsGateway,
   ],
