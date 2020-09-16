@@ -16,7 +16,7 @@ import { BusinessPaymentOptionService } from './business-payment-option.service'
 import { PaymentFlowService } from './payment-flow.service';
 import { PaymentsMicroService } from './payments-micro.service';
 import { TransactionsService } from './transactions.service';
-import {AllowedUpdateStatusPaymentMethodsEnum, NextActionTypesEnum, RpcMessageIdentifierEnum} from '../enum';
+import { AllowedUpdateStatusPaymentMethodsEnum, NextActionTypesEnum, RpcMessageIdentifierEnum } from '../enum';
 
 @Injectable()
 export class MessagingService implements ActionCallerInterface {

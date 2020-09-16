@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Command, Positional } from '@pe/nest-kit';
-import { NextActionTypesEnum, PaymentTypesEnum} from '../enum';
+import { NextActionTypesEnum, PaymentTypesEnum } from '../enum';
 import { BusinessPaymentOptionService, MessagingService, TransactionsService } from '../services';
 import { TransactionUnpackedDetailsInterface, UnpackedDetailsInterface } from '../interfaces/transaction';
 import { NextActionDto } from '../dto';
