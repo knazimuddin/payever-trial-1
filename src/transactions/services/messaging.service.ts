@@ -185,7 +185,7 @@ export class MessagingService implements ActionCallerInterface {
     paymentMethod: string,
     payload: any,
   ): Promise<void> {
-    const stub: boolean = this.configService.get<boolean>('STUB');
+    const stub: boolean = this.configService.get<string>('STUB') === 'true';
     await this.rabbitRpcClient.send(
       {
         channel: this.paymentMicroService.getChannelByPaymentType(paymentMethod, stub),
