@@ -14,6 +14,7 @@ import { StatusModule } from '@pe/nest-kit/modules/status';
 import { environment } from './environments';
 import { IntegrationModule } from './integration';
 import { TransactionsModule } from './transactions/transactions.module';
+import { TranslateModule } from 'nestjs-translate/lib/translate.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { TransactionsModule } from './transactions/transactions.module';
       environment.apm.options,
     ),
     CommandModule,
+    TranslateModule.forRoot(),
     JwtAuthModule.forRoot(environment.jwtOptions),
     RedisModule.forRoot(environment.redis),
     MongooseModule.forRoot(
