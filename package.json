@@ -20,7 +20,8 @@
     "test:unit": "mocha -r ts-node/register --recursive ./tests/unit/**/*.spec.ts",
     "test:unit:single": "mocha -r ts-node/register --recursive",
     "ws": "tsc-watch -p tsconfig.build.json --onSuccess \"node dist/src/ws.js\"",
-    "ws:prod": "node dist/src/ws.js"
+    "ws:prod": "node dist/src/ws.js",
+    "test:artillery-scenario": "DEBUG=http:response artillery run ./tests/artillery/scenarios/$SCRIPT.scenarios.yaml"
   },
   "dependencies": {
     "@nestjs/platform-socket.io": "6.8.5",
@@ -31,6 +32,8 @@
     "@pe/migration-kit": "*",
     "@pe/nest-kit": "*",
     "@pe/notifications-sdk": "*",
+    "@types/artillery": "^1.6.2",
+    "faker": "^5.1.0",
     "form-data": "^2.5.1",
     "moment": "^2.24.0",
     "pdfmake": "^0.1.58",

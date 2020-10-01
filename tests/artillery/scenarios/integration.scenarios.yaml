@@ -1,0 +1,66 @@
+config:
+  target: "https://transactions-backend.test.devpayever.com/api"
+  phases:
+    - duration: 1
+      arrivalRate: 1
+  http:
+    timeout: 10
+  processor: "../processors/integration.js"
+  variables:
+    authUrl: "https://auth.test.devpayever.com/api"
+    email: "rob@top.com"
+    plainPassword: "Test1234!"
+  default:
+    headers:
+      content-type: "application/json"
+  environments:
+    test:
+      target: "https://transactions-backend.test.devpayever.com/api"
+      phases:
+        - duration: 1
+          arrivalRate: 1
+      variables:
+        authUrl: "https://auth.test.devpayever.com/api"
+        email: "rob@top.com"
+        plainPassword: "Test1234!"
+    staging:
+      target: "https://transactions-backend.staging.devpayever.com/api"
+      phases:
+        - duration: 1
+          arrivalRate: 1
+      variables:
+        authUrl: "https://auth.staging.devpayever.com/api"
+        email: "rob@top.com"
+        plainPassword: "Test1234!"
+scenarios:
+  - name: "Integration"
+    flow:
+      - function: "defineVariables"
+      - log: "Login"
+      - post:
+          url: "{{ authUrl }}/login"
+          json:
+            email: "{{ email }}"
+            plainPassword: "{{ plainPassword }}"
+          capture:
+            - json: "$.accessToken"
+              as: "accessToken"
+      - log: "POST /integration"
+      - post:
+          url: "/integration"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
+          json:
+            default: False
+            name: "{{ integrationName }}"
+            category: "{{ category }}"
+      - log: "GET /integration"
+      - get:
+          url: "/integration"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
+      - log: "GET /integration/{{ integrationName }}"
+      - get:
+          url: "/integration/{{ integrationName }}"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
