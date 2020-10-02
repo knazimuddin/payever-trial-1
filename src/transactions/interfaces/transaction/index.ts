@@ -9,3 +9,4 @@ export * from './transaction-output-interface';
 export * from './transaction-unpacked-details.interface';
 export * from './transaction-upload-item.interface';
 export * from './unpacked-details.interface';
+export * from './monthly-business-transaction.interface';

@@ -4,7 +4,7 @@ import { plainToClass } from 'class-transformer';
 import { RabbitRoutingKeys } from '../../enums';
 import { TransactionExportBusinessDto, TransactionExportChannelSetDto, TransactionExportDto } from '../dto';
 
-import { TransactionPackedDetailsInterface } from '../interfaces';
+import { MonthlyBusinessTransactionInterface, TransactionPackedDetailsInterface } from '../interfaces';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 import { TransactionPaymentInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
@@ -69,6 +69,16 @@ export class TransactionEventProducer {
     };
 
     await this.send(RabbitRoutingKeys.TransactionsPaymentRemoved, payload);
+  }
+
+  public async produceExportMonthlyBusinessTransactionEvent(
+    transactions: MonthlyBusinessTransactionInterface[],
+  ): Promise<void> {
+    const payload: any = {
+      transactions: transactions,
+    };
+
+    await this.send(RabbitRoutingKeys.ExportMonthlyBusinessTransaction, payload);
   }
 
   public async produceTransactionBlankMigrateEvent(transactionModel: TransactionModel): Promise<void> {
