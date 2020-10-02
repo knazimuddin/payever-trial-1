@@ -22,3 +22,11 @@ Run `npm run test:coverage` to generate coverage report
 ## Running e2e tests
 
 Run `npm run e2e` for single run and `npm run e2e:watch` for watch mode.
+
+## Running artillery tests
+
+Run `npm run test:artillery-load` for load testing
+
+Run `SCRIPT=<script> npm run test:artillery-load` for functional testing
+
+where `<script>` is the API section name: integration, business, etc. (as in swagger)
