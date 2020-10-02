@@ -1,7 +1,8 @@
-const helper = require('./helper')
+const helper = require('./helper');
+const constants = require('../constants');
 
 function defineVariables(context, events, done) {
-  context.vars.reference = '1544513830.71615c0f6926aed201.76640051';
+  context.vars.reference = constants.ADMIN.reference;
 
   return done();
 }

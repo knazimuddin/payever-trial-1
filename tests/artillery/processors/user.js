@@ -1,4 +1,4 @@
-const helper = require('./helper')
+const helper = require('./helper');
 
 function defineUserId(requestParams, response, context, ee, next) {
   const body = helper.getResponseBody(response);

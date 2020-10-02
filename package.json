@@ -21,6 +21,7 @@
     "test:unit:single": "mocha -r ts-node/register --recursive",
     "ws": "tsc-watch -p tsconfig.build.json --onSuccess \"node dist/src/ws.js\"",
     "ws:prod": "node dist/src/ws.js",
+    "test:artillery-load": "artillery run ./tests/artillery/load.yaml",
     "test:artillery-scenario": "DEBUG=http:response artillery run ./tests/artillery/scenarios/$SCRIPT.scenarios.yaml"
   },
   "dependencies": {

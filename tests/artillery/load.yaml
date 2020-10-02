@@ -1,11 +1,11 @@
 config:
   target: "https://transactions-backend.test.devpayever.com/api"
   phases:
-    - duration: 1
-      arrivalRate: 1
+    - duration: 10
+      arrivalRate: 10
   http:
     timeout: 10
-  processor: "../processors/business.js"
+  processor: "./processors/load.js"
   variables:
     authUrl: "https://auth.test.devpayever.com/api"
     userUrl: "https://users.test.devpayever.com/api"
@@ -18,8 +18,8 @@ config:
     test:
       target: "https://transactions-backend.test.devpayever.com/api"
       phases:
-        - duration: 1
-          arrivalRate: 1
+        - duration: 1200
+          arrivalRate: 20
       variables:
         authUrl: "https://auth.test.devpayever.com/api"
         userUrl: "https://users.test.devpayever.com/api"
@@ -28,17 +28,48 @@ config:
     staging:
       target: "https://transactions-backend.staging.devpayever.com/api"
       phases:
-        - duration: 1
-          arrivalRate: 1
+        - duration: 1200
+          arrivalRate: 20
       variables:
         authUrl: "https://auth.staging.devpayever.com/api"
-        userUrl: "https://users.staging.devpayever.com/api"
+        userUrl: "https://users.test.devpayever.com/api"
         email: "rob@top.com"
         plainPassword: "Test1234!"
 scenarios:
+  - name: "Integration"
+    flow:
+      - function: "defineIntegrationVariables"
+      - log: "Login"
+      - post:
+          url: "{{ authUrl }}/login"
+          json:
+            email: "{{ email }}"
+            plainPassword: "{{ plainPassword }}"
+          capture:
+            - json: "$.accessToken"
+              as: "accessToken"
+      - log: "POST /integration"
+      - post:
+          url: "/integration"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
+          json:
+            default: False
+            name: "{{ integrationName }}"
+            category: "{{ category }}"
+      - log: "GET /integration"
+      - get:
+          url: "/integration"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
+      - log: "GET /integration/{{ integrationName }}"
+      - get:
+          url: "/integration/{{ integrationName }}"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
   - name: "Business"
     flow:
-      - function: "defineVariables"
+      - function: "defineBusinessVariables"
       - log: "Login"
       - post:
           url: "{{ authUrl }}/login"
@@ -133,3 +164,78 @@ scenarios:
           json:
             fields: {}
             files: []
+  - name: "Admin"
+    flow:
+      - function: "defineAdminVariables"
+      - log: "Login"
+      - post:
+          url: "{{ authUrl }}/login"
+          json:
+            email: "{{ email }}"
+            plainPassword: "{{ plainPassword }}"
+          capture:
+            - json: "$.accessToken"
+              as: "accessToken"
+      - log: "GET /admin/list"
+      - get:
+          url: "/admin/list"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
+          afterResponse: "defineAdminId"
+      - log: "GET /admin/mongo"
+      - get:
+          url: "/admin/mongo"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
+      - log: "GET /admin/detail/{{ adminId }}"
+      - get:
+          url: "/admin/detail/{{ adminId }}"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
+      - log: "POST /admin/{{ adminId }}/action/edit"
+      - post:
+          url: "/admin/{{ adminId }}/action/shipping_goods"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
+      - log: "GET /admin/{{ adminId }}/update-status"
+      - get:
+          url: "/admin/{{ adminId }}/update-status"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
+      - log: "GET /admin/settings"
+      - get:
+          url: "/admin/settings"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
+  - name: "User"
+    flow:
+      - log: "Login"
+      - post:
+          url: "{{ authUrl }}/login"
+          json:
+            email: "{{ email }}"
+            plainPassword: "{{ plainPassword }}"
+          capture:
+            - json: "$.accessToken"
+              as: "accessToken"
+      - log: "GET /user/list"
+      - get:
+          url: "/user/list"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
+          afterResponse: "defineUserId"
+      - log: "GET /user/mongo"
+      - get:
+          url: "/user/mongo"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
+      - log: "GET /user/detail/{{ userId }}"
+      - get:
+          url: "/user/detail/{{ userId }}"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
+      - log: "GET /user/settings"
+      - get:
+          url: "/user/settings"
+          headers:
+            authorization: "Bearer {{ accessToken }}"
