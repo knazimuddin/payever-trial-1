@@ -7,4 +7,6 @@ export enum ThirdPartyPaymentsEnum {
   santanderNLInstallment = 'santander_installment_nl',
   swedbankCreditCard = 'swedbank_creditcard',
   swedbankInvoice = 'swedbank_invoice',
+  santanderDEInvoice = 'santander_invoice_de',
+  santanderDEPosInvoice = 'santander_pos_invoice_de',
 }
