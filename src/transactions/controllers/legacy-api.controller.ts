@@ -8,10 +8,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
-import { Acl, AclActionsEnum, ParamModel } from '@pe/nest-kit';
+import { Acl, AclActionsEnum } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
-import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import { TransactionConverter, TransactionPaymentDetailsConverter } from '../converter';
+import {
+  TransactionUnpackedDetailsInterface
+} from '../interfaces/transaction';
+import { CheckoutTransactionInterface } from "../interfaces/checkout";
+import { ActionItemInterface } from "../interfaces";
 import { TransactionModel } from '../models';
 import {
   ActionsRetriever,
@@ -44,7 +48,7 @@ export class LegacyApiController {
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async getTransactionById(
     @Param('original_id') transactionId: string,
-  ): Promise<TransactionOutputInterface>  {
+  ): Promise<any>  {
     const transaction: TransactionModel = await this.transactionsService.findModelByParams({
       original_id: transactionId
     });
@@ -57,12 +61,11 @@ export class LegacyApiController {
       transaction.toObject({ virtuals: true }),
     );
 
-    return TransactionOutputConverter.convert(
-      unpackedTransaction,
-      !transaction.example
-        ? await this.actionsRetriever.retrieve(unpackedTransaction)
-        : this.actionsRetriever.retrieveFakeActions(unpackedTransaction)
-      ,
-    );
+    const checkoutTransaction: CheckoutTransactionInterface = TransactionConverter.toCheckoutTransaction(unpackedTransaction);
+    const actions: ActionItemInterface[] = !transaction.example
+      ? await this.actionsRetriever.retrieve(unpackedTransaction)
+      : this.actionsRetriever.retrieveFakeActions(unpackedTransaction);
+
+    return Object.assign({ actions: actions }, checkoutTransaction);
   }
 }
