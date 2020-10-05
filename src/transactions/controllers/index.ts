@@ -6,6 +6,7 @@ export * from './daily-report-transactions-bus-messages.controller';
 export * from './flow-events.controller';
 export * from './history-events.controller';
 export * from './migrate-events.controller';
+export * from './legacy-api.controller';
 export * from './transaction-events.controller';
 export * from './user.controller';
 export * from './third-party-events.controller';
