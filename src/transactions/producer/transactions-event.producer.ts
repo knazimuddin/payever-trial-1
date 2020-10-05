@@ -74,11 +74,9 @@ export class TransactionEventProducer {
   public async produceExportMonthlyBusinessTransactionEvent(
     transactions: MonthlyBusinessTransactionInterface[],
   ): Promise<void> {
-    const payload: any = {
-      transactions: transactions,
-    };
-
-    await this.send(RabbitRoutingKeys.ExportMonthlyBusinessTransaction, payload);
+    for (const transaction of transactions) {
+      await this.send(RabbitRoutingKeys.ExportMonthlyBusinessTransaction, transaction);
+    }
   }
 
   public async produceTransactionBlankMigrateEvent(transactionModel: TransactionModel): Promise<void> {
