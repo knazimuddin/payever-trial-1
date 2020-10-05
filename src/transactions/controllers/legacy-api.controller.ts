@@ -14,7 +14,7 @@ import { TransactionConverter, TransactionPaymentDetailsConverter } from '../con
 import {
   TransactionUnpackedDetailsInterface
 } from '../interfaces/transaction';
-import { CheckoutTransactionInterface } from "../interfaces/checkout";
+import { CheckoutTransactionInterface, CheckoutTransactionWithActionsInterface } from "../interfaces/checkout";
 import { ActionItemInterface } from "../interfaces";
 import { TransactionModel } from '../models';
 import {
@@ -48,7 +48,7 @@ export class LegacyApiController {
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async getTransactionById(
     @Param('original_id') transactionId: string,
-  ): Promise<any>  {
+  ): Promise<CheckoutTransactionWithActionsInterface>  {
     const transaction: TransactionModel = await this.transactionsService.findModelByParams({
       original_id: transactionId
     });
