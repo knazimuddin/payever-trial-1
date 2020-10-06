@@ -42,4 +42,6 @@ export enum RabbitRoutingKeys {
   SellerNamePropagated = 'auth.event.propagate_user_data',
 
   MailerReportDailyReportRequested = 'mailer-report.event.transactions-daily.request',
+
+  ExportMonthlyBusinessTransaction = 'transactions.event.export.monthly-business-transaction',
 }
