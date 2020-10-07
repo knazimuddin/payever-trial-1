@@ -116,7 +116,6 @@ class TransactionDetailsReferenceFixture extends BaseFixture {
       },
       business_uuid : businessId,
       user_uuid: userId,
-      merchant_name: 'Test merchant',
       business_option_id: businessOptionId,
       payment_flow_id: paymentFlowTwoId,
       channel_set_uuid: '7c2298a7-a172-4048-8977-dbff24dec100',
