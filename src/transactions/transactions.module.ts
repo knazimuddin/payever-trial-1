@@ -8,7 +8,7 @@ import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { MigrationModule } from '@pe/migration-kit';
 import { environment } from '../environments';
 import {
-  BpoFixCommand,
+  BpoFixCommand, ExportTransactionToWidgetCommand,
   TransactionsEsBusinessCheckCommand,
   TransactionsEsBusinessUpdateCommand,
   TransactionsEsCompareCommand,
@@ -76,7 +76,7 @@ import {
   TransactionHistoryService,
   TransactionsExampleService,
   TransactionsService,
-  SampleProductsService,
+  SampleProductsService, ExportMonthlyBusinessTransactionService,
 } from './services';
 import { EventsGateway } from './ws';
 
@@ -137,6 +137,7 @@ import { EventsGateway } from './ws';
     DtoValidationService,
     ElasticSearchService,
     ExchangeCalculatorFactory,
+    ExportTransactionToWidgetCommand,
     MessagingService,
     MongoSearchService,
     PaymentFlowService,
@@ -162,6 +163,7 @@ import { EventsGateway } from './ws';
     TriggerPayexCaptureCommand,
     ...EventListenersList,
     EventsGateway,
+    ExportMonthlyBusinessTransactionService,
   ],
 })
 export class TransactionsModule { }
