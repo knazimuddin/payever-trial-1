@@ -60,7 +60,7 @@ export class LegacyApiController {
     );
 
     const checkoutTransaction: CheckoutTransactionInterface = TransactionConverter.toCheckoutTransaction(
-      unpackedTransaction
+      unpackedTransaction,
     );
     const actions: ActionItemInterface[] = !transaction.example
       ? await this.actionsRetriever.retrieve(unpackedTransaction)
