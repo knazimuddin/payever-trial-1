@@ -1,5 +1,6 @@
 import {
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -9,7 +10,15 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { Acl, AclActionsEnum } from '@pe/nest-kit';
-import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
+import {
+  AccessTokenPayload,
+  JwtAuthGuard,
+  Roles,
+  RolesEnum,
+  User,
+  UserRoleInterface,
+  UserRoleOauth,
+} from '@pe/nest-kit/modules/auth';
 import { TransactionConverter, TransactionPaymentDetailsConverter } from '../converter';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { CheckoutTransactionInterface, CheckoutTransactionWithActionsInterface } from '../interfaces/checkout';
@@ -17,9 +26,6 @@ import { ActionItemInterface } from '../interfaces';
 import { TransactionModel } from '../models';
 import {
   ActionsRetriever,
-  ElasticSearchService,
-  MessagingService,
-  MongoSearchService,
   TransactionsService,
 } from '../services';
 
@@ -34,9 +40,6 @@ export class LegacyApiController {
 
   constructor(
     private readonly transactionsService: TransactionsService,
-    private readonly mongoSearchService: MongoSearchService,
-    private readonly elasticSearchService: ElasticSearchService,
-    private readonly messagingService: MessagingService,
     private readonly actionsRetriever: ActionsRetriever,
   ) { }
 
@@ -46,6 +49,7 @@ export class LegacyApiController {
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async getTransactionById(
     @Param('original_id') transactionId: string,
+    @User() user: AccessTokenPayload,
   ): Promise<CheckoutTransactionWithActionsInterface> {
     const transaction: TransactionModel = await this.transactionsService.findModelByParams({
       original_id: transactionId,
@@ -53,6 +57,12 @@ export class LegacyApiController {
 
     if (!transaction) {
       throw new NotFoundException(`Transaction by id ${transactionId} not found`);
+    }
+
+    const businessId: string = this.getOauthUserBusiness(user, transaction.business_uuid);
+
+    if (transaction.business_uuid !== businessId) {
+      throw new ForbiddenException(`You're not allowed to get transaction with id ${transactionId}`);
     }
 
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
@@ -67,5 +77,26 @@ export class LegacyApiController {
       : this.actionsRetriever.retrieveFakeActions(unpackedTransaction);
 
     return Object.assign({ actions: actions }, checkoutTransaction);
+  }
+
+  private getOauthUserBusiness(user: AccessTokenPayload, businessId?: string): string
+  {
+    const userRole: UserRoleInterface = user.roles.find((x: UserRoleInterface) => x.name === RolesEnum.oauth);
+    if (!userRole) {
+      return null;
+    }
+
+    const oauthRole: UserRoleOauth = userRole as UserRoleOauth;
+    if (businessId) {
+      for (const permission of oauthRole.permissions) {
+        if (permission.businessId === businessId) {
+          return permission.businessId;
+        }
+      }
+
+      return null;
+    }
+
+    return oauthRole.permissions[0].businessId;
   }
 }

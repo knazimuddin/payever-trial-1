@@ -25,11 +25,70 @@ Feature: Transaction legacy api
       {"message":"Transaction by id fake-transaction-id not found"}
       """
 
+  Scenario: Getting transaction from another business should be forbidden
+    And I authenticate as a user with the following data:
+    """
+    {
+      "id": "2673fa45-82b9-484c-bcbe-46da250c2639",
+      "email": "testcases@payever.de",
+      "firstName": "Test",
+      "lastName": "Test",
+      "roles": [
+        {
+          "name": "oauth",
+          "permissions": [
+            {
+              "acls": [],
+              "businessId": "0064bd92-c270-49f4-9910-cfab877c1255"
+            }
+          ]
+        }
+      ]
+    }
+    """
+    And I use DB fixture "transactions/transaction-details"
+    And I mock RPC request "payment_option.payex_creditcard.action" to "rpc_payment_payex" with:
+      """
+      {
+        "requestPayload": {
+          "action": "action.list"
+        },
+        "responsePayload": "s:80:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"test_action\":true,\"another_action\":false}}}\";"
+      }
+      """
+    When I send a GET request to "/api/legacy-api/transactions/440ec879-7f02-48d4-9ffb-77adfaf79a06"
+    Then print last response
+    Then the response status code should be 403
+    And the response should contain json:
+    """
+    {
+      "statusCode": 403,
+      "error": "Forbidden",
+      "message": "You're not allowed to get transaction with id 440ec879-7f02-48d4-9ffb-77adfaf79a06"
+    }
+    """
+
   Scenario: Get transaction by id
-    Given I authenticate as a user with the following data:
-      """
-      {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
-      """
+    And I authenticate as a user with the following data:
+    """
+    {
+      "id": "2673fa45-82b9-484c-bcbe-46da250c2639",
+      "email": "testcases@payever.de",
+      "firstName": "Test",
+      "lastName": "Test",
+      "roles": [
+        {
+          "name": "oauth",
+          "permissions": [
+            {
+              "acls": [],
+              "businessId": "{{businessId}}"
+            }
+          ]
+        }
+      ]
+    }
+    """
     And I use DB fixture "transactions/transaction-details"
     And I mock RPC request "payment_option.payex_creditcard.action" to "rpc_payment_payex" with:
       """
