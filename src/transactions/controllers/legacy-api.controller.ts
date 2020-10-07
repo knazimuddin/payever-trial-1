@@ -11,11 +11,9 @@ import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
 import { Acl, AclActionsEnum } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { TransactionConverter, TransactionPaymentDetailsConverter } from '../converter';
-import {
-  TransactionUnpackedDetailsInterface
-} from '../interfaces/transaction';
-import { CheckoutTransactionInterface, CheckoutTransactionWithActionsInterface } from "../interfaces/checkout";
-import { ActionItemInterface } from "../interfaces";
+import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
+import { CheckoutTransactionInterface, CheckoutTransactionWithActionsInterface } from '../interfaces/checkout';
+import { ActionItemInterface } from '../interfaces';
 import { TransactionModel } from '../models';
 import {
   ActionsRetriever,
@@ -39,7 +37,7 @@ export class LegacyApiController {
     private readonly mongoSearchService: MongoSearchService,
     private readonly elasticSearchService: ElasticSearchService,
     private readonly messagingService: MessagingService,
-    private readonly actionsRetriever: ActionsRetriever
+    private readonly actionsRetriever: ActionsRetriever,
   ) { }
 
   @Get('transactions/:original_id')
@@ -48,9 +46,9 @@ export class LegacyApiController {
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async getTransactionById(
     @Param('original_id') transactionId: string,
-  ): Promise<CheckoutTransactionWithActionsInterface>  {
+  ): Promise<CheckoutTransactionWithActionsInterface> {
     const transaction: TransactionModel = await this.transactionsService.findModelByParams({
-      original_id: transactionId
+      original_id: transactionId,
     });
 
     if (!transaction) {
@@ -61,7 +59,9 @@ export class LegacyApiController {
       transaction.toObject({ virtuals: true }),
     );
 
-    const checkoutTransaction: CheckoutTransactionInterface = TransactionConverter.toCheckoutTransaction(unpackedTransaction);
+    const checkoutTransaction: CheckoutTransactionInterface = TransactionConverter.toCheckoutTransaction(
+      unpackedTransaction
+    );
     const actions: ActionItemInterface[] = !transaction.example
       ? await this.actionsRetriever.retrieve(unpackedTransaction)
       : this.actionsRetriever.retrieveFakeActions(unpackedTransaction);
