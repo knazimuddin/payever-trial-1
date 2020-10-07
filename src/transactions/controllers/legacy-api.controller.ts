@@ -62,7 +62,7 @@ export class LegacyApiController {
     const businessId: string = this.getOauthUserBusiness(user, transaction.business_uuid);
 
     if (transaction.business_uuid !== businessId) {
-      throw new ForbiddenException(`You're not allowed to get transaction with id ${transactionId} ${transaction.business_uuid} ${businessId}`);
+      throw new ForbiddenException(`You're not allowed to get transaction with id ${transactionId}`);
     }
 
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
