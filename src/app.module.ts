@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, HttpModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
   ApmModule,
@@ -14,6 +14,7 @@ import { StatusModule } from '@pe/nest-kit/modules/status';
 import { environment } from './environments';
 import { IntegrationModule } from './integration';
 import { TransactionsModule } from './transactions/transactions.module';
+import { TranslationService } from './transactions/services/translation.service';
 
 @Module({
   imports: [
@@ -39,9 +40,9 @@ import { TransactionsModule } from './transactions/transactions.module';
     MutexModule,
     IntegrationModule,
     TransactionsModule,
+    HttpModule
   ],
-  providers: [
-  ],
+  providers: [TranslationService],
 })
 export class AppModule implements NestModule {
   public configure(): MiddlewareConsumer | void { }
