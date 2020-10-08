@@ -27,6 +27,9 @@ Run `npm run e2e` for single run and `npm run e2e:watch` for watch mode.
 
 Run `npm run test:artillery-load` for load testing
 
-Run `SCRIPT=<script> npm run test:artillery-load` for functional testing
+Run `SCRIPT=<script> npm run test:artillery-scenario` for functional testing
 
-where `<script>` is the API section name: integration, business, etc. (as in swagger)
+where `<script>` is the API section name: business, integration, etc. (as in swagger).
+The correct names can be seen in the dir ./tests/artillery/scenarios/.
+
+For example, `SCRIPT=business npm run test:artillery-scenario`

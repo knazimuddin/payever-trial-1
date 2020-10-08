@@ -33,8 +33,6 @@
     "@pe/migration-kit": "*",
     "@pe/nest-kit": "*",
     "@pe/notifications-sdk": "*",
-    "@types/artillery": "^1.6.2",
-    "faker": "^5.1.0",
     "form-data": "^2.5.1",
     "moment": "^2.24.0",
     "pdfmake": "^0.1.58",
@@ -45,6 +43,9 @@
   "devDependencies": {
     "@pe/cucumber-sdk": "*",
     "@pe/dev-kit": "*",
-    "@pe/pact-kit": "*"
+    "@pe/pact-kit": "*",
+    "@types/artillery": "^1.6.2",
+    "artillery": "^1.6.1",
+    "faker": "^5.1.0"
   }
 }
