@@ -37,6 +37,8 @@ export class TransactionCartItemDto implements CheckoutTransactionCartItemInterf
   @IsString()
   public shipping_type: string;
   @IsString()
+  public sku: string;
+  @IsString()
   public thumbnail: string;
   @IsString()
   public updated_at: Date;

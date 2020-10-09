@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { SampleProductDto, TransactionCartItemDto } from '../dto';
-import { TransactionCartItemModel, SampleProductsModel } from '../models';
-import { ProductUuid } from '../tools';
+import { TransactionCartItemModel } from '../models';
 
 @Injectable()
 export class TransactionCartItemConverter {
@@ -31,6 +30,7 @@ export class TransactionCartItemConverter {
         shipping_settings_rate: null,
         shipping_settings_rate_type: null,
         shipping_type: null,
+        sku: null,
         thumbnail: sample.images.length > 0 ? sample.images[0] : '',
         updated_at: sample.updated_at,
         url: null,
