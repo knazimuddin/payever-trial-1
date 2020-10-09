@@ -159,7 +159,7 @@ export class Exporter {
         ...[t.channel, t.original_id, t.total],
         ...shippingsColumns
           .map((c: { title: string, name: string }) => {
-            return t.shipping_address && c.name in t.shipping_address ? t.shipping_address[c.name] : ''; 
+            return t.shipping_address && c.name in t.shipping_address ? t.shipping_address[c.name] : t.billing_address[c.name]; 
           }),
         ...productColumns
           .map((c: { index: number, title: string, name: string }) => {
