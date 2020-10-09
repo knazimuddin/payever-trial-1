@@ -19,6 +19,7 @@ const shippingsColumns: Array<{ title: string, name: string }> = [
 const productColumnsFunc: any = (key: number): Array<{ index: number, title: string, name: string }> => [
   { index: key, title: `Lineitem${key + 1} identifier`, name: 'uuid' },
   { index: key, title: `Lineitem${key + 1} name`, name: 'name' },
+  { index: key, title: `Lineitem${key + 1} variant`, name: 'variant' },
   { index: key, title: `Lineitem${key + 1} price`, name: 'price' },
   { index: key, title: `Lineitem${key + 1} vat`, name: 'vat_rate' },
   { index: key, title: `Lineitem${key + 1} sku`, name: 'sku' },
@@ -164,8 +165,10 @@ export class Exporter {
               : t.billing_address[c.name] || ''; 
           }),
         ...productColumns
-          .map((c: { index: number, title: string, name: string }) => {
-            return c.index in t.items && c.name in t.items[c.index] ? t.items[c.index][c.name] : '';
+          .map((c: { index: number, title: string, name: string }) => {            
+            return c.index in t.items && c.name in t.items[c.index] 
+              ? this.getProductValue(c.name, t.items[c.index][c.name]) 
+              : '';
           }),
         ...columns
           .map((c: { title: string, name: string }) =>
@@ -174,5 +177,15 @@ export class Exporter {
                 : t[c.name],
           ),
       ]);
+  }
+
+  private static getProductValue(field: string, value: string | any[]): string {
+    if (field !== 'variant') {
+      return value as string;
+    }
+
+    return (value as any[]).map((item: { name: string, value: string }) => {
+      return `${item.name}:${item.value}`;
+    }).join(', ');
   }
 }
