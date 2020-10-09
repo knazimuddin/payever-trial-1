@@ -21,6 +21,7 @@ const productColumnsFunc: any = (key: number): Array<{ index: number, title: str
   { index: key, title: `Lineitem${key + 1} name`, name: 'name' },
   { index: key, title: `Lineitem${key + 1} price`, name: 'price' },
   { index: key, title: `Lineitem${key + 1} vat`, name: 'vat_rate' },
+  { index: key, title: `Lineitem${key + 1} sku`, name: 'sku' },
   { index: key, title: `Lineitem${key + 1} quantity`, name: 'quantity' },
 ];
 
