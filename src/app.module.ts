@@ -34,6 +34,7 @@ import { TransactionsModule } from './transactions/transactions.module';
     }),
     RabbitMqModule.forRoot(environment.rabbitmq),
     StatusModule.forRoot({
+      mongodbUrl: environment.mongodb,
       sideAppPort: environment.statusPort,
     }),
     MutexModule,
