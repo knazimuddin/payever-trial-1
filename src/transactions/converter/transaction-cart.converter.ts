@@ -40,6 +40,7 @@ export class TransactionCartConverter {
         shipping_settings_rate: cartItem.shipping_settings_rate,
         shipping_settings_rate_type: cartItem.shipping_settings_rate_type,
         shipping_type: cartItem.shipping_type,
+        sku: cartItem.sku,
         thumbnail: cartItem.thumbnail,
         updated_at: cartItem.updated_at,
         url: cartItem.url,
