@@ -27,7 +27,6 @@
     "@nestjs/platform-socket.io": "6.8.5",
     "@nestjs/platform-ws": "6.8.5",
     "@nestjs/websockets": "6.8.5",
-    "@pe/artillery-kit": "^1.0.1",
     "@pe/common-sdk": "*",
     "@pe/elastic-kit": "*",
     "@pe/migration-kit": "*",
@@ -41,11 +40,9 @@
     "xlsx": "^0.15.0"
   },
   "devDependencies": {
+    "@pe/artillery-kit": "^1.0.1",
     "@pe/cucumber-sdk": "*",
     "@pe/dev-kit": "*",
-    "@pe/pact-kit": "*",
-    "@types/artillery": "^1.6.2",
-    "artillery": "^1.6.1",
-    "faker": "^5.1.0"
+    "@pe/pact-kit": "*"
   }
 }
