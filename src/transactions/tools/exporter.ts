@@ -180,7 +180,7 @@ export class Exporter {
   }
 
   private static getProductValue(field: string, value: string | any[]): string {
-    if (field !== 'variant') {
+    if (field !== 'options') {
       return value as string;
     }
 
