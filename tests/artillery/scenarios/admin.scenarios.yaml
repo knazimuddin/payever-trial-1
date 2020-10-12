@@ -1,78 +1,37 @@
-config:
-  target: "https://transactions-backend.test.devpayever.com/api"
-  phases:
-    - duration: 1
-      arrivalRate: 1
-  http:
-    timeout: 10
-  processor: "../processors/admin.js"
-  variables:
-    authUrl: "https://auth.test.devpayever.com/api"
-    email: "rob@top.com"
-    plainPassword: "Test1234!"
-  default:
-    headers:
-      content-type: "application/json"
-  environments:
-    test:
-      target: "https://transactions-backend.test.devpayever.com/api"
-      phases:
-        - duration: 1
-          arrivalRate: 1
-      variables:
-        authUrl: "https://auth.test.devpayever.com/api"
-        email: "rob@top.com"
-        plainPassword: "Test1234!"
-    staging:
-      target: "https://transactions-backend.staging.devpayever.com/api"
-      phases:
-        - duration: 1
-          arrivalRate: 1
-      variables:
-        authUrl: "https://auth.staging.devpayever.com/api"
-        email: "rob@top.com"
-        plainPassword: "Test1234!"
 scenarios:
   - name: "Admin"
     flow:
       - function: "defineVariables"
       - log: "Login"
-      - post:
-          url: "{{ authUrl }}/login"
-          json:
-            email: "{{ email }}"
-            plainPassword: "{{ plainPassword }}"
-          capture:
-            - json: "$.accessToken"
-              as: "accessToken"
-      - log: "GET /admin/list"
+      - function: "auth"
+      - log: "GET /api/admin/list"
       - get:
-          url: "/admin/list"
+          url: "/api/admin/list"
           headers:
             authorization: "Bearer {{ accessToken }}"
           afterResponse: "defineAdminId"
-      - log: "GET /admin/mongo"
+      - log: "GET /api/admin/mongo"
       - get:
-          url: "/admin/mongo"
+          url: "/api/admin/mongo"
           headers:
             authorization: "Bearer {{ accessToken }}"
-      - log: "GET /admin/detail/{{ adminId }}"
+      - log: "GET /api/admin/detail/{{ adminId }}"
       - get:
-          url: "/admin/detail/{{ adminId }}"
+          url: "/api/admin/detail/{{ adminId }}"
           headers:
             authorization: "Bearer {{ accessToken }}"
-      - log: "POST /admin/{{ adminId }}/action/edit"
+      - log: "POST /api/admin/{{ adminId }}/action/edit"
       - post:
-          url: "/admin/{{ adminId }}/action/shipping_goods"
+          url: "/api/admin/{{ adminId }}/action/shipping_goods"
           headers:
             authorization: "Bearer {{ accessToken }}"
-      - log: "GET /admin/{{ adminId }}/update-status"
+      - log: "GET /api/admin/{{ adminId }}/update-status"
       - get:
-          url: "/admin/{{ adminId }}/update-status"
+          url: "/api/admin/{{ adminId }}/update-status"
           headers:
             authorization: "Bearer {{ accessToken }}"
-      - log: "GET /admin/settings"
+      - log: "GET /api/admin/settings"
       - get:
-          url: "/admin/settings"
+          url: "/api/admin/settings"
           headers:
             authorization: "Bearer {{ accessToken }}"

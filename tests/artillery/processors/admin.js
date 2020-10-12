@@ -1,4 +1,4 @@
-const helper = require('./helper');
+const artillery = require('@pe/artillery-kit').ArtilleryTest;
 const constants = require('../constants');
 
 function defineVariables(context, events, done) {
@@ -8,7 +8,7 @@ function defineVariables(context, events, done) {
 }
 
 function defineAdminId(requestParams, response, context, ee, next) {
-  const body = helper.getResponseBody(response);
+  const body = artillery.helper.getResponseBody(response);
 
   if (body && body.collection && body.collection.length) {
     context.vars.adminId = body.collection[0].uuid;
@@ -18,6 +18,7 @@ function defineAdminId(requestParams, response, context, ee, next) {
 }
 
 module.exports = {
+  auth: artillery.helper.auth,
   defineVariables,
   defineAdminId,
 };
