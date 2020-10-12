@@ -10,6 +10,7 @@ export interface TransactionCartItemInterface {
   price_net: number;
   product_variant_uuid: string;
   quantity: number;
+  sku: string;
   shipping_price: number;
   shipping_settings_rate: number;
   shipping_settings_rate_type: string;
