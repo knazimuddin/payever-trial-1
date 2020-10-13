@@ -155,6 +155,8 @@ export class Exporter {
     columns: Array<{ title: string, name: string }>,
     isFormatDate: boolean = false,
   ): any[] {
+    console.log(transactions);
+    
     return transactions
       .map((t: TransactionModel) => [
         ...[t.channel, t.original_id, t.total],
