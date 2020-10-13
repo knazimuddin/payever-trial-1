@@ -156,7 +156,7 @@ export class Exporter {
     isFormatDate: boolean = false,
   ): any[] {
     // tslint:disable-next-line: no-console
-    console.log(transactions);
+    console.log(transactions[0].items);
 
     return transactions
       .map((t: TransactionModel) => [
