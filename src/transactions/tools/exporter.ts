@@ -155,9 +155,6 @@ export class Exporter {
     columns: Array<{ title: string, name: string }>,
     isFormatDate: boolean = false,
   ): any[] {
-    // tslint:disable-next-line: no-console
-    console.log(transactions);
-
     return transactions
       .map((t: TransactionModel) => [
         ...[t.channel, t.original_id, t.total],
