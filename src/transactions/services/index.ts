@@ -16,3 +16,5 @@ export * from './transaction-action.service';
 export * from './transactions-example.service';
 export * from './third-party-caller.service';
 export * from './export-monthly-business-transaction.service';
+export * from './action-item-validators/action-item-validators.collector';
+export * from './action-item-validators/validators/action-item-identifier-validator.service';

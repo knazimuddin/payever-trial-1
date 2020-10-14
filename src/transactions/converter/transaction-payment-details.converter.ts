@@ -32,7 +32,11 @@ export class TransactionPaymentDetailsConverter {
       fee_accepted: transaction.fee_accepted,
       history: transaction.history,
       is_shipping_order_processed: transaction.is_shipping_order_processed,
+
+      captured_items: transaction.captured_items,
       items: transaction.items,
+      refunded_items: transaction.refunded_items,
+
       merchant_email: transaction.merchant_email,
       merchant_name: transaction.merchant_name,
       payment_details: { },

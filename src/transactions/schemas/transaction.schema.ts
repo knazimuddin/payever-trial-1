@@ -43,7 +43,11 @@ export const TransactionSchema: Schema = new Schema({
   fee_accepted: Boolean,
   history: [TransactionHistoryEntrySchema],
   invoice_id: String,
+
+  captured_items: [TransactionCartItemSchema],
   items: [TransactionCartItemSchema],
+  refunded_items: [TransactionCartItemSchema],
+
   merchant_email: String,
   merchant_name: String,
   /** Serialized big object */

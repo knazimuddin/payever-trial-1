@@ -27,7 +27,11 @@ export interface TransactionBasicInterface extends SantanderApplicationAwareInte
   down_payment: number;
   fee_accepted: boolean;
   history: TransactionHistoryEntryInterface[];
+
+  captured_items?: TransactionCartItemInterface[];
   items: TransactionCartItemInterface[];
+  refunded_items?: TransactionCartItemInterface[];
+
   merchant_email: string;
   merchant_name: string;
   payment_fee: number;

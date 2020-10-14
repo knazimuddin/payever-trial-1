@@ -59,16 +59,14 @@ export class TransactionActionService {
       throw new BadRequestException(e.message);
     }
 
-    const updatedTransaction: TransactionUnpackedDetailsInterface =
-      await this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
-    /** Send update to checkout-php */
-    try {
-      await this.messagingService.sendTransactionUpdate(updatedTransaction);
-    } catch (e) {
-      throw new BadRequestException(`Error occurred while sending transaction update: ${e.message}`);
-    }
+    await this.eventDispatcher.dispatch(
+      PaymentActionEventEnum.PaymentActionAfter,
+      transaction,
+      actionPayload,
+      action,
+    );
 
-    return updatedTransaction;
+    return this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
   }
 
   public async updateStatus(

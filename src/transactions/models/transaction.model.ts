@@ -8,6 +8,10 @@ export interface TransactionModel extends TransactionPackedDetailsInterface, Doc
   id: string;
   billing_address: AddressModel;
   history: Types.DocumentArray<TransactionHistoryEntryModel>;
+
+  captured_items?: Types.DocumentArray<TransactionCartItemModel>;
   items: Types.DocumentArray<TransactionCartItemModel>;
+  refunded_items?: Types.DocumentArray<TransactionCartItemModel>;
+
   shipping_address: AddressModel;
 }
