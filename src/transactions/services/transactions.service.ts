@@ -17,7 +17,7 @@ import { RpcResultDto } from '../dto';
 import { ElasticTransactionEnum } from '../enum';
 import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
 import {
-  TransactionBasicInterface,
+  TransactionBasicInterface, TransactionCartItemInterface,
   TransactionHistoryEntryInterface,
   TransactionPackedDetailsInterface,
   TransactionUnpackedDetailsInterface,
@@ -262,6 +262,16 @@ export class TransactionsService {
     result: RpcResultDto,
   ): Promise<void> {
     await this.applyPaymentProperties(transaction, result);
+  }
+
+  public async saveCaptureItems(transaction: TransactionModel, items: TransactionCartItemInterface[]): Promise<void> {
+    items.forEach((item: TransactionCartItemInterface, index: number) => {
+      const existingCaptureItem: TransactionCartItemInterface =
+        transaction.captured_items.find((transactionItem: TransactionCartItemInterface) => {
+          return transactionItem.identifier === item.identifier;
+        });
+    });
+    // TODO: implement
   }
 
   private async applyPaymentProperties(

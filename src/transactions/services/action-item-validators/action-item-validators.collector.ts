@@ -10,9 +10,10 @@ export class ActionItemValidatorsCollector extends AbstractCollector{
   public async validateAll(
     transaction: TransactionPackedDetailsInterface,
     item: TransactionCartItemInterface,
+    action: string,
   ): Promise<void> {
     this.services.forEach(async (validator: ActionItemValidatorInterface) => {
-      await validator.validate(transaction, item);
+      await validator.validate(transaction, item, action);
     });
   }
 }

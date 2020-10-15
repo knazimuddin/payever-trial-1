@@ -80,6 +80,9 @@ import {
   ExportMonthlyBusinessTransactionService,
   ActionItemValidatorsCollector,
   ActionItemIdentifierValidator,
+  ActionItemTransactionValidatorService,
+  ActionItemCaptureValidatorService,
+  ActionItemRefundValidatorService,
 } from './services';
 import { EventsGateway } from './ws';
 
@@ -170,6 +173,9 @@ import { EventsGateway } from './ws';
     ExportMonthlyBusinessTransactionService,
     ActionItemValidatorsCollector,
     ActionItemIdentifierValidator,
+    ActionItemTransactionValidatorService,
+    ActionItemCaptureValidatorService,
+    ActionItemRefundValidatorService,
   ],
 })
 export class TransactionsModule { }

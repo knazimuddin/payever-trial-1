@@ -13,6 +13,7 @@ export class ActionItemIdentifierValidator implements ActionItemValidatorInterfa
   public async validate(
     transaction: TransactionPackedDetailsInterface,
     item: TransactionCartItemInterface,
+    action: string,
   ): Promise<void> {
     const identifier: string = item.identifier;
     if (!identifier) {

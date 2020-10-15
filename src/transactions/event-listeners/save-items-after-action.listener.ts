@@ -2,19 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { EventListener } from '@pe/nest-kit';
 import { PaymentActionEventEnum } from '../enum/events';
 import { TransactionModel } from '../models';
-import { ActionItemValidatorsCollector } from '../services';
+import { TransactionsService } from '../services';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { TransactionCartItemInterface } from '../interfaces/transaction';
 import { PaymentActionsEnum } from '../enum';
 
 @Injectable()
-export class ValidateItemsBeforeActionListener {
+export class SaveItemsAfterActionListener {
   constructor(
-    private readonly actionItemValidatorsCollector: ActionItemValidatorsCollector,
+    private readonly transactionsService: TransactionsService,
   ) { }
 
-  @EventListener(PaymentActionEventEnum.PaymentActionBefore)
-  public async validatePaymentItemsBeforeAction(
+  @EventListener(PaymentActionEventEnum.PaymentActionAfter)
+  public async savePaymentItemsAfterAction(
     transaction: TransactionModel,
     actionPayload: ActionPayloadDto,
     action: string,
@@ -34,8 +33,6 @@ export class ValidateItemsBeforeActionListener {
       return;
     }
 
-    actionPayload.fields.payment_items.forEach(async (item: TransactionCartItemInterface) => {
-      await this.actionItemValidatorsCollector.validateAll(transaction, item, action);
-    });
+
   }
 }
