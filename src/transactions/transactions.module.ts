@@ -78,11 +78,7 @@ import {
   TransactionsService,
   SampleProductsService,
   ExportMonthlyBusinessTransactionService,
-  ActionItemValidatorsCollector,
-  ActionItemIdentifierValidator,
-  ActionItemTransactionValidatorService,
-  ActionItemCaptureValidatorService,
-  ActionItemRefundValidatorService,
+  ActionValidatorsList,
 } from './services';
 import { EventsGateway } from './ws';
 
@@ -171,11 +167,7 @@ import { EventsGateway } from './ws';
     ...EventListenersList,
     EventsGateway,
     ExportMonthlyBusinessTransactionService,
-    ActionItemValidatorsCollector,
-    ActionItemIdentifierValidator,
-    ActionItemTransactionValidatorService,
-    ActionItemCaptureValidatorService,
-    ActionItemRefundValidatorService,
+    ...ActionValidatorsList,
   ],
 })
 export class TransactionsModule { }

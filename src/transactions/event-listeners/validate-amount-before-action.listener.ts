@@ -2,19 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { EventListener } from '@pe/nest-kit';
 import { PaymentActionEventEnum } from '../enum/events';
 import { TransactionModel } from '../models';
-import { ActionItemValidatorsCollector } from '../services';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { TransactionCartItemInterface } from '../interfaces/transaction';
 import { PaymentActionsEnum } from '../enum';
+import { ActionAmountValidatorsCollector } from '../services';
 
 @Injectable()
-export class ValidateItemsBeforeActionListener {
+export class ValidateAmountBeforeActionListener {
   constructor(
-    private readonly actionItemValidatorsCollector: ActionItemValidatorsCollector,
+    private readonly actionAmountValidatorsCollector: ActionAmountValidatorsCollector,
   ) { }
 
   @EventListener(PaymentActionEventEnum.PaymentActionBefore)
-  public async validatePaymentItemsBeforeAction(
+  public async validateAmountBeforeAction(
     transaction: TransactionModel,
     actionPayload: ActionPayloadDto,
     action: string,
@@ -26,16 +25,13 @@ export class ValidateItemsBeforeActionListener {
 
     const allowedByAction: boolean = allowedActions.includes(action);
     const allowedByPayload: boolean =
-      actionPayload.fields?.payment_items
-      && Array.isArray(actionPayload.fields.payment_items)
-      && actionPayload.fields.payment_items.length > 0;
+      actionPayload.fields?.amount
+      && !isNaN(Number(actionPayload.fields.amount));
 
     if (!allowedByAction || !allowedByPayload) {
       return;
     }
 
-    actionPayload.fields.payment_items.forEach(async (item: TransactionCartItemInterface) => {
-      await this.actionItemValidatorsCollector.validateAll(transaction, item, action);
-    });
+    await this.actionAmountValidatorsCollector.validateAll(transaction, actionPayload.fields.amount, action);
   }
 }

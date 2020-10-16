@@ -25,7 +25,7 @@ export class SaveItemsAfterActionListener {
 
     const allowedByAction: boolean = allowedActions.includes(action);
     const allowedByPayload: boolean =
-      actionPayload.fields.payment_items
+      actionPayload.fields?.payment_items
       && Array.isArray(actionPayload.fields.payment_items)
       && actionPayload.fields.payment_items.length > 0;
 
@@ -33,6 +33,13 @@ export class SaveItemsAfterActionListener {
       return;
     }
 
-
+    switch (action) {
+      case PaymentActionsEnum.Refund:
+        await this.transactionsService.saveRefundItems(transaction, actionPayload.fields.payment_items);
+        break;
+      case PaymentActionsEnum.ShippingGoods:
+        await this.transactionsService.saveCaptureItems(transaction, actionPayload.fields.payment_items);
+        break;
+    }
   }
 }

@@ -7,6 +7,7 @@ import {
 import { AddressSchema } from './address.schema';
 import { TransactionCartItemSchema } from './transaction-cart-item-schema';
 import { TransactionHistoryEntrySchema } from './transaction-history-entry.schema';
+import { PaymentActionsEnum } from '../enum';
 
 export const TransactionSchemaName: string = 'Transaction';
 
@@ -90,7 +91,10 @@ TransactionSchema.virtual('amount_refunded').get(function(): number {
 
   if (this.history) {
     this.history
-      .filter((entry: { action: string }) => entry.action === 'refund' || entry.action === 'return')
+      .filter((entry: { action: string }) =>
+        entry.action === PaymentActionsEnum.Refund
+        || entry.action === PaymentActionsEnum.Return,
+      )
       .forEach((entry: { amount: number }) => totalRefunded += (entry.amount || 0))
     ;
   }
@@ -98,8 +102,25 @@ TransactionSchema.virtual('amount_refunded').get(function(): number {
   return totalRefunded;
 });
 
-TransactionSchema.virtual('amount_rest').get(function(): number {
+TransactionSchema.virtual('amount_captured').get(function(): number {
+  let totalCaptured: number = 0;
+
+  if (this.history) {
+    this.history
+      .filter((entry: { action: string }) => entry.action === PaymentActionsEnum.ShippingGoods)
+      .forEach((entry: { amount: number }) => totalCaptured += (entry.amount || 0))
+    ;
+  }
+
+  return totalCaptured;
+});
+
+TransactionSchema.virtual('amount_refund_rest').get(function(): number {
   return this.amount - this.amount_refunded;
+});
+
+TransactionSchema.virtual('amount_capture_rest').get(function(): number {
+  return this.total - this.amount_captured - this.amount_refunded;
 });
 
 TransactionSchema.virtual('available_refund_items').get(function(): TransactionRefundItemInterface[] {

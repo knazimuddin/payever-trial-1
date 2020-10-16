@@ -264,14 +264,44 @@ export class TransactionsService {
     await this.applyPaymentProperties(transaction, result);
   }
 
-  public async saveCaptureItems(transaction: TransactionModel, items: TransactionCartItemInterface[]): Promise<void> {
-    items.forEach((item: TransactionCartItemInterface, index: number) => {
+  public async saveCaptureItems(
+    transaction: TransactionModel,
+    captureItems: TransactionCartItemInterface[],
+  ): Promise<void> {
+    captureItems.forEach((captureItem: TransactionCartItemInterface) => {
       const existingCaptureItem: TransactionCartItemInterface =
         transaction.captured_items.find((transactionItem: TransactionCartItemInterface) => {
-          return transactionItem.identifier === item.identifier;
+          return transactionItem.identifier === captureItem.identifier;
         });
+      if (existingCaptureItem) {
+        existingCaptureItem.quantity += captureItem.quantity;
+      } else {
+        transaction.captured_items.push(captureItem);
+      }
     });
-    // TODO: implement
+
+    transaction.markModified('captured_items');
+    await transaction.save();
+  }
+
+  public async saveRefundItems(
+    transaction: TransactionModel,
+    refundItems: TransactionCartItemInterface[],
+  ): Promise<void> {
+    refundItems.forEach((refundItem: TransactionCartItemInterface) => {
+      const existingRefundItem: TransactionCartItemInterface =
+        transaction.refunded_items.find((transactionItem: TransactionCartItemInterface) => {
+          return transactionItem.identifier === refundItem.identifier;
+        });
+      if (existingRefundItem) {
+        existingRefundItem.quantity += refundItem.quantity;
+      } else {
+        transaction.refunded_items.push(refundItem);
+      }
+    });
+
+    transaction.markModified('refunded_items');
+    await transaction.save();
   }
 
   private async applyPaymentProperties(

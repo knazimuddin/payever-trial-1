@@ -14,8 +14,10 @@ export class TransactionPaymentDetailsConverter {
 
       action_running: transaction.action_running,
       amount: transaction.amount,
+      amount_capture_rest: transaction.amount_capture_rest,
+      amount_captured: transaction.amount_captured,
+      amount_refund_rest: transaction.amount_refund_rest,
       amount_refunded: transaction.amount_refunded,
-      amount_rest: transaction.amount_rest,
       available_refund_items: transaction.available_refund_items,
       billing_address: transaction.billing_address,
       business_option_id: transaction.business_option_id,

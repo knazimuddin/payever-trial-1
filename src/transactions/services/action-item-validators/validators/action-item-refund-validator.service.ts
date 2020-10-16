@@ -10,11 +10,12 @@ import { PaymentActionsEnum } from '../../../enum';
 
 @Injectable()
 @ServiceTag(ACTION_ITEM_VALIDATOR)
-export class ActionItemRefundValidatorService implements ActionItemValidatorInterface{
+export class ActionItemRefundValidatorService implements ActionItemValidatorInterface {
   public async validate(
     transaction: TransactionPackedDetailsInterface,
     item: TransactionCartItemInterface,
-    action: string, ): Promise<void> {
+    action: string,
+  ): Promise<void> {
     if (action !== PaymentActionsEnum.Refund) {
       return;
     }

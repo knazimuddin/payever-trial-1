@@ -54,7 +54,7 @@ Feature: Third party payment actions
          "uuid": "{{transactionId}}",
          "amount": 50,
          "amount_refunded": 0,
-         "amount_rest": 50,
+         "amount_refund_rest": 50,
          "currency": "EUR",
          "total": 50
        },
@@ -219,7 +219,7 @@ Feature: Third party payment actions
          "uuid": "{{transactionId}}",
          "amount": 50,
          "amount_refunded": 0,
-         "amount_rest": 50,
+         "amount_refund_rest": 50,
          "currency": "EUR",
          "total": 50
        },

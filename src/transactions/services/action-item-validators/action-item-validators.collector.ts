@@ -6,7 +6,7 @@ import { ActionItemValidatorInterface } from '../../interfaces';
 
 @Injectable()
 @Collector(ACTION_ITEM_VALIDATOR)
-export class ActionItemValidatorsCollector extends AbstractCollector{
+export class ActionItemValidatorsCollector extends AbstractCollector {
   public async validateAll(
     transaction: TransactionPackedDetailsInterface,
     item: TransactionCartItemInterface,

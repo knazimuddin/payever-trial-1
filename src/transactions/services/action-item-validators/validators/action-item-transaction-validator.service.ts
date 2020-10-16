@@ -9,7 +9,7 @@ import {
 
 @Injectable()
 @ServiceTag(ACTION_ITEM_VALIDATOR)
-export class ActionItemTransactionValidatorService implements ActionItemValidatorInterface{
+export class ActionItemTransactionValidatorService implements ActionItemValidatorInterface {
   public async validate(
     transaction: TransactionPackedDetailsInterface,
     item: TransactionCartItemInterface,
