@@ -19,7 +19,7 @@ const shippingsColumns: Array<{ title: string, name: string }> = [
 const productColumnsFunc: any = (key: number): Array<{ index: number, title: string, name: string }> => [
   { index: key, title: `Lineitem${key + 1} identifier`, name: 'uuid' },
   { index: key, title: `Lineitem${key + 1} name`, name: 'name' },
-  { index: key, title: `Lineitem${key + 1} variant`, name: 'variant' },
+  { index: key, title: `Lineitem${key + 1} variant`, name: 'options' },
   { index: key, title: `Lineitem${key + 1} price`, name: 'price' },
   { index: key, title: `Lineitem${key + 1} vat`, name: 'vat_rate' },
   { index: key, title: `Lineitem${key + 1} sku`, name: 'sku' },
@@ -180,7 +180,7 @@ export class Exporter {
   }
 
   private static getProductValue(field: string, value: string | any[]): string {
-    if (field !== 'variant') {
+    if (field !== 'options') {
       return value as string;
     }
 
