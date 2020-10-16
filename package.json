@@ -40,7 +40,7 @@
     "xlsx": "^0.15.0"
   },
   "devDependencies": {
-    "@pe/artillery-kit": "^1.0.1",
+    "@pe/artillery-kit": "^1.0.6",
     "@pe/cucumber-sdk": "*",
     "@pe/dev-kit": "*",
     "@pe/pact-kit": "*"

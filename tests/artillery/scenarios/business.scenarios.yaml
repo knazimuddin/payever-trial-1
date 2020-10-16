@@ -4,12 +4,6 @@ scenarios:
       - function: "defineVariables"
       - log: "Login"
       - function: "auth"
-      - log: "Get business ID"
-      - get:
-          url: "{{ userUrl }}/api/business"
-          headers:
-            authorization: "Bearer {{ accessToken }}"
-          afterResponse: "defineBusinessId"
       - log: "GET /api/business/{{ businessId }}/list"
       - get:
           url: "/api/business/{{ businessId }}/list"
@@ -40,9 +34,10 @@ scenarios:
             name: "{{ businessName }}"
             currency: "EUR"
             companyAddress:
-              country: "Germany"
+              country: "DE"
             companyDetails:
-              product: "product"
+              product: "BUSINESS_PRODUCT_RETAIL_B2C"
+              industry: "BRANCHE_FASHION"
       - log: "GET /api/business/{{ businessId }}/detail/reference/{{ reference }}"
       - get:
           url: "/api/business/{{ businessId }}/detail/reference/{{ reference }}"
@@ -89,3 +84,4 @@ scenarios:
           json:
             fields: {}
             files: []
+

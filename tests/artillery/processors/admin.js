@@ -3,6 +3,7 @@ const constants = require('../constants');
 
 function defineVariables(context, events, done) {
   context.vars.reference = constants.ADMIN.reference;
+  context.vars.transactionId = constants.ADMIN.transactionId;
 
   return done();
 }

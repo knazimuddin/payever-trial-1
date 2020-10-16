@@ -2,6 +2,7 @@ const artillery = require('@pe/artillery-kit').ArtilleryTest;
 const constants = require('../constants');
 
 function defineVariables(context, events, done) {
+  context.vars.businessId = constants.BUSINESS.businessId;
   context.vars.businessName = artillery.helper.faker.random.alpha({ count: 16 });
   context.vars.business_Id = artillery.helper.faker.random.uuid();
   context.vars.reference = constants.BUSINESS.reference;
@@ -14,19 +15,7 @@ function defineVariables(context, events, done) {
   return done();
 }
 
-function defineBusinessId(requestParams, response, context, ee, next) {
-  const body = artillery.helper.getResponseBody(response);
-  const business = (body || []).find(b => b.active);
-
-  if (business) {
-    context.vars.businessId =  business._id;
-  }
-
-  return next();
-}
-
 module.exports = {
   auth: artillery.helper.auth,
   defineVariables,
-  defineBusinessId,
 };
