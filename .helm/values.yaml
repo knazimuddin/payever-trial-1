@@ -2,10 +2,10 @@ namespace: default
 priorityClass: app-9stars
 
 replicas:
-  http: 1
-  consumer: 1
-  cron: 1
-  ws: 1
+  http: 6
+  consumer: 6
+  cron: 2
+  ws: 2
 
 image:
   nodejs: registry.devpayever.com/nodejs-backend/transactions
