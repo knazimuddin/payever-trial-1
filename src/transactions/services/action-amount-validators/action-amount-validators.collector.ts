@@ -6,14 +6,16 @@ import { ActionAmountValidatorInterface } from '../../interfaces';
 
 @Injectable()
 @Collector(ACTION_AMOUNT_VALIDATOR)
-export class ActionAmountValidatorsCollector extends AbstractCollector{
+export class ActionAmountValidatorsCollector extends AbstractCollector {
+  protected services: ActionAmountValidatorInterface[];
+
   public async validateAll(
     transaction: TransactionPackedDetailsInterface,
     amount: number,
     action: string,
   ): Promise<void> {
-    this.services.forEach(async (validator: ActionAmountValidatorInterface) => {
+    for (const validator of this.services) {
       await validator.validate(transaction, amount, action);
-    });
+    }
   }
 }

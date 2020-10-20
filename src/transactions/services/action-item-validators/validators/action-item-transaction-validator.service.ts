@@ -26,7 +26,7 @@ export class ActionItemTransactionValidatorService implements ActionItemValidato
     }
 
     if (existingTransactionItem.quantity < item.quantity) {
-      throw new BadRequestException(`Item with identifier ${identifier} cannot have higher quantity than transaction item quantity`);
+      throw new BadRequestException(`Item with identifier ${identifier} cannot have greater quantity than transaction item quantity`);
     }
   }
 }

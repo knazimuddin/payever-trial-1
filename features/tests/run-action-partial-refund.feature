@@ -10,13 +10,13 @@ Feature: Partial capture
     "ad738281-f9f0-4db7-a4f6-670b0dff5327"
     """
 
-  Scenario: Do shipping goods action with missing identifier in item
+  Scenario: Do refund action with missing identifier in item
     Given I authenticate as a user with the following data:
     """
     {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
     """
     And I use DB fixture "transactions/partial-capture/third-party-payment"
-    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
+    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/refund" with json:
     """
     {
       "fields": {
@@ -41,13 +41,13 @@ Feature: Partial capture
     }
     """
 
-  Scenario: Do shipping goods action with item that does not belong to transaction
+  Scenario: Do refund action with item that does not belong to transaction
     Given I authenticate as a user with the following data:
     """
     {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
     """
     And I use DB fixture "transactions/partial-capture/third-party-payment"
-    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
+    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/refund" with json:
     """
     {
       "fields": {
@@ -73,13 +73,13 @@ Feature: Partial capture
     }
     """
 
-  Scenario: Do shipping goods action with item quantity greater than initial in transaction
+  Scenario: Do refund action with item quantity greater than initial in transaction
     Given I authenticate as a user with the following data:
     """
     {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
     """
     And I use DB fixture "transactions/partial-capture/third-party-payment"
-    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
+    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/refund" with json:
     """
     {
       "fields": {
@@ -105,45 +105,13 @@ Feature: Partial capture
     }
     """
 
-  Scenario: Do shipping goods action with already captured item
-    Given I authenticate as a user with the following data:
-    """
-    {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
-    """
-    And I use DB fixture "transactions/partial-capture/third-party-payment-captured"
-    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
-    """
-    {
-      "fields": {
-        "payment_items": [
-          {
-            "identifier": "c4bce8c1-6572-43fc-8fc9-0f8f0a5efad1",
-            "name": "test item",
-            "price": 50,
-            "quantity": 1
-          }
-        ]
-      }
-    }
-    """
-    Then print last response
-    And the response status code should be 400
-    And the response should contain json:
-    """
-    {
-       "statusCode": 400,
-       "error": "Bad Request",
-       "message": "Quantity for item c4bce8c1-6572-43fc-8fc9-0f8f0a5efad1 is greater than allowed"
-    }
-    """
-
-  Scenario: Do shipping goods action with already refunded item
+  Scenario: Do refund action with already refunded item
     Given I authenticate as a user with the following data:
     """
     {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
     """
     And I use DB fixture "transactions/partial-capture/third-party-payment-refunded"
-    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
+    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/refund" with json:
     """
     {
       "fields": {
@@ -168,36 +136,3 @@ Feature: Partial capture
        "message": "Quantity for item c4bce8c1-6572-43fc-8fc9-0f8f0a5efad1 is greater than allowed"
     }
     """
-
-  Scenario: Do shipping goods action with already captured and refunded item
-    Given I authenticate as a user with the following data:
-    """
-    {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
-    """
-    And I use DB fixture "transactions/partial-capture/third-party-payment-captured-and-refunded"
-    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
-    """
-    {
-      "fields": {
-        "payment_items": [
-          {
-            "identifier": "3a6bd3ae-3b30-41a4-803f-e457d6113279",
-            "name": "test item",
-            "price": 25,
-            "quantity": 1
-          }
-        ]
-      }
-    }
-    """
-    Then print last response
-    And the response status code should be 400
-    And the response should contain json:
-    """
-    {
-       "statusCode": 400,
-       "error": "Bad Request",
-       "message": "Quantity for item 3a6bd3ae-3b30-41a4-803f-e457d6113279 is greater than allowed"
-    }
-    """
-

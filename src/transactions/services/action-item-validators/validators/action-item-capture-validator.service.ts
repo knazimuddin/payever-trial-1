@@ -48,7 +48,7 @@ export class ActionItemCaptureValidatorService implements ActionItemValidatorInt
       existingTransactionItemQuantity - existingCaptureItemQuantity - existingRefundItemQuantity;
 
     if (item.quantity > allowedCaptureItemQuantity) {
-      throw new BadRequestException(`Quantity for item ${identifier} is higher than allowed`);
+      throw new BadRequestException(`Quantity for item ${identifier} is greater than allowed`);
     }
   }
 }

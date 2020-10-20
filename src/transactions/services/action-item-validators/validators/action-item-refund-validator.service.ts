@@ -42,7 +42,7 @@ export class ActionItemRefundValidatorService implements ActionItemValidatorInte
       existingTransactionItemQuantity - existingRefundItemQuantity;
 
     if (item.quantity > allowedRefundItemQuantity) {
-      throw new BadRequestException(`Quantity for item ${identifier} is higher than allowed`);
+      throw new BadRequestException(`Quantity for item ${identifier} is greater than allowed`);
     }
   }
 }

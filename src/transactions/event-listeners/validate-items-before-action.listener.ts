@@ -4,7 +4,6 @@ import { PaymentActionEventEnum } from '../enum/events';
 import { TransactionModel } from '../models';
 import { ActionItemValidatorsCollector } from '../services';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { TransactionCartItemInterface } from '../interfaces/transaction';
 import { PaymentActionsEnum } from '../enum';
 
 @Injectable()
@@ -34,8 +33,8 @@ export class ValidateItemsBeforeActionListener {
       return;
     }
 
-    actionPayload.fields.payment_items.forEach(async (item: TransactionCartItemInterface) => {
+    for (const item of actionPayload.fields.payment_items) {
       await this.actionItemValidatorsCollector.validateAll(transaction, item, action);
-    });
+    }
   }
 }
