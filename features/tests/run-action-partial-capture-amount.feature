@@ -1,4 +1,4 @@
-Feature: Partial capture
+Feature: Partial capture - amount flow
 
   Background:
     Given I remember as "businessId" following value:
@@ -10,7 +10,7 @@ Feature: Partial capture
     "ad738281-f9f0-4db7-a4f6-670b0dff5327"
     """
 
-  Scenario: Do shipping goods action with missing identifier in item
+  Scenario: Do shipping goods action with negative amount
     Given I authenticate as a user with the following data:
     """
     {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
@@ -20,13 +20,7 @@ Feature: Partial capture
     """
     {
       "fields": {
-        "payment_items": [
-          {
-            "name": "Test item",
-            "price": 500,
-            "quantity": 1
-          }
-        ]
+        "amount": -100
       }
     }
     """
@@ -37,11 +31,11 @@ Feature: Partial capture
     {
        "statusCode": 400,
        "error": "Bad Request",
-       "message": "Identifier is missing for payment item Test item"
+       "message": "Amount should be positive value"
     }
     """
 
-  Scenario: Do shipping goods action with item that does not belong to transaction
+  Scenario: Do shipping goods action with amount greater than transaction amount
     Given I authenticate as a user with the following data:
     """
     {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
@@ -51,14 +45,7 @@ Feature: Partial capture
     """
     {
       "fields": {
-        "payment_items": [
-          {
-            "identifier": "id-12345",
-            "name": "Test item",
-            "price": 500,
-            "quantity": 1
-          }
-        ]
+        "amount": 5000
       }
     }
     """
@@ -69,28 +56,21 @@ Feature: Partial capture
     {
        "statusCode": 400,
        "error": "Bad Request",
-       "message": "Item with identifier id-12345 does not belong to transaction"
+       "message": "Amount is higher than allowed capture amount"
     }
     """
 
-  Scenario: Do shipping goods action with item quantity greater than initial in transaction
+  Scenario: Do shipping goods action with amount greater than allowed amount (already captured partly)
     Given I authenticate as a user with the following data:
     """
     {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
     """
-    And I use DB fixture "transactions/partial-capture/third-party-payment"
+    And I use DB fixture "transactions/partial-capture/third-party-payment-captured-amount"
     When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
     """
     {
       "fields": {
-        "payment_items": [
-          {
-            "identifier": "c4bce8c1-6572-43fc-8fc9-0f8f0a5efad1",
-            "name": "test item",
-            "price": 50,
-            "quantity": 3
-          }
-        ]
+        "amount": 60
       }
     }
     """
@@ -101,28 +81,21 @@ Feature: Partial capture
     {
        "statusCode": 400,
        "error": "Bad Request",
-       "message": "Item with identifier c4bce8c1-6572-43fc-8fc9-0f8f0a5efad1 cannot have greater quantity than transaction item quantity"
+       "message": "Amount is higher than allowed capture amount"
     }
     """
 
-  Scenario: Do shipping goods action with already captured item
+  Scenario: Do shipping goods action with amount greater than allowed amount (already refunded partly)
     Given I authenticate as a user with the following data:
     """
     {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
     """
-    And I use DB fixture "transactions/partial-capture/third-party-payment-captured"
+    And I use DB fixture "transactions/partial-capture/third-party-payment-refunded-amount"
     When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
     """
     {
       "fields": {
-        "payment_items": [
-          {
-            "identifier": "c4bce8c1-6572-43fc-8fc9-0f8f0a5efad1",
-            "name": "test item",
-            "price": 50,
-            "quantity": 1
-          }
-        ]
+        "amount": 60
       }
     }
     """
@@ -133,28 +106,21 @@ Feature: Partial capture
     {
        "statusCode": 400,
        "error": "Bad Request",
-       "message": "Quantity for item c4bce8c1-6572-43fc-8fc9-0f8f0a5efad1 is greater than allowed"
+       "message": "Amount is higher than allowed capture amount"
     }
     """
 
-  Scenario: Do shipping goods action with already refunded item
+  Scenario: Do shipping goods action with amount greater than allowed amount (already captured and refunded partly)
     Given I authenticate as a user with the following data:
     """
     {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
     """
-    And I use DB fixture "transactions/partial-capture/third-party-payment-refunded"
+    And I use DB fixture "transactions/partial-capture/third-party-payment-captured-and-refunded-amount"
     When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
     """
     {
       "fields": {
-        "payment_items": [
-          {
-            "identifier": "c4bce8c1-6572-43fc-8fc9-0f8f0a5efad1",
-            "name": "test item",
-            "price": 50,
-            "quantity": 1
-          }
-        ]
+        "amount": 60
       }
     }
     """
@@ -165,43 +131,11 @@ Feature: Partial capture
     {
        "statusCode": 400,
        "error": "Bad Request",
-       "message": "Quantity for item c4bce8c1-6572-43fc-8fc9-0f8f0a5efad1 is greater than allowed"
+       "message": "Amount is higher than allowed capture amount"
     }
     """
 
-  Scenario: Do shipping goods action with already captured and refunded item
-    Given I authenticate as a user with the following data:
-    """
-    {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
-    """
-    And I use DB fixture "transactions/partial-capture/third-party-payment-captured-and-refunded"
-    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
-    """
-    {
-      "fields": {
-        "payment_items": [
-          {
-            "identifier": "3a6bd3ae-3b30-41a4-803f-e457d6113279",
-            "name": "test item",
-            "price": 25,
-            "quantity": 1
-          }
-        ]
-      }
-    }
-    """
-    Then print last response
-    And the response status code should be 400
-    And the response should contain json:
-    """
-    {
-       "statusCode": 400,
-       "error": "Bad Request",
-       "message": "Quantity for item 3a6bd3ae-3b30-41a4-803f-e457d6113279 is greater than allowed"
-    }
-    """
-
-  Scenario: Do shipping goods action with item
+  Scenario: Do shipping goods action with amount
     Given I authenticate as a user with the following data:
     """
     {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
@@ -212,7 +146,7 @@ Feature: Partial capture
       "request": {
         "method": "post",
         "url": "*/api/business/{{businessId}}/integration/stripe/action/action-shipping-goods",
-        "body": "{\"fields\":{\"payment_items\":[{\"identifier\":\"3a6bd3ae-3b30-41a4-803f-e457d6113279\",\"name\":\"test item\",\"price\":25,\"quantity\":1}]},\"paymentId\":\"{{transactionId}}\"}",
+        "body": "{\"fields\":{\"amount\":50},\"paymentId\":\"{{transactionId}}\"}",
         "headers": {
           "Accept": "application/json, text/plain, */*",
           "Content-Type": "application/json;charset=utf-8",
@@ -246,19 +180,72 @@ Feature: Partial capture
       }
     }
     """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "transactions",
+          "transaction",
+          {
+            "uuid": "{{transactionId}}"
+          }
+         ],
+        "result": {}
+      }
+      """
     And I use DB fixture "transactions/partial-capture/third-party-payment"
+    When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
+    """
+    {
+      "name": "payever.event.payment.action.completed",
+      "payload": {
+        "payment": {
+          "id": "440ec879-7f02-48d4-9ffb-77adfaf79a06",
+          "uuid": "{{transactionId}}",
+          "amount": 100,
+          "total": 100,
+          "currency": "NOK",
+          "reference": "1906191249319025",
+          "customer_name": "Test Customer",
+          "customer_email": "test@test.com",
+          "specific_status": "PAID",
+          "status": "STATUS_CANCELLED",
+          "address": {
+            "country": "NO",
+            "city": "HAUGLANDSHELLA",
+            "zip_code": "5310",
+            "street": "Ravnetua 21",
+            "phone": "90782130",
+            "salutation": "SALUTATION_MR",
+            "first_name": "Christian",
+            "last_name": "Breivik"
+          },
+          "fee": 0,
+          "delivery_fee": 0,
+          "payment_fee": 0,
+          "down_payment": 0,
+          "place": "cancelled",
+          "business_payment_option": {
+            "payment_option": {
+              "payment_method": "santander_invoice_no"
+            }
+          },
+          "created_at": "2019-06-19T10:50:00+00:00"
+        },
+        "action": "shipping_goods",
+        "amount": "50",
+        "data": {
+          "amount": "50"
+        }
+      }
+    }
+    """
+    Then I process messages from RabbitMQ "async_events_transactions_micro" channel
     When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
     """
     {
       "fields": {
-        "payment_items": [
-          {
-            "identifier": "3a6bd3ae-3b30-41a4-803f-e457d6113279",
-            "name": "test item",
-            "price": 25,
-            "quantity": 1
-          }
-        ]
+        "amount": 50
       }
     }
     """
@@ -272,34 +259,12 @@ Feature: Partial capture
          "original_id": "*",
          "uuid": "{{transactionId}}",
          "amount": 100,
-         "amount_capture_rest": 100,
-         "amount_captured": 0,
+         "amount_capture_rest": 50,
+         "amount_captured": 50,
          "amount_refund_rest": 100,
          "amount_refunded": 0,
          "currency": "EUR",
          "total": 100
        }
-    }
-    """
-    And I look for model "Transaction" by following JSON and remember as "transactionModel":
-    """
-    {
-      "uuid": "{{transactionId}}"
-    }
-    """
-    Then print storage key "transactionModel"
-    Then stored value "transactionModel" should contain json:
-    """
-    {
-      "captured_items": [
-        {
-          "identifier": "3a6bd3ae-3b30-41a4-803f-e457d6113279",
-          "name": "test item",
-          "price": 25,
-          "quantity": 1,
-          "options": []
-        }
-      ],
-      "refunded_items": []
     }
     """
