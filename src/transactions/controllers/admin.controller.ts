@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -135,32 +134,8 @@ export class AdminController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
   ): Promise<TransactionOutputInterface> {
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
-    );
-
-    try {
-      await this.messagingService.updateStatus(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(
-        {
-          context: 'AdminController',
-          error: e.message,
-          message: `Error occured during status update`,
-        },
-      );
-
-      throw new BadRequestException(`Error occurred during status update. Please try again later.`);
-    }
-
     const updatedTransaction: TransactionUnpackedDetailsInterface =
-      await this.transactionsService.findUnpackedByUuid(transaction.uuid);
-    /** Send update to checkout-php */
-    try {
-      await this.messagingService.sendTransactionUpdate(updatedTransaction);
-    } catch (e) {
-      throw new BadRequestException(`Error occurred while sending transaction update: ${e.message}`);
-    }
+      await this.transactionActionService.updateStatus(transaction);
 
     return TransactionOutputConverter.convert(
       updatedTransaction,
