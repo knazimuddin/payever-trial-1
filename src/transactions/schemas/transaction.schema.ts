@@ -129,23 +129,20 @@ TransactionSchema.virtual('available_refund_items').get(function(): TransactionR
   this.items.forEach((item: TransactionCartItemInterface) => {
     let availableCount: number = item.quantity;
 
-    if (this.history) {
-      this.history.forEach((historyEntry: TransactionHistoryEntryInterface) => {
-        if (historyEntry.refund_items) {
-          const refundedLog: TransactionRefundItemInterface = historyEntry.refund_items.find(
-            (refundedItem: TransactionRefundItemInterface) => item.uuid === refundedItem.item_uuid,
-          );
+    if (this.refunded_items) {
+      const existingRefundItem: TransactionCartItemInterface = this.refunded_items.find(
+        (refundedItem: TransactionCartItemInterface) => item.identifier === refundedItem.identifier,
+      );
 
-          if (refundedLog && refundedLog.count) {
-            availableCount -= refundedLog.count;
-          }
-        }
-      });
+      if (existingRefundItem && existingRefundItem.quantity) {
+        availableCount -= existingRefundItem.quantity;
+      }
     }
 
     if (availableCount > 0) {
       refundItems.push({
         count: availableCount,
+        identifier: item.identifier,
         item_uuid: item.uuid,
       });
     }

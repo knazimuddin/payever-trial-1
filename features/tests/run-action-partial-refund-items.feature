@@ -1,4 +1,4 @@
-Feature: Partial capture
+Feature: Partial refund - items flow
 
   Background:
     Given I remember as "businessId" following value:
