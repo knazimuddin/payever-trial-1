@@ -16,7 +16,12 @@ import { BusinessPaymentOptionService } from './business-payment-option.service'
 import { PaymentFlowService } from './payment-flow.service';
 import { PaymentsMicroService } from './payments-micro.service';
 import { TransactionsService } from './transactions.service';
-import { AllowedUpdateStatusPaymentMethodsEnum, NextActionTypesEnum, RpcMessageIdentifierEnum } from '../enum';
+import {
+  AllowedUpdateStatusPaymentMethodsEnum,
+  NextActionTypesEnum,
+  PaymentActionsEnum,
+  RpcMessageIdentifierEnum
+} from '../enum';
 
 @Injectable()
 export class MessagingService implements ActionCallerInterface {
@@ -377,12 +382,17 @@ export class MessagingService implements ActionCallerInterface {
     fields: FieldsInterface & UnwrappedFieldsInterface,
   ): FieldsInterface & UnwrappedFieldsInterface {
     // @TODO ask FE to remove wrapper object!
-    if ((action === 'refund' || action === 'return') && fields.payment_return) {
-      fields.amount = fields.payment_return.amount || fields.amount || 0.0;
-      fields.reason = fields.payment_return.reason || fields.reason || null;
+    if ((action === 'refund' || action === 'return')) {
+      if (fields.payment_return) {
+        fields.amount = fields.payment_return.amount || fields.amount || 0.0;
+        fields.reason = fields.payment_return.reason || fields.reason || null;
+      }
+
       fields.refunded_amount = transaction.amount_refunded;
+      fields.captured_amount = transaction.amount_captured;
       /** php microservices use JMS Serializer, thus need this field in camel case also */
       fields.refundedAmount = fields.refunded_amount;
+      fields.capturedAmount = fields.captured_amount;
     }
     if (action === 'change_amount' && fields.payment_change_amount) {
       fields.amount = fields.payment_change_amount.amount || fields.amount || 0;
@@ -400,6 +410,12 @@ export class MessagingService implements ActionCallerInterface {
         ,
         reason: fields.payment_update.reason,
       };
+    }
+    if (action === PaymentActionsEnum.ShippingGoods) {
+      fields.refunded_amount = transaction.amount_refunded;
+      fields.captured_amount = transaction.amount_captured;
+      fields.refundedAmount = fields.refunded_amount;
+      fields.capturedAmount = fields.captured_amount;
     }
 
     return fields;
