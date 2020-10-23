@@ -20,7 +20,7 @@ import {
   AllowedUpdateStatusPaymentMethodsEnum,
   NextActionTypesEnum,
   PaymentActionsEnum,
-  RpcMessageIdentifierEnum
+  RpcMessageIdentifierEnum,
 } from '../enum';
 
 @Injectable()
@@ -376,6 +376,7 @@ export class MessagingService implements ActionCallerInterface {
     }
   }
 
+  /* tslint:disable-next-line */
   private prepareActionFields(
     transaction: TransactionBasicInterface,
     action: string,
