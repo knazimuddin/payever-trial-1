@@ -30,8 +30,10 @@ export class TransactionOutputConverter {
         uuid: transaction.uuid,
 
         amount: transaction.amount,
+        amount_capture_rest: transaction.amount_capture_rest,
+        amount_captured: transaction.amount_captured,
+        amount_refund_rest: transaction.amount_refund_rest,
         amount_refunded: transaction.amount_refunded,
-        amount_rest: transaction.amount_rest,
         currency: transaction.currency,
         total: transaction.total,
 

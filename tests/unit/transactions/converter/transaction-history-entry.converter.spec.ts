@@ -2,9 +2,8 @@ import 'mocha';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as sinonChai from 'sinon-chai';
-import * as uuid from 'uuid';
-import { TransactionHistoryEntryConverter } from '../../../../src/transactions/converter/transaction-history-entry.converter';
-import { HistoryEventDataInterface, HistoryEventRefundItemInterface } from '../../../../src/transactions/interfaces/history-event-message';
+import { TransactionHistoryEntryConverter } from '../../../../src/transactions/converter';
+import { HistoryEventDataInterface } from '../../../../src/transactions/interfaces/history-event-message';
 import { TransactionModel } from '../../../../src/transactions/models';
 import { CheckoutTransactionHistoryItemInterface } from '../../../../src/transactions/interfaces/checkout';
 
@@ -32,6 +31,7 @@ describe('TransactionHistoryEntryConverter', () => {
       {
         count: 4,
         payment_item_id: '86b62cc1-cf75-4065-ac91-b1df6ccc6157',
+        identifier: 'test_id',
       },
     ],
   }
@@ -64,10 +64,12 @@ describe('TransactionHistoryEntryConverter', () => {
       {
         id: '86b62cc1-cf75-4065-ac91-b1df6ccc6157',
         name: 'item_1',
+        identifier: 'test_id',
       },
       {
         id: '86d6e5da-c5b2-41e6-b77f-0400cc17b9ab',
         name: 'item_2',
+        identifier: 'test_id2',
       },
     ],
   } as TransactionModel;
@@ -123,7 +125,7 @@ describe('TransactionHistoryEntryConverter', () => {
   });
 
   describe('fromHistoryRefundCompletedMessage()', () => {
-    it('should complete message frm history refund', () => {
+    it('should complete message from history refund', () => {
       const type: string = 'type_1';
       const createdAt: Date = new Date('2009-11-04T18:55:41+00:00');
 
@@ -143,6 +145,7 @@ describe('TransactionHistoryEntryConverter', () => {
           refund_items: [{
             count: 4,
             item_uuid: '86b62cc1-cf75-4065-ac91-b1df6ccc6157',
+            identifier: 'test_id',
           }],
         },
       );

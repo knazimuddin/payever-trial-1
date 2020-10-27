@@ -10,8 +10,10 @@ export interface TransactionBasicInterface extends SantanderApplicationAwareInte
   uuid: string;
   action_running: boolean;
   amount: number;
+  amount_capture_rest?: number;
+  amount_captured?: number;
   amount_refunded?: number;
-  amount_rest?: number;
+  amount_refund_rest?: number;
   available_refund_items?: TransactionRefundItemInterface[];
   billing_address: AddressInterface;
   business_option_id: number;
@@ -27,7 +29,11 @@ export interface TransactionBasicInterface extends SantanderApplicationAwareInte
   down_payment: number;
   fee_accepted: boolean;
   history: TransactionHistoryEntryInterface[];
+
+  captured_items?: TransactionCartItemInterface[];
   items: TransactionCartItemInterface[];
+  refunded_items?: TransactionCartItemInterface[];
+
   merchant_email: string;
   merchant_name: string;
   payment_fee: number;

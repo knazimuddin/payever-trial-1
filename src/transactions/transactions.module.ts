@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
 import { DelayRemoveClient, ElasticSearchModule } from '@pe/elastic-kit';
-import { EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
+import { CollectorModule, EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { MigrationModule } from '@pe/migration-kit';
 import { environment } from '../environments';
@@ -76,7 +76,9 @@ import {
   TransactionHistoryService,
   TransactionsExampleService,
   TransactionsService,
-  SampleProductsService, ExportMonthlyBusinessTransactionService,
+  SampleProductsService,
+  ExportMonthlyBusinessTransactionService,
+  ActionValidatorsList,
 } from './services';
 import { EventsGateway } from './ws';
 
@@ -130,6 +132,7 @@ import { EventsGateway } from './ws';
     BpoFixCommand,
     BusinessPaymentOptionService,
     BusinessService,
+    CollectorModule,
     ConfigService,
     DailyReportTransactionMailerReportEventProducer,
     DailyReportTransactionsService,
@@ -164,6 +167,7 @@ import { EventsGateway } from './ws';
     ...EventListenersList,
     EventsGateway,
     ExportMonthlyBusinessTransactionService,
+    ...ActionValidatorsList,
   ],
 })
 export class TransactionsModule { }

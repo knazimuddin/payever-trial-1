@@ -15,8 +15,10 @@ export interface TransactionOutputInterface {
     uuid: string;
     currency: string;
     amount: number;
+    amount_capture_rest?: number;
+    amount_captured?: number;
     amount_refunded?: number;
-    amount_rest?: number;
+    amount_refund_rest?: number;
     total: number;
     created_at: Date;
     updated_at: Date;

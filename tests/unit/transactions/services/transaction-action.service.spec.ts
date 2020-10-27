@@ -51,7 +51,7 @@ describe('TransactonActionService()', () => {
     original_id: '627a3236-af6c-444a-836c-9f0d1d27c21a',
     amount: 100,
     amount_refunded: 50,
-    amount_rest: 40,
+    amount_refund_rest: 40,
     available_refund_items: [],
     billing_address: {
       id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
@@ -102,7 +102,7 @@ describe('TransactonActionService()', () => {
     original_id: '627a3236-af6c-444a-836c-9f0d1d27c21a',
     amount: 100,
     amount_refunded: 50,
-    amount_rest: 40,
+    amount_refund_rest: 40,
     available_refund_items: [],
     billing_address: {
       id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',

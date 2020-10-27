@@ -102,6 +102,7 @@ export class TransactionHistoryEntryConverter {
       if (cartItem) {
         items.push({
           count: refundItem.count,
+          identifier: cartItem.identifier,
           item_uuid: cartItem.id,
         });
       }
