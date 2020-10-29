@@ -27,7 +27,7 @@
     "@nestjs/platform-ws": "6.8.5",
     "@nestjs/websockets": "6.8.5",
     "@pe/common-sdk": "*",
-    "@pe/elastic-kit": "*",
+    "@pe/elastic-kit": "^2.0.0",
     "@pe/migration-kit": "*",
     "@pe/nest-kit": "^6.0.2",
     "@pe/notifications-sdk": "*",
