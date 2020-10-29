@@ -22,7 +22,10 @@ export const environment: any = {
   applicationName: env.APP_NAME,
   connectMicroUrlBase: env.MICRO_URL_CONNECT,
   defaultCurrency: env.DEFAULT_CURRENCY,
-  elasticSearch: env.ELASTIC_HOST,
+  elasticSearchAuthPassword: env.ELASTIC_AUTH_PASSWORD,
+  elasticSearchAuthUsername: env.ELASTIC_AUTH_USERNAME,
+  elasticSearchCloudId: env.ELASTIC_CLOUD_ID,
+  elasticSearchHost: env.ELASTIC_HOST,
   jwtOptions: {
     // this should be set to PEM encoded private key for RSA/ECDSA for production
     // @see https://github.com/auth0/node-jsonwebtoken#jwtsignpayload-secretorprivatekey-options-callback

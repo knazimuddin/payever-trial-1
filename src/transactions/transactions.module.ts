@@ -122,7 +122,10 @@ import { EventsGateway } from './ws';
     }),
     EventDispatcherModule,
     ElasticSearchModule.forRoot({
-      host: environment.elasticSearch,
+      authPassword: environment.elasticSearchAuthPassword,
+      authUsername: environment.elasticSearchAuthUsername,
+      cloudId: environment.elasticSearchCloudId,
+      host: environment.elasticSearchHost,
     }),
     MigrationModule,
   ],
