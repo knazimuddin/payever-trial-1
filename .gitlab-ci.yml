@@ -2,3 +2,52 @@ include:
   - project: "infra/ci-config"
     ref: "master"
     file: "/nodejs-backend/transactions.yml"
+
+.Base tagging image:
+  stage: build
+  tags:
+    - live_deploy
+  variables:
+    BRANCH_IMAGE: "$REGISTRY_SERVER/$CI_PROJECT_PATH:$CI_COMMIT_SHA"
+    TAG_IMAGE: "$REGISTRY_SERVER/$CI_PROJECT_PATH:$CI_COMMIT_SHA"
+    GIT_STRATEGY: none
+  rules:
+    - if: '$IN_PIPELINE_TYPE'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: manual
+    - if: '$CI_COMMIT_BRANCH'
+      when: manual
+  before_script:
+    - echo "$BRANCH_IMAGE"
+    - echo "$TAG_IMAGE"
+  script:
+    - i=0; while ! docker image pull $BRANCH_IMAGE; do if [[ $i -eq 100 ]]; then exit 1; fi; i=$(( i + 1 )); sleep 10; done
+    - docker image tag $BRANCH_IMAGE $TAG_IMAGE
+    - docker image push $TAG_IMAGE
+
+.Tagging image to live:
+  extends: .Base tagging image
+  variables:
+    TAG_IMAGE: "$REGISTRY_LIVE_SERVER/$CI_PROJECT_PATH:$CI_COMMIT_SHA"
+  script:
+    - i=0; while ! docker image pull $BRANCH_IMAGE; do if [[ $i -eq 100 ]]; then exit 1; fi; i=$(( i + 1 )); sleep 10; done
+    - docker image tag $BRANCH_IMAGE $TAG_IMAGE
+    - docker image push $TAG_IMAGE --disable-content-trust=false
+
+Tagging image:
+  extends: .Tagging image to live
+
+Deploy to live new:
+  extends: .Deploy to live new
+  environment:
+    name: live_new
+  variables:
+    REGISTRY_SERVER: "$REGISTRY_LIVE_SERVER"
+    IMAGE_TAG: "$CI_COMMIT_SHA"
+    NAMESPACE: production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: manual
+    - if: '$CI_COMMIT_BRANCH'
+      when: manual
