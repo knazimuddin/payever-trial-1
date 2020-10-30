@@ -3,7 +3,11 @@
 {{ $appName := printf "%s-ws" $chartName }}
 
 apiVersion: apps/v1
+{{- if eq $values.namespace "production" }}
+kind: DaemonSet
+{{- else }}
 kind: Deployment
+{{- end }}
 
 metadata:
   name: {{ $appName }}
@@ -18,8 +22,9 @@ metadata:
     "werf.io/set-replicas-only-on-creation": "true"
 
 spec:
+  {{- if ne $values.namespace "production" }}
   replicas: {{ $values.replicas.ws }}
-
+  {{- end }}
   strategy:
     type: RollingUpdate
 
