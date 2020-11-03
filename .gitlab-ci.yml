@@ -2,3 +2,13 @@ include:
   - project: "infra/ci-config"
     ref: "master"
     file: "/nodejs-backend/transactions.yml"
+
+Deploy to stage:
+  extends: .Deploy to stage
+  rules:
+    - if: '$IN_PIPELINE_TYPE'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH'
+      when: manual
