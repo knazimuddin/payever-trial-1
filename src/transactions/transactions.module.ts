@@ -8,11 +8,13 @@ import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { MigrationModule } from '@pe/migration-kit';
 import { environment } from '../environments';
 import {
-  BpoFixCommand, ExportTransactionToWidgetCommand,
+  BpoFixCommand,
+  ExportTransactionToWidgetCommand,
   TransactionsEsBusinessCheckCommand,
   TransactionsEsBusinessUpdateCommand,
   TransactionsEsCompareCommand,
   TransactionsEsExportCommand,
+  TransactionsEsFixDiffCommand,
   TransactionsEsSetupCommand,
   TransactionsExportForBlankMigrateCommand,
   TransactionsExportForWidgetsCommand,
@@ -160,6 +162,7 @@ import { EventsGateway } from './ws';
     TransactionsEsBusinessUpdateCommand,
     TransactionsEsCompareCommand,
     TransactionsEsExportCommand,
+    TransactionsEsFixDiffCommand,
     TransactionsEsSetupCommand,
     TransactionsExampleService,
     TransactionsExportForBlankMigrateCommand,
