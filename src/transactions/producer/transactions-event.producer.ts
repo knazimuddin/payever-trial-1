@@ -20,55 +20,35 @@ export class TransactionEventProducer {
     amount: number,
   ): Promise<void> {
 
-    const payload: TransactionPaymentInterface = {
-      amount: amount,
-      business: {
-        id: transaction.business_uuid,
-      },
-      channel_set: {
-        id: transaction.channel_set_uuid,
-      },
-      date: transaction.updated_at,
-      id: transaction.uuid,
-      items: transaction.items,
-    };
-    await this.send(RabbitRoutingKeys.TransactionsPaymentAdd, payload);
+    await this.produceTransactionUpdateEvent(transaction, amount, RabbitRoutingKeys.TransactionsPaymentAdd);
+  }
+
+  public async produceTransactionPaidEvent(
+    transaction: TransactionPackedDetailsInterface,
+    amount: number,
+  ): Promise<void> {
+    await this.produceTransactionUpdateEvent(transaction, amount, RabbitRoutingKeys.TransactionsPaymentPaid);
+  }
+
+  public async produceTransactionRefundEvent(
+    transaction: TransactionPackedDetailsInterface,
+    amount: number,
+  ): Promise<void> {
+
+    await this.produceTransactionUpdateEvent(transaction, amount, RabbitRoutingKeys.TransactionsPaymentRefund);
   }
 
   public async produceTransactionSubtractEvent(
     transaction: TransactionModel,
     refund: HistoryEventActionCompletedInterface,
   ): Promise<void> {
-    const payload: TransactionPaymentInterface = {
-      amount: refund.data.amount,
-      business: {
-        id: transaction.business_uuid,
-      },
-      channel_set: {
-        id: transaction.channel_set_uuid,
-      },
-      date: transaction.updated_at,
-      id: transaction.uuid,
-      items: transaction.items,
-    };
-    await this.send(RabbitRoutingKeys.TransactionsPaymentSubtract, payload);
+    await this.produceTransactionUpdateEvent(
+      transaction, refund.data.amount, RabbitRoutingKeys.TransactionsPaymentSubtract);
   }
 
   public async produceTransactionRemoveEvent(transaction: TransactionModel): Promise<void> {
-    const payload: any = {
-      amount: transaction.amount,
-      business: {
-        id: transaction.business_uuid,
-      },
-      channel_set: {
-        id: transaction.channel_set_uuid,
-      },
-      date: transaction.updated_at,
-      id: transaction.uuid,
-      items: transaction.items,
-    };
-
-    await this.send(RabbitRoutingKeys.TransactionsPaymentRemoved, payload);
+    await this.produceTransactionUpdateEvent(
+      transaction, transaction.amount, RabbitRoutingKeys.TransactionsPaymentRemoved);
   }
 
   public async produceExportMonthlyBusinessTransactionEvent(
@@ -116,5 +96,27 @@ export class TransactionEventProducer {
         payload: payload,
       },
     );
+  }
+
+  private async produceTransactionUpdateEvent(
+    transaction: TransactionPackedDetailsInterface,
+    amount: number,
+    event: RabbitRoutingKeys,
+  ): Promise<void> {
+
+    const payload: TransactionPaymentInterface = {
+      amount: amount,
+      business: {
+        id: transaction.business_uuid,
+      },
+      channel_set: {
+        id: transaction.channel_set_uuid,
+      },
+      date: transaction.updated_at,
+      id: transaction.uuid,
+      items: transaction.items,
+    };
+
+    await this.send(event, payload);
   }
 }

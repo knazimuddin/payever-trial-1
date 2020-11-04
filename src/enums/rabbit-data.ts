@@ -21,6 +21,8 @@ export enum RabbitRoutingKeys {
   PaymentFlowMigrate = 'checkout.event.payment-flow.migrate',
 
   TransactionsPaymentAdd = 'transactions.event.payment.add',
+  TransactionsPaymentPaid = 'transactions.event.payment.paid',
+  TransactionsPaymentRefund = 'transactions.event.payment.refund',
   TransactionsPaymentSubtract = 'transactions.event.payment.subtract',
   TransactionsPaymentRemoved = 'transactions.event.payment.removed',
   TransactionsMigrate = 'transactions.event.payment.migrate',

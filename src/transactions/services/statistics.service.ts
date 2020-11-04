@@ -6,6 +6,7 @@ import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionEventProducer } from '../producer';
 import { TransactionSchemaName } from '../schemas';
+import { PaymentStatusesEnum } from '../../transactions/enum';
 
 @Injectable()
 export class StatisticsService {
@@ -26,17 +27,29 @@ export class StatisticsService {
       return;
     }
 
-    if (existing.status !== updating.status && updating.status === 'STATUS_ACCEPTED') {
+    if (existing.status !== updating.status && updating.status === PaymentStatusesEnum.Accepted) {
       await this.transactionsEventProducer.produceTransactionAddEvent(updating, updating.amount);
     }
   }
 
+  public async processPaidTransaction(id: string, updating: TransactionPackedDetailsInterface): Promise<void> {
+    const existing: TransactionModel = await this.transactionsModel.findOne({ uuid: id }).lean();
+
+    if (!existing) {
+      return;
+    }
+
+    if (existing.status !== updating.status && updating.status === PaymentStatusesEnum.Paid) {
+      await this.transactionsEventProducer.produceTransactionPaidEvent(updating, updating.amount);
+    }
+  }
+
   public async processMigratedTransaction(transaction: TransactionPackedDetailsInterface): Promise<void> {
-    if (transaction.status === 'STATUS_ACCEPTED' || transaction.status === 'STATUS_PAID') {
+    if (transaction.status === PaymentStatusesEnum.Accepted || transaction.status === PaymentStatusesEnum.Paid) {
       await this.transactionsEventProducer.produceTransactionAddEvent(transaction, transaction.amount);
     }
 
-    if (transaction.status === 'STATUS_REFUNDED') {
+    if (transaction.status === PaymentStatusesEnum.Refunded) {
       let refundedAmount: number = 0.0;
       for (const item of transaction.history) {
         if (item.action === 'refund') {
@@ -59,4 +72,28 @@ export class StatisticsService {
       await this.transactionsEventProducer.produceTransactionSubtractEvent(existing, refund);
     }
   }
+
+  public async processRefaudedTransactionAfterPaid(
+    id: string,
+    updating: TransactionPackedDetailsInterface,
+  ): Promise<void> {
+    const existing: TransactionModel = await this.transactionsModel.findOne({ uuid: id }).lean();
+
+    if (!existing) {
+      return;
+    }
+
+    if (existing.status === PaymentStatusesEnum.Paid && updating.status === PaymentStatusesEnum.Refunded) {
+
+      let refundedAmount: number = 0.0;
+      for (const item of updating.history) {
+        if (item.action === 'refund') {
+          refundedAmount = Number(refundedAmount) + Number(item.amount);
+        }
+      }
+
+      await this.transactionsEventProducer.produceTransactionRefundEvent(updating, refundedAmount);
+    }
+  }
+
 }
