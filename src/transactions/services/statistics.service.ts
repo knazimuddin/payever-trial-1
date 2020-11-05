@@ -6,7 +6,7 @@ import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionEventProducer } from '../producer';
 import { TransactionSchemaName } from '../schemas';
-import { PaymentStatusesEnum } from '../../transactions/enum';
+import { PaymentStatusesEnum, PaymentActionsEnum } from '../../transactions/enum';
 
 @Injectable()
 export class StatisticsService {
@@ -40,7 +40,8 @@ export class StatisticsService {
     }
 
     if (existing.status !== updating.status && updating.status === PaymentStatusesEnum.Paid) {
-      await this.transactionsEventProducer.produceTransactionPaidEvent(updating, updating.amount);
+      await this.transactionsEventProducer.produceTransactionPaidEvent(
+        updating, updating.amount, existing.updated_at);
     }
   }
 
@@ -52,7 +53,7 @@ export class StatisticsService {
     if (transaction.status === PaymentStatusesEnum.Refunded) {
       let refundedAmount: number = 0.0;
       for (const item of transaction.history) {
-        if (item.action === 'refund') {
+        if (item.action === PaymentActionsEnum.Refund) {
           refundedAmount = Number(refundedAmount) + Number(item.amount);
         }
       }
@@ -68,7 +69,7 @@ export class StatisticsService {
       return;
     }
 
-    if (refund.action && refund.action === 'refund') {
+    if (refund.action && refund.action === PaymentActionsEnum.Refund) {
       await this.transactionsEventProducer.produceTransactionSubtractEvent(existing, refund);
     }
   }
@@ -83,16 +84,20 @@ export class StatisticsService {
       return;
     }
 
-    if (existing.status === PaymentStatusesEnum.Paid && updating.status === PaymentStatusesEnum.Refunded) {
+    if (existing.status === PaymentStatusesEnum.Paid &&
+      (updating.status === PaymentStatusesEnum.Refunded) || (updating.status === PaymentStatusesEnum.Cancelled)) {
 
+      const virifiedAction: PaymentActionsEnum = updating.status === PaymentStatusesEnum.Refunded ?
+        PaymentActionsEnum.Refund : PaymentActionsEnum.Cancel;
       let refundedAmount: number = 0.0;
       for (const item of updating.history) {
-        if (item.action === 'refund') {
+        if (item.action === virifiedAction) {
           refundedAmount = Number(refundedAmount) + Number(item.amount);
         }
       }
 
-      await this.transactionsEventProducer.produceTransactionRefundEvent(updating, refundedAmount);
+      await this.transactionsEventProducer.produceTransactionRefundEvent(
+        updating, refundedAmount, existing.updated_at);
     }
   }
 

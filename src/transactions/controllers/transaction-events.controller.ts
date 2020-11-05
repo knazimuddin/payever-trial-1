@@ -53,7 +53,8 @@ export class TransactionEventsController {
     if (transaction.status === PaymentStatusesEnum.Paid) {
       await this.statisticsService.processPaidTransaction(transaction.uuid, transaction);
     }
-    if (transaction.status === PaymentStatusesEnum.Refunded) {
+    if ((transaction.status === PaymentStatusesEnum.Refunded)
+      || (transaction.status === PaymentStatusesEnum.Cancelled)) {
       await this.statisticsService.processRefaudedTransactionAfterPaid(transaction.uuid, transaction);
     }
     const updated: TransactionModel = await this.transactionsService.updateByUuid(transaction.uuid, transaction);

@@ -15,40 +15,47 @@ export class TransactionEventProducer {
     private readonly rabbitClient: RabbitMqClient,
   ) { }
 
+  /** @deprecated */
   public async produceTransactionAddEvent(
     transaction: TransactionPackedDetailsInterface,
     amount: number,
   ): Promise<void> {
 
-    await this.produceTransactionUpdateEvent(transaction, amount, RabbitRoutingKeys.TransactionsPaymentAdd);
+    await this.produceTransactionUpdateEvent(
+      transaction, amount, RabbitRoutingKeys.TransactionsPaymentAdd, null);
   }
 
   public async produceTransactionPaidEvent(
     transaction: TransactionPackedDetailsInterface,
     amount: number,
+    last_updated: Date,
   ): Promise<void> {
-    await this.produceTransactionUpdateEvent(transaction, amount, RabbitRoutingKeys.TransactionsPaymentPaid);
+    await this.produceTransactionUpdateEvent(
+      transaction, amount, RabbitRoutingKeys.TransactionsPaymentPaid, last_updated);
   }
 
   public async produceTransactionRefundEvent(
     transaction: TransactionPackedDetailsInterface,
     amount: number,
+    last_updated: Date,
   ): Promise<void> {
 
-    await this.produceTransactionUpdateEvent(transaction, amount, RabbitRoutingKeys.TransactionsPaymentRefund);
+    await this.produceTransactionUpdateEvent(
+      transaction, amount, RabbitRoutingKeys.TransactionsPaymentRefund, last_updated);
   }
 
+  /** @deprecated */
   public async produceTransactionSubtractEvent(
     transaction: TransactionModel,
     refund: HistoryEventActionCompletedInterface,
   ): Promise<void> {
     await this.produceTransactionUpdateEvent(
-      transaction, refund.data.amount, RabbitRoutingKeys.TransactionsPaymentSubtract);
+      transaction, refund.data.amount, RabbitRoutingKeys.TransactionsPaymentSubtract, null);
   }
 
   public async produceTransactionRemoveEvent(transaction: TransactionModel): Promise<void> {
     await this.produceTransactionUpdateEvent(
-      transaction, transaction.amount, RabbitRoutingKeys.TransactionsPaymentRemoved);
+      transaction, transaction.amount, RabbitRoutingKeys.TransactionsPaymentRemoved, null);
   }
 
   public async produceExportMonthlyBusinessTransactionEvent(
@@ -102,6 +109,7 @@ export class TransactionEventProducer {
     transaction: TransactionPackedDetailsInterface,
     amount: number,
     event: RabbitRoutingKeys,
+    last_updated: Date,
   ): Promise<void> {
 
     const payload: TransactionPaymentInterface = {
@@ -115,6 +123,7 @@ export class TransactionEventProducer {
       date: transaction.updated_at,
       id: transaction.uuid,
       items: transaction.items,
+      last_updated: last_updated,
     };
 
     await this.send(event, payload);
