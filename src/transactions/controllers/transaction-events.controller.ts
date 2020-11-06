@@ -10,7 +10,6 @@ import { PaymentMailEventProducer } from '../producer';
 import { StatisticsService, TransactionsExampleService, TransactionsService } from '../services';
 import { PaymentStatusesEnum } from '../../transactions/enum';
 
-
 @Controller()
 export class TransactionEventsController {
   constructor(
@@ -55,7 +54,7 @@ export class TransactionEventsController {
     }
     if ((transaction.status === PaymentStatusesEnum.Refunded)
       || (transaction.status === PaymentStatusesEnum.Cancelled)) {
-      await this.statisticsService.processRefaudedTransactionAfterPaid(transaction.uuid, transaction);
+      await this.statisticsService.processRefundedTransactionAfterPaid(transaction.uuid, transaction);
     }
     const updated: TransactionModel = await this.transactionsService.updateByUuid(transaction.uuid, transaction);
     this.logger.log({ text: 'PAYMENT.UPDATE: Updated transaction', transaction: updated.toObject() });

@@ -74,7 +74,7 @@ export class StatisticsService {
     }
   }
 
-  public async processRefaudedTransactionAfterPaid(
+  public async processRefundedTransactionAfterPaid(
     id: string,
     updating: TransactionPackedDetailsInterface,
   ): Promise<void> {
