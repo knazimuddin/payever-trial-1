@@ -110,7 +110,9 @@ describe('Elastic Search Service', () => {
                 },
               },
             ],
-            total: 1,
+            total: {
+              value: 1,
+            },
           },
         },
       };
@@ -330,7 +332,9 @@ describe('Elastic Search Service', () => {
                 },
               },
             ],
-            total: 1,
+            total: {
+              value: 1,
+            },
           },
         },
       };
@@ -548,7 +552,9 @@ describe('Elastic Search Service', () => {
                 },
               },
             ],
-            total: 1,
+            total: {
+              value: 1,
+            },
           },
         },
       };
