@@ -40,7 +40,7 @@ export class ElasticSearchService {
             amount: res[1],
             amount_currency: listDto.currency,
             page: listDto.page,
-            total: res[0].total,
+            total: res[0].total.value,
           },
           usage: {
             specific_statuses: res[3].map((bucket: { key: string }) => bucket.key.toUpperCase()),
