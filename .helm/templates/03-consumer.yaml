@@ -55,7 +55,7 @@ spec:
             - matchExpressions:
               - key: node_worker
                 operator: Exists
-              - key: node_critical
+              - key: node_high
                 operator: Exists
 
       imagePullSecrets:
