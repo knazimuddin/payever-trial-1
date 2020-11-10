@@ -86,18 +86,7 @@ export class StatisticsService {
 
     if (existing.status === PaymentStatusesEnum.Paid &&
       (updating.status === PaymentStatusesEnum.Refunded) || (updating.status === PaymentStatusesEnum.Cancelled)) {
-
-      const virifiedAction: PaymentActionsEnum = updating.status === PaymentStatusesEnum.Refunded ?
-        PaymentActionsEnum.Refund : PaymentActionsEnum.Cancel;
-      let refundedAmount: number = 0.0;
-      for (const item of updating.history) {
-        if (item.action === virifiedAction) {
-          refundedAmount = Number(refundedAmount) + Number(item.amount);
-        }
-      }
-
-      await this.transactionsEventProducer.produceTransactionRefundEvent(
-        updating, refundedAmount, existing.updated_at);
+      await this.transactionsEventProducer.produceInternalTransactionRefundEvent(updating, existing.updated_at);
     }
   }
 

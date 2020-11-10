@@ -37,6 +37,7 @@ import {
   ThirdPartyEventsController,
   TransactionEventsController,
   UserController,
+  InternalTransactionEventsController,
 } from './controllers';
 import { ExchangeCalculatorFactory } from './currency';
 import { EventListenersList } from './event-listeners/event-listeners.list';
@@ -102,6 +103,7 @@ import { EventsGateway } from './ws';
     MailerBusMessagesController,
     AuthEventsController,
     SampleProductsBusMessagesController,
+    InternalTransactionEventsController,
   ],
   imports: [
     ConfigModule,
