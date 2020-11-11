@@ -15,16 +15,6 @@ export class TransactionEventProducer {
     private readonly rabbitClient: RabbitMqClient,
   ) { }
 
-  /** @deprecated */
-  public async produceTransactionAddEvent(
-    transaction: TransactionPackedDetailsInterface,
-    amount: number,
-  ): Promise<void> {
-
-    await this.produceTransactionUpdateEvent(
-      transaction, amount, RabbitRoutingKeys.TransactionsPaymentAdd, null);
-  }
-
   public async produceTransactionPaidEvent(
     transaction: TransactionPackedDetailsInterface,
     amount: number,
@@ -42,6 +32,23 @@ export class TransactionEventProducer {
 
     await this.produceTransactionUpdateEvent(
       transaction, amount, RabbitRoutingKeys.TransactionsPaymentRefund, last_updated);
+  }
+
+  public async produceTransactionRefundEventPayload(
+    payload: any,
+  ): Promise<void> {
+
+    await this.send(RabbitRoutingKeys.TransactionsPaymentRefund, payload);
+  }
+
+  /** @deprecated */
+  public async produceTransactionAddEvent(
+    transaction: TransactionPackedDetailsInterface,
+    amount: number,
+  ): Promise<void> {
+
+    await this.produceTransactionUpdateEvent(
+      transaction, amount, RabbitRoutingKeys.TransactionsPaymentAdd, null);
   }
 
   /** @deprecated */
@@ -92,6 +99,15 @@ export class TransactionEventProducer {
     await this.send(RabbitRoutingKeys.TransactionsMigrate, { payment: transactionExportDto });
   }
 
+  public async produceInternalTransactionRefundEvent(
+    transaction: TransactionPackedDetailsInterface,
+    last_updated: Date,
+  ): Promise<void> {
+
+    await this.produceTransactionUpdateEvent(
+      transaction, null, RabbitRoutingKeys.InternalTransactionPaymentRefund, last_updated);
+  }
+
   private async send(eventName: string, payload: any): Promise<void> {
     await this.rabbitClient.send(
       {
@@ -104,6 +120,7 @@ export class TransactionEventProducer {
       },
     );
   }
+
 
   private async produceTransactionUpdateEvent(
     transaction: TransactionPackedDetailsInterface,
