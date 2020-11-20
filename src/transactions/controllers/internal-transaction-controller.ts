@@ -33,9 +33,7 @@ export class InternalTransactionEventsController {
       PaymentActionsEnum.Refund : PaymentActionsEnum.Cancel;
 
     if (!transaction.history || transaction.history.length === 0) {
-      this.logger.log({
-        text: 'INTERNAL.TRANSACTION.REFUND: transaction.history is empty', transaction: transaction.toObject(),
-      });
+      this.logger.log({ text: 'INTERNAL.TRANSACTION.REFUND: transaction.history is empty', transaction });
       throw new NotFoundException(`Transaction history with id ${payload.id} haven't added yet`);
     } else {
       let refundedAmount: number = 0.0;
@@ -45,17 +43,13 @@ export class InternalTransactionEventsController {
         }
       }
       if (refundedAmount === 0) {
-        this.logger.log({
-          text: 'INTERNAL.TRANSACTION.REFUND: refundedAmount = 0', transaction: transaction.toObject(),
-        });
+        this.logger.log({ text: 'INTERNAL.TRANSACTION.REFUND: refundedAmount = 0', transaction });
         throw new NotFoundException(`Transaction history with id ${payload.id} haven't added yet completely`);
       }
 
       await this.transactionsEventProducer.produceTransactionRefundEventPayload(payload);
 
-      this.logger.log({
-        text: 'INTERNAL.TRANSACTION.REFUND: Send updated transaction', transaction: transaction.toObject(),
-      });
+      this.logger.log({ text: 'INTERNAL.TRANSACTION.REFUND: Send updated transaction', transaction });
     }
   }
 }
