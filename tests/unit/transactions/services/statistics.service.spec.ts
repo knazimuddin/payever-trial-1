@@ -33,12 +33,35 @@ describe('StatisticsService', () => {
     uuid: '5fe5f561-fdad-4634-ad3e-8fe72b649d93',
   } as TransactionModel;
 
+  const transactionsPAID: TransactionModel = {
+    _id: 'ed376e5e-b954-4eb1-83a1-9b174e512441',
+    business_uuid: '4b94f63b-fe21-4a97-9288-07583cb74d67',
+    status: 'STATUS_PAID',
+    uuid: '5fe5f561-fdad-4634-ad3e-8fe72b649d93',
+    updated_at: new Date('2020-11-10'),
+  } as TransactionModel;
+
   const transactionDtoACCEPTED: TransactionPackedDetailsInterface = {
     id: uuid.v4(),
     uuid: uuid.v4(),
     status: 'STATUS_ACCEPTED',
-    amount: 100
+    amount: 100,
+    updated_at: new Date('2020-11-10'),
   } as any;
+
+  const transactionDtoREFUND: TransactionPackedDetailsInterface = {
+    id: uuid.v4(),
+    uuid: uuid.v4(),
+    status: 'STATUS_REFUNDED',
+    history: [
+      {
+        action: 'refund',
+        amount: 100,
+      },
+    ],
+    updated_at: new Date('2020-11-10')
+  } as any;
+
 
   const refund: HistoryEventActionCompletedInterface = {
     action: 'refund',
@@ -60,6 +83,7 @@ describe('StatisticsService', () => {
     } as any;
 
     transactionEventProducer = {
+      produceInternalTransactionRefundEvent: (): any => { },
       produceTransactionAddEvent: (): any => { },
       produceTransactionRemoveEvent: (): any => { },
       produceTransactionSubtractEvent: (): any => { },
@@ -77,10 +101,10 @@ describe('StatisticsService', () => {
     sandbox = undefined;
   });
 
-  
+
   describe('processAcceptedTransaction()', () => {
     it('should process successfully accepted transaction', async () => {
-      
+
       sandbox.stub(transactionModel, 'findOne').returns(query);
       sandbox.stub(query, 'lean').resolves(transactionsADD);
 
@@ -257,5 +281,34 @@ describe('StatisticsService', () => {
 
     });
   });
-  
+
+  describe('processRefundedTransactionAfterPaid()', () => {
+    it('should process successfully refund transaction after paid', async () => {
+
+      sandbox.stub(transactionModel, 'findOne').returns(query);
+      sandbox.stub(query, 'lean').resolves(transactionsPAID);
+
+      sandbox.spy(transactionEventProducer, 'produceInternalTransactionRefundEvent');
+
+      await testService.processRefundedTransactionAfterPaid(
+        '5fe5f561-fdad-4634-ad3e-8fe72b649d93', transactionDtoREFUND);
+      expect(transactionEventProducer.produceInternalTransactionRefundEvent).calledOnceWith(
+        transactionDtoREFUND, transactionDtoREFUND.updated_at);
+
+    });
+
+    it('should process refund transaction but doesn send message', async () => {
+
+      sandbox.stub(transactionModel, 'findOne').returns(query);
+      sandbox.stub(query, 'lean').resolves(transactionDtoACCEPTED);
+
+      sandbox.spy(transactionEventProducer, 'produceInternalTransactionRefundEvent');
+
+      await testService.processRefundedTransactionAfterPaid(
+        '5fe5f561-fdad-4634-ad3e-8fe72b649d93', transactionDtoREFUND);
+      expect(transactionEventProducer.produceInternalTransactionRefundEvent).to.not.called;
+    });
+
+  });
+
 });
