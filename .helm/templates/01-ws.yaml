@@ -23,14 +23,14 @@ metadata:
 spec:
   {{- if ne $values.namespace "production" }}
   replicas: {{ $values.replicas.ws }}
-  {{- end }}
+
   strategy:
     type: RollingUpdate
 
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 0
-
+  {{- end }}
   selector:
     matchLabels:
       app: {{ $appName }}
