@@ -27,14 +27,32 @@ export class TransactionsEsFixDiffCommand {
     @Positional({
       name: 'after',
     }) after: string,
+    @Positional({
+      name: 'before',
+    }) before: string,
   ): Promise<void> {
     const listDto: ListQueryDto = new ListQueryDto();
+    listDto.orderBy = 'created_at';
+    listDto.direction = 'asc';
+
+    const createdAtFilter: any[] = [];
 
     if (after) {
-      listDto.filters.created_at = [{
+      createdAtFilter.push({
         condition: 'afterDate',
         value: [new Date(after)],
-      }];
+      });
+    }
+
+    if (before) {
+      createdAtFilter.push({
+        condition: 'beforeDate',
+        value: [new Date(before)],
+      });
+    }
+
+    if (createdAtFilter.length) {
+      listDto.filters.created_at = createdAtFilter;
     }
 
     listDto.limit = 1000;

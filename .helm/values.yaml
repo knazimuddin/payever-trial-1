@@ -5,7 +5,7 @@ replicas:
   http: 4
   consumer: 4
   cron: 1
-  ws: 2
+  ws: 1
 
 image:
   nodejs: registry.devpayever.com/nodejs-backend/transactions

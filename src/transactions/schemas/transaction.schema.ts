@@ -86,6 +86,7 @@ TransactionSchema.index({ status: 1, _id: 1 });
 TransactionSchema.index({ business_uuid: 1 });
 TransactionSchema.index({ example: 1 });
 TransactionSchema.index({ created_at: -1 });
+TransactionSchema.index({ business_uuid: 1, example: 1 });
 
 TransactionSchema.virtual('amount_refunded').get(function (): number {
   let totalRefunded: number = 0;
