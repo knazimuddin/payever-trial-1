@@ -65,6 +65,7 @@ export class ElasticSearchService {
       sort: [
         sorting,
       ],
+      track_total_hits: true,
     };
 
     return this.elasticSearchClient.search(ElasticTransactionEnum.index, body)
