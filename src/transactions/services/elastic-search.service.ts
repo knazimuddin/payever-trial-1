@@ -31,6 +31,7 @@ export class ElasticSearchService {
         this.totalAmount(elasticFilters, listDto.currency),
         this.distinctFieldValues('status', elasticFilters),
         this.distinctFieldValues('specific_status', elasticFilters),
+        this.count(elasticFilters),
       ])
       .then((res: any) => {
         return {
@@ -40,7 +41,7 @@ export class ElasticSearchService {
             amount: res[1],
             amount_currency: listDto.currency,
             page: listDto.page,
-            total: res[0].total.value,
+            total: res[4].count,
           },
           usage: {
             specific_statuses: res[3].map((bucket: { key: string }) => bucket.key.toUpperCase()),
@@ -65,7 +66,6 @@ export class ElasticSearchService {
       sort: [
         sorting,
       ],
-      track_total_hits: true,
     };
 
     return this.elasticSearchClient.search(ElasticTransactionEnum.index, body)
@@ -82,6 +82,23 @@ export class ElasticSearchService {
             },
           ),
           total: results.body.hits.total,
+        };
+      });
+  }
+
+  private async count(
+    filters: any,
+  ): Promise<{ count: number }> {
+    const body: any = {
+      query: {
+        bool: filters,
+      },
+    };
+
+    return this.elasticSearchClient.count(ElasticTransactionEnum.index, body)
+      .then((results: any) => {
+        return {
+          count: results.body.count,
         };
       });
   }
