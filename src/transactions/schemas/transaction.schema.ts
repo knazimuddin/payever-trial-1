@@ -16,6 +16,8 @@ export const TransactionSchema: Schema = new Schema({
   original_id: { type: String, unique: true },
   uuid: { type: String, required: true, unique: true },
 
+  api_call_id: { type: String, required: false },
+
   action_running: { type: Boolean, required: false, default: false },
   amount: Number,
   billing_address: AddressSchema,

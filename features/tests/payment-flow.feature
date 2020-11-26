@@ -184,6 +184,7 @@ Feature: Full real payment flow
       "payload":{
         "payment":{
           "id":"8ecc3fbbf663c2908503cedeaa61a79a",
+          "api_call_id": "test_api_call_id_12345",
           "uuid":"f61e09b6-61ca-426b-8ee6-e8ce3118e932",
           "status":"STATUS_NEW",
           "business":{
@@ -649,6 +650,18 @@ Feature: Full real payment flow
       ]
     ]
     """
+    Then I look for model "Transaction" by following JSON and remember as "createdTransaction":
+    """
+    {
+      "original_id": "8ecc3fbbf663c2908503cedeaa61a79a"
+    }
+    """
+    Then model "Transaction" with id "{{createdTransaction._id}}" should contain json:
+    """
+    {
+      "api_call_id": "test_api_call_id_12345"
+    }
+    """
 
   Scenario: Payment migrate event
     Given I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
@@ -667,6 +680,7 @@ Feature: Full real payment flow
         "payment":{
           "id":"8ecc3fbbf663c2908503cedeaa61a79a",
           "uuid":"f61e09b6-61ca-426b-8ee6-e8ce3118e932",
+          "api_call_id": "test_api_call_id_12345",
           "status":"STATUS_ACCEPTED",
           "business":{
             "uuid":"504dbe56-a67f-4e92-9470-477e88b12bae",
@@ -754,6 +768,7 @@ Feature: Full real payment flow
         "currency":"EUR",
         "type":"stripe_directdebit",
         "channel":"link",
-        "amount":650
+        "amount":650,
+        "api_call_id": "test_api_call_id_12345"
       }
       """
