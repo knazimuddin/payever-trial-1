@@ -3,6 +3,7 @@ export * from './transactions-es-business-check.command';
 export * from './transactions-es-business-update.command';
 export * from './transactions-es-compare.command';
 export * from './transactions-es-export.command';
+export * from './transactions-es-fix-diff.command';
 export * from './transactions-es-setup.command';
 export * from './transactions-export-for-widgets-command.service';
 export * from './transactions-export-for-blank-migrate.command';

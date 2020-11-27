@@ -8,11 +8,13 @@ import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { MigrationModule } from '@pe/migration-kit';
 import { environment } from '../environments';
 import {
-  BpoFixCommand, ExportTransactionToWidgetCommand,
+  BpoFixCommand,
+  ExportTransactionToWidgetCommand,
   TransactionsEsBusinessCheckCommand,
   TransactionsEsBusinessUpdateCommand,
   TransactionsEsCompareCommand,
   TransactionsEsExportCommand,
+  TransactionsEsFixDiffCommand,
   TransactionsEsSetupCommand,
   TransactionsExportForBlankMigrateCommand,
   TransactionsExportForWidgetsCommand,
@@ -35,6 +37,7 @@ import {
   ThirdPartyEventsController,
   TransactionEventsController,
   UserController,
+  InternalTransactionEventsController,
 } from './controllers';
 import { ExchangeCalculatorFactory } from './currency';
 import { EventListenersList } from './event-listeners/event-listeners.list';
@@ -100,6 +103,7 @@ import { EventsGateway } from './ws';
     MailerBusMessagesController,
     AuthEventsController,
     SampleProductsBusMessagesController,
+    InternalTransactionEventsController,
   ],
   imports: [
     ConfigModule,
@@ -160,6 +164,7 @@ import { EventsGateway } from './ws';
     TransactionsEsBusinessUpdateCommand,
     TransactionsEsCompareCommand,
     TransactionsEsExportCommand,
+    TransactionsEsFixDiffCommand,
     TransactionsEsSetupCommand,
     TransactionsExampleService,
     TransactionsExportForBlankMigrateCommand,

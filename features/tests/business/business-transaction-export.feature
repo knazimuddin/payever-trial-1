@@ -34,6 +34,7 @@ Feature: Transaction export for business
   Scenario: Export transactions for business
     Given I use DB fixture "transactions/transactions-list-with-different-currencies"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-transactions-list.json" content and remember as "elasticTransactionsListJson"
+    And I get file "features/fixtures/json/transaction-list-elastica/elastic-transactions-count.json" content and remember as "elasticTransactionsCountJson"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-total-by-currencies.json" content and remember as "totalByCurrencies"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-statuses-response.json" content and remember as "statusesResponse"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-specific-statuses-response.json" content and remember as "specificStatusesResponse"
@@ -166,6 +167,29 @@ Feature: Transaction export for business
           }
         ],
         "result": {{specificStatusesResponse}}
+      }
+      """
+    And I mock Elasticsearch method "count" with:
+      """
+      {
+        "arguments": [
+          "transactions",
+          {
+            "query": {
+              "bool": {
+                "must": [
+                  {
+                    "match_phrase": {
+                      "business_uuid": "{{businessId}}"
+                    }
+                  }
+                ],
+                "must_not": []
+              }
+            }
+          }
+        ],
+        "result": {{elasticTransactionsCountJson}}
       }
       """
     When I send a GET request to "/api/business/{{businessId}}/export?orderBy=created_at&direction=desc&limit=20&page=1&currency=EUR&format=csv&businessName=test&columns=%5B%7B%22name%22:%22type%22,%22title%22:%22Payment%20type%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22customer_name%22,%22title%22:%22Customer%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22merchant_name%22,%22title%22:%22Merchant%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22created_at%22,%22title%22:%22Date%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22status%22,%22title%22:%22Status%22,%22isActive%22:true,%22isToggleable%22:true%7D%5D"

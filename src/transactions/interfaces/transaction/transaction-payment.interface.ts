@@ -11,4 +11,5 @@ export interface TransactionPaymentInterface {
   date: Date;
   id: string;
   items: TransactionCartItemInterface[];
+  last_updated: Date;
 }

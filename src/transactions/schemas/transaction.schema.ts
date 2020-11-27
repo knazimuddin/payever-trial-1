@@ -16,6 +16,8 @@ export const TransactionSchema: Schema = new Schema({
   original_id: { type: String, unique: true },
   uuid: { type: String, required: true, unique: true },
 
+  api_call_id: { type: String, required: false },
+
   action_running: { type: Boolean, required: false, default: false },
   amount: Number,
   billing_address: AddressSchema,
@@ -86,6 +88,7 @@ TransactionSchema.index({ status: 1, _id: 1 });
 TransactionSchema.index({ business_uuid: 1 });
 TransactionSchema.index({ example: 1 });
 TransactionSchema.index({ created_at: -1 });
+TransactionSchema.index({ business_uuid: 1, example: 1 });
 
 TransactionSchema.virtual('amount_refunded').get(function (): number {
   let totalRefunded: number = 0;

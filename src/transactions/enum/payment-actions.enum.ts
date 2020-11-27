@@ -6,7 +6,7 @@ export enum PaymentActionsEnum {
   Authorize = 'authorize',
   Capture = 'capture',
   ChangeAmount = 'change_amount',
-  Collection= 'collection',
+  Collection = 'collection',
   LatePayment = 'late_payment',
   Paid = 'paid',
   Remind = 'remind',
