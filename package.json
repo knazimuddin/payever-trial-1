@@ -27,7 +27,7 @@
     "@nestjs/platform-ws": "6.8.5",
     "@nestjs/websockets": "6.8.5",
     "@pe/common-sdk": "*",
-    "@pe/elastic-kit": "^3.0.0",
+    "@pe/elastic-kit": "^3.1.0",
     "@pe/migration-kit": "*",
     "@pe/nest-kit": "^6.0.2",
     "@pe/notifications-sdk": "*",
@@ -39,7 +39,7 @@
     "xlsx": "^0.15.0"
   },
   "devDependencies": {
-    "@pe/cucumber-sdk": "*",
+    "@pe/cucumber-sdk": "^1.9.0",
     "@pe/dev-kit": "*",
     "@pe/pact-kit": "*"
   }
