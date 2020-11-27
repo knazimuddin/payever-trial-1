@@ -15,6 +15,10 @@ export class TransactionExportDto {
   @Expose()
   public uuid: string;
 
+  @IsString()
+  @Expose()
+  public api_call_id: string;
+
   @IsNumber()
   @Expose()
   public amount: number;
