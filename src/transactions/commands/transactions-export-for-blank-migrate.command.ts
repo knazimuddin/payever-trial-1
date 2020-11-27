@@ -1,9 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Command } from '@pe/nest-kit';
+import { Command, Positional } from '@pe/nest-kit';
 import { Model } from 'mongoose';
 import { TransactionModel } from '../models';
 import { TransactionEventProducer } from '../producer';
+import { ThirdPartyPaymentsEnum } from '../enum';
 
 @Injectable()
 export class TransactionsExportForBlankMigrateCommand {
@@ -13,15 +14,55 @@ export class TransactionsExportForBlankMigrateCommand {
   ) { }
 
   @Command({ command: 'transactions:export:blank-migrate', describe: 'Migrate transactions to fill new services' })
-  public async transactionsMigrate(): Promise<void> {
-    const count: number = await this.transactionsModel.estimatedDocumentCount();
+  public async transactionsMigrate(
+    @Positional({
+      name: 'after',
+    }) after: string,
+    @Positional({
+      name: 'before',
+    }) before: string,
+    @Positional({
+      name: 'only_third_party',
+    }) onlyThirdParty: boolean,
+    @Positional({
+      name: 'original_id',
+    }) originalId: boolean,
+  ): Promise<void> {
+    const criteria: any = { };
+    if (before || after) {
+      criteria.created_at = { };
+    }
+    if (before) {
+      criteria.created_at.$lte = new Date(before);
+    }
+    if (after) {
+      criteria.created_at.$gte = new Date(after);
+    }
+    if (onlyThirdParty) {
+      criteria.type = {
+        $in: Object.values(ThirdPartyPaymentsEnum),
+      };
+    }
+    if (originalId) {
+      criteria.original_id = originalId;
+    }
+
+    Logger.log(`Starting transactions blank migrate`);
+    Logger.log(`Criteria is ${JSON.stringify(criteria, null, 2)}.`);
+
+    const count: number = await this.transactionsModel.countDocuments(criteria);
+    Logger.log(`Found ${count} records.`);
+
     const limit: number = 1000;
     let start: number = 0;
     let transactions: TransactionModel[] = [];
     let processed: number = 0;
 
     while (start < count) {
-      transactions = await this.getWithLimit(start, limit);
+      transactions = await this.getWithLimit(start, limit, criteria);
+
+      Logger.log(`Starting next ${transactions.length} transactions.`);
+
       start += limit;
       processed += transactions.length;
 
@@ -33,14 +74,14 @@ export class TransactionsExportForBlankMigrateCommand {
     }
   }
 
-  private async getWithLimit(start: number, limit: number): Promise<TransactionModel[]> {
+  private async getWithLimit(start: number, limit: number, criteria: any): Promise<TransactionModel[]> {
     return this.transactionsModel.find(
-      { },
+      criteria,
       null,
       {
         limit: limit,
         skip: start,
-        sort: { _id: 1 },
+        sort: { created_at: 1 },
       },
     );
   }

@@ -11,6 +11,7 @@ export interface CheckoutTransactionInterface extends UnpackedDetailsAwareInterf
   uuid: string;
 
   address?: AddressInterface;
+  api_call_id?: string;
   business?: TransactionBusinessInterface;
   channel_set?: ChannelSetInterface;
   payment_flow?: PaymentFlowInterface;

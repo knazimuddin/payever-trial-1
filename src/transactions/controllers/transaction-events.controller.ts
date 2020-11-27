@@ -8,7 +8,7 @@ import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { PaymentMailEventProducer } from '../producer';
 import { StatisticsService, TransactionsExampleService, TransactionsService } from '../services';
-import { PaymentStatusesEnum } from '../../transactions/enum';
+import { PaymentStatusesEnum } from '../enum';
 
 @Controller()
 export class TransactionEventsController {
