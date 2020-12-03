@@ -318,5 +318,186 @@ Feature: Third party payment actions
     }
     """
 
-
+  Scenario: Update status on third party transaction
+    Given I authenticate as a user with the following data:
+    """
+    {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
+    """
+    And I mock an axios request with parameters:
+    """
+    {
+      "request": {
+        "method": "post",
+        "url": "*/api/business/{{businessId}}/integration/santander_installment_at/action/update-status",
+        "body": "{\"paymentId\":\"{{transactionId}}\"}",
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "Content-Type": "application/json;charset=utf-8",
+          "authorization": "*"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "id": "{{transactionId}}",
+          "payment": {
+            "status": "STATUS_ACCEPTED",
+            "specificStatus": "DELIVERY_RELEASE"
+          }
+        }
+      }
+    }
+    """
+    And I mock an axios request with parameters:
+    """
+    {
+      "request": {
+        "method": "post",
+        "url": "*/api/business/{{businessId}}/integration/santander_installment_at/action/action-list",
+        "body": "{\"paymentId\":\"{{transactionId}}\"}",
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "Content-Type": "application/json;charset=utf-8",
+          "authorization": "*"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "shipping_goods": true
+        }
+      }
+    }
+    """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "transactions",
+          "transaction",
+          {
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "{{transactionId}}"
+          }
+         ],
+        "result": {}
+      }
+      """
+    And I use DB fixture "transactions/third-party-payment-status-update"
+    When I send a GET request to "/api/business/{{businessId}}/{{transactionId}}/update-status"
+    Then print last response
+    And the response status code should be 200
+    And the response should contain json:
+    """
+    {
+       "actions": [
+         {
+            "action": "shipping_goods",
+            "enabled": true
+         }
+       ],
+       "transaction": {
+         "original_id": "{{transactionId}}",
+         "uuid": "{{transactionId}}",
+         "amount": 50,
+         "amount_refunded": 0,
+         "amount_refund_rest": 50,
+         "currency": "EUR",
+         "total": 50
+       },
+       "billing_address": {
+         "salutation": "SALUTATION_MR",
+         "first_name": "Test First_name",
+         "last_name": "Test Last_name",
+         "email": "test@test.com",
+         "country": "AT",
+         "country_name": "Austria",
+         "city": "Wien",
+         "zip_code": "1012",
+         "street": "Rödingsmarkt"
+       },
+       "business": {
+         "uuid": "{{businessId}}"
+       },
+       "cart": {
+         "available_refund_items": [
+           {
+             "count": 1,
+             "item_uuid": "f83c9c9f-77eb-464a-9ef3-95f572301d2c"
+           }
+         ],
+         "items": [
+           {
+             "uuid": "f83c9c9f-77eb-464a-9ef3-95f572301d2c",
+             "name": "test item",
+             "identifier": "c4bce8c1-6572-43fc-8fc9-0f8f0a5efad1",
+             "price": 50,
+             "price_net": 10,
+             "vat_rate": 10,
+             "quantity": 1,
+             "thumbnail": "https://payeverstaging.blob.core.windows.net/products/image_test"
+           }
+         ]
+       },
+       "channel": {
+         "name": "pos"
+       },
+       "channel_set": {
+         "uuid": "7c2298a7-a172-4048-8977-dbff24dec100"
+       },
+       "customer": {
+         "email": "test@test.com",
+         "name": "Customer Test"
+       },
+       "details": {
+         "order": {
+           "reference": "f3d44333-21e2-4f0f-952b-72ac2dfb8fc9"
+         }
+       },
+       "history": [
+         {
+           "refund_items": [],
+           "upload_items": [],
+           "action": "test_action"
+         }
+       ],
+       "merchant": {
+         "email": "testcases@merchant.com",
+         "name": "Test Merchant"
+       },
+       "payment_flow": {
+         "id": "2"
+       },
+       "payment_option": {
+         "down_payment": 0,
+         "id": 1,
+         "payment_fee": 0,
+         "type": "santander_installment_at"
+       },
+       "shipping": {
+         "address": {
+           "salutation": "SALUTATION_MR",
+           "first_name": "First name Shipping",
+           "last_name": "Last_name Shipping",
+           "email": "test_shipping@test.com",
+           "country": "AT",
+           "country_name": "Austria",
+           "city": "Wien",
+           "zip_code": "1012",
+           "street": "Rödingsmarkt shipping"
+         },
+         "delivery_fee": 2,
+         "method_name": "some shipping name",
+         "order_id": "5db105b8-2da6-421e-8e6a-1c67048cda2b"
+       },
+       "status": {
+         "general": "STATUS_ACCEPTED",
+         "place": "paid",
+         "specific": "DELIVERY_RELEASE"
+       },
+       "store": {},
+       "user": {}
+    }
+    """
 

@@ -304,6 +304,20 @@ export class TransactionsService {
     await transaction.save();
   }
 
+  public async updateTransactionByUuid(transactionUuid: string, updatedData: { }): Promise<void> {
+    await this.transactionModel.findOneAndUpdate(
+      {
+        uuid: transactionUuid,
+      },
+      {
+        $set: updatedData,
+      },
+      {
+        new: true,
+      },
+    );
+  }
+
   private async applyPaymentProperties(
     transaction: TransactionUnpackedDetailsInterface,
     result: RpcResultDto,

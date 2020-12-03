@@ -24,6 +24,10 @@ export class TransactionSantanderApplicationConverter {
       transaction.santander_applications.push(payment_details.application_number);
     }
 
+    if (payment_details.applicationNumber) {
+      transaction.santander_applications.push(payment_details.applicationNumber);
+    }
+
     if (payment_details.usage_text || payment_details.application_number) {
       checkoutTransaction.payment_details.pan_id = payment_details.usage_text || payment_details.application_number;
     }

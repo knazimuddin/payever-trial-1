@@ -17,10 +17,15 @@ export class TransactionOutputConverter {
     delete details.finance_id;
     delete details.application_no;
     delete details.application_number;
+    delete details.applicationNumber;
     delete details.usage_text;
     delete details.pan_id;
     delete details.iban;
     delete details.bank_i_b_a_n;
+
+    if (transaction?.payment_details?.applicationNumber) {
+      transaction.payment_details.application_number = transaction.payment_details.applicationNumber;
+    }
 
     return {
       actions: actions,

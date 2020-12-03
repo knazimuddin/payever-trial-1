@@ -12,7 +12,7 @@ import { TransactionsService } from './transactions.service';
 
 @Injectable()
 export class ThirdPartyCallerService implements ActionCallerInterface {
-  private thirdPartyPaymentsMicroUrl: string;
+  private readonly thirdPartyPaymentsMicroUrl: string;
   constructor(
     private readonly transactionsService: TransactionsService,
     private readonly httpService: IntercomService,
@@ -60,6 +60,36 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
     actionPayload.paymentId = transaction.uuid;
 
     await this.runThirdPartyAction(transaction, action, actionPayload);
+  }
+
+  public async updateStatus(
+    transaction: TransactionUnpackedDetailsInterface,
+  ): Promise<void> {
+    const oldStatus: string = transaction.status;
+    const oldSpecificStatus: string = transaction.specific_status;
+
+    const result: any = await this.runThirdPartyAction(
+      transaction,
+      ThirdPartyPaymentActionsEnum.actionUpdateStatus,
+      { paymentId: transaction.uuid },
+    );
+
+    const newStatus: string = result?.payment?.status;
+    const newSpecificStatus: string = result?.payment?.specificStatus;
+
+    const updateData: any = { };
+
+    if (newStatus && newStatus !== oldStatus) {
+      updateData.status = newStatus;
+    }
+
+    if (newSpecificStatus && newSpecificStatus !== oldSpecificStatus) {
+      updateData.specific_status = newSpecificStatus;
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      await this.transactionsService.updateByUuid(transaction.uuid, updateData);
+    }
   }
 
   private async runThirdPartyAction(
