@@ -43,6 +43,8 @@ export class EventsGateway {
       result: false,
     };
 
+    console.log('starting ws update for ' + transactionId);
+
     if (!this.verifyToken(payload.token)) {
       return updateStatusResponse;
     }
@@ -61,6 +63,7 @@ export class EventsGateway {
       updateStatusResponse.specificStatus = updatedTransaction.specific_status;
       updateStatusResponse.result = true;
     } catch (error) {
+      console.log(error.message);
       return updateStatusResponse;
     }
 

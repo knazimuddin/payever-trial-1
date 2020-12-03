@@ -19,7 +19,8 @@ import { TransactionsService } from './transactions.service';
 import {
   AllowedUpdateStatusPaymentMethodsEnum,
   NextActionTypesEnum,
-  PaymentActionsEnum, PaymentStatusesEnum,
+  PaymentActionsEnum,
+  PaymentStatusesEnum,
   RpcMessageIdentifierEnum,
 } from '../enum';
 
