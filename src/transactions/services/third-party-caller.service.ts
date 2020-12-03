@@ -68,8 +68,11 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
     const oldStatus: string = transaction.status;
     const oldSpecificStatus: string = transaction.specific_status;
 
-    const result: any
-      = await this.runThirdPartyAction(transaction, ThirdPartyPaymentActionsEnum.actionUpdateStatus, { });
+    const result: any = await this.runThirdPartyAction(
+      transaction,
+      ThirdPartyPaymentActionsEnum.actionUpdateStatus,
+      { paymentId: transaction.original_id },
+    );
 
     const newStatus: string = result?.payment?.status;
     const newSpecificStatus: string = result?.payment?.specificStatus;

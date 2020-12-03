@@ -43,8 +43,6 @@ export class EventsGateway {
       result: false,
     };
 
-    console.log('starting ws update for ' + transactionId);
-
     if (!this.verifyToken(payload.token)) {
       return updateStatusResponse;
     }
