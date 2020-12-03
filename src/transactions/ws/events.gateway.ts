@@ -61,7 +61,6 @@ export class EventsGateway {
       updateStatusResponse.specificStatus = updatedTransaction.specific_status;
       updateStatusResponse.result = true;
     } catch (error) {
-      console.log(error.message);
       return updateStatusResponse;
     }
 
