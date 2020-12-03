@@ -77,7 +77,6 @@ export class TransactionActionService {
     );
 
     const disabledUpdateStatuses: string[] = [
-      PaymentStatusesEnum.New,
       PaymentStatusesEnum.Paid,
     ];
 
@@ -93,7 +92,9 @@ export class TransactionActionService {
     const oldSpecificStatus: string = unpackedTransaction.specific_status;
 
     try {
-      await this.messagingService.updateStatus(unpackedTransaction);
+      const actionCallerService: ActionCallerInterface = this.chooseActionCallerService(unpackedTransaction);
+
+      await actionCallerService.updateStatus(unpackedTransaction);
     } catch (e) {
       this.logger.error(
         {

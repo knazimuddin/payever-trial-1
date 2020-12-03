@@ -19,7 +19,7 @@ import { TransactionsService } from './transactions.service';
 import {
   AllowedUpdateStatusPaymentMethodsEnum,
   NextActionTypesEnum,
-  PaymentActionsEnum,
+  PaymentActionsEnum, PaymentStatusesEnum,
   RpcMessageIdentifierEnum,
 } from '../enum';
 
@@ -163,6 +163,10 @@ export class MessagingService implements ActionCallerInterface {
   }
 
   public async updateStatus(transaction: TransactionUnpackedDetailsInterface): Promise<void> {
+    if (transaction.status === PaymentStatusesEnum.New) {
+      return;
+    }
+
     let payload: CheckoutRpcPayloadInterface;
     try {
       const dto: CheckoutTransactionRpcActionInterface = await this.createPayloadData(transaction);
