@@ -17,6 +17,7 @@ export class ValidateAmountBeforeActionListener {
     transaction: TransactionModel,
     actionPayload: ActionPayloadDto,
     action: string,
+    skipValidation: boolean,
   ): Promise<void> {
     const allowedActions: string[] = [
       PaymentActionsEnum.Refund,
@@ -28,7 +29,7 @@ export class ValidateAmountBeforeActionListener {
       actionPayload.fields?.amount
       && !isNaN(Number(actionPayload.fields.amount));
 
-    if (!allowedByAction || !allowedByPayload) {
+    if (!allowedByAction || !allowedByPayload || skipValidation) {
       return;
     }
 
