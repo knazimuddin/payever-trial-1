@@ -30,6 +30,7 @@ export class TransactionActionService {
     transaction: TransactionModel,
     actionPayload: ActionPayloadDto,
     action: string,
+    skipValidation: boolean = false,
   ): Promise<TransactionUnpackedDetailsInterface> {
     this.dtoValidation.checkFileUploadDto(actionPayload);
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
@@ -44,6 +45,7 @@ export class TransactionActionService {
         transaction,
         actionPayload,
         action,
+        skipValidation,
       );
 
       await actionCallerService.runAction(unpackedTransaction, action, actionPayload);
