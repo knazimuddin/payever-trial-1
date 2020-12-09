@@ -23,6 +23,10 @@ export class TransactionDto implements CheckoutTransactionInterface {
   @Type(() => AddressDto)
   public address?: AddressDto;
 
+  @IsString()
+  @IsOptional()
+  public api_call_id?: string;
+
   @IsOptional()
   @ValidateNested()
   @Type(() => TransactionBusinessDto)

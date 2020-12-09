@@ -15,11 +15,13 @@ export class TransactionCartConverter {
     const newCart: Types.DocumentArray<TransactionCartItemModel> = new Types.DocumentArray();
 
     for (const cartItem of cartItems) {
-      const newCartItem: TransactionCartItemDto = {
-        _id: cartItem.product_uuid
+      const itemIdentifier: string =
+        cartItem.product_uuid
           ? cartItem.product_uuid
-          : ProductUuid.generate(businessId, `${cartItem.name}${cartItem.product_variant_uuid}`)
-        ,
+          : ProductUuid.generate(businessId, `${cartItem.name}${cartItem.identifier}`);
+
+      const newCartItem: TransactionCartItemDto = {
+        _id: itemIdentifier,
         uuid: cartItem.product_uuid
           ? cartItem.product_uuid
           : null
@@ -40,6 +42,7 @@ export class TransactionCartConverter {
         shipping_settings_rate: cartItem.shipping_settings_rate,
         shipping_settings_rate_type: cartItem.shipping_settings_rate_type,
         shipping_type: cartItem.shipping_type,
+        sku: cartItem.sku,
         thumbnail: cartItem.thumbnail,
         updated_at: cartItem.updated_at,
         url: cartItem.url,

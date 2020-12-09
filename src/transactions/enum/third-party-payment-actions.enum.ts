@@ -6,6 +6,7 @@ export enum ThirdPartyPaymentActionsEnum {
   actionCapture = 'action-capture',
   actionRefund = 'action-refund',
   actionShippingGoods = 'action-shipping-goods',
+  actionUpdateStatus = 'update-status',
 }
 
 export const TransactionActionsToThirdPartyActions: Map<string, string> = new Map<string, string>([

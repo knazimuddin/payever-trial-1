@@ -23,4 +23,5 @@ export const BusinessPaymentOptionSchema: Schema = new Schema(
   {
     id: false,
   },
-);
+)
+  .index({ business_uuid: 1, completed: 1, payment_method: 1, status: 1 });

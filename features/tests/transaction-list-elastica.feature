@@ -44,6 +44,7 @@ Feature: Transaction list for business
       """
     And I use DB fixture "transactions/transactions-list-with-different-currencies"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-transactions-list.json" content and remember as "elasticTransactionsListJson"
+    And I get file "features/fixtures/json/transaction-list-elastica/elastic-transactions-count.json" content and remember as "elasticTransactionsCountJson"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-total-by-currencies.json" content and remember as "totalByCurrencies"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-statuses-response.json" content and remember as "statusesResponse"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-specific-statuses-response.json" content and remember as "specificStatusesResponse"
@@ -152,6 +153,23 @@ Feature: Transaction list for business
           }
         ],
         "result": {{specificStatusesResponse}}
+      }
+      """
+    And I mock Elasticsearch method "count" with:
+      """
+      {
+        "arguments": [
+          "transactions",
+          {
+            "query": {
+              "bool": {
+                "must": <elasticsearch_filter>,
+                "must_not": []
+              }
+            }
+          }
+        ],
+        "result": {{elasticTransactionsCountJson}}
       }
       """
     When I send a GET request to "<path>"
@@ -493,6 +511,210 @@ Feature: Transaction list for business
                 "buckets" : []
               }
             }
+          }
+        }
+      }
+      """
+    And I mock Elasticsearch method "count" with:
+      """
+      {
+         "arguments": [
+           "transactions",
+           {
+             "query": {
+               "bool": {
+                 "must": [
+                   {
+                     "match_phrase": {
+                       "currency": "AFN"
+                     }
+                   },
+                   {
+                     "query_string": {
+                       "fields": [
+                         "original_id^1"
+                       ],
+                       "query": "asd*"
+                     }
+                   },
+                   {
+                     "query_string": {
+                       "fields": [
+                         "reference^1"
+                       ],
+                       "query": "*testContains*"
+                     }
+                   },
+                   {
+                     "match_phrase": {
+                       "business_uuid": "36bf8981-8827-4c0c-a645-02d9fc6d72c8"
+                     }
+                   },
+                   {
+                     "query_string": {
+                       "fields": [
+                         "original_id^1",
+                         "customer_name^1",
+                         "merchant_name^1",
+                         "reference^1",
+                         "payment_details.finance_id^1",
+                         "payment_details.application_no^1",
+                         "customer_email^1"
+                       ],
+                       "query": "*test query*"
+                     }
+                   }
+                 ],
+                 "must_not": [
+                   {
+                     "match_phrase": {
+                       "type": "cash"
+                     }
+                   }
+                 ]
+               }
+             }
+           }
+         ],
+        "result": {
+          "body": {
+            "count": "4"
+          }
+        }
+      }
+      """
+    And I mock Elasticsearch method "count" with:
+      """
+      {
+         "arguments": [
+           "transactions",
+           {
+             "query": {
+               "bool": {
+                 "must": [
+                   {
+                     "match_phrase": {
+                       "currency": "AFN"
+                     }
+                   },
+                   {
+                     "query_string": {
+                       "fields": [
+                         "original_id^1"
+                       ],
+                       "query": "asd*"
+                     }
+                   },
+                   {
+                     "query_string": {
+                       "fields": [
+                         "reference^1"
+                       ],
+                       "query": "*testContains*"
+                     }
+                   },
+                   {
+                     "query_string": {
+                       "fields": [
+                         "original_id^1",
+                         "customer_name^1",
+                         "merchant_name^1",
+                         "reference^1",
+                         "payment_details.finance_id^1",
+                         "payment_details.application_no^1",
+                         "customer_email^1"
+                       ],
+                       "query": "*test query*"
+                     }
+                   }
+                 ],
+                 "must_not": [
+                   {
+                     "match_phrase": {
+                       "type": "cash"
+                     }
+                   },
+                   {
+                     "match_phrase": {
+                       "example": true
+                     }
+                   }
+                 ]
+               }
+             }
+           }
+         ],
+        "result": {
+          "body": {
+            "count": "4"
+          }
+        }
+      }
+      """
+    And I mock Elasticsearch method "count" with:
+      """
+      {
+         "arguments": [
+           "transactions",
+           {
+             "query": {
+               "bool": {
+                 "must": [
+                   {
+                     "match_phrase": {
+                       "currency": "AFN"
+                     }
+                   },
+                   {
+                     "query_string": {
+                       "fields": [
+                         "original_id^1"
+                       ],
+                       "query": "asd*"
+                     }
+                   },
+                   {
+                     "query_string": {
+                       "fields": [
+                         "reference^1"
+                       ],
+                       "query": "*testContains*"
+                     }
+                   },
+                   {
+                     "match_phrase": {
+                       "user_uuid": "08a3fac8-43ef-4998-99aa-cabc97a39261"
+                     }
+                   },
+                   {
+                     "query_string": {
+                       "fields": [
+                         "original_id^1",
+                         "customer_name^1",
+                         "merchant_name^1",
+                         "reference^1",
+                         "payment_details.finance_id^1",
+                         "payment_details.application_no^1",
+                         "customer_email^1"
+                       ],
+                       "query": "*test query*"
+                     }
+                   }
+                 ],
+                 "must_not": [
+                   {
+                     "match_phrase": {
+                       "type": "cash"
+                     }
+                   }
+                 ]
+               }
+             }
+           }
+         ],
+        "result": {
+          "body": {
+            "count": "4"
           }
         }
       }
@@ -890,6 +1112,204 @@ Feature: Transaction list for business
         }
       }
       """
+    And I mock Elasticsearch method "count" with:
+      """
+      {
+         "arguments": [
+           "transactions",
+           {
+             "query": {
+               "bool": {
+                 "must": [
+                   {
+                     "range": {
+                       "created_at": {
+                         "gte": "2019-10-01T00:00:00.000Z"
+                       }
+                     }
+                   },
+                   {
+                     "range": {
+                       "created_at": {
+                         "gte": "2019-10-01T00:00:00.000Z",
+                         "lt": "2019-10-02T00:00:00.000Z"
+                       }
+                     }
+                   },
+                   {
+                     "range": {
+                       "created_at": {
+                         "lt": "2019-10-10T00:00:00.000Z"
+                       }
+                     }
+                   },
+                   {
+                     "range": {
+                       "created_at": {
+                         "gte": "2019-09-30T00:00:00.000Z",
+                         "lt": "2019-10-07T00:00:00.000Z"
+                       }
+                     }
+                   },
+                   {
+                     "match_phrase": {
+                       "business_uuid": "36bf8981-8827-4c0c-a645-02d9fc6d72c8"
+                     }
+                   }
+                 ],
+                 "must_not": [
+                   {
+                     "range": {
+                       "created_at": {
+                         "gte": "2019-10-09T00:00:00.000Z",
+                         "lt": "2019-10-10T00:00:00.000Z"
+                       }
+                     }
+                   }
+                 ]
+               }
+             }
+           }
+         ],
+        "result": {
+          "body": {
+            "count": "4"
+          }
+        }
+      }
+      """
+    And I mock Elasticsearch method "count" with:
+      """
+      {
+         "arguments": [
+           "transactions",
+           {
+             "query": {
+               "bool": {
+                 "must": [
+                   {
+                     "range": {
+                       "created_at": {
+                         "gte": "2019-10-01T00:00:00.000Z"
+                       }
+                     }
+                   },
+                   {
+                     "range": {
+                       "created_at": {
+                         "gte": "2019-10-01T00:00:00.000Z",
+                         "lt": "2019-10-02T00:00:00.000Z"
+                       }
+                     }
+                   },
+                   {
+                     "range": {
+                       "created_at": {
+                         "lt": "2019-10-10T00:00:00.000Z"
+                       }
+                     }
+                   },
+                   {
+                     "range": {
+                       "created_at": {
+                         "gte": "2019-09-30T00:00:00.000Z",
+                         "lt": "2019-10-07T00:00:00.000Z"
+                       }
+                     }
+                   }
+                 ],
+                 "must_not": [
+                   {
+                     "range": {
+                       "created_at": {
+                         "gte": "2019-10-09T00:00:00.000Z",
+                         "lt": "2019-10-10T00:00:00.000Z"
+                       }
+                     }
+                   },
+                   {
+                     "match_phrase": {
+                       "example": true
+                     }
+                   }
+                 ]
+               }
+             }
+           }
+         ],
+        "result": {
+          "body": {
+            "count": "4"
+          }
+        }
+      }
+      """
+    And I mock Elasticsearch method "count" with:
+      """
+      {
+         "arguments": [
+           "transactions",
+           {
+             "query": {
+               "bool": {
+                 "must": [
+                   {
+                     "range": {
+                       "created_at": {
+                         "gte": "2019-10-01T00:00:00.000Z"
+                       }
+                     }
+                   },
+                   {
+                     "range": {
+                       "created_at": {
+                         "gte": "2019-10-01T00:00:00.000Z",
+                         "lt": "2019-10-02T00:00:00.000Z"
+                       }
+                     }
+                   },
+                   {
+                     "range": {
+                       "created_at": {
+                         "lt": "2019-10-10T00:00:00.000Z"
+                       }
+                     }
+                   },
+                   {
+                     "range": {
+                       "created_at": {
+                         "gte": "2019-09-30T00:00:00.000Z",
+                         "lt": "2019-10-07T00:00:00.000Z"
+                       }
+                     }
+                   },
+                   {
+                     "match_phrase": {
+                       "user_uuid": "08a3fac8-43ef-4998-99aa-cabc97a39261"
+                     }
+                   }
+                 ],
+                 "must_not": [
+                   {
+                     "range": {
+                       "created_at": {
+                         "gte": "2019-10-09T00:00:00.000Z",
+                         "lt": "2019-10-10T00:00:00.000Z"
+                       }
+                     }
+                   }
+                 ]
+               }
+             }
+           }
+         ],
+        "result": {
+          "body": {
+            "count": "4"
+          }
+        }
+      }
+      """
     When I send a GET request to "<uri>"
     Then print last response
     And the response status code should be 200
@@ -953,7 +1373,6 @@ Feature: Transaction list for business
       ]
     ]
     """
-
     Examples:
       | match_phrase                                           | token                                                                                                                     | uri                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
       | ,{"match_phrase": {"business_uuid": "{{businessId}}"}} | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} | /api/business/{{businessId}}/list?orderBy=created_at&direction=desc&limit=20&query=&page=1&currency=EUR&filters%5Bcreated_at%5D%5B0%5D%5Bcondition%5D=afterDate&filters%5Bcreated_at%5D%5B0%5D%5Bvalue%5D%5B0%5D=2019-10-01&filters%5Bcreated_at%5D%5B1%5D%5Bcondition%5D=isDate&filters%5Bcreated_at%5D%5B1%5D%5Bvalue%5D%5B0%5D=2019-10-01&filters%5Bcreated_at%5D%5B2%5D%5Bcondition%5D=isNotDate&filters%5Bcreated_at%5D%5B2%5D%5Bvalue%5D%5B0%5D=2019-10-09&filters%5Bcreated_at%5D%5B3%5D%5Bcondition%5D=beforeDate&filters%5Bcreated_at%5D%5B3%5D%5Bvalue%5D%5B0%5D=2019-10-09&filters%5Bcreated_at%5D%5B4%5D%5Bcondition%5D=betweenDates&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5BdateFrom%5D=2019-09-30T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5BdateTo%5D=2019-10-06T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5Bfrom%5D=2019-09-30T22:00:00.000Z&filters%5Bcreated_at%5D%5B4%5D%5Bvalue%5D%5B0%5D%5Bto%5D=2019-10-06T22:00:00.000Z |

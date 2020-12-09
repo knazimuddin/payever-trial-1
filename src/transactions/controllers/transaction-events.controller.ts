@@ -8,6 +8,7 @@ import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { PaymentMailEventProducer } from '../producer';
 import { StatisticsService, TransactionsExampleService, TransactionsService } from '../services';
+import { PaymentStatusesEnum } from '../enum';
 
 @Controller()
 export class TransactionEventsController {
@@ -48,6 +49,13 @@ export class TransactionEventsController {
 
     this.logger.log({ text: 'PAYMENT.UPDATE: Prepared transaction', transaction });
     await this.statisticsService.processAcceptedTransaction(transaction.uuid, transaction);
+    if (transaction.status === PaymentStatusesEnum.Paid) {
+      await this.statisticsService.processPaidTransaction(transaction.uuid, transaction);
+    }
+    if ((transaction.status === PaymentStatusesEnum.Refunded)
+      || (transaction.status === PaymentStatusesEnum.Cancelled)) {
+      await this.statisticsService.processRefundedTransactionAfterPaid(transaction.uuid, transaction);
+    }
     const updated: TransactionModel = await this.transactionsService.updateByUuid(transaction.uuid, transaction);
     this.logger.log({ text: 'PAYMENT.UPDATE: Updated transaction', transaction: updated.toObject() });
   }

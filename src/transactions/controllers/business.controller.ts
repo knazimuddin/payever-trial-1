@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -38,6 +37,7 @@ import {
   TransactionsService,
 } from '../services';
 import { BusinessFilter, Exporter, ExportFormat } from '../tools';
+import { PaymentActionsEnum } from '../enum';
 
 const BusinessPlaceholder: string = ':businessId';
 const UuidPlaceholder: string = ':uuid';
@@ -197,6 +197,27 @@ export class BusinessController {
     const slipPath: string = path.resolve(`./example_data/${name}`);
 
     return JSON.parse(readFileSync(slipPath, 'utf8'));
+  }
+
+  @Post(':uuid/legacy-api-action/shipped')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.oauth)
+  public async runLegacyApiShippedAction(
+    @ParamModel(
+      {
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+    @Body() actionPayload: ActionPayloadDto,
+  ): Promise<TransactionUnpackedDetailsInterface> {
+    return this.transactionActionService.doAction(
+      transaction,
+      actionPayload,
+      PaymentActionsEnum.ShippingGoods,
+      true,
+    );
   }
 
   @Post(':uuid/legacy-api-action/:action')

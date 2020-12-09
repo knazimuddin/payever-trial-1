@@ -12,6 +12,7 @@ export class TransactionCartItemDto implements TransactionCartItemInterface {
   public price_net: number;
   public product_variant_uuid: string;
   public quantity: number;
+  public sku: string;
   public shipping_price: number;
   public shipping_settings_rate: number;
   public shipping_settings_rate_type: string;

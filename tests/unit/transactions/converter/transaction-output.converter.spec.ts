@@ -18,8 +18,10 @@ describe('TransactionOutputConverter', () => {
         uuid: 'b4fd1c4d-d2b6-4484-be63-8f5d027d4585',
         action_running: true,
         amount: 123,
+        amount_capture_rest: 100,
+        amount_captured: 23,
         amount_refunded: 456,
-        amount_rest: 789,
+        amount_refund_rest: 789,
         available_refund_items: [
           {
             count: 123,
@@ -104,8 +106,10 @@ describe('TransactionOutputConverter', () => {
             original_id: '6bceacfc-178e-4cc5-a91f-2104cf04c1a0',
             uuid: 'b4fd1c4d-d2b6-4484-be63-8f5d027d4585',
             amount: 123,
+            amount_capture_rest: 100,
+            amount_captured: 23,
             amount_refunded: 456,
-            amount_rest: 789,
+            amount_refund_rest: 789,
             currency: 'EUR',
             total: 901,
             created_at: new Date('2009-11-04T18:55:41.000Z'),
