@@ -3,12 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { MessageBusService, MessageInterface, RabbitMqClient, RabbitMqRPCClient } from '@pe/nest-kit';
 import { TransactionConverter } from '../converter';
 import { NextActionDto } from '../dto';
-import {
-  ActionCallerInterface,
-  ActionItemInterface,
-  BusinessPaymentOptionInterface,
-  PaymentFlowInterface,
-} from '../interfaces';
+import { ActionCallerInterface, ActionItemInterface, PaymentFlowInterface } from '../interfaces';
 import { ActionPayloadInterface, FieldsInterface, UnwrappedFieldsInterface } from '../interfaces/action-payload';
 import {
   CheckoutRpcPayloadInterface,
@@ -21,6 +16,13 @@ import { BusinessPaymentOptionService } from './business-payment-option.service'
 import { PaymentFlowService } from './payment-flow.service';
 import { PaymentsMicroService } from './payments-micro.service';
 import { TransactionsService } from './transactions.service';
+import {
+  AllowedUpdateStatusPaymentMethodsEnum,
+  NextActionTypesEnum,
+  PaymentActionsEnum,
+  PaymentStatusesEnum,
+  RpcMessageIdentifierEnum,
+} from '../enum';
 
 @Injectable()
 export class MessagingService implements ActionCallerInterface {
@@ -69,7 +71,8 @@ export class MessagingService implements ActionCallerInterface {
       return [];
     }
 
-    const actionsResponse: { [key: string]: boolean } = await this.runPaymentRpc(transaction, payload, 'action');
+    const actionsResponse: { [key: string]: boolean } =
+      await this.runPaymentRpc(transaction, payload, RpcMessageIdentifierEnum.Action);
     if (!actionsResponse) {
       return [];
     }
@@ -127,7 +130,7 @@ export class MessagingService implements ActionCallerInterface {
       throw new Error(`Cannot prepare dto for run action: ${e}`);
     }
 
-    const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'action');
+    const rpcResult: any = await this.runPaymentRpc(transaction, payload, RpcMessageIdentifierEnum.Action);
     this.logger.log({
       action: action,
       actionPayload: actionPayload,
@@ -154,13 +157,17 @@ export class MessagingService implements ActionCallerInterface {
       case 'action':
         /** stub for action behaviour */
         break;
-      case 'external_capture':
+      case NextActionTypesEnum.externalCapture:
         await this.externalCapture(nextAction.payment_method, nextAction.payload);
         break;
     }
   }
 
   public async updateStatus(transaction: TransactionUnpackedDetailsInterface): Promise<void> {
+    if (transaction.status === PaymentStatusesEnum.New) {
+      return;
+    }
+
     let payload: CheckoutRpcPayloadInterface;
     try {
       const dto: CheckoutTransactionRpcActionInterface = await this.createPayloadData(transaction);
@@ -174,7 +181,7 @@ export class MessagingService implements ActionCallerInterface {
       throw new Error(`Cannot prepare dto for update status: ${e}`);
     }
 
-    const rpcResult: any = await this.runPaymentRpc(transaction, payload, 'payment');
+    const rpcResult: any = await this.runPaymentRpc(transaction, payload, RpcMessageIdentifierEnum.UpdateStatus);
     this.logger.log({
       context: 'MessagingService',
       message: 'RPC status update result',
@@ -188,14 +195,14 @@ export class MessagingService implements ActionCallerInterface {
     paymentMethod: string,
     payload: any,
   ): Promise<void> {
-    const stub: boolean = this.configService.get<boolean>('STUB');
+    const stub: boolean = this.configService.get<string>('STUB') === 'true';
     await this.rabbitRpcClient.send(
       {
         channel: this.paymentMicroService.getChannelByPaymentType(paymentMethod, stub),
       },
       this.paymentMicroService.createPaymentMicroMessage(
         paymentMethod,
-        'external_capture',
+        NextActionTypesEnum.externalCapture,
         payload,
         stub,
       ),
@@ -254,12 +261,24 @@ export class MessagingService implements ActionCallerInterface {
   private async runPaymentRpc(
     transaction: TransactionUnpackedDetailsInterface,
     payload: CheckoutRpcPayloadInterface,
-    messageIdentifier: string,
+    messageIdentifier: RpcMessageIdentifierEnum,
   ): Promise<any> {
     const stub: boolean = this.configService.get<string>('STUB') === 'true';
+    let channel: string = this.paymentMicroService.getChannelByPaymentType(transaction.type, stub);
+
+    if (messageIdentifier === RpcMessageIdentifierEnum.UpdateStatus
+      && Object.values(AllowedUpdateStatusPaymentMethodsEnum).includes(
+        transaction.type as AllowedUpdateStatusPaymentMethodsEnum,
+      )
+      && !stub
+    ) {
+      // status update uses separate channel
+      channel += '_status';
+    }
+
     const result: any = await this.rabbitRpcClient.send(
       {
-        channel: this.paymentMicroService.getChannelByPaymentType(transaction.type, stub),
+        channel,
       },
       this.paymentMicroService.createPaymentMicroMessage(
         transaction.type,
@@ -362,18 +381,24 @@ export class MessagingService implements ActionCallerInterface {
     }
   }
 
+  /* tslint:disable-next-line */
   private prepareActionFields(
     transaction: TransactionBasicInterface,
     action: string,
     fields: FieldsInterface & UnwrappedFieldsInterface,
   ): FieldsInterface & UnwrappedFieldsInterface {
     // @TODO ask FE to remove wrapper object!
-    if ((action === 'refund' || action === 'return') && fields.payment_return) {
-      fields.amount = fields.payment_return.amount || fields.amount || 0.0;
-      fields.reason = fields.payment_return.reason || fields.reason || null;
+    if ((action === 'refund' || action === 'return')) {
+      if (fields.payment_return) {
+        fields.amount = fields.payment_return.amount || fields.amount || 0.0;
+        fields.reason = fields.payment_return.reason || fields.reason || null;
+      }
+
       fields.refunded_amount = transaction.amount_refunded;
+      fields.captured_amount = transaction.amount_captured;
       /** php microservices use JMS Serializer, thus need this field in camel case also */
       fields.refundedAmount = fields.refunded_amount;
+      fields.capturedAmount = fields.captured_amount;
     }
     if (action === 'change_amount' && fields.payment_change_amount) {
       fields.amount = fields.payment_change_amount.amount || fields.amount || 0;
@@ -391,6 +416,12 @@ export class MessagingService implements ActionCallerInterface {
         ,
         reason: fields.payment_update.reason,
       };
+    }
+    if (action === PaymentActionsEnum.ShippingGoods) {
+      fields.refunded_amount = transaction.amount_refunded;
+      fields.captured_amount = transaction.amount_captured;
+      fields.refundedAmount = fields.refunded_amount;
+      fields.capturedAmount = fields.captured_amount;
     }
 
     return fields;

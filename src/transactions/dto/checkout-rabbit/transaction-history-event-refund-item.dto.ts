@@ -5,6 +5,9 @@ export class TransactionHistoryEventRefundItemDto {
   @IsNotEmpty()
   public item_uuid: string;
 
+  @IsString()
+  public identifier: string;
+
   @IsNumber()
   public count: number;
 }

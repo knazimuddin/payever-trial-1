@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { TransactionPaymentDetailsConverter } from '../converter';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { ThirdPartyPaymentsEnum } from '../enum';
+import { AllowedUpdateStatusPaymentMethodsEnum, PaymentStatusesEnum, ThirdPartyPaymentsEnum } from '../enum';
 import { ActionCallerInterface } from '../interfaces';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 
@@ -30,6 +30,7 @@ export class TransactionActionService {
     transaction: TransactionModel,
     actionPayload: ActionPayloadDto,
     action: string,
+    skipValidation: boolean = false,
   ): Promise<TransactionUnpackedDetailsInterface> {
     this.dtoValidation.checkFileUploadDto(actionPayload);
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
@@ -44,6 +45,7 @@ export class TransactionActionService {
         transaction,
         actionPayload,
         action,
+        skipValidation,
       );
 
       await actionCallerService.runAction(unpackedTransaction, action, actionPayload);
@@ -59,13 +61,76 @@ export class TransactionActionService {
       throw new BadRequestException(e.message);
     }
 
-    const updatedTransaction: TransactionUnpackedDetailsInterface =
-      await this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
-    /** Send update to checkout-php */
+    await this.eventDispatcher.dispatch(
+      PaymentActionEventEnum.PaymentActionAfter,
+      transaction,
+      actionPayload,
+      action,
+    );
+
+    return this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
+  }
+
+  public async updateStatus(
+    transaction: TransactionModel,
+  ): Promise<TransactionUnpackedDetailsInterface> {
+    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
+      transaction.toObject({ virtuals: true }),
+    );
+
+    const disabledUpdateStatuses: string[] = [
+      PaymentStatusesEnum.Paid,
+    ];
+
+    if (!Object.values(AllowedUpdateStatusPaymentMethodsEnum).includes(
+        unpackedTransaction.type as AllowedUpdateStatusPaymentMethodsEnum,
+      )
+      || disabledUpdateStatuses.includes(unpackedTransaction.status)
+    ) {
+      return unpackedTransaction;
+    }
+
+    const oldStatus: string = unpackedTransaction.status;
+    const oldSpecificStatus: string = unpackedTransaction.specific_status;
+
     try {
-      await this.messagingService.sendTransactionUpdate(updatedTransaction);
+      const actionCallerService: ActionCallerInterface = this.chooseActionCallerService(unpackedTransaction);
+
+      await actionCallerService.updateStatus(unpackedTransaction);
     } catch (e) {
-      throw new BadRequestException(`Error occurred while sending transaction update: ${e.message}`);
+      this.logger.error(
+        {
+          context: 'TransactionActionService',
+          error: e.message,
+          message: `Error occurred during status update`,
+          paymentId: unpackedTransaction.original_id,
+          paymentUuid: unpackedTransaction.id,
+        },
+      );
+      throw new BadRequestException(`Error occurred during status update. Please try again later. ${e.message}`);
+    }
+
+    const updatedTransaction: TransactionUnpackedDetailsInterface =
+      await this.transactionsService.findUnpackedByUuid(transaction.uuid);
+
+    const newStatus: string = updatedTransaction.status;
+    const newSpecificStatus: string = updatedTransaction.specific_status;
+
+    if (newStatus !== oldStatus || newSpecificStatus !== oldSpecificStatus) {
+      /** Send update to checkout-php */
+      try {
+        await this.messagingService.sendTransactionUpdate(updatedTransaction);
+      } catch (e) {
+        this.logger.error(
+          {
+            context: 'TransactionActionService',
+            error: e.message,
+            message: 'Error occurred while sending transaction update',
+            paymentId: unpackedTransaction.original_id,
+            paymentUuid: unpackedTransaction.id,
+          },
+        );
+      }
     }
 
     return updatedTransaction;

@@ -1,4 +1,6 @@
 export * from './action-item.interface';
+export * from './action-item-validator.interface';
+export * from './action-amount-validator.interface';
 export * from './address.interface';
 export * from './transaction-business.interface';
 export * from './business.interface';
@@ -9,3 +11,4 @@ export * from './payment-flow.interface';
 export * from './transaction';
 export * from './action-caller.interface';
 export * from './sample-product.interface';
+export * from './ws';

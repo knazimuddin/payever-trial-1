@@ -7,6 +7,7 @@ import {
 import { AddressSchema } from './address.schema';
 import { TransactionCartItemSchema } from './transaction-cart-item-schema';
 import { TransactionHistoryEntrySchema } from './transaction-history-entry.schema';
+import { PaymentActionsEnum } from '../enum';
 
 export const TransactionSchemaName: string = 'Transaction';
 
@@ -14,6 +15,8 @@ export const TransactionSchema: Schema = new Schema({
   /** Original id for legacy purposes */
   original_id: { type: String, unique: true },
   uuid: { type: String, required: true, unique: true },
+
+  api_call_id: { type: String, required: false },
 
   action_running: { type: Boolean, required: false, default: false },
   amount: Number,
@@ -43,7 +46,11 @@ export const TransactionSchema: Schema = new Schema({
   fee_accepted: Boolean,
   history: [TransactionHistoryEntrySchema],
   invoice_id: String,
+
+  captured_items: [TransactionCartItemSchema],
   items: [TransactionCartItemSchema],
+  refunded_items: [TransactionCartItemSchema],
+
   merchant_email: String,
   merchant_name: String,
   /** Serialized big object */
@@ -71,56 +78,75 @@ export const TransactionSchema: Schema = new Schema({
   example_shipping_slip: String,
 });
 
-TransactionSchema.index({ uuid: 1});
-TransactionSchema.index({ santander_applications: 1});
-TransactionSchema.index({ original_id: 1});
-TransactionSchema.index({ reference: 1});
-TransactionSchema.index({ customer_name: 1});
-TransactionSchema.index({ customer_email: 1});
-TransactionSchema.index({ merchant_name: 1});
-TransactionSchema.index({ merchant_email: 1});
+TransactionSchema.index({ santander_applications: 1 });
+TransactionSchema.index({ reference: 1 });
+TransactionSchema.index({ customer_name: 1 });
+TransactionSchema.index({ customer_email: 1 });
+TransactionSchema.index({ merchant_name: 1 });
+TransactionSchema.index({ merchant_email: 1 });
 TransactionSchema.index({ status: 1, _id: 1 });
+TransactionSchema.index({ business_uuid: 1 });
+TransactionSchema.index({ example: 1 });
+TransactionSchema.index({ created_at: -1 });
+TransactionSchema.index({ business_uuid: 1, example: 1 });
 
-TransactionSchema.virtual('amount_refunded').get(function(): number {
+TransactionSchema.virtual('amount_refunded').get(function (): number {
   let totalRefunded: number = 0;
 
   if (this.history) {
     this.history
-      .filter((entry: { action: string }) => entry.action === 'refund' || entry.action === 'return')
+      .filter((entry: { action: string }) =>
+        entry.action === PaymentActionsEnum.Refund
+        || entry.action === PaymentActionsEnum.Return,
+      )
       .forEach((entry: { amount: number }) => totalRefunded += (entry.amount || 0))
-    ;
+      ;
   }
 
   return totalRefunded;
 });
 
-TransactionSchema.virtual('amount_rest').get(function(): number {
+TransactionSchema.virtual('amount_captured').get(function (): number {
+  let totalCaptured: number = 0;
+
+  if (this.history) {
+    this.history
+      .filter((entry: { action: string }) => entry.action === PaymentActionsEnum.ShippingGoods)
+      .forEach((entry: { amount: number }) => totalCaptured += (entry.amount || 0))
+      ;
+  }
+
+  return totalCaptured;
+});
+
+TransactionSchema.virtual('amount_refund_rest').get(function (): number {
   return this.amount - this.amount_refunded;
 });
 
-TransactionSchema.virtual('available_refund_items').get(function(): TransactionRefundItemInterface[] {
+TransactionSchema.virtual('amount_capture_rest').get(function (): number {
+  return this.total - this.amount_captured - this.amount_refunded;
+});
+
+TransactionSchema.virtual('available_refund_items').get(function (): TransactionRefundItemInterface[] {
   const refundItems: TransactionRefundItemInterface[] = [];
 
   this.items.forEach((item: TransactionCartItemInterface) => {
     let availableCount: number = item.quantity;
 
-    if (this.history) {
-      this.history.forEach((historyEntry: TransactionHistoryEntryInterface) => {
-        if (historyEntry.refund_items) {
-          const refundedLog: TransactionRefundItemInterface = historyEntry.refund_items.find(
-            (refundedItem: TransactionRefundItemInterface) => item.uuid === refundedItem.item_uuid,
-          );
+    if (this.refunded_items) {
+      const existingRefundItem: TransactionCartItemInterface = this.refunded_items.find(
+        (refundedItem: TransactionCartItemInterface) => item.identifier === refundedItem.identifier,
+      );
 
-          if (refundedLog && refundedLog.count) {
-            availableCount -= refundedLog.count;
-          }
-        }
-      });
+      if (existingRefundItem && existingRefundItem.quantity) {
+        availableCount -= existingRefundItem.quantity;
+      }
     }
 
     if (availableCount > 0) {
       refundItems.push({
         count: availableCount,
+        identifier: item.identifier,
         item_uuid: item.uuid,
       });
     }

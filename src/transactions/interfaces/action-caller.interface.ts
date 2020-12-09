@@ -12,4 +12,8 @@ export interface ActionCallerInterface {
     action: string,
     actionPayload: ActionPayloadInterface,
   ): Promise<void>;
+
+  updateStatus(
+    transaction: TransactionUnpackedDetailsInterface,
+  ): Promise<void>;
 }

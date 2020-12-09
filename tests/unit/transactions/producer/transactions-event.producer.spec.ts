@@ -26,7 +26,7 @@ describe('PaymentMailEventProducer ', () => {
         {
           provide: RabbitMqClient,
           useValue: {
-            send: () => {},
+            send: () => { },
           },
         },
       ],
@@ -44,6 +44,91 @@ describe('PaymentMailEventProducer ', () => {
   afterEach(async () => {
     sandbox.restore();
     sandbox = undefined;
+  });
+
+  describe('produceTransactionPaidEvent method', () => {
+    it('should send produceTransactionPaidEvent', async () => {
+      const eventName: RabbitRoutingKeys = RabbitRoutingKeys.TransactionsPaymentPaid;
+      const amount: number = 100;
+
+      const transaction: TransactionPackedDetailsInterface = {
+        business_uuid: uuid.v4(),
+        channel_set_uuid: uuid.v4(),
+        items: [],
+        updated_at: new Date(),
+        uuid: uuid.v4(),
+      } as any;
+
+      const payload: TransactionPaymentInterface = {
+        amount: amount,
+        business: {
+          id: transaction.business_uuid,
+        },
+        channel_set: {
+          id: transaction.channel_set_uuid,
+        },
+        date: transaction.updated_at,
+        id: transaction.uuid,
+        items: transaction.items,
+        last_updated: transaction.updated_at,
+      };
+
+      await transactionEventProducer.produceTransactionPaidEvent(transaction, amount, transaction.updated_at);
+
+      expect(rabbitMqClient.send).to.have.been.calledWithMatch(
+        {
+          channel: eventName,
+          exchange: 'async_events',
+        },
+        {
+          name: eventName,
+          payload: payload,
+        },
+      );
+    });
+  });
+
+  describe('produceTransactionRefundEvent method', () => {
+    it('should send produceTransactionRefundEvent', async () => {
+      const eventName: RabbitRoutingKeys = RabbitRoutingKeys.TransactionsPaymentRefund;
+      const amount: number = 100;
+
+      const transaction: TransactionModel = {
+        business_uuid: uuid.v4(),
+        channel_set_uuid: uuid.v4(),
+        items: [],
+        updated_at: new Date(),
+        uuid: uuid.v4(),
+      } as any;
+
+      const payload: TransactionPaymentInterface = {
+        amount: amount,
+        business: {
+          id: transaction.business_uuid,
+        },
+        channel_set: {
+          id: transaction.channel_set_uuid,
+        },
+        date: transaction.updated_at,
+        id: transaction.uuid,
+        items: transaction.items,
+        last_updated: transaction.updated_at,
+      };
+
+      await transactionEventProducer.produceTransactionRefundEvent(
+        transaction, amount, transaction.updated_at);
+
+      expect(rabbitMqClient.send).to.have.been.calledWithMatch(
+        {
+          channel: eventName,
+          exchange: 'async_events',
+        },
+        {
+          name: eventName,
+          payload: payload,
+        },
+      );
+    });
   });
 
   describe('produceTransactionAddEvent method', () => {
@@ -70,6 +155,7 @@ describe('PaymentMailEventProducer ', () => {
         date: transaction.updated_at,
         id: transaction.uuid,
         items: transaction.items,
+        last_updated: null,
       };
 
       await transactionEventProducer.produceTransactionAddEvent(transaction, amount);
@@ -90,7 +176,7 @@ describe('PaymentMailEventProducer ', () => {
   describe('produceTransactionSubtractEvent method', () => {
     it('should send produceTransactionSubtractEvent', async () => {
       const eventName = RabbitRoutingKeys.TransactionsPaymentSubtract;
-      
+
       const transaction: TransactionModel = {
         business_uuid: uuid.v4(),
         channel_set_uuid: uuid.v4(),
@@ -121,6 +207,7 @@ describe('PaymentMailEventProducer ', () => {
         date: transaction.updated_at,
         id: transaction.uuid,
         items: transaction.items,
+        last_updated: null,
       };
 
       await transactionEventProducer.produceTransactionSubtractEvent(transaction, refund);
@@ -141,7 +228,7 @@ describe('PaymentMailEventProducer ', () => {
   describe('produceTransactionRemoveEvent method', () => {
     it('should send produceTransactionRemoveEvent', async () => {
       const eventName = RabbitRoutingKeys.TransactionsPaymentRemoved;
-      
+
       const transaction: TransactionModel = {
         amount: 100,
         business_uuid: uuid.v4(),
@@ -162,6 +249,7 @@ describe('PaymentMailEventProducer ', () => {
         date: transaction.updated_at,
         id: transaction.uuid,
         items: transaction.items,
+        last_updated: null,
       };
 
       await transactionEventProducer.produceTransactionRemoveEvent(transaction);

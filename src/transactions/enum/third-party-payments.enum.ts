@@ -5,6 +5,7 @@ export enum ThirdPartyPaymentsEnum {
   stripeCreditCard = 'stripe',
   stripeDirectDebit = 'stripe_directdebit',
   santanderNLInstallment = 'santander_installment_nl',
+  santanderATInstallment = 'santander_installment_at',
   swedbankCreditCard = 'swedbank_creditcard',
   swedbankInvoice = 'swedbank_invoice',
   santanderDEFactoring = 'santander_factoring_de',

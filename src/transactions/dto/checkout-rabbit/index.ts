@@ -7,3 +7,4 @@ export * from './payment-flow-removed.dto';
 export * from './transaction-changed.dto';
 export * from './transaction-removed.dto';
 export * from './transaction.dto';
+export * from './transaction-payment.dto';

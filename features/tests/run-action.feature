@@ -445,7 +445,7 @@ Feature: Run payment action
       """
       {
         "requestPayload": {{requestPayloadSantanderSE}},
-        "responsePayload": "s:82:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"payment\":{\"amount\":100},\"payment_items\":[]}}}\";"
+        "responsePayload": "s:348:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"payment\":{\"amount\":100},\"payment_items\":[],\"next_action\":{\"type\":\"external_capture\",\"payment_method\":\"payex_creditcard\",\"payload\":{\"payment_id\":\"39c153122d0f66890da7c9b98ba94ae3\",\"total\":599,\"transaction_number\":\"931648990\",\"credentials\":{\"accountNumber\":\"108830107\",\"encryptionKey\":\"54jVE2s25MT79t55fyZR\"}}}}}}\";"
       }
       """
     And I mock RPC request "payment_option.santander_installment_se.action" to "rpc_payment_santander_se" with:
@@ -455,6 +455,21 @@ Feature: Run payment action
           "action": "action.list"
         },
         "responsePayload": "s:75:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"refund\":true,\"shipping_goods\":false}}}\";"
+      }
+      """
+    And I mock RPC request "payment_option.payex_creditcard.external_capture" to "rpc_payment_payex" with:
+      """
+      {
+        "requestPayload": {
+          "payment_id": "39c153122d0f66890da7c9b98ba94ae3",
+          "total": 599,
+          "transaction_number": "931648990",
+          "credentials": {
+            "accountNumber": "108830107",
+            "encryptionKey": "54jVE2s25MT79t55fyZR"
+          }
+        },
+        "responsePayload": "s:45:\"{\"payload\":{\"status\":\"OK\",\"result\":{}}}\";"
       }
       """
     And I mock Elasticsearch method "singleIndex" with:

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -38,6 +37,7 @@ import {
   TransactionsService,
 } from '../services';
 import { BusinessFilter, Exporter, ExportFormat } from '../tools';
+import { PaymentActionsEnum } from '../enum';
 
 const BusinessPlaceholder: string = ':businessId';
 const UuidPlaceholder: string = ':uuid';
@@ -199,6 +199,27 @@ export class BusinessController {
     return JSON.parse(readFileSync(slipPath, 'utf8'));
   }
 
+  @Post(':uuid/legacy-api-action/shipped')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.oauth)
+  public async runLegacyApiShippedAction(
+    @ParamModel(
+      {
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+    @Body() actionPayload: ActionPayloadDto,
+  ): Promise<TransactionUnpackedDetailsInterface> {
+    return this.transactionActionService.doAction(
+      transaction,
+      actionPayload,
+      PaymentActionsEnum.ShippingGoods,
+      true,
+    );
+  }
+
   @Post(':uuid/legacy-api-action/:action')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.oauth)
@@ -233,31 +254,8 @@ export class BusinessController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
   ): Promise<TransactionOutputInterface> {
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
-    );
-
-    try {
-      await this.messagingService.updateStatus(unpackedTransaction);
-    } catch (e) {
-      this.logger.error(
-        {
-          context: 'BusinessController',
-          error: e.message,
-          message: `Error occurred during status update`,
-        },
-      );
-      throw new BadRequestException(`Error occurred during status update. Please try again later. ${e.message}`);
-    }
-
     const updatedTransaction: TransactionUnpackedDetailsInterface =
-      await this.transactionsService.findUnpackedByUuid(transaction.uuid);
-    /** Send update to checkout-php */
-    try {
-      await this.messagingService.sendTransactionUpdate(updatedTransaction);
-    } catch (e) {
-      throw new BadRequestException(`Error occurred while sending transaction update: ${e.message}`);
-    }
+      await this.transactionActionService.updateStatus(transaction);
 
     return TransactionOutputConverter.convert(
       updatedTransaction,

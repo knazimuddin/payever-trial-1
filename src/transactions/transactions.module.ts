@@ -3,19 +3,22 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
 import { DelayRemoveClient, ElasticSearchModule } from '@pe/elastic-kit';
-import { EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
+import { CollectorModule, EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { MigrationModule } from '@pe/migration-kit';
 import { environment } from '../environments';
 import {
   BpoFixCommand,
+  ExportTransactionToWidgetCommand,
   TransactionsEsBusinessCheckCommand,
   TransactionsEsBusinessUpdateCommand,
   TransactionsEsCompareCommand,
   TransactionsEsExportCommand,
+  TransactionsEsFixDiffCommand,
   TransactionsEsSetupCommand,
   TransactionsExportForBlankMigrateCommand,
   TransactionsExportForWidgetsCommand,
+  TriggerPayexCaptureCommand,
 } from './commands';
 import {
   AdminController,
@@ -28,11 +31,13 @@ import {
   HistoryEventsController,
   MailerBusMessagesController,
   MigrateEventsController,
+  LegacyApiController,
   SampleProductsBusMessagesController,
   ShippingBusMessagesController,
   ThirdPartyEventsController,
   TransactionEventsController,
   UserController,
+  InternalTransactionEventsController,
 } from './controllers';
 import { ExchangeCalculatorFactory } from './currency';
 import { EventListenersList } from './event-listeners/event-listeners.list';
@@ -75,7 +80,10 @@ import {
   TransactionsExampleService,
   TransactionsService,
   SampleProductsService,
+  ExportMonthlyBusinessTransactionService,
+  ActionValidatorsList,
 } from './services';
+import { EventsGateway } from './ws';
 
 @Module({
   controllers: [
@@ -87,6 +95,7 @@ import {
     FlowEventsController,
     HistoryEventsController,
     MigrateEventsController,
+    LegacyApiController,
     ThirdPartyEventsController,
     TransactionEventsController,
     UserController,
@@ -94,6 +103,7 @@ import {
     MailerBusMessagesController,
     AuthEventsController,
     SampleProductsBusMessagesController,
+    InternalTransactionEventsController,
   ],
   imports: [
     ConfigModule,
@@ -116,7 +126,10 @@ import {
     }),
     EventDispatcherModule,
     ElasticSearchModule.forRoot({
-      host: environment.elasticSearch,
+      authPassword: environment.elasticSearchAuthPassword,
+      authUsername: environment.elasticSearchAuthUsername,
+      cloudId: environment.elasticSearchCloudId,
+      host: environment.elasticSearchHost,
     }),
     MigrationModule,
   ],
@@ -126,6 +139,7 @@ import {
     BpoFixCommand,
     BusinessPaymentOptionService,
     BusinessService,
+    CollectorModule,
     ConfigService,
     DailyReportTransactionMailerReportEventProducer,
     DailyReportTransactionsService,
@@ -133,6 +147,7 @@ import {
     DtoValidationService,
     ElasticSearchService,
     ExchangeCalculatorFactory,
+    ExportTransactionToWidgetCommand,
     MessagingService,
     MongoSearchService,
     PaymentFlowService,
@@ -149,13 +164,18 @@ import {
     TransactionsEsBusinessUpdateCommand,
     TransactionsEsCompareCommand,
     TransactionsEsExportCommand,
+    TransactionsEsFixDiffCommand,
     TransactionsEsSetupCommand,
     TransactionsExampleService,
     TransactionsExportForBlankMigrateCommand,
     TransactionsExportForWidgetsCommand,
     TransactionsNotifier,
     TransactionsService,
+    TriggerPayexCaptureCommand,
     ...EventListenersList,
+    EventsGateway,
+    ExportMonthlyBusinessTransactionService,
+    ...ActionValidatorsList,
   ],
 })
 export class TransactionsModule { }

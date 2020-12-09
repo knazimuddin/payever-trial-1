@@ -47,7 +47,7 @@ Feature: Update transaction status
       """
       <token>
       """
-    When I mock RPC request "payment_option.payex_creditcard.payment" to "rpc_payment_payex" with:
+    When I mock RPC request "payment_option.payex_creditcard.payment" to "rpc_payment_payex_status" with:
       """
       {
         "requestPayload": {
@@ -70,7 +70,7 @@ Feature: Update transaction status
       """
       <token>
       """
-    And I mock RPC request "payment_option.payex_creditcard.payment" to "rpc_payment_payex" with:
+    And I mock RPC request "payment_option.payex_creditcard.payment" to "rpc_payment_payex_status" with:
       """
       {
         "requestPayload": {
@@ -121,6 +121,30 @@ Feature: Update transaction status
         }
       ]
       """
+    Examples:
+      | path                                                         | token                                                                                                                     |
+      | /api/business/{{businessId}}/{{transactionId}}/update-status | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | /api/admin/{{transactionId}}/update-status                   | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
+
+
+  Scenario Outline: Update status with not allowed status
+    Given I authenticate as a user with the following data:
+      """
+      <token>
+      """
+    And I mock RPC request "payment_option.payex_creditcard.action" to "rpc_payment_payex" with:
+      """
+      {
+        "requestPayload": {
+          "action": "action.list"
+        },
+        "responsePayload": "s:80:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"test_action\":true,\"another_action\":false}}}\";"
+      }
+      """
+    And I use DB fixture "transactions/transaction-details-paid"
+    When I send a GET request to "<path>"
+    And print last response
+    Then the response status code should be 200
     Examples:
       | path                                                         | token                                                                                                                     |
       | /api/business/{{businessId}}/{{transactionId}}/update-status | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
