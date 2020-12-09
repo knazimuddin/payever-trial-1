@@ -14,8 +14,10 @@ export class TransactionPaymentDetailsConverter {
 
       action_running: transaction.action_running,
       amount: transaction.amount,
+      amount_capture_rest: transaction.amount_capture_rest,
+      amount_captured: transaction.amount_captured,
+      amount_refund_rest: transaction.amount_refund_rest,
       amount_refunded: transaction.amount_refunded,
-      amount_rest: transaction.amount_rest,
       available_refund_items: transaction.available_refund_items,
       billing_address: transaction.billing_address,
       business_option_id: transaction.business_option_id,
@@ -32,7 +34,11 @@ export class TransactionPaymentDetailsConverter {
       fee_accepted: transaction.fee_accepted,
       history: transaction.history,
       is_shipping_order_processed: transaction.is_shipping_order_processed,
+
+      captured_items: transaction.captured_items,
       items: transaction.items,
+      refunded_items: transaction.refunded_items,
+
       merchant_email: transaction.merchant_email,
       merchant_name: transaction.merchant_name,
       payment_details: { },

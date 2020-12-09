@@ -33,6 +33,7 @@ describe('Elastic Search Service', () => {
     } as any;
     elasticSearchClient = {
       search: (): any => { },
+      count: (): any => { },
     } as any;
 
     testService = new ElasticSearchService(elasticSearchClient, exchangeCalculatorFactory);
@@ -110,7 +111,9 @@ describe('Elastic Search Service', () => {
                 },
               },
             ],
-            total: 1,
+            total: {
+              value: 1,
+            },
           },
         },
       };
@@ -148,6 +151,7 @@ describe('Elastic Search Service', () => {
       const currencyExchangeRate: number = 1.23;
 
       sandbox.stub(elasticSearchClient, 'search').resolves(elasticSearchResult);
+      sandbox.stub(elasticSearchClient, 'count').resolves({ body: { count: 1 }});
       sandbox.stub(exchangeCalculator, 'getCurrencyExchangeRate').resolves(currencyExchangeRate);
       sandbox.stub(exchangeCalculatorFactory, 'create').returns(exchangeCalculator);
 
@@ -330,7 +334,9 @@ describe('Elastic Search Service', () => {
                 },
               },
             ],
-            total: 1,
+            total: {
+              value: 1,
+            },
           },
         },
       };
@@ -367,6 +373,7 @@ describe('Elastic Search Service', () => {
       const currencyExchangeRate: number = 1.23;
 
       sandbox.stub(elasticSearchClient, 'search').resolves(elasticSearchResult);
+      sandbox.stub(elasticSearchClient, 'count').resolves({ body: { count: 1 }});
       sandbox.stub(exchangeCalculatorFactory, 'create').returns(exchangeCalculator);
       sandbox.stub(exchangeCalculator, 'getCurrencyExchangeRate').resolves(currencyExchangeRate);
 
@@ -548,7 +555,9 @@ describe('Elastic Search Service', () => {
                 },
               },
             ],
-            total: 1,
+            total: {
+              value: 1,
+            },
           },
         },
       };
@@ -565,6 +574,7 @@ describe('Elastic Search Service', () => {
       const currencyExchangeRate: number = 0;
 
       sandbox.stub(elasticSearchClient, 'search').resolves(elasticSearchResult);
+      sandbox.stub(elasticSearchClient, 'count').resolves({ body: { count: 1 }});
       sandbox.stub(exchangeCalculatorFactory, 'create').returns(exchangeCalculator);
       sandbox.stub(exchangeCalculator, 'getCurrencyExchangeRate').resolves(currencyExchangeRate);
 

@@ -57,7 +57,7 @@ describe('PaymentMailEventProducer ', () => {
         action_running: true,
         amount: 123,
         amount_refunded: 456,
-        amount_rest: 789,
+        amount_refund_rest: 789,
         available_refund_items: [
           {
             count: 123,

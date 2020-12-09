@@ -17,7 +17,7 @@ import { RpcResultDto } from '../dto';
 import { ElasticTransactionEnum } from '../enum';
 import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
 import {
-  TransactionBasicInterface,
+  TransactionBasicInterface, TransactionCartItemInterface,
   TransactionHistoryEntryInterface,
   TransactionPackedDetailsInterface,
   TransactionUnpackedDetailsInterface,
@@ -262,6 +262,60 @@ export class TransactionsService {
     result: RpcResultDto,
   ): Promise<void> {
     await this.applyPaymentProperties(transaction, result);
+  }
+
+  public async saveCaptureItems(
+    transaction: TransactionModel,
+    captureItems: TransactionCartItemInterface[],
+  ): Promise<void> {
+    captureItems.forEach((captureItem: TransactionCartItemInterface) => {
+      const existingCaptureItem: TransactionCartItemInterface =
+        transaction.captured_items.find((transactionItem: TransactionCartItemInterface) => {
+          return transactionItem.identifier === captureItem.identifier;
+        });
+      if (existingCaptureItem) {
+        existingCaptureItem.quantity += captureItem.quantity;
+      } else {
+        transaction.captured_items.push(captureItem);
+      }
+    });
+
+    transaction.markModified('captured_items');
+    await transaction.save();
+  }
+
+  public async saveRefundItems(
+    transaction: TransactionModel,
+    refundItems: TransactionCartItemInterface[],
+  ): Promise<void> {
+    refundItems.forEach((refundItem: TransactionCartItemInterface) => {
+      const existingRefundItem: TransactionCartItemInterface =
+        transaction.refunded_items.find((transactionItem: TransactionCartItemInterface) => {
+          return transactionItem.identifier === refundItem.identifier;
+        });
+      if (existingRefundItem) {
+        existingRefundItem.quantity += refundItem.quantity;
+      } else {
+        transaction.refunded_items.push(refundItem);
+      }
+    });
+
+    transaction.markModified('refunded_items');
+    await transaction.save();
+  }
+
+  public async updateTransactionByUuid(transactionUuid: string, updatedData: { }): Promise<void> {
+    await this.transactionModel.findOneAndUpdate(
+      {
+        uuid: transactionUuid,
+      },
+      {
+        $set: updatedData,
+      },
+      {
+        new: true,
+      },
+    );
   }
 
   private async applyPaymentProperties(

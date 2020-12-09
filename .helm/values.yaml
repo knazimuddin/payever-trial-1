@@ -2,8 +2,8 @@ namespace: default
 priorityClass: app-9stars
 
 replicas:
-  http: 1
-  consumer: 1
+  http: 4
+  consumer: 4
   cron: 1
   ws: 1
 

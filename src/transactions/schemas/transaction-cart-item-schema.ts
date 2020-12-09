@@ -20,6 +20,7 @@ export const TransactionCartItemSchema: Schema = new Schema({
   shipping_settings_rate: Number,
   shipping_settings_rate_type: String,
   shipping_type: String,
+  sku: String,
   thumbnail: String,
   updated_at: Date,
   url: String,

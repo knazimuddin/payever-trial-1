@@ -17,10 +17,15 @@ export class TransactionOutputConverter {
     delete details.finance_id;
     delete details.application_no;
     delete details.application_number;
+    delete details.applicationNumber;
     delete details.usage_text;
     delete details.pan_id;
     delete details.iban;
     delete details.bank_i_b_a_n;
+
+    if (transaction?.payment_details?.applicationNumber) {
+      transaction.payment_details.application_number = transaction.payment_details.applicationNumber;
+    }
 
     return {
       actions: actions,
@@ -30,8 +35,10 @@ export class TransactionOutputConverter {
         uuid: transaction.uuid,
 
         amount: transaction.amount,
+        amount_capture_rest: transaction.amount_capture_rest,
+        amount_captured: transaction.amount_captured,
+        amount_refund_rest: transaction.amount_refund_rest,
         amount_refunded: transaction.amount_refunded,
-        amount_rest: transaction.amount_rest,
         currency: transaction.currency,
         total: transaction.total,
 

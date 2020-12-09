@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { TransactionPaymentDetailsConverter } from '../converter';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { AllowedUpdateStatusPaymentMethodsEnum, ThirdPartyPaymentsEnum } from '../enum';
+import { AllowedUpdateStatusPaymentMethodsEnum, PaymentStatusesEnum, ThirdPartyPaymentsEnum } from '../enum';
 import { ActionCallerInterface } from '../interfaces';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 
@@ -30,6 +30,7 @@ export class TransactionActionService {
     transaction: TransactionModel,
     actionPayload: ActionPayloadDto,
     action: string,
+    skipValidation: boolean = false,
   ): Promise<TransactionUnpackedDetailsInterface> {
     this.dtoValidation.checkFileUploadDto(actionPayload);
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
@@ -44,6 +45,7 @@ export class TransactionActionService {
         transaction,
         actionPayload,
         action,
+        skipValidation,
       );
 
       await actionCallerService.runAction(unpackedTransaction, action, actionPayload);
@@ -59,16 +61,14 @@ export class TransactionActionService {
       throw new BadRequestException(e.message);
     }
 
-    const updatedTransaction: TransactionUnpackedDetailsInterface =
-      await this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
-    /** Send update to checkout-php */
-    try {
-      await this.messagingService.sendTransactionUpdate(updatedTransaction);
-    } catch (e) {
-      throw new BadRequestException(`Error occurred while sending transaction update: ${e.message}`);
-    }
+    await this.eventDispatcher.dispatch(
+      PaymentActionEventEnum.PaymentActionAfter,
+      transaction,
+      actionPayload,
+      action,
+    );
 
-    return updatedTransaction;
+    return this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);
   }
 
   public async updateStatus(
@@ -78,9 +78,15 @@ export class TransactionActionService {
       transaction.toObject({ virtuals: true }),
     );
 
+    const disabledUpdateStatuses: string[] = [
+      PaymentStatusesEnum.Paid,
+    ];
+
     if (!Object.values(AllowedUpdateStatusPaymentMethodsEnum).includes(
-      unpackedTransaction.type as AllowedUpdateStatusPaymentMethodsEnum,
-    )) {
+        unpackedTransaction.type as AllowedUpdateStatusPaymentMethodsEnum,
+      )
+      || disabledUpdateStatuses.includes(unpackedTransaction.status)
+    ) {
       return unpackedTransaction;
     }
 
@@ -88,7 +94,9 @@ export class TransactionActionService {
     const oldSpecificStatus: string = unpackedTransaction.specific_status;
 
     try {
-      await this.messagingService.updateStatus(unpackedTransaction);
+      const actionCallerService: ActionCallerInterface = this.chooseActionCallerService(unpackedTransaction);
+
+      await actionCallerService.updateStatus(unpackedTransaction);
     } catch (e) {
       this.logger.error(
         {
