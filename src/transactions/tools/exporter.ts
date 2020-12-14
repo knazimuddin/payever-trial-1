@@ -184,6 +184,10 @@ export class Exporter {
       return value as string;
     }
 
+    if (!value || !Array.isArray(value)) {
+      return '';
+    }
+
     return (value as any[]).map((item: { name: string, value: string }) => {
       return `${item.name}:${item.value}`;
     }).join(', ');
