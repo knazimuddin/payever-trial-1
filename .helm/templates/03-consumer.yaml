@@ -3,11 +3,7 @@
 {{ $appName := printf "%s-consumer" $chartName }}
 
 apiVersion: apps/v1
-{{- if eq $values.namespace "production" }}
-kind: DaemonSet
-{{- else }}
 kind: Deployment
-{{- end }}
 metadata:
   name: {{ $appName }}
   namespace: {{ $values.namespace }}
@@ -21,7 +17,6 @@ metadata:
     "werf.io/set-replicas-only-on-creation": "true"
 
 spec:
-  {{- if ne $values.namespace "production" }}
   replicas: {{ $values.replicas.consumer }}
 
   strategy:
@@ -30,7 +25,6 @@ spec:
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 0
-  {{- end }}
   selector:
     matchLabels:
       app: {{ $appName }}
