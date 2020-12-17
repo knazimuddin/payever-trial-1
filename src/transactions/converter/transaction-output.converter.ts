@@ -20,11 +20,21 @@ export class TransactionOutputConverter {
     delete details.applicationNumber;
     delete details.usage_text;
     delete details.pan_id;
+    delete details.usageText;
+    delete details.panId;
     delete details.iban;
     delete details.bank_i_b_a_n;
 
     if (transaction?.payment_details?.applicationNumber) {
       transaction.payment_details.application_number = transaction.payment_details.applicationNumber;
+    }
+
+    if (transaction?.payment_details?.usageText) {
+      transaction.payment_details.usage_text = transaction.payment_details.usageText;
+    }
+
+    if (transaction?.payment_details?.panId) {
+      transaction.payment_details.pan_id = transaction.payment_details.panId;
     }
 
     return {

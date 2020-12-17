@@ -28,8 +28,13 @@ export class TransactionSantanderApplicationConverter {
       transaction.santander_applications.push(payment_details.applicationNumber);
     }
 
-    if (payment_details.usage_text || payment_details.application_number) {
-      checkoutTransaction.payment_details.pan_id = payment_details.usage_text || payment_details.application_number;
+    if (payment_details.usageText) {
+      transaction.santander_applications.push(payment_details.usageText);
+    }
+
+    if (payment_details.usage_text || payment_details.usageText || payment_details.application_number) {
+      checkoutTransaction.payment_details.pan_id =
+        payment_details.usage_text || payment_details.usageText || payment_details.application_number;
     }
   }
 }
