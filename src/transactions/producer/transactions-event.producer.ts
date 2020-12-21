@@ -7,12 +7,14 @@ import { TransactionExportBusinessDto, TransactionExportChannelSetDto, Transacti
 import { MonthlyBusinessTransactionInterface, TransactionPackedDetailsInterface } from '../interfaces';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 import { TransactionPaymentInterface } from '../interfaces/transaction';
-import { TransactionModel } from '../models';
+import { BusinessPaymentOptionModel, TransactionModel } from '../models';
+import { BusinessPaymentOptionService } from '../services';
 
 @Injectable()
 export class TransactionEventProducer {
   constructor(
     private readonly rabbitClient: RabbitMqClient,
+    private readonly businessPaymentOptionService: BusinessPaymentOptionService,
   ) { }
 
   public async produceTransactionPaidEvent(
@@ -95,6 +97,12 @@ export class TransactionEventProducer {
         TransactionExportChannelSetDto,
         transactionModel.toObject() as TransactionPackedDetailsInterface,
       );
+
+    const bpoModel: BusinessPaymentOptionModel =
+      await this.businessPaymentOptionService.findOneById(transactionModel.business_option_id);
+    if (bpoModel) {
+      transactionExportDto.businessPaymentOptionId = bpoModel.uuid;
+    }
 
     await this.send(RabbitRoutingKeys.TransactionsMigrate, { payment: transactionExportDto });
   }
