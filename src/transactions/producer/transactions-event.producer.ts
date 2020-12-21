@@ -7,7 +7,7 @@ import { TransactionExportBusinessDto, TransactionExportChannelSetDto, Transacti
 import {
   MonthlyBusinessTransactionInterface,
   TransactionPackedDetailsInterface,
-  TransactionUnpackedDetailsInterface
+  TransactionUnpackedDetailsInterface,
 } from '../interfaces';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 import { TransactionPaymentInterface } from '../interfaces/transaction';
