@@ -64,6 +64,9 @@ export class TransactionExportDto {
   @Expose()
   public customer_name: string;
 
+  @Expose()
+  public payment_details: any;
+
   @IsNumber()
   @Expose()
   public payment_fee: number = 0;
