@@ -26,7 +26,10 @@ export class TransactionsExportForBlankMigrateCommand {
     }) onlyThirdParty: boolean,
     @Positional({
       name: 'original_id',
-    }) originalId: boolean,
+    }) originalId: string,
+    @Positional({
+      name: 'payment_method',
+    }) paymentMethod: string,
   ): Promise<void> {
     const criteria: any = { };
     if (before || after) {
@@ -42,6 +45,9 @@ export class TransactionsExportForBlankMigrateCommand {
       criteria.type = {
         $in: Object.values(ThirdPartyPaymentsEnum),
       };
+    }
+    if (paymentMethod) {
+      criteria.type = paymentMethod;
     }
     if (originalId) {
       criteria.original_id = originalId;
