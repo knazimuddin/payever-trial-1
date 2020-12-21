@@ -12,4 +12,5 @@ export enum ThirdPartyPaymentsEnum {
   santanderDEPosInvoice = 'santander_pos_invoice_de',
   santanderDEFactoring = 'santander_factoring_de',
   santanderDEPosFactoring = 'santander_pos_factoring_de',
+  wiretransfer = 'cash',
 }
