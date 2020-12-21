@@ -39,6 +39,10 @@ export class TransactionExportDto {
   @Expose()
   public business: TransactionExportBusinessDto;
 
+  @IsNumber()
+  @Expose({ name: 'business_option_id' })
+  public businessPaymentOptionId: number;
+
   @IsString()
   @Expose()
   public channel: string;
