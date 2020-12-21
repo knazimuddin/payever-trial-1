@@ -52,6 +52,18 @@ export class TransactionExportDto {
   public currency: string;
 
   @IsString()
+  @Expose()
+  public customer_email: string;
+
+  @IsString()
+  @Expose()
+  public customer_name: string;
+
+  @IsNumber()
+  @Expose()
+  public payment_fee: number = 0;
+
+  @IsString()
   @Expose({ name: 'type' })
   public payment_type: string;
 
