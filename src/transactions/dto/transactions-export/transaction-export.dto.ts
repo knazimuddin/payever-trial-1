@@ -41,7 +41,7 @@ export class TransactionExportDto {
 
   @IsString()
   @Expose()
-  public businessPaymentOptionId: string;
+  public business_payment_option_id: string;
 
   @IsString()
   @Expose()

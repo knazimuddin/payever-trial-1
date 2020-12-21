@@ -100,7 +100,7 @@ export class TransactionEventProducer {
       );
 
     if (bpoModel) {
-      transactionExportDto.businessPaymentOptionId = bpoModel.uuid;
+      transactionExportDto.business_payment_option_id = bpoModel.uuid;
     }
 
     await this.send(RabbitRoutingKeys.TransactionsMigrate, { payment: transactionExportDto });
