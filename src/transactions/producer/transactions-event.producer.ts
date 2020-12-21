@@ -7,7 +7,7 @@ import { TransactionExportBusinessDto, TransactionExportChannelSetDto, Transacti
 import { MonthlyBusinessTransactionInterface, TransactionPackedDetailsInterface } from '../interfaces';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 import { TransactionPaymentInterface } from '../interfaces/transaction';
-import { TransactionModel } from '../models';
+import { BusinessPaymentOptionModel, TransactionModel } from '../models';
 
 @Injectable()
 export class TransactionEventProducer {
@@ -73,7 +73,10 @@ export class TransactionEventProducer {
     }
   }
 
-  public async produceTransactionBlankMigrateEvent(transactionModel: TransactionModel): Promise<void> {
+  public async produceTransactionBlankMigrateEvent(
+    transactionModel: TransactionModel,
+    bpoModel: BusinessPaymentOptionModel = null,
+  ): Promise<void> {
     if (!transactionModel.original_id) {
       transactionModel.original_id = transactionModel.uuid;
     }
@@ -95,6 +98,10 @@ export class TransactionEventProducer {
         TransactionExportChannelSetDto,
         transactionModel.toObject() as TransactionPackedDetailsInterface,
       );
+
+    if (bpoModel) {
+      transactionExportDto.business_option_uuid = bpoModel.uuid;
+    }
 
     await this.send(RabbitRoutingKeys.TransactionsMigrate, { payment: transactionExportDto });
   }
