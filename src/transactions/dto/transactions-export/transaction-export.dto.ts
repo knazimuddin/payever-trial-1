@@ -4,6 +4,7 @@ import { TransactionExportBusinessDto } from './transaction-export-business.dto'
 import { TransactionExportChannelSetDto } from './transaction-export-channel-set.dto';
 import { TransactionExportItemDto } from './transaction-export-item.dto';
 import { Exclude, Expose, Type } from 'class-transformer';
+import { TransactionExportHistoryDto } from './transaction-export-history.dto';
 
 @Exclude()
 export class TransactionExportDto {
@@ -41,6 +42,10 @@ export class TransactionExportDto {
 
   @IsString()
   @Expose()
+  public business_option_uuid: string;
+
+  @IsString()
+  @Expose()
   public channel: string;
 
   @Type(() => TransactionExportChannelSetDto)
@@ -50,6 +55,21 @@ export class TransactionExportDto {
   @IsString()
   @Expose()
   public currency: string;
+
+  @IsString()
+  @Expose()
+  public customer_email: string;
+
+  @IsString()
+  @Expose()
+  public customer_name: string;
+
+  @Expose()
+  public payment_details: any;
+
+  @IsNumber()
+  @Expose()
+  public payment_fee: number = 0;
 
   @IsString()
   @Expose({ name: 'type' })
@@ -78,6 +98,10 @@ export class TransactionExportDto {
   @Type(() => TransactionExportItemDto)
   @Expose()
   public items: TransactionExportItemDto[];
+
+  @Type(() => TransactionExportHistoryDto)
+  @Expose()
+  public history: TransactionExportHistoryDto[];
 
   @IsDateString()
   @Expose()

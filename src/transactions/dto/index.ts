@@ -25,6 +25,7 @@ export * from './payment-mail-sent.dto';
 export * from './transactions-export/transaction-export-address.dto';
 export * from './transactions-export/transaction-export-business.dto';
 export * from './transactions-export/transaction-export-item.dto';
+export * from './transactions-export/transaction-export-history.dto';
 export * from './transactions-export/transaction-export-channel-set.dto';
 export * from './transactions-export/transaction-export.dto';
 export * from './generic.dto';
