@@ -8,13 +8,11 @@ import { MonthlyBusinessTransactionInterface, TransactionPackedDetailsInterface 
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 import { TransactionPaymentInterface } from '../interfaces/transaction';
 import { BusinessPaymentOptionModel, TransactionModel } from '../models';
-import { BusinessPaymentOptionService } from '../services';
 
 @Injectable()
 export class TransactionEventProducer {
   constructor(
     private readonly rabbitClient: RabbitMqClient,
-    private readonly businessPaymentOptionService: BusinessPaymentOptionService,
   ) { }
 
   public async produceTransactionPaidEvent(
@@ -75,7 +73,10 @@ export class TransactionEventProducer {
     }
   }
 
-  public async produceTransactionBlankMigrateEvent(transactionModel: TransactionModel): Promise<void> {
+  public async produceTransactionBlankMigrateEvent(
+    transactionModel: TransactionModel,
+    bpoModel: BusinessPaymentOptionModel = null,
+  ): Promise<void> {
     if (!transactionModel.original_id) {
       transactionModel.original_id = transactionModel.uuid;
     }
@@ -98,8 +99,6 @@ export class TransactionEventProducer {
         transactionModel.toObject() as TransactionPackedDetailsInterface,
       );
 
-    const bpoModel: BusinessPaymentOptionModel =
-      await this.businessPaymentOptionService.findOneById(transactionModel.business_option_id);
     if (bpoModel) {
       transactionExportDto.businessPaymentOptionId = bpoModel.uuid;
     }

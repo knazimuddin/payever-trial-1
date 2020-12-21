@@ -2,15 +2,17 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Command, Positional } from '@pe/nest-kit';
 import { Model } from 'mongoose';
-import { TransactionModel } from '../models';
+import { BusinessPaymentOptionModel, TransactionModel } from '../models';
 import { TransactionEventProducer } from '../producer';
 import { ThirdPartyPaymentsEnum } from '../enum';
+import { BusinessPaymentOptionService } from '../services';
 
 @Injectable()
 export class TransactionsExportForBlankMigrateCommand {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
     private readonly transactionsEventProducer: TransactionEventProducer,
+    private readonly businessPaymentOptionService: BusinessPaymentOptionService,
   ) { }
 
   @Command({ command: 'transactions:export:blank-migrate', describe: 'Migrate transactions to fill new services' })
@@ -73,7 +75,9 @@ export class TransactionsExportForBlankMigrateCommand {
       processed += transactions.length;
 
       for (const transactionModel of transactions) {
-        await this.transactionsEventProducer.produceTransactionBlankMigrateEvent(transactionModel);
+        const bpoModel: BusinessPaymentOptionModel =
+          await this.businessPaymentOptionService.findOneById(transactionModel.business_option_id);
+        await this.transactionsEventProducer.produceTransactionBlankMigrateEvent(transactionModel, bpoModel);
       }
 
       Logger.log(`Migrated ${processed} of ${count}`);
