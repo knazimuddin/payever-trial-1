@@ -4,6 +4,7 @@ import { TransactionExportBusinessDto } from './transaction-export-business.dto'
 import { TransactionExportChannelSetDto } from './transaction-export-channel-set.dto';
 import { TransactionExportItemDto } from './transaction-export-item.dto';
 import { Exclude, Expose, Type } from 'class-transformer';
+import { TransactionExportHistoryDto } from './transaction-export-history.dto';
 
 @Exclude()
 export class TransactionExportDto {
@@ -94,6 +95,10 @@ export class TransactionExportDto {
   @Type(() => TransactionExportItemDto)
   @Expose()
   public items: TransactionExportItemDto[];
+
+  @Type(() => TransactionExportHistoryDto)
+  @Expose()
+  public history: TransactionExportHistoryDto[];
 
   @IsDateString()
   @Expose()
