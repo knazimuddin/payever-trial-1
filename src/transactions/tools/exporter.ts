@@ -184,12 +184,12 @@ export class Exporter {
       return value as string;
     }
 
-    if (value) {
-      return (value as any[]).map((item: { name: string, value: string }) => {
-        return `${item.name}:${item.value}`;
-      }).join(', ');
-    }else {
+    if (!value || !Array.isArray(value)) {
       return '';
     }
+
+    return (value as any[]).map((item: { name: string, value: string }) => {
+      return `${item.name}:${item.value}`;
+    }).join(', ');
   }
 }
