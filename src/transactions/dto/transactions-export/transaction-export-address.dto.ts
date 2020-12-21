@@ -22,4 +22,24 @@ export class TransactionExportAddressDto {
   @IsString()
   @Expose()
   public zip_code: string;
+
+  @IsString()
+  @Expose()
+  public first_name: string;
+
+  @IsString()
+  @Expose()
+  public last_name: string;
+
+  @IsString()
+  @Expose()
+  public salutation: string;
+
+  @IsString()
+  @Expose()
+  public phone: string;
+
+  @IsString()
+  @Expose()
+  public email: string;
 }
