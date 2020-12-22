@@ -5,7 +5,7 @@ import * as PdfMakePrinter from 'pdfmake/src/printer';
 import * as XLSX from 'xlsx';
 import { TransactionModel } from '../models';
 
-export type ExportFormat = 'xlsx' | 'xls' | 'csv' | 'ods' | 'pdf';
+export type ExportFormat = 'xlsx' | 'csv' | 'ods' | 'pdf';
 
 const shippingsColumns: Array<{ title: string, name: string }> = [
   { title: 'Shipping City', name: 'city' },
@@ -39,7 +39,7 @@ export class Exporter {
     }
 
     const productColumns: Array<{ index: number, title: string, name: string }> = this.getProductColumns(transactions);
-    
+
     const header: string[] = [
       ...['CHANNEL', 'ID', 'TOTAL'],
       ...shippingsColumns.map((c: { title: string, name: string }) => c.title ),
@@ -139,7 +139,7 @@ export class Exporter {
   private static getProductColumns(transactions: TransactionModel[]): any[] {
     let productColumns: any[] = [];
     const maxItems: number = Math.max.apply(
-      Math, 
+      Math,
       transactions.map((t: TransactionModel) => t.items ? t.items.length : 0),
     );
     for (let i: number = 0; i < maxItems; i++) {
@@ -150,8 +150,8 @@ export class Exporter {
   }
 
   private static getTransactionData(
-    transactions: TransactionModel[], 
-    productColumns: Array<{ index: number, title: string, name: string }>, 
+    transactions: TransactionModel[],
+    productColumns: Array<{ index: number, title: string, name: string }>,
     columns: Array<{ title: string, name: string }>,
     isFormatDate: boolean = false,
   ): any[] {
@@ -160,14 +160,14 @@ export class Exporter {
         ...[t.channel, t.original_id, t.total],
         ...shippingsColumns
           .map((c: { title: string, name: string }) => {
-            return t.shipping_address && c.name in t.shipping_address 
-              ? t.shipping_address[c.name] 
-              : t.billing_address[c.name] || ''; 
+            return t.shipping_address && c.name in t.shipping_address
+              ? t.shipping_address[c.name]
+              : t.billing_address[c.name] || '';
           }),
         ...productColumns
-          .map((c: { index: number, title: string, name: string }) => {            
-            return c.index in t.items && c.name in t.items[c.index] 
-              ? this.getProductValue(c.name, t.items[c.index][c.name]) 
+          .map((c: { index: number, title: string, name: string }) => {
+            return c.index in t.items && c.name in t.items[c.index]
+              ? this.getProductValue(c.name, t.items[c.index][c.name])
               : '';
           }),
         ...columns

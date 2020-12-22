@@ -16,7 +16,7 @@ const expect: Chai.ExpectStatic = chai.expect;
 
 describe('Exporter', () => {
   let sandbox: sinon.SinonSandbox;
-  
+
   const transaction: TransactionModel = {
     id: '4416ed60-93e4-4557-a4e8-5e57140ee88b',
     original_id: '627a3236-af6c-444a-836c-9f0d1d27c21a',
@@ -40,7 +40,33 @@ describe('Exporter', () => {
     fee_accepted: true,
     history: [],
     is_shipping_order_processed: true,
-    items: [],
+    items: [
+      {
+        id: 'string',
+        description: 'string',
+        fixed_shipping_price: 100,
+        identifier: 'string',
+        item_type: 'string',
+        name: 'options',
+        options: undefined,
+        price: 100,
+        price_net: 90,
+        product_variant_uuid: 'string',
+        quantity: 3,
+        sku: 'string',
+        shipping_price: 10,
+        shipping_settings_rate: 10,
+        shipping_settings_rate_type: 'string',
+        shipping_type: 'string',
+        uuid: 'string',
+        vat_rate: 19,
+        thumbnail: 'string',
+        updated_at: new Date('2020-12-12'),
+        url: 'string',
+        weight: 1,
+        created_at: new Date('2020-12-12'),
+      },
+    ],
     merchant_email: 'merchant@payever.de',
     merchant_name: 'Merchant Doe',
     payment_details: {},
@@ -69,7 +95,7 @@ describe('Exporter', () => {
   } as TransactionModel;
 
   before(() => {
-    
+
   });
 
   beforeEach(() => {
@@ -82,8 +108,8 @@ describe('Exporter', () => {
   });
 
   describe('export', () => {
-    it('should perform export xls successfully', async () => {
-      
+    it('should perform export xlsx successfully', async () => {
+
       const response: FastifyReply<any> = {
         header: (): any => { },
         send: (): any => { },
@@ -92,15 +118,15 @@ describe('Exporter', () => {
       sinon.stub(response, "header");
       sinon.stub(response, "send");
 
-      Exporter.export([transaction], response, "result.csv", 
+      Exporter.export([transaction], response, "result.csv",
         [{title:'Merchant',name:'merchant_name'},{title:'Status',name:'status'}],
-        'xls');
+        'xlsx');
       expect(response.header).calledThrice;
       expect(response.send).calledOnce;
     });
 
     it('should perform export successfully no format', async () => {
-      
+
       const response: FastifyReply<any> = {
         header: (): any => { },
         send: (): any => { },
@@ -109,7 +135,7 @@ describe('Exporter', () => {
       sinon.stub(response, "header");
       sinon.stub(response, "send");
 
-      Exporter.export([transaction], response, "result.csv", 
+      Exporter.export([transaction], response, "result.csv",
         [{title:'Merchant',name:'merchant_name'},{title:'Status',name:'status'}]);
       expect(response.header).calledThrice;
       expect(response.send).calledOnce;
@@ -139,9 +165,9 @@ describe('Exporter', () => {
 
       emitter.emit('end');
       document.end();
-      
-      Exporter.export([transaction, transaction], response, "result.pdf", 
-        [{title:'Merchant',name:'merchant_name'},{title:'Created',name:'created_at'},{title:'None',name:'none'}], 
+
+      Exporter.export([transaction, transaction], response, "result.pdf",
+        [{title:'Merchant',name:'merchant_name'},{title:'Created',name:'created_at'},{title:'None',name:'none'}],
         'pdf');
       expect(document.end).calledOnce;
     });

@@ -87,7 +87,9 @@ TransactionSchema.index({ merchant_email: 1 });
 TransactionSchema.index({ status: 1, _id: 1 });
 TransactionSchema.index({ business_uuid: 1 });
 TransactionSchema.index({ example: 1 });
+TransactionSchema.index({ type: 1 });
 TransactionSchema.index({ created_at: -1 });
+TransactionSchema.index({ created_at: 1 });
 TransactionSchema.index({ business_uuid: 1, example: 1 });
 
 TransactionSchema.virtual('amount_refunded').get(function (): number {
@@ -103,7 +105,7 @@ TransactionSchema.virtual('amount_refunded').get(function (): number {
       ;
   }
 
-  return totalRefunded;
+  return Math.round((totalRefunded + Number.EPSILON) * 100) / 100;
 });
 
 TransactionSchema.virtual('amount_captured').get(function (): number {
@@ -116,15 +118,15 @@ TransactionSchema.virtual('amount_captured').get(function (): number {
       ;
   }
 
-  return totalCaptured;
+  return Math.round((totalCaptured + Number.EPSILON) * 100) / 100;
 });
 
 TransactionSchema.virtual('amount_refund_rest').get(function (): number {
-  return this.amount - this.amount_refunded;
+  return Math.round((this.amount - this.amount_refunded + Number.EPSILON) * 100) / 100;
 });
 
 TransactionSchema.virtual('amount_capture_rest').get(function (): number {
-  return this.total - this.amount_captured - this.amount_refunded;
+  return Math.round((this.total - this.amount_captured - this.amount_refunded + Number.EPSILON) * 100) / 100;
 });
 
 TransactionSchema.virtual('available_refund_items').get(function (): TransactionRefundItemInterface[] {

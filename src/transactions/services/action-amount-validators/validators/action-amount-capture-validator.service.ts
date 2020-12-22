@@ -21,8 +21,10 @@ export class ActionAmountCaptureValidatorService implements ActionAmountValidato
 
     const allowedCaptureAmount: number =
       transaction.total - transaction.amount_captured - transaction.amount_refunded;
+    const roundedAllowedCaptureAmount: number =
+      Math.round((allowedCaptureAmount + Number.EPSILON) * 100) / 100;
 
-    if (amount > allowedCaptureAmount) {
+    if (amount > roundedAllowedCaptureAmount) {
       throw new BadRequestException(`Amount is higher than allowed capture amount`);
     }
   }
