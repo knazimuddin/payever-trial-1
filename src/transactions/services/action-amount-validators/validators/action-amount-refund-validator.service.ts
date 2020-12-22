@@ -21,8 +21,10 @@ export class ActionAmountRefundValidatorService implements ActionAmountValidator
 
     const allowedRefundAmount: number =
       transaction.total - transaction.amount_refunded;
+    const roundedAllowedRefundAmount: number =
+      Math.round((allowedRefundAmount + Number.EPSILON) * 100) / 100;
 
-    if (amount > allowedRefundAmount) {
+    if (amount > roundedAllowedRefundAmount) {
       throw new BadRequestException(`Amount is higher than allowed refund amount`);
     }
   }
