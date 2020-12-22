@@ -108,7 +108,7 @@ describe('Exporter', () => {
   });
 
   describe('export', () => {
-    it('should perform export xls successfully', async () => {
+    it('should perform export xlsx successfully', async () => {
 
       const response: FastifyReply<any> = {
         header: (): any => { },
@@ -120,7 +120,7 @@ describe('Exporter', () => {
 
       Exporter.export([transaction], response, "result.csv",
         [{title:'Merchant',name:'merchant_name'},{title:'Status',name:'status'}],
-        'xls');
+        'xlsx');
       expect(response.header).calledThrice;
       expect(response.send).calledOnce;
     });
