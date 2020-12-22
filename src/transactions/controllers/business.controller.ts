@@ -310,7 +310,7 @@ export class BusinessController {
     exportDto.currency = business ? business.currency : this.defaultCurrency;
     const result: PagingResultDto =  await this.elasticSearchService.getResult(exportDto);
     const format: ExportFormat = exportDto.format;
-    const fileName: string = exportDto.businessName.replace(/[^\x00-\x7F]/g, '');
+    const fileName: string = `"${exportDto.businessName.replace(/[^\x00-\x7F]/g, '')}"`;
     const columns: Array<{ title: string, name: string }> = JSON.parse(exportDto.columns);
     Exporter.export(result.collection as TransactionModel[] , res, fileName, columns, format);
   }
