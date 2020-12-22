@@ -33,10 +33,10 @@
     "@pe/notifications-sdk": "*",
     "form-data": "^2.5.1",
     "moment": "^2.24.0",
-    "pdfmake": "^0.1.58",
+    "pdfmake": "^0.1.68",
     "php-serialize": "^2.1.0",
     "php-unserialize": "0.0.1",
-    "xlsx": "^0.15.0"
+    "xlsx": "^0.16.9"
   },
   "devDependencies": {
     "@pe/cucumber-sdk": "^1.9.0",

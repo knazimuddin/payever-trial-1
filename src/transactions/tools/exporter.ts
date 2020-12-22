@@ -5,7 +5,7 @@ import * as PdfMakePrinter from 'pdfmake/src/printer';
 import * as XLSX from 'xlsx';
 import { TransactionModel } from '../models';
 
-export type ExportFormat = 'xlsx' | 'xls' | 'csv' | 'ods' | 'pdf';
+export type ExportFormat = 'xlsx' | 'csv' | 'ods' | 'pdf';
 
 const shippingsColumns: Array<{ title: string, name: string }> = [
   { title: 'Shipping City', name: 'city' },
