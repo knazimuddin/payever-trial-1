@@ -188,7 +188,7 @@ export class Exporter {
       return '';
     }
 
-    return (value as any[]).map((item: { name: string, value: string }) => {
+    return (value).map((item: { name: string, value: string }) => {
       return `${item.name}:${item.value}`;
     }).join(', ');
   }
