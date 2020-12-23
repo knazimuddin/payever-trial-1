@@ -37,9 +37,7 @@ export class Exporter {
     if (format === 'pdf') {
       return this.exportPDF(transactions, res, fileName, columns);
     }
-
     const productColumns: Array<{ index: number, title: string, name: string }> = this.getProductColumns(transactions);
-
     const header: string[] = [
       ...['CHANNEL', 'ID', 'TOTAL'],
       ...shippingsColumns.map((c: { title: string, name: string }) => c.title ),
@@ -62,6 +60,7 @@ export class Exporter {
     fileName: string,
     columns: Array<{ title: string, name: string }>,
   ): void {
+    const pageHeight: number = 5000;
     const productColumns: Array<{ index: number, title: string, name: string }> = this.getProductColumns(transactions);
     const header: any[] = [
       ...['CHANNEL', 'ID', 'TOTAL'],
@@ -99,7 +98,7 @@ export class Exporter {
       ],
       pageMargins: [40, 40 , 40, 40],
       pageSize: {
-        height: 'auto',
+        height: pageHeight,
         width: (allColumns.length + 2) * 120,
       },
       styles: {
@@ -124,9 +123,16 @@ export class Exporter {
     };
 
     const printer: PdfMakePrinter = new PdfMakePrinter(fonts);
-    const doc: any = printer.createPdfKitDocument(docDefinition);
+    const doc: any = printer.createPdfKitDocument(
+      docDefinition,
+      {
+        pdfVersion: '1.7ext3',
+      });
     const chunks: any[] = [];
-    doc.on('data', (chunk: any) => chunks.push(chunk));
+    doc.on('data', (chunk: any) => {
+      chunks.push(chunk);
+    });
+
     doc.on('end', () => {
       res.header('Content-Transfer-Encoding', `binary`);
       res.header('Access-Control-Expose-Headers', `Content-Disposition,X-Suggested-Filename`);
