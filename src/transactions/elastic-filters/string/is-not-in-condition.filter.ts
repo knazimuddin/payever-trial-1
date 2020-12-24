@@ -11,11 +11,16 @@ export class IsNotInConditionFilter {
     field: string,
     _filter: StringFilterInterface,
   ): void {
+    const shouldCondition: Array<{ }> = new Array<{ }>();
+
+    for (const value of _filter.value) {
+      const item: { } = { match: { [field]: value }};
+      shouldCondition.push(item);
+    }
+
     const condition: { } = {
-      match_phrase: {
-        [field]: {
-          or: { ..._filter.value},
-        },
+      bool: {
+        should: shouldCondition,
       },
     };
 
