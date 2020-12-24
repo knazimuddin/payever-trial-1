@@ -1,12 +1,12 @@
-import { ApiModelProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
 export class CreateIntegrationDto {
-  @ApiModelProperty()
+  @ApiProperty()
   @IsNotEmpty()
   public name: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsNotEmpty()
   public category: string;
 }

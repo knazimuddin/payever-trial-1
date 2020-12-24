@@ -29,13 +29,14 @@
     "@pe/common-sdk": "*",
     "@pe/elastic-kit": "^3.1.0",
     "@pe/migration-kit": "*",
-    "@pe/nest-kit": "^6.0.2",
+    "@pe/nest-kit": "^7.2.1",
     "@pe/notifications-sdk": "*",
     "form-data": "^2.5.1",
     "moment": "^2.24.0",
     "pdfmake": "^0.1.68",
     "php-serialize": "^2.1.0",
     "php-unserialize": "0.0.1",
+    "uuid": "^8.3.2",
     "xlsx": "^0.16.9"
   },
   "devDependencies": {

@@ -29,7 +29,7 @@ export class TransactionsExampleService {
     const country: string = business.companyAddress.country;
     const currency: string = business.currency;
     
-    const examples: TransactionExampleModel[] = await this.transactionExampleModel.find({ });
+    const examples: TransactionExampleModel[] = await this.transactionExampleModel.find({ }).exec();
 
     for (const example of examples) {
       const raw: any = example.toObject();

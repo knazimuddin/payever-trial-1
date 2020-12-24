@@ -46,7 +46,7 @@ export class TransactionsEsExportCommand {
 
     Logger.log(`Criteria is ${JSON.stringify(criteria, null, 2)}.`);
 
-    const total: number = await this.transactionsModel.countDocuments(criteria);
+    const total: number = await this.transactionsModel.countDocuments(criteria).exec();
     Logger.log(`Found ${total} records.`);
 
     const limit: number = 1000;

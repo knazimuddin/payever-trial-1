@@ -9,7 +9,7 @@ export class TransactionCartItemConverter {
   public static fromSampleProducts(
     sampleProducts: SampleProductDto[],
   ): Types.DocumentArray<TransactionCartItemModel> {
-    const newCart: Types.DocumentArray<TransactionCartItemModel> = new Types.DocumentArray();
+    const newCart: Types.DocumentArray<TransactionCartItemModel> = new Types.DocumentArray([]);
 
     for (const sample of sampleProducts) {
       const newCartItem: TransactionCartItemDto = {

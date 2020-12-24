@@ -26,7 +26,7 @@ export class BusinessPaymentOptionService {
         new: true,
         upsert: true,
       },
-    );
+    ).exec();
 
     return this.findOneById(businessPaymentOptionDto.id);
   }
@@ -44,10 +44,10 @@ export class BusinessPaymentOptionService {
   }
 
   public async findOneById(id: number): Promise<BusinessPaymentOptionModel> {
-    const bpo: BusinessPaymentOptionModel = await this.model.findOne({ id });
+    const bpo: BusinessPaymentOptionModel = await this.model.findOne({ id }).exec();
 
     return bpo
-      ? this.unwrap(bpo.toObject({ virtuals: true }))
+      ? this.unwrap(bpo.toObject({ virtuals: true }) as any)
       : null
     ;
   }

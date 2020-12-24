@@ -56,7 +56,7 @@ export class TransactionsService {
     const created: TransactionModel = await this.mutex.lock(
       TransactionMutexKey,
       transactionDto.uuid,
-      async () => this.transactionModel.create(transactionDto),
+      async () => this.transactionModel.create(transactionDto as any),
     );
 
     await this.elasticSearchClient.singleIndex(
@@ -153,7 +153,7 @@ export class TransactionsService {
 
   public async findModelByParams(params: any): Promise<TransactionModel> {
     const transactionModel: TransactionModel[]
-      = await this.transactionModel.find(params).sort({ created_at: -1 }).limit(1);
+      = await this.transactionModel.find(params).sort({ created_at: -1 }).limit(1).exec();
     if (!transactionModel || !transactionModel.length) {
       return null;
     }
@@ -170,7 +170,7 @@ export class TransactionsService {
   }
 
   public async findUnpackedByParams(params: any): Promise<TransactionUnpackedDetailsInterface> {
-    const transaction: TransactionModel = await this.transactionModel.findOne(params);
+    const transaction: TransactionModel = await this.transactionModel.findOne(params).exec();
 
     if (!transaction) {
       return;
@@ -184,7 +184,8 @@ export class TransactionsService {
   }
 
   public async removeByUuid(transactionId: string): Promise<void> {
-    const transaction: TransactionModel = await this.transactionModel.findOneAndRemove({ uuid: transactionId });
+    const transaction: TransactionModel = 
+      await this.transactionModel.findOneAndRemove({ uuid: transactionId }).exec();
     if (!transaction) {
       return;
     }
@@ -213,7 +214,7 @@ export class TransactionsService {
         { uuid: transaction.uuid },
         {
           $push: {
-            history: history,
+            history: history as any,
           },
         },
         {
@@ -315,7 +316,7 @@ export class TransactionsService {
       {
         new: true,
       },
-    );
+    ).exec();
   }
 
   private async applyPaymentProperties(

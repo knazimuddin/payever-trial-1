@@ -30,6 +30,6 @@ export class BusinessService {
   public async deleteOneById(id: string): Promise<void> {
     await this.businessModel.deleteOne({
       _id: id,
-    });
+    }).exec();
   }
 }

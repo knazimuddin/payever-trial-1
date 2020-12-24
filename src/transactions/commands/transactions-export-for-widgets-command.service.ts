@@ -16,7 +16,7 @@ export class TransactionsExportForWidgetsCommand {
   public async businessExport(): Promise<void> {
     const count: number = await this.transactionsModel.countDocuments({
       status: { $in: ['STATUS_ACCEPTED', 'STATUS_PAID', 'STATUS_REFUNDED']},
-    });
+    }).exec();
     const limit: number = 1000;
     let start: number = 0;
     let transactions: TransactionModel[] = [];

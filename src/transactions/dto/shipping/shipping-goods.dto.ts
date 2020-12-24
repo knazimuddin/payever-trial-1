@@ -1,31 +1,31 @@
-import { ApiModelProperty, ApiModelPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsDate, IsDefined, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class ShippingGoodsDto {
-  @ApiModelProperty()
+  @ApiProperty()
   @IsNotEmpty()
   @IsDefined()
   @IsString()
   public businessName: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsNotEmpty()
   @IsDefined()
   @IsString()
   public transactionId: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsNotEmpty()
   @IsDefined()
   @IsDate()
   public transactionDate: Date;
 
-  @ApiModelPropertyOptional()
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   public shipmentDate?: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsNotEmpty()
   @IsDefined()
   @IsString()

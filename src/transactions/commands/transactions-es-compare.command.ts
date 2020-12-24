@@ -31,7 +31,7 @@ export class TransactionsEsCompareCommand {
       criteria._id = business_uuid;
     }
 
-    const total: number = await this.businessModel.countDocuments(criteria);
+    const total: number = await this.businessModel.countDocuments(criteria).exec();
     const limit: number = 1000;
     let processed: number = 0;
 

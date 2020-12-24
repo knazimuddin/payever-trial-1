@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiUseTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { CreateIntegrationDto } from '../dto';
 import { IntegrationModel } from '../models';
@@ -8,7 +8,7 @@ import { IntegrationService } from '../services';
 @ApiBearerAuth()
 @Controller('integration')
 @UseGuards(JwtAuthGuard)
-@ApiUseTags('integration')
+@ApiTags('integration')
 export class IntegrationController {
   constructor(private readonly integrationService: IntegrationService) { }
 

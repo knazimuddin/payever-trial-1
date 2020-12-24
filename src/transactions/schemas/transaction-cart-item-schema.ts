@@ -29,5 +29,5 @@ export const TransactionCartItemSchema: Schema = new Schema({
 });
 
 TransactionCartItemSchema.post('init', function(): void {
-  this.uuid = this.uuid || this._id;
+  (this as any).uuid = (this as any).uuid || this._id;
 });
