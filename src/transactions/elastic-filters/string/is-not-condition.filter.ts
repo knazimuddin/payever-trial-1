@@ -3,7 +3,7 @@ import { StringFilterInterface } from '../interfaces';
 
 export class IsNotConditionFilter {
   public static getName(): string {
-    return FilterConditionEnum.IsNot;
+    return FilterConditionEnum.IsNotIn;
   }
 
   public static apply(
