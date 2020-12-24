@@ -11,13 +11,19 @@ export class IsNotConditionFilter {
     field: string,
     _filter: StringFilterInterface,
   ): void {
+    const shouldCondition: Array<{ }> = new Array<{ }>();
+
     for (const value of _filter.value) {
-      const condition: { } = {
-        match_phrase: {
-          [field]: value,
-        },
-      };
-      elasticFilters.must_not.push(condition);
+      const item: { } = { match: { [field]: value }};
+      shouldCondition.push(item);
     }
+
+    const condition: { } = {
+      bool: {
+        should: shouldCondition,
+      },
+    };
+
+    elasticFilters.must_not.push(condition);
   }
 }
