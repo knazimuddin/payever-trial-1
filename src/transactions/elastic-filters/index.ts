@@ -14,3 +14,5 @@ export * from './string/is-not-condition.filter';
 export * from './string/less-then-condition.filter';
 export * from './string/less-then-or-equal-condition.filter';
 export * from './string/starts-with-condition.filter';
+export * from './string/is-in-condition.filter';
+export * from './string/is-not-in-condition.filter';
