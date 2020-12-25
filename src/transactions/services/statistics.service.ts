@@ -21,7 +21,7 @@ export class StatisticsService {
    * Thus it can handle transaction status changing.
    */
   public async processAcceptedTransaction(id: string, updating: TransactionPackedDetailsInterface): Promise<void> {
-    const existing: TransactionModel = await this.transactionsModel.findOne({ uuid: id }).exec();
+    const existing: TransactionModel = await this.transactionsModel.findOne({ uuid: id });
 
     if (!existing) {
       return;
@@ -33,7 +33,7 @@ export class StatisticsService {
   }
 
   public async processPaidTransaction(id: string, updating: TransactionPackedDetailsInterface): Promise<void> {
-    const existing: TransactionModel = await this.transactionsModel.findOne({ uuid: id }).exec();
+    const existing: TransactionModel = await this.transactionsModel.findOne({ uuid: id });
 
     if (!existing) {
       return;
@@ -63,7 +63,7 @@ export class StatisticsService {
   }
 
   public async processRefundedTransaction(id: string, refund: HistoryEventActionCompletedInterface): Promise<void> {
-    const existing: TransactionModel = await this.transactionsModel.findOne({ uuid: id }).exec();
+    const existing: TransactionModel = await this.transactionsModel.findOne({ uuid: id });
 
     if (!existing) {
       return;
@@ -78,7 +78,7 @@ export class StatisticsService {
     id: string,
     updating: TransactionPackedDetailsInterface,
   ): Promise<void> {
-    const existing: TransactionModel = await this.transactionsModel.findOne({ uuid: id }).exec();
+    const existing: TransactionModel = await this.transactionsModel.findOne({ uuid: id });
 
     if (!existing) {
       return;

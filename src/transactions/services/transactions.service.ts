@@ -153,7 +153,7 @@ export class TransactionsService {
 
   public async findModelByParams(params: any): Promise<TransactionModel> {
     const transactionModel: TransactionModel[]
-      = await this.transactionModel.find(params).sort({ created_at: -1 }).limit(1).exec();
+      = await this.transactionModel.find(params).sort({ created_at: -1 }).limit(1);
     if (!transactionModel || !transactionModel.length) {
       return null;
     }
@@ -170,7 +170,7 @@ export class TransactionsService {
   }
 
   public async findUnpackedByParams(params: any): Promise<TransactionUnpackedDetailsInterface> {
-    const transaction: TransactionModel = await this.transactionModel.findOne(params).exec();
+    const transaction: TransactionModel = await this.transactionModel.findOne(params);
 
     if (!transaction) {
       return;
@@ -184,8 +184,8 @@ export class TransactionsService {
   }
 
   public async removeByUuid(transactionId: string): Promise<void> {
-    const transaction: TransactionModel = 
-      await this.transactionModel.findOneAndRemove({ uuid: transactionId }).exec();
+    const transaction: TransactionModel =
+      await this.transactionModel.findOneAndRemove({ uuid: transactionId });
     if (!transaction) {
       return;
     }
@@ -316,7 +316,7 @@ export class TransactionsService {
       {
         new: true,
       },
-    ).exec();
+    );
   }
 
   private async applyPaymentProperties(

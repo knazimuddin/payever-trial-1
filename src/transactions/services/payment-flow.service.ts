@@ -28,6 +28,6 @@ export class PaymentFlowService {
   }
 
   public async removeById(id: string): Promise<void> {
-    await this.model.findOneAndRemove({ id }).exec();
+    await this.model.findOneAndRemove({ id });
   }
 }

@@ -124,7 +124,6 @@ describe('StatisticsService', () => {
 
       await testService.processAcceptedTransaction('5fe5f561-fdad-4634-ad3e-8fe72b649d93', transactionDtoACCEPTED);
       expect(transactionEventProducer.produceTransactionAddEvent).to.not.called;
-
     });
 
     it('should no process accepted transaction status test', async () => {
@@ -143,7 +142,6 @@ describe('StatisticsService', () => {
 
       await testService.processAcceptedTransaction('5fe5f561-fdad-4634-ad3e-8fe72b649d93', transactionDtoTEST);
       expect(transactionEventProducer.produceTransactionAddEvent).to.not.called;
-
     });
   });
 
