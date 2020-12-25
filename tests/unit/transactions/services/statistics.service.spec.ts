@@ -5,7 +5,7 @@ import * as chaiAsPromised from 'chai-as-promised';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as uuid from 'uuid';
-import { Model, DocumentQuery } from 'mongoose';
+import { Model } from 'mongoose';
 import { StatisticsService } from '../../../../src/transactions/services/statistics.service';
 import { TransactionModel } from '../../../../src/transactions/models';
 import { TransactionEventProducer } from '../../../../src/transactions/producer';
@@ -22,7 +22,7 @@ describe('StatisticsService', () => {
   let transactionEventProducer: TransactionEventProducer;
   let transactionModel: Model<TransactionModel>;
 
-  let query: DocumentQuery<TransactionModel, TransactionModel, {}> = {
+  let query: any = {
     lean: (): any => { },
   } as any;
 
