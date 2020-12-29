@@ -28,6 +28,6 @@ export const TransactionCartItemSchema: Schema = new Schema({
   weight: Number,
 });
 
-TransactionCartItemSchema.post('init', function(): void {
-  (this as any).uuid = (this as any).uuid || this._id;
+TransactionCartItemSchema.post('init', function(doc: any): void {
+  doc.uuid = doc.uuid || doc._id;
 });
