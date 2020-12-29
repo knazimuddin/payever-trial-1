@@ -14,6 +14,8 @@ import { IsNotConditionFilter } from './string/is-not-condition.filter';
 import { LessThenConditionFilter } from './string/less-then-condition.filter';
 import { LessThenOrEqualConditionFilter } from './string/less-then-or-equal-condition.filter';
 import { StartsWithConditionFilter } from './string/starts-with-condition.filter';
+import { IsInConditionFilter } from './string/is-in-condition.filter';
+import { IsNotInConditionFilter } from './string/is-not-in-condition.filter';
 
 export const FiltersList: any[] = [
   AfterDateConditionFilter,
@@ -32,4 +34,6 @@ export const FiltersList: any[] = [
   LessThenConditionFilter,
   LessThenOrEqualConditionFilter,
   StartsWithConditionFilter,
+  IsInConditionFilter,
+  IsNotInConditionFilter,
 ];
