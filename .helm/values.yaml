@@ -15,8 +15,8 @@ resources:
     cpu: 32m
     memory: 384Mi
   limits:
-    cpu: 1000m
-    memory: 1Gi
+    cpu: 200m
+    memory: 600Mi
 #high
 replicas:
   http:
