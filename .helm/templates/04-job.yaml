@@ -32,14 +32,6 @@ spec:
       priorityClassName: {{ $values.priorityClass }}
       restartPolicy: Never
 
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: node_worker
-                operator: Exists
-
       imagePullSecrets:
         - name: {{ $values.image.pullSecretName }}
 

@@ -29,8 +29,4 @@ replicas:
     min: 5
     max: 10
   cron: 1
-hpa:
-  cpu:
-    tarUti: 75
-  mem:
-    tarUti: 85
+  
