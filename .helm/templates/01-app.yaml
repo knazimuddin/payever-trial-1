@@ -3,7 +3,7 @@
 {{ $appName := $chartName }}
 
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: {{ $appName }}
   namespace: {{ $values.namespace }}
@@ -20,11 +20,6 @@ spec:
   replicas: {{ $values.replicas.http.min }}
 
   strategy:
-    type: RollingUpdate
-
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
   selector:
     matchLabels:
       app: {{ $appName }}
