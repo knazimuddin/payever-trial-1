@@ -12,4 +12,5 @@ export enum PaymentActionsEnum {
   Remind = 'remind',
   Upload = 'upload',
   Edit = 'edit',
+  Verify = 'verify',
 }
