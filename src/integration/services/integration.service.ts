@@ -27,6 +27,6 @@ export class IntegrationService {
   public async create(
     data: CreateIntegrationDto,
   ): Promise<IntegrationModel> {
-      return this.integrationModel.create(data as any);
+      return this.integrationModel.create(data as IntegrationModel);
   }
 }

@@ -56,12 +56,11 @@ export class TransactionsService {
     const created: TransactionModel = await this.mutex.lock(
       TransactionMutexKey,
       transactionDto.uuid,
-      async () => this.transactionModel.create(transactionDto as any),
+      async () => this.transactionModel.create(transactionDto as TransactionModel),
     );
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(created.toObject()),
     );
 
@@ -109,7 +108,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
 
@@ -140,7 +138,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
 
@@ -225,7 +222,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
   }
@@ -367,7 +363,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
   }
@@ -399,7 +394,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
   }

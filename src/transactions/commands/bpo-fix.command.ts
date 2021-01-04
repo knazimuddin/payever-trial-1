@@ -24,7 +24,7 @@ export class BpoFixCommand {
       Logger.log(`${bpos.length} items taken`);
 
       for (const bpo of bpos) {
-        const data: BusinessPaymentOptionModel = bpo.toObject() as any;
+        const data: BusinessPaymentOptionModel = bpo.toObject() as BusinessPaymentOptionModel;
 
         if (!data._id) {
           Logger.log(data);
