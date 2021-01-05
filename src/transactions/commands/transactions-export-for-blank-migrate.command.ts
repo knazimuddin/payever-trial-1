@@ -33,7 +33,7 @@ export class TransactionsExportForBlankMigrateCommand {
       name: 'payment_method',
     }) paymentMethod: string,
   ): Promise<void> {
-    const criteria: any = { };
+    const criteria: any = { example: null };
     if (before || after) {
       criteria.created_at = { };
     }
