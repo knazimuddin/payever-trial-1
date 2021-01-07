@@ -12,7 +12,7 @@ export class BpoFixCommand {
 
   @Command({ command: 'bpo:fix', describe: 'Fix BPO _ids' })
   public async transactionsEsExport(): Promise<void> {
-    const count: number = await this.bpoModel.countDocuments().exec();
+    const count: number = await this.bpoModel.countDocuments();
     Logger.log(`Found ${count} records.`);
 
     const limit: number = 200;
@@ -29,7 +29,7 @@ export class BpoFixCommand {
         if (!data._id) {
           Logger.log(data);
 
-          await this.bpoModel.findOneAndRemove({ id: data.id }).exec();
+          await this.bpoModel.findOneAndRemove({ id: data.id });
           await this.bpoModel.create(data);
         }
       }

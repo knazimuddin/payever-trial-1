@@ -58,7 +58,7 @@ export class TransactionsExportForBlankMigrateCommand {
     Logger.log(`Starting transactions blank migrate`);
     Logger.log(`Criteria is ${JSON.stringify(criteria, null, 2)}.`);
 
-    const count: number = await this.transactionsModel.countDocuments(criteria).exec();
+    const count: number = await this.transactionsModel.countDocuments(criteria);
     Logger.log(`Found ${count} records.`);
 
     const limit: number = 1000;

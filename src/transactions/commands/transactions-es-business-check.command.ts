@@ -73,7 +73,7 @@ export class TransactionsEsBusinessCheckCommand {
 
         const mongoTransaction: TransactionBasicInterface = await this.transactionsModel.findOne({
           uuid: transaction.uuid,
-        }).exec();
+        });
 
         if (!mongoTransaction) {
           readline.moveCursor(process.stdout, 0, -1);

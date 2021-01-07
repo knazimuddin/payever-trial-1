@@ -44,7 +44,7 @@ export class TransactionsEsBusinessUpdateCommand {
     );
     Logger.log(`Clearing done.`);
 
-    const total: number = await this.transactionsModel.countDocuments(criteria).exec();
+    const total: number = await this.transactionsModel.countDocuments(criteria);
     Logger.log(`Found ${total} records.`);
 
     const limit: number = 1000;
