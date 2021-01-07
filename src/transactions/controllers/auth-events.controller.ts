@@ -50,6 +50,6 @@ export class AuthEventsController {
     await this.transactionModel.updateMany(
       { _id: { $in: transactions.map((e: { _id: string}) => e._id)}, seller_name: { $exists: false }},
       { $set: { seller_name: sellerName, seller_email: data.email}},
-    ).exec();
+    );
   }
 }
