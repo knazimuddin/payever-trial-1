@@ -16,7 +16,7 @@ export class SampleProductsService {
     const sampleByIndustry: SampleProductsModel[] = await this.sampleProductsModel.find({
       industry: industry,
       product: businessProduct,
-    }).exec();
+    });
 
     if (!sampleByIndustry.length) {
       if (industry !== 'BRANCHE_OTHER') {
@@ -31,7 +31,7 @@ export class SampleProductsService {
 
   private async getSampleRandomProducts(businessProduct: string): Promise<SampleProductsModel[]> {
     const sampleByBusinessProduct: SampleProductsModel[]
-      = await this.sampleProductsModel.find({ product: businessProduct }).exec();
+      = await this.sampleProductsModel.find({ product: businessProduct });
     if (!sampleByBusinessProduct.length) {
       return [];
     }

@@ -23,7 +23,7 @@ export class InternalTransactionEventsController {
   public async onInternalTransactionRefundEvent(payload: TransactionPaymentDto): Promise<void> {
     this.logger.log({ text: 'INTERNAL.TRANSACTION.REFUND', payload });
 
-    const transaction: TransactionModel = await this.transactionsModel.findOne({ uuid: payload.id }).exec();
+    const transaction: TransactionModel = await this.transactionsModel.findOne({ uuid: payload.id }).lean();
 
     if (!transaction) {
       throw new NotFoundException(`Transaction with id ${payload.id} not found`);
