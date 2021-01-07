@@ -1,4 +1,4 @@
-import uuid = require('uuid');
+import * as uuid from 'uuid';
 import { partialFactory, PartialFactory, SequenceGenerator } from '@pe/cucumber-sdk';
 import { BusinessPaymentOptionModel } from '../../../src/transactions/models';
 
@@ -19,7 +19,7 @@ const defaultBusinessPaymentOptionFactory = (): BusinessPaymentOptionModel => {
     shop_redirect_enabled: true,
     status: 'new',
     variable_fee: seq.current,
-  });
+  } as BusinessPaymentOptionModel);
 };
 
 export class businessPaymentOptionFactory {

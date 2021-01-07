@@ -18,7 +18,7 @@ class ExampleFixture extends BaseFixture {
       completed : true,
       shop_redirect_enabled : false,
       credentials : {},
-    });
+    } as BusinessPaymentOptionModel);
 
     const bpo: BusinessPaymentOptionModel = await service.findOneById(50);
   }

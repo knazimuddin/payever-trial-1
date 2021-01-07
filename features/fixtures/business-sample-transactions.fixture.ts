@@ -1,5 +1,6 @@
+import { Model } from 'mongoose';
 import { BaseFixture } from '@pe/cucumber-sdk';
-import { Model } from "mongoose";
+
 import { SampleProductsModel, TransactionExampleModel } from '../../src/transactions/models';
 import { sampleProductFactory, transactionFactory } from './factories';
 
@@ -9,9 +10,9 @@ class BusinessEventsFixture extends BaseFixture {
 
   public async apply(): Promise<void> {
 
-    await this.transactionExampleModel.create(transactionFactory.create({country: "DE"}));
-    await this.transactionExampleModel.create(transactionFactory.create({country: "DE"}));
-    await this.transactionExampleModel.create(transactionFactory.create({country: "DE"}));
+    await this.transactionExampleModel.create(transactionFactory.create({ country: 'DE' }));
+    await this.transactionExampleModel.create(transactionFactory.create({ country: 'DE' }));
+    await this.transactionExampleModel.create(transactionFactory.create({ country: 'DE' }));
 
     await this.sampleProductsModel.create(sampleProductFactory({}));
     await this.sampleProductsModel.create(sampleProductFactory({}));
