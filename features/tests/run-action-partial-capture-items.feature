@@ -1,3 +1,4 @@
+@captureitems
 Feature: Partial capture - items flow
 
   Background:
@@ -257,6 +258,12 @@ Feature: Partial capture - items flow
             "name": "test item",
             "price": 25,
             "quantity": 1
+          },
+          {
+            "identifier": "c4bce8c1-6572-43fc-8fc9-0f8f0a5efad1",
+            "name": "test item",
+            "price": 50,
+            "quantity": 1
           }
         ]
       }
@@ -272,12 +279,15 @@ Feature: Partial capture - items flow
          "original_id": "*",
          "uuid": "{{transactionId}}",
          "amount": 100,
-         "amount_capture_rest": 100,
+         "amount_capture_rest": 102,
          "amount_captured": 0,
          "amount_refund_rest": 100,
          "amount_refunded": 0,
          "currency": "EUR",
-         "total": 100
+         "total": 102
+       },
+       "shipping": {
+         "delivery_fee": 2
        }
     }
     """
@@ -296,6 +306,13 @@ Feature: Partial capture - items flow
           "identifier": "3a6bd3ae-3b30-41a4-803f-e457d6113279",
           "name": "test item",
           "price": 25,
+          "quantity": 1,
+          "options": []
+        },
+        {
+          "identifier": "c4bce8c1-6572-43fc-8fc9-0f8f0a5efad1",
+          "name": "test item",
+          "price": 50,
           "quantity": 1,
           "options": []
         }
