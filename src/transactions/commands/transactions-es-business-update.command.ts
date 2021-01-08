@@ -34,7 +34,6 @@ export class TransactionsEsBusinessUpdateCommand {
     Logger.log(`Clearing "${business_uuid}" transactions from ElasticSearch.`);
     await this.elasticSearchClient.deleteByQuery(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       {
         query: {
           match_phrase: {
@@ -62,7 +61,6 @@ export class TransactionsEsBusinessUpdateCommand {
 
       await this.elasticSearchClient.bulkIndex(
         ElasticTransactionEnum.index,
-        ElasticTransactionEnum.type,
         prepared,
       );
 

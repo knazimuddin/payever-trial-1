@@ -9,7 +9,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ParamModel, QueryDto } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
@@ -30,7 +30,7 @@ import { IsNotExampleFilter } from '../tools';
 import { ConfigService } from '@nestjs/config';
 
 @Controller('admin')
-@ApiUseTags('admin')
+@ApiTags('admin')
 @UseGuards(JwtAuthGuard)
 @Roles(RolesEnum.admin)
 @ApiBearerAuth()

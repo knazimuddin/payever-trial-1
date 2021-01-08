@@ -1,5 +1,5 @@
 import { Controller, Get, HttpCode, HttpStatus, NotFoundException, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ParamModel, QueryDto } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum, User, UserTokenInterface } from '@pe/nest-kit/modules/auth';
 import { TransactionOutputConverter } from '../converter';
@@ -13,7 +13,7 @@ import { UserFilter } from '../tools';
 import { ConfigService } from '@nestjs/config';
 
 @Controller('user')
-@ApiUseTags('user')
+@ApiTags('user')
 @UseGuards(JwtAuthGuard)
 @Roles(RolesEnum.user)
 @ApiBearerAuth()

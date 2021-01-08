@@ -11,7 +11,7 @@ const defaultFactory = (): CurrencyModel => {
     name: `Currency ${seq.current}`,
     rate: seq.current,
     symbol: `cur_${seq.current}`
-  });
+  } as CurrencyModel);
 };
 
 export class currencyFactory {

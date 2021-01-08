@@ -1,42 +1,42 @@
-import { ApiModelProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { PagingDto } from './paging.dto';
 import { SortingDto } from './sorting.dto';
 
 export class ListQueryDto {
-  @ApiModelProperty()
+  @ApiProperty()
   @IsOptional()
   @IsString()
   public orderBy: string = 'created_at';
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsOptional()
   @IsString()
   @IsIn(['asc', 'desc'])
   public direction: string = 'asc';
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsOptional()
   @IsNumber()
   @Min(1)
   public page: number = 1;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsOptional()
   @IsNumber()
   @Max(100)
   public limit: number = 10;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsOptional()
   @IsString()
   public query: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsNotEmpty()
   public filters: any = { };
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsOptional()
   @IsString()
   public currency: string;

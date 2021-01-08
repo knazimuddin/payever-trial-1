@@ -1,8 +1,8 @@
-import { ApiModelProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsDefined, IsNotEmpty, IsDate } from 'class-validator';
 
 export class DailyReportFilterDto {
-  @ApiModelProperty()
+  @ApiProperty()
   @IsNotEmpty()
   @IsDefined()
   @IsDate()

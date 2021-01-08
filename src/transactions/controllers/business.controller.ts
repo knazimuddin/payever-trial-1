@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Acl, AclActionsEnum, ParamModel } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
@@ -43,7 +43,7 @@ const BusinessPlaceholder: string = ':businessId';
 const UuidPlaceholder: string = ':uuid';
 
 @Controller('business/:businessId')
-@ApiUseTags('business')
+@ApiTags('business')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })

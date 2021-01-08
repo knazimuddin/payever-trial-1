@@ -151,7 +151,6 @@ Feature: Partial capture - amount flow
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "uuid": "{{transactionId}}"
           }
@@ -279,7 +278,6 @@ Feature: Partial capture - amount flow
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "uuid": "{{transactionId}}"
           }

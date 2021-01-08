@@ -1,4 +1,4 @@
-import uuid = require('uuid');
+import * as uuid from 'uuid';
 import { partialFactory, PartialFactory, SequenceGenerator } from '@pe/cucumber-sdk';
 import { PaymentFlowModel } from '../../../src/transactions/models';
 
@@ -30,7 +30,7 @@ const defaultFactory = (): PaymentFlowModel => {
     step: `Step_${seq.current}`,
     tax_value: seq.current,
     x_frame_host: `x_frame_host_${seq.current}`,
-  });
+  } as PaymentFlowModel);
 };
 
 export class paymentFlowFactory {

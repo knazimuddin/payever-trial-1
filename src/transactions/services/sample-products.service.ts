@@ -17,7 +17,7 @@ export class SampleProductsService {
       industry: industry,
       product: businessProduct,
     });
-    
+
     if (!sampleByIndustry.length) {
       if (industry !== 'BRANCHE_OTHER') {
         return [];
@@ -26,18 +26,18 @@ export class SampleProductsService {
       return this.getSampleRandomProducts(businessProduct);
     }
 
-    return sampleByIndustry.map((product: SampleProductsModel) => product.toObject());
+    return sampleByIndustry.map((product: SampleProductsModel) => product.toObject()) as SampleProductsModel[];
   }
 
   private async getSampleRandomProducts(businessProduct: string): Promise<SampleProductsModel[]> {
-    const sampleByBusinessProduct: SampleProductsModel[] 
+    const sampleByBusinessProduct: SampleProductsModel[]
       = await this.sampleProductsModel.find({ product: businessProduct });
     if (!sampleByBusinessProduct.length) {
       return [];
     }
 
     if (sampleByBusinessProduct.length <= SampleProductsService.MAX_RANDOM) {
-      return sampleByBusinessProduct.map((product: SampleProductsModel) => product.toObject());
+      return sampleByBusinessProduct.map((product: SampleProductsModel) => product.toObject()) as SampleProductsModel[];
     }
 
     const sampleProductRandom: SampleProductsModel[] = [];
@@ -49,6 +49,6 @@ export class SampleProductsService {
       sampleProductRandom.push(sample);
     }
 
-    return sampleProductRandom.map((product: SampleProductsModel) => product.toObject());
+    return sampleProductRandom.map((product: SampleProductsModel) => product.toObject()) as SampleProductsModel[];
   }
 }

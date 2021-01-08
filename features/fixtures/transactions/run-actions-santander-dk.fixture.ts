@@ -1,8 +1,9 @@
 import { BaseFixture } from '@pe/cucumber-sdk';
+import { getModelToken } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+
 import { BusinessPaymentOptionModel, PaymentFlowModel, TransactionModel } from '../../../src/transactions/models';
 import { businessPaymentOptionFactory, paymentFlowFactory, transactionFactory } from '../factories';
-import { Model } from 'mongoose';
-import { getModelToken } from '@nestjs/mongoose';
 import {
   BusinessPaymentOptionSchemaName,
   PaymentFlowSchemaName,
@@ -11,8 +12,8 @@ import {
 
 const transactionId: string = 'ad738281-f9f0-4db7-a4f6-670b0dff5327';
 const businessId: string = '36bf8981-8827-4c0c-a645-02d9fc6d72c8';
-const businessOptionId: string = 1;
-const paymentFlowId: string = 2;
+const businessOptionId: string = '1';
+const paymentFlowId: string = '2';
 
 class RunActionsFileUploadFixture extends BaseFixture {
 

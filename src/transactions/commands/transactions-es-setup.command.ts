@@ -33,7 +33,6 @@ export class TransactionsEsSetupCommand {
       if (ElasticMappingFieldsConfig[field]) {
         await this.elasticSearchClient.setupFieldMapping(
           ElasticTransactionEnum.index,
-          ElasticTransactionEnum.type,
           field,
           ElasticMappingFieldsConfig[field],
         );

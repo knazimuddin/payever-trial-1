@@ -374,7 +374,6 @@ Feature: Third party payment actions
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "action_running": false,
             "santander_applications": [],
@@ -500,4 +499,3 @@ Feature: Third party payment actions
        "user": {}
     }
     """
-
