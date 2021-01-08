@@ -542,7 +542,6 @@ Feature: Full real payment flow
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "uuid": "f61e09b6-61ca-426b-8ee6-e8ce3118e932"
           }
@@ -745,7 +744,6 @@ Feature: Full real payment flow
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "uuid": "f61e09b6-61ca-426b-8ee6-e8ce3118e932"
           }

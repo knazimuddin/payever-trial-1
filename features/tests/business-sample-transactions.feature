@@ -36,7 +36,6 @@ Feature: Handling business events
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "action_running": false,
             "santander_applications": []
@@ -156,7 +155,7 @@ Feature: Handling business events
         }
       }
       """
-    And I process messages from RabbitMQ "async_events_transactions_micro" channel    
+    And I process messages from RabbitMQ "async_events_transactions_micro" channel
     Then I look for model "Transaction" by following JSON and remember as "transactions1":
     """
       {
@@ -173,4 +172,4 @@ Feature: Handling business events
           }
         ]
       }
-    """   
+    """

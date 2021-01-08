@@ -84,7 +84,6 @@ Feature: Update transaction status
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "action_running": false,
             "santander_applications": [],

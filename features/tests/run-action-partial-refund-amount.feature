@@ -135,7 +135,6 @@ Feature: Partial refund - amount flow
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "uuid": "{{transactionId}}"
           }
@@ -262,7 +261,6 @@ Feature: Partial refund - amount flow
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "uuid": "{{transactionId}}"
           }

@@ -61,7 +61,6 @@ Feature: Run payment action
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "action_running": false,
             "santander_applications": [],
@@ -170,7 +169,6 @@ Feature: Run payment action
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "action_running": false,
             "santander_applications": [],
@@ -287,7 +285,6 @@ Feature: Run payment action
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "action_running": false,
             "santander_applications": [],
@@ -390,7 +387,6 @@ Feature: Run payment action
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "action_running": false,
             "santander_applications": [],
@@ -500,7 +496,6 @@ Feature: Run payment action
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "action_running": false,
             "santander_applications": [],
