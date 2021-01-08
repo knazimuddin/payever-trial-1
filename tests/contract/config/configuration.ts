@@ -1,11 +1,11 @@
 import { PactConfigurationInterface } from '@pe/pact-kit';
-import { SantanderPaymentWithPanIdState } from "../states";
+import { SantanderPaymentWithPanIdState } from '../states';
 
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import { AppModule } from '../../../src/app.module'
-import { MessagingServiceMock } from "../mocks";
-import { MessagingService } from "../../../src/transactions/services";
+import { AppModule } from '../../../src/app.module';
+import { MessagingServiceMock } from '../mocks';
+import { MessagingService } from '../../../src/transactions/services';
 import { StatisticsMessagesMock } from '../providers/transactions-messages.pact.mock';
 import { PaymentMailMessagesProvider } from '../providers/payment-mail-message.mock';
 import { DailyReportTransactionsMailMessagesProvider } from '../providers/daily-report-transactions-mail-message.pact.mock';
