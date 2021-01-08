@@ -126,7 +126,6 @@ Feature: Run payment action
         "singleIndex",
         [
           "transactions",
-          "transaction",
           {
             "action_running": false,
             "santander_applications": [],
@@ -241,7 +240,6 @@ Feature: Run payment action
         "singleIndex",
         [
           "transactions",
-          "transaction",
           {
             "action_running": false,
             "santander_applications": [],
@@ -329,7 +327,6 @@ Feature: Run payment action
           "singleIndex",
           [
             "transactions",
-            "transaction",
             {
               "action_running": false,
               "santander_applications": [],
@@ -452,7 +449,6 @@ Feature: Run payment action
         "singleIndex",
         [
           "transactions",
-          "transaction",
           {
             "action_running": false,
             "santander_applications": [],
@@ -559,7 +555,6 @@ Feature: Run payment action
         "singleIndex",
         [
           "transactions",
-          "transaction",
           {
             "action_running": false,
             "santander_applications": [],
