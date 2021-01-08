@@ -201,12 +201,12 @@ Feature: Partial refund - amount flow
          "original_id": "*",
          "uuid": "{{transactionId}}",
          "amount": 100,
-         "amount_capture_rest": 50,
+         "amount_capture_rest": 52,
          "amount_captured": 0,
          "amount_refund_rest": 50,
          "amount_refunded": 50,
          "currency": "EUR",
-         "total": 100
+         "total": 102
        }
     }
     """
@@ -278,7 +278,7 @@ Feature: Partial refund - amount flow
           "id": "440ec879-7f02-48d4-9ffb-77adfaf79a06",
           "uuid": "{{transactionId}}",
           "amount": 100,
-          "total": 100,
+          "total": 102,
           "currency": "NOK",
           "reference": "1906191249319025",
           "customer_name": "Test Customer",
@@ -296,7 +296,7 @@ Feature: Partial refund - amount flow
             "last_name": "Breivik"
           },
           "fee": 0,
-          "delivery_fee": 0,
+          "delivery_fee": 2,
           "payment_fee": 0,
           "down_payment": 0,
           "place": "cancelled",
@@ -327,12 +327,12 @@ Feature: Partial refund - amount flow
          "original_id": "*",
          "uuid": "{{transactionId}}",
          "amount": 100,
-         "amount_capture_rest": 0,
+         "amount_capture_rest": 2,
          "amount_captured": 0,
          "amount_refund_rest": 0,
          "amount_refunded": 100,
          "currency": "EUR",
-         "total": 100
+         "total": 102
        }
     }
     """

@@ -208,12 +208,12 @@ Feature: Partial refund - items flow
          "original_id": "*",
          "uuid": "{{transactionId}}",
          "amount": 100,
-         "amount_capture_rest": 100,
+         "amount_capture_rest": 102,
          "amount_captured": 0,
          "amount_refund_rest": 100,
          "amount_refunded": 0,
          "currency": "EUR",
-         "total": 100
+         "total": 102
        }
     }
     """

@@ -344,12 +344,12 @@ Feature: Partial capture - amount flow
          "original_id": "*",
          "uuid": "{{transactionId}}",
          "amount": 100,
-         "amount_capture_rest": 50,
+         "amount_capture_rest": 52,
          "amount_captured": 50,
          "amount_refund_rest": 100,
          "amount_refunded": 0,
          "currency": "EUR",
-         "total": 100
+         "total": 102
        }
     }
     """
