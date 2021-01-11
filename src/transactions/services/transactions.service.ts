@@ -56,12 +56,11 @@ export class TransactionsService {
     const created: TransactionModel = await this.mutex.lock(
       TransactionMutexKey,
       transactionDto.uuid,
-      async () => this.transactionModel.create(transactionDto),
+      async () => this.transactionModel.create(transactionDto as TransactionModel),
     );
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(created.toObject()),
     );
 
@@ -109,7 +108,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
 
@@ -140,7 +138,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
 
@@ -184,7 +181,8 @@ export class TransactionsService {
   }
 
   public async removeByUuid(transactionId: string): Promise<void> {
-    const transaction: TransactionModel = await this.transactionModel.findOneAndRemove({ uuid: transactionId });
+    const transaction: TransactionModel =
+      await this.transactionModel.findOneAndRemove({ uuid: transactionId });
     if (!transaction) {
       return;
     }
@@ -213,7 +211,7 @@ export class TransactionsService {
         { uuid: transaction.uuid },
         {
           $push: {
-            history: history,
+            history: history as any,
           },
         },
         {
@@ -224,7 +222,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
   }
@@ -376,7 +373,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
   }
@@ -408,7 +404,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
   }

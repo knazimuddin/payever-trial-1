@@ -8,7 +8,7 @@ import {
   Param,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse, ApiUseTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Acl, AclActionsEnum } from '@pe/nest-kit';
 import {
   AccessTokenPayload,
@@ -30,7 +30,7 @@ import {
 } from '../services';
 
 @Controller('legacy-api')
-@ApiUseTags('legacy-api')
+@ApiTags('legacy-api')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })

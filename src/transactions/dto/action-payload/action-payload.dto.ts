@@ -1,4 +1,4 @@
-import { ApiModelProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 import { ValidateNested } from 'class-validator';
 import { ActionPayloadInterface } from 'src/transactions/interfaces/action-payload';
@@ -7,11 +7,11 @@ import { FileDataDto } from './file-data.dto';
 
 export class ActionPayloadDto implements ActionPayloadInterface {
 
-  @ApiModelProperty()
+  @ApiProperty()
   @ValidateNested()
   public fields: FieldsDto;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @ValidateNested()
   public files: FileDataDto[];
 }
