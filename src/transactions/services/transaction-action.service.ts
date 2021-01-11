@@ -32,6 +32,10 @@ export class TransactionActionService {
     action: string,
     skipValidation: boolean = false,
   ): Promise<TransactionUnpackedDetailsInterface> {
+    console.log('doAction');
+    console.log(actionPayload);
+    console.log(transaction);
+
     this.dtoValidation.checkFileUploadDto(actionPayload);
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
       transaction.toObject({ virtuals: true }),
@@ -56,6 +60,8 @@ export class TransactionActionService {
       ) {
         updatedActionPayload.fields.amount += transaction.delivery_fee;
       }
+
+      console.log(updatedActionPayload);
 
       await actionCallerService.runAction(unpackedTransaction, action, updatedActionPayload);
     } catch (e) {
@@ -201,6 +207,8 @@ export class TransactionActionService {
 
   private updateAmountFromItems(actionPayload: ActionPayloadDto): ActionPayloadDto {
     const updatedActionPayload: ActionPayloadDto = actionPayload;
+    console.log('updateAmountFromItems');
+    console.log(updatedActionPayload.fields.payment_items);
     if (updatedActionPayload.fields && updatedActionPayload.fields.payment_items) {
       let itemsTotalAmount: number = 0;
       updatedActionPayload.fields.payment_items.forEach(( item: any ) => {
