@@ -283,7 +283,19 @@ export class TransactionsService {
     });
 
     transaction.markModified('captured_items');
-    await transaction.save();
+    try {
+      await transaction.save();
+    }catch (e) {
+      console.log(e);
+
+      this.logger.log(
+        {
+          context: 'TransactionsService',
+          error: e.message,
+          message: `Error occurred during saveCaptureItems`,
+        },
+      );
+    }
   }
 
   public async saveRefundItems(
