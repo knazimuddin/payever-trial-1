@@ -34,7 +34,6 @@ export class TransactionActionService {
   ): Promise<TransactionUnpackedDetailsInterface> {
     console.log('doAction');
     console.log(actionPayload);
-    console.log(transaction);
 
     this.dtoValidation.checkFileUploadDto(actionPayload);
     const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(

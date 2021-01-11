@@ -269,7 +269,6 @@ export class TransactionsService {
     captureItems: TransactionCartItemInterface[],
   ): Promise<void> {
     console.log('saveCaptureItems');
-    console.log(captureItems);
     captureItems.forEach((captureItem: TransactionCartItemInterface) => {
       const existingCaptureItem: TransactionCartItemInterface =
         transaction.captured_items.find((transactionItem: TransactionCartItemInterface) => {
@@ -283,8 +282,10 @@ export class TransactionsService {
     });
 
     transaction.markModified('captured_items');
+    console.log(transaction);
     try {
       await transaction.save();
+      console.log('Transaction saved');
     }catch (e) {
       console.log(e);
 
