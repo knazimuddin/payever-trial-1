@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, HttpException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { DelayRemoveClient, ElasticSearchClient } from '@pe/elastic-kit';
@@ -288,6 +288,7 @@ export class TransactionsService {
           message: `Error occurred during saveCaptureItems`,
         },
       );
+      throw new HttpException(`Couldn't store captured_items`, 412);
     }
   }
 
