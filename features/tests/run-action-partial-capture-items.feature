@@ -251,7 +251,7 @@ Feature: Partial capture - items flow
     When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
     """
     {
-      "fields": {
+      "fields":{
         "payment_items": [
           {
             "identifier": "3a6bd3ae-3b30-41a4-803f-e457d6113279",
@@ -288,6 +288,125 @@ Feature: Partial capture - items flow
        },
        "shipping": {
          "delivery_fee": 2
+       }
+    }
+    """
+    And I look for model "Transaction" by following JSON and remember as "transactionModel":
+    """
+    {
+      "uuid": "{{transactionId}}"
+    }
+    """
+    Then print storage key "transactionModel"
+    Then stored value "transactionModel" should contain json:
+    """
+    {
+      "captured_items": [
+        {
+          "identifier": "3a6bd3ae-3b30-41a4-803f-e457d6113279",
+          "name": "test item",
+          "price": 25,
+          "quantity": 1,
+          "options": []
+        },
+        {
+          "identifier": "c4bce8c1-6572-43fc-8fc9-0f8f0a5efad1",
+          "name": "test item",
+          "price": 50,
+          "quantity": 1,
+          "options": []
+        }
+      ],
+      "refunded_items": []
+    }
+    """
+
+  Scenario: Do shipping goods action with item
+    Given I authenticate as a user with the following data:
+    """
+    {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
+    """
+    And I mock an axios request with parameters:
+    """
+    {
+      "request": {
+        "method": "post",
+        "url": "*/api/business/{{businessId}}/integration/santander_factoring_de/action/action-shipping-goods",
+        "body": "*",
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "Content-Type": "application/json;charset=utf-8",
+          "authorization": "*"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {}
+      }
+    }
+    """
+    And I mock an axios request with parameters:
+    """
+    {
+      "request": {
+        "method": "post",
+        "url": "*/api/business/{{businessId}}/integration/santander_factoring_de/action/action-list",
+        "body": "{\"paymentId\":\"{{transactionId}}\"}",
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "Content-Type": "application/json;charset=utf-8",
+          "authorization": "*"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "shipping_goods": true
+        }
+      }
+    }
+    """
+    And I use DB fixture "transactions/partial-capture/third-party-payment-partial-products"
+    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
+    """
+    {
+      "fields":{
+        "payment_items": [
+          {
+            "identifier": "3a6bd3ae-3b30-41a4-803f-e457d6113279",
+            "name": "test item",
+            "price": 25,
+            "quantity": 1
+          },
+          {
+            "identifier": "c4bce8c1-6572-43fc-8fc9-0f8f0a5efad1",
+            "name": "test item",
+            "price": 50,
+            "quantity": 1
+          }
+        ]
+      }
+    }
+    """
+    Then print last response
+    And the response status code should be 200
+    And the response should contain json:
+    """
+    {
+       "transaction": {
+         "id": "*",
+         "original_id": "*",
+         "uuid": "{{transactionId}}",
+         "amount": 100,
+         "amount_capture_rest": 100,
+         "amount_captured": 0,
+         "amount_refund_rest": 100,
+         "amount_refunded": 0,
+         "currency": "EUR",
+         "total": 100
+       },
+       "shipping": {
+         "delivery_fee": 0
        }
     }
     """
