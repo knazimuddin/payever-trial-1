@@ -48,13 +48,17 @@ export class TransactionActionService {
         skipValidation,
       );
 
-      const updatedActionPayload: ActionPayloadDto = action === PaymentActionsEnum.ShippingGoods
-        ? this.updateAmountFromItems(actionPayload)
-        : actionPayload;
-      if (updatedActionPayload.fields && updatedActionPayload.fields.amount &&
-        (updatedActionPayload.fields.amount === (transaction.amount_capture_rest - transaction.delivery_fee))
-      ) {
-        updatedActionPayload.fields.amount += transaction.delivery_fee;
+      let updatedActionPayload: ActionPayloadDto = actionPayload;
+      if (action === PaymentActionsEnum.ShippingGoods) {
+        updatedActionPayload = this.updateAmountFromItems(actionPayload);
+        let fee_amount: number = 0;
+        fee_amount = transaction.delivery_fee ? fee_amount + transaction.delivery_fee : fee_amount;
+        fee_amount = transaction.payment_fee ? fee_amount + transaction.payment_fee : fee_amount;
+        if (updatedActionPayload.fields && updatedActionPayload.fields.amount &&
+          (updatedActionPayload.fields.amount === (transaction.amount_capture_rest - fee_amount))
+        ) {
+          updatedActionPayload.fields.amount += fee_amount;
+        }
       }
 
       await actionCallerService.runAction(unpackedTransaction, action, updatedActionPayload);

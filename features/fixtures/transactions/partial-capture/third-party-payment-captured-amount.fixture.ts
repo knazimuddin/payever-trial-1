@@ -50,7 +50,7 @@ class ThirdPartyPaymentFixture extends BaseFixture {
       reference: 'f3d44333-21e2-4f0f-952b-72ac2dfb8fc9',
       type: 'stripe',
       amount: 100,
-      total: 100,
+      total: 102,
       items : [],
       captured_items: [],
       history: [

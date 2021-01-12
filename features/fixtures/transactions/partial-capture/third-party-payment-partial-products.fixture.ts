@@ -32,8 +32,8 @@ class ThirdPartyPaymentFixture extends BaseFixture {
       action_running: false,
       business_uuid : businessId,
       santander_applications: [ 'stub_usage_text' ],
-      delivery_fee: 0,
-      payment_fee: 0,
+      delivery_fee: 2,
+      payment_fee: 3,
       uuid: transactionId,
       amount: 100,
       api_call_id: 'f3b35337-c74e-4f87-b679-af554211645f',
@@ -47,7 +47,7 @@ class ThirdPartyPaymentFixture extends BaseFixture {
       shipping_address: null,
       specific_status: 'NEW_TRANSACTION',
       status: 'STATUS_ACCEPTED',
-      total: 100,
+      total: 105,
       updated_at: new Date(),
       items: [
         {

@@ -1,4 +1,4 @@
-@captureitems
+@partial-capture-items-flow
 Feature: Partial capture - items flow
 
   Background:
@@ -279,12 +279,12 @@ Feature: Partial capture - items flow
          "original_id": "*",
          "uuid": "{{transactionId}}",
          "amount": 100,
-         "amount_capture_rest": 102,
+         "amount_capture_rest": 105,
          "amount_captured": 0,
          "amount_refund_rest": 100,
          "amount_refunded": 0,
          "currency": "EUR",
-         "total": 102
+         "total": 105
        },
        "shipping": {
          "delivery_fee": 2
@@ -321,7 +321,7 @@ Feature: Partial capture - items flow
     }
     """
 
-  Scenario: Do shipping goods action with item
+  Scenario: Do shipping goods action with item partial products
     Given I authenticate as a user with the following data:
     """
     {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
@@ -398,15 +398,15 @@ Feature: Partial capture - items flow
          "original_id": "*",
          "uuid": "{{transactionId}}",
          "amount": 100,
-         "amount_capture_rest": 100,
+         "amount_capture_rest": 105,
          "amount_captured": 0,
          "amount_refund_rest": 100,
          "amount_refunded": 0,
          "currency": "EUR",
-         "total": 100
+         "total": 105
        },
        "shipping": {
-         "delivery_fee": 0
+         "delivery_fee": 2
        }
     }
     """
