@@ -285,7 +285,7 @@ export class TransactionsService {
         {
           context: 'TransactionsService',
           error: e.message,
-          message: `Error occurred during saveCaptureItems`,
+          message: `Error occurred during saveCaptureItems, transaction.original_id: ${transaction.original_id}`,
         },
       );
       throw new HttpException(`Couldn't store captured_items`, 412);
