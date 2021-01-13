@@ -18,6 +18,7 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
+  // tslint:disable-next-line no-floating-promises
   app.register(jwt, { secret: environment.jwtOptions.secret });
   const logger: NestKitLogger = app.get(NestKitLogger);
   app.useLogger(logger);
