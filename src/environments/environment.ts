@@ -13,10 +13,10 @@ export const environment: any = {
     enable: env.APM_SERVICE_ENABLE === 'true',
     options: {
       active: env.ELASTIC_APM_ACTIVE,
+      centralConfig: env.ELASTIC_APM_CENTRAL_CONFIG,
       logLevel: env.ELASTIC_APM_LOG_LEVEL,
       serverUrl: env.ELASTIC_APM_SERVER_URL,
       serviceName: env.ELASTIC_APM_SERVICE_NAME,
-      centralConfig: env.ELASTIC_APM_CENTRAL_CONFIG,
     },
   },
   appCors: env.APP_CORS === 'true',
