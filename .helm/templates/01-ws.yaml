@@ -3,34 +3,24 @@
 {{ $appName := printf "%s-ws" $chartName }}
 
 apiVersion: apps/v1
-{{- if eq $values.namespace "production" }}
-kind: DaemonSet
-{{- else }}
 kind: Deployment
-{{- end }}
 metadata:
   name: {{ $appName }}
   namespace: {{ $values.namespace }}
-
   labels:
     app: {{ $appName }}
     tier: nodejs
     type: ws
-
   annotations:
     "werf.io/set-replicas-only-on-creation": "true"
-
 spec:
-  {{- if ne $values.namespace "production" }}
-  replicas: {{ $values.replicas.ws }}
-
+  replicas: {{ $values.replicas.ws.min }}
   strategy:
     type: RollingUpdate
 
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 0
-  {{- end }}
   selector:
     matchLabels:
       app: {{ $appName }}
@@ -47,17 +37,6 @@ spec:
 
     spec:
       priorityClassName: {{ $values.priorityClass }}
-
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: node_worker
-                operator: Exists
-              - key: node_high
-                operator: Exists
-
       imagePullSecrets:
         - name: {{ $values.image.pullSecretName }}
 

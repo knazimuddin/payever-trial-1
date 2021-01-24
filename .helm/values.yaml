@@ -1,12 +1,6 @@
 namespace: default
 priorityClass: app-9stars
 
-replicas:
-  http: 4
-  consumer: 4
-  cron: 1
-  ws: 1
-
 image:
   nodejs: registry.devpayever.com/nodejs-backend/transactions
   pullSecretName: regsecret
@@ -19,8 +13,26 @@ service:
 
 resources:
   requests:
-    cpu: 32m
-    memory: 128Mi
+    cpu: 156m
+    memory: 284Mi
   limits:
-    cpu: 1000m
-    memory: 1Gi
+    cpu: 300m
+    memory: 600Mi
+#high
+replicas:
+  http:
+    min: 5
+    max: 20
+  consumer:
+    min: 5
+    max: 20
+  ws:
+    min: 5
+    max: 10
+  cron: 1
+
+hpa:
+  cpu:
+    tarUti: 75
+  mem:
+    tarUti: 85
