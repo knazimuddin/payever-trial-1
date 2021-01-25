@@ -74,6 +74,7 @@ export const environment: any = {
     ],
   },
   redis: {
+    connect_timeout: env.REDIS_CONNECT_TIMEOUT,
     retryAttempts: env.REDIS_RETRY_ATTEMPTS,
     retryDelay: env.REDIS_RETRY_DELAY,
     url: env.REDIS_URL,
