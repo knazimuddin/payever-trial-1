@@ -13,6 +13,7 @@ export const environment: any = {
     enable: env.APM_SERVICE_ENABLE === 'true',
     options: {
       active: env.ELASTIC_APM_ACTIVE,
+      centralConfig: env.ELASTIC_APM_CENTRAL_CONFIG,
       logLevel: env.ELASTIC_APM_LOG_LEVEL,
       serverUrl: env.ELASTIC_APM_SERVER_URL,
       serviceName: env.ELASTIC_APM_SERVICE_NAME,
@@ -73,6 +74,7 @@ export const environment: any = {
     ],
   },
   redis: {
+    connect_timeout: env.REDIS_CONNECT_TIMEOUT,
     retryAttempts: env.REDIS_RETRY_ATTEMPTS,
     retryDelay: env.REDIS_RETRY_DELAY,
     url: env.REDIS_URL,
