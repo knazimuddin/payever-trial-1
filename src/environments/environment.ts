@@ -30,6 +30,10 @@ export const environment: any = {
   jwtOptions: {
     // this should be set to PEM encoded private key for RSA/ECDSA for production
     // @see https://github.com/auth0/node-jsonwebtoken#jwtsignpayload-secretorprivatekey-options-callback
+    jwtKeyExtractorOptions: {
+      authScheme: env.JWT_AUTH_SCHEME,
+      tokenQueryParameterName: env.JWT_PARAM_NAME,
+    },
     secret: env.JWT_SECRET_TOKEN,
     signOptions: {
       expiresIn: (

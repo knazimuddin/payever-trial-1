@@ -18,7 +18,7 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  app.register(jwt, { secret: environment.jwtOptions.secret });
+  await app.register(jwt, { secret: environment.jwtOptions.secret });
   const logger: NestKitLogger = app.get(NestKitLogger);
   app.useLogger(logger);
 

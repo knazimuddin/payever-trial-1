@@ -92,6 +92,46 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
     }
   }
 
+  public async downloadContract(
+    transaction: TransactionUnpackedDetailsInterface,
+  ): Promise<{ contentType: string, filenameWithExtension: string, base64Content: string }> {
+
+    const url: string =
+      `${this.thirdPartyPaymentsMicroUrl}`
+      + `/api/download-resource/business/${transaction.business_uuid}/integration/${transaction.type}/action/contract?paymentId=${transaction.original_id}&rawData=true`;
+
+    this.logger.log({
+      message: 'Starting third party download contract action call',
+      transaction: transaction.original_id,
+      url: url,
+    });
+
+    const response: Observable<AxiosResponse<any>> = await this.httpService.get(url);
+
+    return response.pipe(
+      map((res: any) => {
+        this.logger.log({
+          message: 'Received response from third party download contract action call',
+          transaction: transaction.original_id,
+          url: url,
+        });
+
+        return res.data;
+      }),
+      catchError((error: AxiosError) => {
+        this.logger.error({
+          error: error.response.data,
+          message: 'Failed response from third party download contract action call',
+          transaction: transaction.original_id,
+          url: url,
+        });
+
+        throw new HttpException(error.response.data.message, error.response.data.code);
+      }),
+    )
+      .toPromise();
+  }
+
   private async runThirdPartyAction(
     transaction: TransactionUnpackedDetailsInterface,
     action: string,
