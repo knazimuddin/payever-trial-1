@@ -7,6 +7,7 @@ import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { ThirdPartyCallerService, TransactionsService } from '../services';
 import { FastifyReply } from 'fastify';
+import { Readable } from 'stream';
 
 @Controller('proxy')
 @ApiTags('proxy')
@@ -48,11 +49,17 @@ export class ProxyController {
     const resourceData: { content: any, headers: any} =
       await this.thirdPartyCaller.downloadContract(unpackedTransaction);
 
+    const buffer: Buffer = Buffer.from(resourceData.content);
+
+    const stream: Readable = new Readable();
+    stream.push(buffer);
+    stream.push(null);
+
     response.header('Content-Type', resourceData.headers['content-type']);
     response.header('Content-Disposition', resourceData.headers['content-disposition']);
     response.header('Content-Length', resourceData.headers['content-length']);
 
-    response.send(resourceData.content);
+    response.send(stream);
   }
 
   private getOauthUserBusiness(user: AccessTokenPayload, businessId?: string): string
