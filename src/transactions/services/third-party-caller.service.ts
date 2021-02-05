@@ -92,17 +92,32 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
     }
   }
 
+  public async downloadContract(
+    transaction: TransactionUnpackedDetailsInterface,
+  ): Promise<any> {
+
+    const endpoint: string = `/api/download-resource/business/${transaction.business_uuid}/integration/${transaction.type}/action/contract`;
+
+    return this.runThirdPartyAction(
+      transaction,
+      null,
+      null,
+      endpoint,
+    );
+  }
+
   private async runThirdPartyAction(
     transaction: TransactionUnpackedDetailsInterface,
     action: string,
     actionPayload?: ActionPayloadInterface,
+    customEndpoint?: string,
   ): Promise<{ }> {
     const businessId: string = transaction.business_uuid;
     const integrationName: string = transaction.type;
 
     const url: string =
       `${this.thirdPartyPaymentsMicroUrl}`
-        + `/api/business/${businessId}/integration/${integrationName}/action/${action}`;
+        + customEndpoint ? customEndpoint : `/api/business/${businessId}/integration/${integrationName}/action/${action}`;
 
     this.logger.log({
       data: actionPayload,

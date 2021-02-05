@@ -38,6 +38,7 @@ import {
   TransactionEventsController,
   UserController,
   InternalTransactionEventsController,
+  ProxyController,
 } from './controllers';
 import { ExchangeCalculatorFactory } from './currency';
 import { EventListenersList } from './event-listeners/event-listeners.list';
@@ -104,6 +105,7 @@ import { EventsGateway } from './ws';
     AuthEventsController,
     SampleProductsBusMessagesController,
     InternalTransactionEventsController,
+    ProxyController,
   ],
   imports: [
     ConfigModule,
