@@ -39,10 +39,6 @@ Feature: Proxy endpoints
     And I use DB fixture "transactions/third-party-payment"
     When I send a GET request to "/api/proxy/download-contract/{{transactionId}}"
     Then print last response
-    And the response status code should be 200
-    And the response should contain json:
-    """
-    {
-
-    }
-    """
+    Then the response status code should be 200
+    And the response header "Content-Type" should have value "application/pdf; charset=utf-8"
+    And the response header "Content-Disposition" should have value "attachment; filename=contract.pdf"
