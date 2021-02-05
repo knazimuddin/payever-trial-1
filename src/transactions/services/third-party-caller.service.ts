@@ -128,7 +128,7 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
     });
 
     const response: Observable<AxiosResponse<any>> =
-      await this.httpService.request({ data: actionPayload, method, url });
+      await this.httpService.request({ data: actionPayload, headers: { }, method, url });
 
     return response.pipe(
         map((res: any) => {
