@@ -96,7 +96,7 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
     transaction: TransactionUnpackedDetailsInterface,
   ): Promise<any> {
 
-    const endpoint: string = `/api/download-resource/business/${transaction.business_uuid}/integration/${transaction.type}/action/contract`;
+    const endpoint: string = `/api/download-resource/business/${transaction.business_uuid}/integration/${transaction.type}/action/contract?paymentId=${transaction.original_id}`;
 
     return this.runThirdPartyAction(
       transaction,
