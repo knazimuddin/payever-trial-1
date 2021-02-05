@@ -1,7 +1,7 @@
 import { HttpException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IntercomService } from '@pe/nest-kit';
-import { AxiosError, AxiosResponse, Method } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { ThirdPartyPaymentActionsEnum, TransactionActionsToThirdPartyActions } from '../enum';
@@ -96,30 +96,55 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
     transaction: TransactionUnpackedDetailsInterface,
   ): Promise<any> {
 
-    const endpoint: string = `/api/download-resource/business/${transaction.business_uuid}/integration/${transaction.type}/action/contract?paymentId=${transaction.original_id}`;
+    const url: string =
+      `${this.thirdPartyPaymentsMicroUrl}`
+      + `/api/download-resource/business/${transaction.business_uuid}/integration/${transaction.type}/action/contract?paymentId=${transaction.original_id}`;
 
-    return this.runThirdPartyAction(
-      transaction,
-      null,
-      null,
-      endpoint,
-      'GET',
-    );
+    this.logger.log({
+      message: 'Starting third party download contract action call',
+      transaction: transaction.original_id,
+      url: url,
+    });
+
+    const response: Observable<AxiosResponse<any>> = await this.httpService.get(url);
+
+    return response.pipe(
+      map((res: any) => {
+        this.logger.log({
+          message: 'Received response from third party download contract action call',
+          transaction: transaction.original_id,
+          url: url,
+        });
+
+        console.log(res);
+
+        return res.data;
+      }),
+      catchError((error: AxiosError) => {
+        this.logger.error({
+          error: error.response.data,
+          message: 'Failed response from third party download contract action call',
+          transaction: transaction.original_id,
+          url: url,
+        });
+
+        throw new HttpException(error.response.data.message, error.response.data.code);
+      }),
+    )
+      .toPromise();
   }
 
   private async runThirdPartyAction(
     transaction: TransactionUnpackedDetailsInterface,
     action: string,
     actionPayload?: ActionPayloadInterface,
-    customEndpoint?: string,
-    method: Method = 'POST',
   ): Promise<{ }> {
     const businessId: string = transaction.business_uuid;
     const integrationName: string = transaction.type;
 
     const url: string =
       `${this.thirdPartyPaymentsMicroUrl}`
-        + (customEndpoint ? customEndpoint : `/api/business/${businessId}/integration/${integrationName}/action/${action}`);
+        + `/api/business/${businessId}/integration/${integrationName}/action/${action}`;
 
     this.logger.log({
       data: actionPayload,
@@ -127,8 +152,7 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
       url: url,
     });
 
-    const response: Observable<AxiosResponse<any>> =
-      await this.httpService.request({ data: actionPayload, headers: { }, method, url });
+    const response: Observable<AxiosResponse<any>> = await this.httpService.post(url, actionPayload);
 
     return response.pipe(
         map((res: any) => {
