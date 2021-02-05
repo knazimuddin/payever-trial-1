@@ -94,7 +94,7 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
 
   public async downloadContract(
     transaction: TransactionUnpackedDetailsInterface,
-  ): Promise<any> {
+  ): Promise<{ content: any, headers: any }> {
 
     const url: string =
       `${this.thirdPartyPaymentsMicroUrl}`
@@ -116,9 +116,10 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
           url: url,
         });
 
-        console.log(res);
-
-        return res.data;
+        return {
+          content: res.data,
+          headers: res.headers,
+        };
       }),
       catchError((error: AxiosError) => {
         this.logger.error({

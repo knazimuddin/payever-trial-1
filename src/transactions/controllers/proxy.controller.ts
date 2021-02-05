@@ -1,4 +1,4 @@
-import { Controller, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, UseGuards } from '@nestjs/common';
+import { Controller, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, UseGuards, Res } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Acl, AclActionsEnum } from '@pe/nest-kit';
 import { AccessTokenPayload, JwtAuthGuard, Roles, RolesEnum, User, UserRoleInterface, UserRoleOauth } from '@pe/nest-kit/modules/auth';
@@ -6,6 +6,7 @@ import { TransactionPaymentDetailsConverter } from '../converter';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { ThirdPartyCallerService, TransactionsService } from '../services';
+import { FastifyReply } from 'fastify';
 
 @Controller('proxy')
 @ApiTags('proxy')
@@ -24,7 +25,8 @@ export class ProxyController {
   public async downloadContract(
     @Param('original_id') transactionId: string,
     @User() user: AccessTokenPayload,
-  ): Promise<any> {
+    @Res() response: FastifyReply<any>,
+  ): Promise<void> {
     const transaction: TransactionModel = await this.transactionsService.findModelByParams({
       original_id: transactionId,
     });
@@ -43,7 +45,14 @@ export class ProxyController {
       transaction.toObject({ virtuals: true }),
     );
 
-    return this.thirdPartyCaller.downloadContract(unpackedTransaction);
+    const resourceData: { content: any, headers: any} =
+      await this.thirdPartyCaller.downloadContract(unpackedTransaction);
+
+    response.header('Content-Type', resourceData.headers['content-type']);
+    response.header('Content-Disposition', resourceData.headers['content-disposition']);
+    response.header('Content-Length', resourceData.headers['content-length']);
+
+    response.send(resourceData.content);
   }
 
   private getOauthUserBusiness(user: AccessTokenPayload, businessId?: string): string
