@@ -40,6 +40,8 @@ spec:
       imagePullSecrets:
         - name: {{ $values.image.pullSecretName }}
 
+      terminationGracePeriodSeconds: 60
+
       containers:
         - name: node
           image: {{ $values.image.nodejs }}
@@ -47,9 +49,13 @@ spec:
           command: [ "/bin/bash", "-c", "/payever/deploy/websocket.sh" ]
 
           lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
             preStop:
               exec:
-                command: ["sleep", "15"]
+                command: ["/bin/sh","-c","nginx -s quit; while killall -0 nginx; do sleep 1; done"]
+
 
           ports:
             - containerPort: {{ $values.service.wsPort }}

@@ -40,6 +40,8 @@ spec:
       imagePullSecrets:
         - name: {{ $values.image.pullSecretName }}
 
+      terminationGracePeriodSeconds: 60
+
       containers:
         - name: node
           image: {{ $values.image.nodejs }}

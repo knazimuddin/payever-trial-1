@@ -16,7 +16,6 @@ resources:
     cpu: 156m
     memory: 284Mi
   limits:
-    cpu: 300m
     memory: 600Mi
 #high
 replicas:
