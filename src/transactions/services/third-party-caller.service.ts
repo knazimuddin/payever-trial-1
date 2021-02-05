@@ -117,7 +117,7 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
 
     const url: string =
       `${this.thirdPartyPaymentsMicroUrl}`
-        + customEndpoint ? customEndpoint : `/api/business/${businessId}/integration/${integrationName}/action/${action}`;
+        + (customEndpoint ? customEndpoint : `/api/business/${businessId}/integration/${integrationName}/action/${action}`);
 
     this.logger.log({
       data: actionPayload,
