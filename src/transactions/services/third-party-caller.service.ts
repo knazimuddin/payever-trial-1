@@ -94,11 +94,11 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
 
   public async downloadContract(
     transaction: TransactionUnpackedDetailsInterface,
-  ): Promise<{ content: any, headers: any }> {
+  ): Promise<{ contentType: string, filenameWithExtension: string, base64Content: string }> {
 
     const url: string =
       `${this.thirdPartyPaymentsMicroUrl}`
-      + `/api/download-resource/business/${transaction.business_uuid}/integration/${transaction.type}/action/contract?paymentId=${transaction.original_id}`;
+      + `/api/download-resource/business/${transaction.business_uuid}/integration/${transaction.type}/action/contract?paymentId=${transaction.original_id}&rawData=true`;
 
     this.logger.log({
       message: 'Starting third party download contract action call',
@@ -116,10 +116,7 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
           url: url,
         });
 
-        return {
-          content: res.data,
-          headers: res.headers,
-        };
+        return res.data;
       }),
       catchError((error: AxiosError) => {
         this.logger.error({

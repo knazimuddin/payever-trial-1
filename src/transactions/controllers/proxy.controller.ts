@@ -46,18 +46,18 @@ export class ProxyController {
       transaction.toObject({ virtuals: true }),
     );
 
-    const resourceData: { content: any, headers: any} =
+    const result: { contentType: string, filenameWithExtension: string, base64Content: string } =
       await this.thirdPartyCaller.downloadContract(unpackedTransaction);
 
-    const buffer: Buffer = Buffer.from(resourceData.content);
+    const buffer: Buffer = Buffer.from(result.base64Content, 'base64');
 
     const stream: Readable = new Readable();
     stream.push(buffer);
     stream.push(null);
 
-    response.header('Content-Type', resourceData.headers['content-type']);
-    response.header('Content-Disposition', resourceData.headers['content-disposition']);
-    response.header('Content-Length', resourceData.headers['content-length']);
+    response.header('Content-Type', result.contentType);
+    response.header('Content-Disposition', `attachment; filename=${result.filenameWithExtension}`);
+    response.header('Content-Length', buffer.length);
 
     response.send(stream);
   }
