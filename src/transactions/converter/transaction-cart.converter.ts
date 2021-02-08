@@ -12,7 +12,7 @@ export class TransactionCartConverter {
     cartItems: CheckoutTransactionCartItemInterface[],
     businessId: string,
   ): Types.DocumentArray<TransactionCartItemModel> {
-    const newCart: Types.DocumentArray<TransactionCartItemModel> = new Types.DocumentArray();
+    const newCart: Types.DocumentArray<TransactionCartItemModel> = new Types.DocumentArray([]);
 
     for (const cartItem of cartItems) {
       const itemIdentifier: string =

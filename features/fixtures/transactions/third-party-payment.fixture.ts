@@ -89,7 +89,7 @@ class ThirdPartyPaymentFixture extends BaseFixture {
       shipping_order_id: '5db105b8-2da6-421e-8e6a-1c67048cda2b',
       status: 'STATUS_ACCEPTED',
       specific_status: 'NONE',
-      original_id: '440ec879-7f02-48d4-9ffb-77adfaf79a06',
+      original_id: 'ad738281-f9f0-4db7-a4f6-670b0dff5327',
     }));
 
     await this.businessPaymentOptionModel.create(businessPaymentOptionFactory.create({

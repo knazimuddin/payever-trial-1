@@ -86,7 +86,6 @@ export class TransactionsEsFixDiffCommand {
 
           await this.elasticSearchClient.deleteByQuery(
             ElasticTransactionEnum.index,
-            ElasticTransactionEnum.type,
             {
               query: {
                 match_phrase: {

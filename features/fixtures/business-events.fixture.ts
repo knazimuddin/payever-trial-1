@@ -1,5 +1,5 @@
 import { BaseFixture } from '@pe/cucumber-sdk';
-import { Model } from "mongoose";
+import { Model } from 'mongoose';
 import { getModelToken } from '@nestjs/mongoose';
 import { BusinessModel } from '../../src/transactions/models';
 import { BusinessSchemaName } from '../../src/transactions/schemas';

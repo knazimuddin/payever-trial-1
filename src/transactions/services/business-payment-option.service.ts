@@ -47,7 +47,7 @@ export class BusinessPaymentOptionService {
     const bpo: BusinessPaymentOptionModel = await this.model.findOne({ id });
 
     return bpo
-      ? this.unwrap(bpo.toObject({ virtuals: true }))
+      ? this.unwrap(bpo.toObject({ virtuals: true }) as BusinessPaymentOptionModel)
       : null
     ;
   }

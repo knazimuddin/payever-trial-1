@@ -1,4 +1,4 @@
-import uuid = require('uuid');
+import * as uuid from 'uuid';
 import { partialFactory, PartialFactory, SequenceGenerator } from '@pe/cucumber-sdk';
 import { TransactionModel } from '../../../src/transactions/models';
 
@@ -72,7 +72,7 @@ const defaultTransactionFactory = (): TransactionModel => {
     shipping_order_id : uuid.v4(),
     created_at: new Date(),
     updated_at: new Date(),
-  });
+  } as TransactionModel);
 };
 
 export class transactionFactory {

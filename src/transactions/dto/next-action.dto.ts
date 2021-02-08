@@ -1,12 +1,12 @@
-import { ApiModelProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class NextActionDto {
-  @ApiModelProperty()
+  @ApiProperty()
   public type: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   public payment_method: string;
 
-  @ApiModelProperty()
+  @ApiProperty()
   public payload: any;
 }

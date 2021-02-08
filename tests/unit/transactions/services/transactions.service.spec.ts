@@ -6,10 +6,11 @@ import { NotificationsEmitter } from '@pe/notifications-sdk';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import 'mocha';
-import { DocumentQuery, Model } from 'mongoose';
+import { Model } from 'mongoose';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as uuid from 'uuid';
+
 import { RpcResultDto } from '../../../../src/transactions/dto';
 import {
   TransactionPackedDetailsInterface,
@@ -242,10 +243,10 @@ describe('TransactionsService', () => {
   describe('findModelByParams', () => {
     it('should return transaction Model by uuid', async () => {
 
-      let querySort: DocumentQuery<TransactionModel[], TransactionModel, {}> = {
+      let querySort: any = {
         sort: (): any => { },
       } as any;
-      let queryLimit: DocumentQuery<TransactionModel[], TransactionModel, {}> = {
+      let queryLimit: any = {
         limit: (): any => { },
       } as any;
 
@@ -259,10 +260,10 @@ describe('TransactionsService', () => {
     });
 
     it('should return null transaction Model by uuid', async () => {
-      let querySort: DocumentQuery<TransactionModel[], TransactionModel, {}> = {
+      let querySort: any = {
         sort: (): any => { },
       } as any;
-      let queryLimit: DocumentQuery<TransactionModel[], TransactionModel, {}> = {
+      let queryLimit: any = {
         limit: (): any => { },
       } as any;
 
@@ -276,10 +277,10 @@ describe('TransactionsService', () => {
     });
 
     it('should return empty transaction Model by uuid', async () => {
-      let querySort: DocumentQuery<TransactionModel[], TransactionModel, {}> = {
+      let querySort: any = {
         sort: (): any => { },
       } as any;
-      let queryLimit: DocumentQuery<TransactionModel[], TransactionModel, {}> = {
+      let queryLimit: any = {
         limit: (): any => { },
       } as any;
 

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, HttpException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { DelayRemoveClient, ElasticSearchClient } from '@pe/elastic-kit';
@@ -56,12 +56,11 @@ export class TransactionsService {
     const created: TransactionModel = await this.mutex.lock(
       TransactionMutexKey,
       transactionDto.uuid,
-      async () => this.transactionModel.create(transactionDto),
+      async () => this.transactionModel.create(transactionDto as TransactionModel),
     );
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(created.toObject()),
     );
 
@@ -109,7 +108,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
 
@@ -140,7 +138,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
 
@@ -184,7 +181,8 @@ export class TransactionsService {
   }
 
   public async removeByUuid(transactionId: string): Promise<void> {
-    const transaction: TransactionModel = await this.transactionModel.findOneAndRemove({ uuid: transactionId });
+    const transaction: TransactionModel =
+      await this.transactionModel.findOneAndRemove({ uuid: transactionId });
     if (!transaction) {
       return;
     }
@@ -213,7 +211,7 @@ export class TransactionsService {
         { uuid: transaction.uuid },
         {
           $push: {
-            history: history,
+            history: history as any,
           },
         },
         {
@@ -224,7 +222,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
   }
@@ -281,7 +278,18 @@ export class TransactionsService {
     });
 
     transaction.markModified('captured_items');
-    await transaction.save();
+    try {
+      await transaction.save();
+    }catch (e) {
+      this.logger.log(
+        {
+          context: 'TransactionsService',
+          error: e.message,
+          message: `Error occurred during saveCaptureItems, transaction.original_id: ${transaction.original_id}`,
+        },
+      );
+      throw new HttpException(`Couldn't store captured_items`, 412);
+    }
   }
 
   public async saveRefundItems(
@@ -366,7 +374,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
   }
@@ -398,7 +405,6 @@ export class TransactionsService {
 
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
   }

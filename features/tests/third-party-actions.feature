@@ -50,7 +50,7 @@ Feature: Third party payment actions
          }
        ],
        "transaction": {
-         "original_id": "440ec879-7f02-48d4-9ffb-77adfaf79a06",
+         "original_id": "ad738281-f9f0-4db7-a4f6-670b0dff5327",
          "uuid": "{{transactionId}}",
          "amount": 50,
          "amount_refunded": 0,
@@ -215,7 +215,7 @@ Feature: Third party payment actions
          }
        ],
        "transaction": {
-         "original_id": "440ec879-7f02-48d4-9ffb-77adfaf79a06",
+         "original_id": "ad738281-f9f0-4db7-a4f6-670b0dff5327",
          "uuid": "{{transactionId}}",
          "amount": 50,
          "amount_refunded": 0,
@@ -374,7 +374,6 @@ Feature: Third party payment actions
       {
         "arguments": [
           "transactions",
-          "transaction",
           {
             "action_running": false,
             "santander_applications": [],
@@ -500,4 +499,3 @@ Feature: Third party payment actions
        "user": {}
     }
     """
-

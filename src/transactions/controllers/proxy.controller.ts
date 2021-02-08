@@ -1,56 +1,33 @@
-import {
-  Controller,
-  ForbiddenException,
-  Get,
-  HttpCode,
-  HttpStatus,
-  NotFoundException,
-  Param,
-  UseGuards,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Controller, ForbiddenException, Get, HttpCode, HttpStatus, NotFoundException, Param, UseGuards, Res } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Acl, AclActionsEnum } from '@pe/nest-kit';
-import {
-  AccessTokenPayload,
-  JwtAuthGuard,
-  Roles,
-  RolesEnum,
-  User,
-  UserRoleInterface,
-  UserRoleOauth,
-} from '@pe/nest-kit/modules/auth';
-import { TransactionConverter, TransactionPaymentDetailsConverter } from '../converter';
+import { AccessTokenPayload, JwtAuthGuard, Roles, RolesEnum, User, UserRoleInterface, UserRoleOauth } from '@pe/nest-kit/modules/auth';
+import { TransactionPaymentDetailsConverter } from '../converter';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
-import { CheckoutTransactionInterface, CheckoutTransactionWithActionsInterface } from '../interfaces/checkout';
-import { ActionItemInterface } from '../interfaces';
 import { TransactionModel } from '../models';
-import {
-  ActionsRetriever,
-  TransactionsService,
-} from '../services';
+import { ThirdPartyCallerService, TransactionsService } from '../services';
+import { FastifyReply } from 'fastify';
+import { Readable } from 'stream';
 
-@Controller('legacy-api')
-@ApiTags('legacy-api')
+@Controller('proxy')
+@ApiTags('proxy')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
-@ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
-@ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
-
-export class LegacyApiController {
-
+export class ProxyController {
   constructor(
     private readonly transactionsService: TransactionsService,
-    private readonly actionsRetriever: ActionsRetriever,
+    private readonly thirdPartyCaller: ThirdPartyCallerService,
   ) { }
 
-  @Get('transactions/:original_id')
+  @Get('download-contract/:original_id')
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
-  public async getTransactionById(
+  public async downloadContract(
     @Param('original_id') transactionId: string,
     @User() user: AccessTokenPayload,
-  ): Promise<CheckoutTransactionWithActionsInterface> {
+    @Res() response: FastifyReply<any>,
+  ): Promise<void> {
     const transaction: TransactionModel = await this.transactionsService.findModelByParams({
       original_id: transactionId,
     });
@@ -69,14 +46,20 @@ export class LegacyApiController {
       transaction.toObject({ virtuals: true }),
     );
 
-    const checkoutTransaction: CheckoutTransactionInterface = TransactionConverter.toCheckoutTransaction(
-      unpackedTransaction,
-    );
-    const actions: ActionItemInterface[] = !transaction.example
-      ? await this.actionsRetriever.retrieve(unpackedTransaction)
-      : this.actionsRetriever.retrieveFakeActions(unpackedTransaction);
+    const result: { contentType: string, filenameWithExtension: string, base64Content: string } =
+      await this.thirdPartyCaller.downloadContract(unpackedTransaction);
 
-    return Object.assign({ actions: actions }, checkoutTransaction);
+    const buffer: Buffer = Buffer.from(result.base64Content, 'base64');
+
+    const stream: Readable = new Readable();
+    stream.push(buffer);
+    stream.push(null);
+
+    response.header('Content-Type', result.contentType);
+    response.header('Content-Disposition', `attachment; filename=${result.filenameWithExtension}`);
+    response.header('Content-Length', buffer.length);
+
+    response.send(stream);
   }
 
   private getOauthUserBusiness(user: AccessTokenPayload, businessId?: string): string

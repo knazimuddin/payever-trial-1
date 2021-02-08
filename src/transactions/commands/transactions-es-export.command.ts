@@ -63,7 +63,6 @@ export class TransactionsEsExportCommand {
         if (remove_old) {
           await this.elasticSearchClient.deleteByQuery(
             ElasticTransactionEnum.index,
-            ElasticTransactionEnum.type,
             {
               query: {
                 match_phrase: {
@@ -77,7 +76,6 @@ export class TransactionsEsExportCommand {
 
       await this.elasticSearchClient.bulkIndex(
         ElasticTransactionEnum.index,
-        ElasticTransactionEnum.type,
         prepared,
       );
 

@@ -50,7 +50,7 @@ class ThirdPartyPaymentFixture extends BaseFixture {
       reference: 'f3d44333-21e2-4f0f-952b-72ac2dfb8fc9',
       type: 'stripe',
       amount: 100,
-      total: 100,
+      total: 105,
       items : [
         {
           'uuid' : 'f83c9c9f-77eb-464a-9ef3-95f572301d2c',
@@ -95,6 +95,7 @@ class ThirdPartyPaymentFixture extends BaseFixture {
         street : 'Rödingsmarkt shipping',
       },
       delivery_fee: 2,
+      payment_fee: 3,
       shipping_method_name: 'some shipping name',
       shipping_order_id: '5db105b8-2da6-421e-8e6a-1c67048cda2b',
       status: 'STATUS_ACCEPTED',

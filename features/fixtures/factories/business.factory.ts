@@ -1,6 +1,6 @@
 import { partialFactory, PartialFactory, SequenceGenerator } from '@pe/cucumber-sdk';
 import { BusinessModel } from '../../../src/transactions/models';
-import uuid = require('uuid');
+import * as uuid from 'uuid';
 
 const seq = new SequenceGenerator();
 
@@ -10,7 +10,7 @@ const defaultFactory = (): BusinessModel => {
   return ({
     _id: uuid.v4(),
     currency: `EUR`,
-  });
+  } as BusinessModel);
 };
 
 export class businessFactory {

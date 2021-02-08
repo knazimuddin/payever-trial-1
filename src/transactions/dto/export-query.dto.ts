@@ -1,30 +1,30 @@
-import { ApiModelProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { ExportFormat } from '../tools';
 import { ListQueryDto } from './list-query.dto';
 
 export class ExportQueryDto extends ListQueryDto {
-  @ApiModelProperty()
+  @ApiProperty()
   @IsOptional()
   @IsString()
   public format: ExportFormat = 'csv';
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsOptional()
   @IsString()
   public businessName: string = 'unnamed';
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsNotEmpty()
   public columns: any = { };
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsOptional()
   @IsNumber()
   @Min(1)
   public page: number = 1;
 
-  @ApiModelProperty()
+  @ApiProperty()
   @IsOptional()
   @IsNumber()
   @Max(10000)

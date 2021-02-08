@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { TransactionPaymentDetailsConverter } from '../converter';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { AllowedUpdateStatusPaymentMethodsEnum, PaymentStatusesEnum, ThirdPartyPaymentsEnum } from '../enum';
+import { AllowedUpdateStatusPaymentMethodsEnum, PaymentStatusesEnum, ThirdPartyPaymentsEnum, PaymentActionsEnum } from '../enum';
 import { ActionCallerInterface } from '../interfaces';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 
@@ -48,7 +48,20 @@ export class TransactionActionService {
         skipValidation,
       );
 
-      await actionCallerService.runAction(unpackedTransaction, action, actionPayload);
+      let updatedActionPayload: ActionPayloadDto = actionPayload;
+      if (action === PaymentActionsEnum.ShippingGoods) {
+        updatedActionPayload = this.updateAmountFromItems(actionPayload);
+        let fee_amount: number = 0;
+        fee_amount = transaction.delivery_fee ? fee_amount + transaction.delivery_fee : fee_amount;
+        fee_amount = transaction.payment_fee ? fee_amount + transaction.payment_fee : fee_amount;
+        if (updatedActionPayload.fields && updatedActionPayload.fields.amount &&
+          (updatedActionPayload.fields.amount === (transaction.amount_capture_rest - fee_amount))
+        ) {
+          updatedActionPayload.fields.amount += fee_amount;
+        }
+      }
+
+      await actionCallerService.runAction(unpackedTransaction, action, updatedActionPayload);
     } catch (e) {
       this.logger.log(
         {
@@ -189,4 +202,20 @@ export class TransactionActionService {
       ? this.thirdPartyCallerService
       : this.messagingService;
   }
+
+  private updateAmountFromItems(actionPayload: ActionPayloadDto): ActionPayloadDto {
+    const updatedActionPayload: ActionPayloadDto = actionPayload;
+    if (updatedActionPayload.fields && updatedActionPayload.fields.payment_items) {
+      let itemsTotalAmount: number = 0;
+      updatedActionPayload.fields.payment_items.forEach(( item: any ) => {
+        if (item.price && item.quantity) {
+          itemsTotalAmount += (item.price * item.quantity);
+        }
+      });
+      updatedActionPayload.fields.amount = itemsTotalAmount;
+    }
+
+    return updatedActionPayload;
+  }
+
 }
