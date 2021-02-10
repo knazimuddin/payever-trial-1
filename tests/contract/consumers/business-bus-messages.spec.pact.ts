@@ -12,6 +12,9 @@ const messages: ExpectedMessageDto[] = [
       companyAddress: {
         country: Matchers.like('DE'),
       },
+      companyDetails: {
+        product: Matchers.like('id'),
+      },
       name: Matchers.like('Test business'),
     },
     dtoClass: BusinessDto,
@@ -24,6 +27,9 @@ const messages: ExpectedMessageDto[] = [
       companyAddress: {
         country: Matchers.like('DE'),
       },
+      companyDetails: {
+        product: Matchers.like('id'),
+      },
       name: Matchers.like('Test business'),
     },
     dtoClass: BusinessDto,
@@ -35,6 +41,9 @@ const messages: ExpectedMessageDto[] = [
       currency: Matchers.like('EUR'),
       companyAddress: {
         country: Matchers.like('DE'),
+      },
+      companyDetails: {
+        product: Matchers.like('id'),
       },
       name: Matchers.like('Test business'),
     },

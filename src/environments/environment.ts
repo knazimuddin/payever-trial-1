@@ -1,5 +1,6 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import { RabbitChannels } from '../enums';
 import ProcessEnv = NodeJS.ProcessEnv;
 
 dotenv.config();
@@ -66,10 +67,10 @@ export const environment: any = {
 
         queues: [
           {
-            name: 'async_events_transactions_micro',
+            name: RabbitChannels.Transactions,
             options: {
               deadLetterExchange: 'async_events_fallback',
-              deadLetterRoutingKey: 'async_events_transactions_micro',
+              deadLetterRoutingKey: RabbitChannels.Transactions,
               durable: true,
             },
           },
