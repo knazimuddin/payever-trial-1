@@ -3,11 +3,7 @@
 {{ $appName := $chartName }}
 
 apiVersion: apps/v1
-{{- if eq $values.namespace "production" }}
-kind: DaemonSet
-{{- else }}
 kind: Deployment
-{{- end }}
 metadata:
   name: {{ $appName }}
   namespace: {{ $values.namespace }}
@@ -21,16 +17,12 @@ metadata:
     "werf.io/set-replicas-only-on-creation": "true"
 
 spec:
-  {{- if ne $values.namespace "production" }}
-  replicas: {{ $values.replicas.http }}
-
+  replicas: {{ $values.replicas.http.min }}
   strategy:
     type: RollingUpdate
-
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 0
-  {{- end }}
   selector:
     matchLabels:
       app: {{ $appName }}
@@ -47,19 +39,10 @@ spec:
 
     spec:
       priorityClassName: {{ $values.priorityClass }}
-
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: node_worker
-                operator: Exists
-              - key: node_high
-                operator: Exists
-
       imagePullSecrets:
         - name: {{ $values.image.pullSecretName }}
+
+      terminationGracePeriodSeconds: 60
 
       containers:
         - name: node
@@ -68,9 +51,14 @@ spec:
           command: [ "/bin/bash", "-c", "/payever/deploy/deploy.sh" ]
 
           lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
             preStop:
               exec:
                 command: ["sleep", "15"]
+
+
 
           ports:
             - containerPort: {{ $values.service.containerPort }}
