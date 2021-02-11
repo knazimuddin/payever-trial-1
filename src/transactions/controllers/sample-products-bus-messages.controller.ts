@@ -3,6 +3,7 @@ import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { SampleProductPayloadDto } from '../dto';
 import { TransactionsExampleService } from '../services';
+import { RabbitChannels } from '../../enums';
 
 @Controller()
 export class SampleProductsBusMessagesController {
@@ -12,6 +13,7 @@ export class SampleProductsBusMessagesController {
   ) { }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: 'products.event.sampleproduct.created',
   })
   public async onSampleProductsCreate(sampleProductsPayload: SampleProductPayloadDto): Promise<void> {

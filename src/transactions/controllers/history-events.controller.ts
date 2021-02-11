@@ -1,7 +1,7 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { EventDispatcher } from '@pe/nest-kit';
-import { RabbitRoutingKeys } from '../../enums';
+import { RabbitRoutingKeys, RabbitChannels } from '../../enums';
 import { ActionCompletedMessageDto, AddHistoryEventMessageDto } from '../dto/payment-micro';
 import { PaymentActionEventEnum } from '../enum/events';
 import { TransactionModel } from '../models';
@@ -17,6 +17,7 @@ export class HistoryEventsController {
   ) { }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentActionCompleted,
   })
   public async onActionCompletedEvent(
@@ -47,6 +48,7 @@ export class HistoryEventsController {
   }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentHistoryAdd,
   })
   public async onHistoryAddEvent(

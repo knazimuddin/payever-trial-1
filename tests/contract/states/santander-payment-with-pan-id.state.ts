@@ -68,6 +68,6 @@ export class SantanderPaymentWithPanIdState extends AbstractStateFixture {
       '__v' : 0,
       'place' : 'accepted',
       'specific_status' : 'ACCEPTED',
-    });
+    } as any);
   }
 }

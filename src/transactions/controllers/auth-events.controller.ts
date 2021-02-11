@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { RabbitRoutingKeys } from '../../enums';
+import { RabbitRoutingKeys, RabbitChannels } from '../../enums';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 
@@ -13,6 +13,7 @@ export class AuthEventsController {
   ) { }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.SellerNamePropagated,
   })
   public async onSellerNamePropagated(

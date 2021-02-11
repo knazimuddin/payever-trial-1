@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { RabbitRoutingKeys } from '../../enums';
+import { RabbitRoutingKeys, RabbitChannels } from '../../enums';
 import { DailyReportCurrencyDto, DailyReportFilterDto } from '../dto';
 import { DailyReportTransactionMailerReportEventProducer } from '../producer';
 import { DailyReportTransactionsService } from '../services';
@@ -13,6 +13,7 @@ export class DailyReportTransactionBusMessagesController {
   ) { }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.MailerReportDailyReportRequested,
   })
   public async onMailerReportDailyReportRequested(dailyReportFilterDto: DailyReportFilterDto): Promise<void> {

@@ -1,8 +1,10 @@
 /* tslint:disable:no-identical-functions */
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
+
 import { BusinessDto, RemoveBusinessDto } from '../dto';
 import { BusinessService, TransactionsExampleService } from '../services';
+import { RabbitChannels } from '../../enums';
 
 @Controller()
 export class BusinessBusMessagesController {
@@ -13,6 +15,7 @@ export class BusinessBusMessagesController {
   ) { }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: 'users.event.business.created',
   })
   public async onBusinessCreate(businessDto: BusinessDto): Promise<void> {
@@ -26,6 +29,7 @@ export class BusinessBusMessagesController {
   }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: 'users.event.business.updated',
   })
   public async onBusinessUpdate(businessDto: BusinessDto): Promise<void> {
@@ -39,6 +43,7 @@ export class BusinessBusMessagesController {
   }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: 'users.event.business.export',
   })
   public async onBusinessExport(businessDto: BusinessDto): Promise<void> {
@@ -52,6 +57,7 @@ export class BusinessBusMessagesController {
   }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: 'users.event.business.removed',
   })
   public async onBusinessRemovedEvent(businessDto: RemoveBusinessDto): Promise<void> {
