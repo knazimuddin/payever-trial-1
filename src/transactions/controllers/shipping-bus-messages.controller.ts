@@ -1,6 +1,6 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { RabbitRoutingKeys } from '../../enums';
+import { RabbitRoutingKeys, RabbitChannels } from '../../enums';
 import { ShippingGoodsMailDtoConverter } from '../converter/mailer';
 import { ShippingLabelDownloadedDto, ShippingOrderProcessedMessageDto, ShippingSlipDownloadedDto } from '../dto';
 import { ShippingMailDto } from '../dto/mail';
@@ -20,6 +20,7 @@ export class ShippingBusMessagesController {
   ) { }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.ShippingOrderProcessed,
   })
   public async onShippingOrderProcessed(orderProcessedDto: ShippingOrderProcessedMessageDto): Promise<void> {
@@ -38,6 +39,7 @@ export class ShippingBusMessagesController {
   }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.ShippingLabelDownloaded,
   })
   public async onShippingLabelDownloaded(labelDownloadedDto: ShippingLabelDownloadedDto): Promise<void> {
@@ -60,6 +62,7 @@ export class ShippingBusMessagesController {
   }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.ShippingSlipDownloaded,
   })
   public async onShippingSlipDownloaded(slipDownloadedDto: ShippingSlipDownloadedDto): Promise<void> {

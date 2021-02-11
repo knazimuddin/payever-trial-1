@@ -1,6 +1,6 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { RabbitRoutingKeys } from '../../enums';
+import { RabbitRoutingKeys, RabbitChannels } from '../../enums';
 import { BusinessPaymentOptionChangedDto } from '../dto/checkout-rabbit';
 import { BusinessPaymentOptionService } from '../services';
 
@@ -12,6 +12,7 @@ export class BpoEventsController {
   ) { }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.BpoCreated,
   })
   public async onBpoCreatedEvent(data: BusinessPaymentOptionChangedDto): Promise<void> {
@@ -19,6 +20,7 @@ export class BpoEventsController {
   }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.BpoUpdated,
   })
   public async onBpoUpdatedEvent(data: BusinessPaymentOptionChangedDto): Promise<void> {
@@ -26,6 +28,7 @@ export class BpoEventsController {
   }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.BpoMigrate,
   })
   public async onBpoMigrateEvent(data: BusinessPaymentOptionChangedDto): Promise<void> {

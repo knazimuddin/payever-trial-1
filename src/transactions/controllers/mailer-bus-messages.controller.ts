@@ -1,6 +1,6 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { RabbitRoutingKeys } from '../../enums';
+import { RabbitRoutingKeys, RabbitChannels } from '../../enums';
 import { PaymentMailSentDto } from '../dto';
 import { HistoryEventDataInterface } from '../interfaces/history-event-message';
 import { TransactionModel } from '../models';
@@ -15,6 +15,7 @@ export class MailerBusMessagesController {
   ) { }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.MailerPaymentMailSent,
   })
   public async onPaymentMailSent(paymentMailSentDto: PaymentMailSentDto): Promise<void> {

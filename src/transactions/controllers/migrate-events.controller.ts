@@ -1,6 +1,6 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { RabbitRoutingKeys } from '../../enums';
+import { RabbitRoutingKeys, RabbitChannels } from '../../enums';
 import { AtomDateConverter, TransactionConverter, TransactionHistoryEntryConverter } from '../converter';
 import { CheckoutTransactionInterface } from '../interfaces/checkout';
 import { TransactionHistoryEntryInterface, TransactionPackedDetailsInterface } from '../interfaces/transaction';
@@ -16,6 +16,7 @@ export class MigrateEventsController {
   ) { }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentMigrate,
   })
   public async onActionMigrateEvent(data: any): Promise<void> {
