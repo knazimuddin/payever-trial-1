@@ -11,6 +11,8 @@ export enum RabbitRoutingKeys {
   PaymentMigrate = 'checkout.event.payment.migrate',
   PaymentSubmitted = 'checkout.event.payment.submitted',
 
+  TransactionPaymentSubmitted = 'transaction.event.payment.submitted',
+
   BpoCreated = 'checkout.event.business-payment-option.created',
   BpoUpdated = 'checkout.event.business-payment-option.updated',
   BpoMigrate = 'checkout.event.business-payment-option.migrate',

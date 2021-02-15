@@ -13,6 +13,7 @@ import { HistoryEventActionCompletedInterface } from '../interfaces/history-even
 import { TransactionPaymentInterface } from '../interfaces/transaction';
 import { BusinessPaymentOptionModel, TransactionModel } from '../models';
 import { TransactionPaymentDetailsConverter } from '../converter';
+import { TransactionChangedDto } from '../dto/checkout-rabbit';
 
 @Injectable()
 export class TransactionEventProducer {
@@ -123,6 +124,18 @@ export class TransactionEventProducer {
 
     await this.produceTransactionUpdateEvent(
       transaction, null, RabbitRoutingKeys.InternalTransactionPaymentRefund, last_updated);
+  }
+
+  public async sendTransactionPaymentSubmitted(transactionId: string, data: TransactionChangedDto): Promise<void> {
+
+    const payload: any = {
+      ...data,
+    };
+
+    payload.invoiceId = transactionId;
+
+
+    await this.send(RabbitRoutingKeys.TransactionPaymentSubmitted, payload);
   }
 
   private async send(eventName: string, payload: any): Promise<void> {

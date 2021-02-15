@@ -6,7 +6,7 @@ import { TransactionChangedDto, TransactionRemovedDto } from '../dto/checkout-ra
 import { CheckoutTransactionInterface } from '../interfaces/checkout';
 import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
-import { PaymentMailEventProducer } from '../producer';
+import { PaymentMailEventProducer, TransactionEventProducer } from '../producer';
 import { StatisticsService, TransactionsExampleService, TransactionsService } from '../services';
 import { PaymentStatusesEnum } from '../enum';
 
@@ -16,6 +16,7 @@ export class TransactionEventsController {
     private readonly transactionsService: TransactionsService,
     private readonly statisticsService: StatisticsService,
     private readonly paymentMailEventProducer: PaymentMailEventProducer,
+    private readonly transactionEventProducer: TransactionEventProducer,
     private readonly exampleService: TransactionsExampleService,
     private readonly logger: Logger,
   ) { }
@@ -78,6 +79,14 @@ export class TransactionEventsController {
   })
   public async onTransactionSubmittedEvent(data: TransactionChangedDto): Promise<void> {
     this.logger.log(data, 'PAYMENT.SUBMIT');
+
+    const checkoutTransaction: CheckoutTransactionInterface = data.payment;
+    const transaction: TransactionPackedDetailsInterface =
+      TransactionConverter.fromCheckoutTransaction(checkoutTransaction);
+
+    const transactionModel: TransactionModel = await this.transactionsService.findModelByUuid(transaction.uuid);
+
+    await this.transactionEventProducer.sendTransactionPaymentSubmitted(transactionModel.id, data);
 
     return this.paymentMailEventProducer.produceOrderInvoiceEvent(data);
   }
