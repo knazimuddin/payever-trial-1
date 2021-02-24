@@ -29,7 +29,7 @@ export class InternalTransactionEventsController {
       throw new NotFoundException(`Transaction with id ${payload.id} not found`);
     }
 
-    const virifiedAction: PaymentActionsEnum = transaction.status === PaymentStatusesEnum.Refunded ?
+    const verifiedAction: PaymentActionsEnum = transaction.status === PaymentStatusesEnum.Refunded ?
       PaymentActionsEnum.Refund : PaymentActionsEnum.Cancel;
 
     if (!transaction.history || transaction.history.length === 0) {
@@ -40,7 +40,7 @@ export class InternalTransactionEventsController {
     } else {
       let refundedAmount: number = 0.0;
       for (const item of transaction.history) {
-        if (item.action === virifiedAction && item.amount) {
+        if (item.action === verifiedAction && item.amount) {
           refundedAmount = Number(refundedAmount) + Number(item.amount);
         }
       }
