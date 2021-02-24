@@ -1,6 +1,6 @@
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
-import { RabbitRoutingKeys } from '../../enums';
+import { RabbitRoutingKeys, RabbitChannels } from '../../enums';
 import { TransactionConverter } from '../converter';
 import { TransactionChangedDto, TransactionRemovedDto } from '../dto/checkout-rabbit';
 import { CheckoutTransactionInterface } from '../interfaces/checkout';
@@ -21,6 +21,7 @@ export class TransactionEventsController {
   ) { }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentCreated,
   })
   public async onTransactionCreateEvent(data: TransactionChangedDto): Promise<void> {
@@ -38,6 +39,7 @@ export class TransactionEventsController {
   }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentUpdated,
   })
   public async onTransactionUpdateEvent(data: TransactionChangedDto): Promise<void> {
@@ -61,6 +63,7 @@ export class TransactionEventsController {
   }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentRemoved,
   })
   public async onTransactionRemoveEvent(data: TransactionRemovedDto): Promise<void> {
@@ -70,6 +73,7 @@ export class TransactionEventsController {
   }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentSubmitted,
   })
   public async onTransactionSubmittedEvent(data: TransactionChangedDto): Promise<void> {

@@ -2,7 +2,7 @@ import { Controller, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { MessagePattern } from '@nestjs/microservices';
-import { RabbitRoutingKeys } from '../../enums';
+import { RabbitRoutingKeys, RabbitChannels } from '../../enums';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import { TransactionEventProducer } from '../producer';
@@ -18,6 +18,7 @@ export class InternalTransactionEventsController {
   ) { }
 
   @MessagePattern({
+    channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.InternalTransactionPaymentRefund,
   })
   public async onInternalTransactionRefundEvent(payload: TransactionPaymentDto): Promise<void> {

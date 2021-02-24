@@ -85,6 +85,7 @@ import {
   ActionValidatorsList,
 } from './services';
 import { EventsGateway } from './ws';
+import { RabbitChannels } from '../enums';
 
 @Module({
   controllers: [
@@ -121,6 +122,7 @@ import { EventsGateway } from './ws';
     ]),
     NotificationsSdkModule,
     CommonSdkModule.forRoot({
+      channel: RabbitChannels.Transactions,
       consumerModels: [
         CommonModelsNamesEnum.CurrencyModel,
       ],
