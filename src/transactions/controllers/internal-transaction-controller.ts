@@ -64,7 +64,7 @@ export class InternalTransactionEventsController {
     } catch (e) {
       this.logger.error( {
         payload: payload,
-        text: 'ERROR IN INTERNAL.TRANSACTION.REFUND: ' + e.text,
+        text: 'ERROR IN INTERNAL.TRANSACTION.REFUND: ' + e.message,
       });
     }
   }
