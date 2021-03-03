@@ -3,7 +3,6 @@ priorityClass: app-9stars
 
 image:
   nodejs: registry.devpayever.com/nodejs-backend/transactions
-  rmq_repub: payeverk8sregistry.azurecr.io/infra/rmq_fallback_repub:1.1.0
   pullSecretName: regsecret
 
 service:

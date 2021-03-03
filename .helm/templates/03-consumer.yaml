@@ -46,7 +46,7 @@ spec:
         - name: rmq
           image: {{ $values.image.rmq_repub }}
           imagePullPolicy: IfNotPresent
-          command: [ "python", "rmqFallbackRepub.py", "async_events_transactions_micro_fallback" ]
+          command: [ "python", "rmqFallbackRepub.py", "async_events_transactions_micro" ]
 
           resources:
             requests:
@@ -54,6 +54,18 @@ spec:
               memory: 40Mi
             limits:
               memory: 100Mi
+
+          envFrom:
+            - configMapRef:
+                name: {{ $chartName }}
+            - configMapRef:
+                name: micro-url-map
+            - secretRef:
+                name: {{ $chartName }}
+
+          env:
+            - name: KUBERNETES_DEPLOYED
+              value: "{{ now }}"
 
         - name: node
           image: {{ $values.image.nodejs }}
