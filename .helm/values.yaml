@@ -1,6 +1,6 @@
 namespace: default
 priorityClass: app-9stars
-
+enableRmqFallbackRepub: false
 image:
   nodejs: registry.devpayever.com/nodejs-backend/transactions
   pullSecretName: regsecret

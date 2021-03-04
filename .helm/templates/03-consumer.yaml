@@ -43,6 +43,7 @@ spec:
       terminationGracePeriodSeconds: 60
 
       containers:
+{{- if $values.enableRmqFallbackRepub }}
         - name: rmq
           image: {{ $values.image.rmq_repub }}
           imagePullPolicy: IfNotPresent
@@ -66,7 +67,7 @@ spec:
           env:
             - name: KUBERNETES_DEPLOYED
               value: "{{ now }}"
-
+{{- end }}
         - name: node
           image: {{ $values.image.nodejs }}
           imagePullPolicy: IfNotPresent
