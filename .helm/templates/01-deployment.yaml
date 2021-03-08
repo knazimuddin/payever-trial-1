@@ -21,7 +21,7 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1
+      maxSurge: 25%
       maxUnavailable: 0
   selector:
     matchLabels:
@@ -51,14 +51,9 @@ spec:
           command: [ "/bin/bash", "-c", "/payever/deploy/deploy.sh" ]
 
           lifecycle:
-            postStart:
-              exec:
-                command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
             preStop:
               exec:
-                command: ["sleep", "15"]
-
-
+                command: ["/bin/sh", "-c", "sleep 10; pkill npm"]
 
           ports:
             - containerPort: {{ $values.service.containerPort }}
