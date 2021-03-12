@@ -158,6 +158,7 @@ export class TransactionEventProducer {
       id: transaction.uuid,
       items: transaction.items,
       last_updated: last_updated,
+      shipping_order_id: transaction.shipping_order_id,
     };
 
     await this.send(event, payload);

@@ -12,4 +12,5 @@ export interface TransactionPaymentInterface {
   id: string;
   items: TransactionCartItemInterface[];
   last_updated: Date;
+  shipping_order_id?: string;
 }
