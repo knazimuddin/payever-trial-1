@@ -89,7 +89,7 @@ describe('CurrencyExchangeService', () => {
 
   before(() => {
     transactionsService = {
-      
+
     } as any;
 
     httpService = {
@@ -119,15 +119,11 @@ describe('CurrencyExchangeService', () => {
 
   describe('getActionsList()', () => {
     it('should return action list', async () => {
-      
+
       const actionItems: ActionItemInterface[] = [
         {
           action: 'create',
           enabled: true,
-        },
-        {
-          action: 'edit',
-          enabled: false,
         },
       ];
       const actionsResponse: { [key: string]: boolean } = {
@@ -155,7 +151,7 @@ describe('CurrencyExchangeService', () => {
 
     it('should post throw error', async () => {
       sandbox.stub(httpService, 'post').throws({});
-      
+
       sandbox.stub(logger, 'log');
       sandbox.stub(logger, 'error');
 
@@ -171,7 +167,7 @@ describe('CurrencyExchangeService', () => {
 
       sandbox.stub(httpService, 'post').resolves(response);
       sandbox.stub(response, 'pipe').throws({});
-      
+
       sandbox.stub(logger, 'log');
       sandbox.stub(logger, 'error');
 
