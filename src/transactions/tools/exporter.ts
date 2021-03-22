@@ -39,7 +39,7 @@ export class Exporter {
     }
     const productColumns: Array<{ index: number, title: string, name: string }> = this.getProductColumns(transactions);
     const header: string[] = [
-      ...['CHANNEL', 'ID', 'TOTAL'],
+      ...['CHANNEL', 'ID', 'TOTAL', 'PAN_ID'],
       ...shippingsColumns.map((c: { title: string, name: string }) => c.title ),
       ...productColumns.map((c: { index: number, title: string, name: string }) => c.title ),
       ...columns.map((c: { title: string, name: string }) => c.title )];
@@ -63,7 +63,7 @@ export class Exporter {
     const pageHeight: number = 5000;
     const productColumns: Array<{ index: number, title: string, name: string }> = this.getProductColumns(transactions);
     const header: any[] = [
-      ...['CHANNEL', 'ID', 'TOTAL'],
+      ...['CHANNEL', 'ID', 'TOTAL', 'PAN_ID'],
       ...shippingsColumns.map((c: { title: string, name: string }) => c.title ),
       ...productColumns.map((c: { index: number, title: string, name: string }) => c.title ),
       ...columns.map((c: { title: string, name: string }) => c.title )]
@@ -163,7 +163,7 @@ export class Exporter {
   ): any[] {
     return transactions
       .map((t: TransactionModel) => [
-        ...[t.channel, t.original_id, t.total],
+        ...[t.channel, t.original_id, t.total, this.parsePanId(t.payment_details)],
         ...shippingsColumns
           .map((c: { title: string, name: string }) => {
             return t.shipping_address && c.name in t.shipping_address
@@ -183,6 +183,12 @@ export class Exporter {
                 : t[c.name],
           ),
       ]);
+  }
+
+  private static parsePanId(panIdStr: string): string {
+    const data: any = JSON.parse(panIdStr);
+
+    return data.usageText ? data.usageText : (data.pan_id ? data.pan_id : '') ;
   }
 
   private static getProductValue(field: string, value: string | any[]): string {
