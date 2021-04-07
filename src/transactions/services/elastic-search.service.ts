@@ -71,16 +71,17 @@ export class ElasticSearchService {
     return this.elasticSearchClient.search(ElasticTransactionEnum.index, body)
       .then((results: any) => {
         return {
-          collection: results.body.hits.hits.map(
-            (elem: any) => {
-              elem._source._id = elem._source.mongoId;
-              delete elem._source.mongoId;
+          collection: results?.body?.hits?.hits
+            ? results.body.hits.hits.map(
+              (elem: any) => {
+                elem._source._id = elem._source.mongoId;
+                delete elem._source.mongoId;
 
-              elem._source = TransactionDoubleConverter.unpack(elem._source);
+                elem._source = TransactionDoubleConverter.unpack(elem._source);
 
-              return elem._source;
-            },
-          ),
+                return elem._source;
+              },
+            ) : [],
           total: results.body.hits.total,
         };
       });
