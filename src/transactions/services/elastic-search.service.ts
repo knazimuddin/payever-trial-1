@@ -70,9 +70,9 @@ export class ElasticSearchService {
 
     return this.elasticSearchClient.search(ElasticTransactionEnum.index, body)
       .then((results: any) => {
-        return {
-          collection: results?.body?.hits?.hits
-            ? results.body.hits.hits.map(
+        return results?.body?.hits?.hits && results?.body?.hits?.total
+          ? {
+            collection: results.body.hits.hits.map(
               (elem: any) => {
                 elem._source._id = elem._source.mongoId;
                 delete elem._source.mongoId;
@@ -81,9 +81,12 @@ export class ElasticSearchService {
 
                 return elem._source;
               },
-            ) : [],
-          total: results.body.hits.total,
-        };
+            ),
+            total: results.body.hits.total,
+          } : {
+            collection: [],
+            total: 0,
+          };
       });
   }
 
