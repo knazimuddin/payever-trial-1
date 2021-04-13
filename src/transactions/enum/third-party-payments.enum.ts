@@ -14,4 +14,5 @@ export enum ThirdPartyPaymentsEnum {
   santanderDEPosFactoring = 'santander_pos_factoring_de',
   wiretransfer = 'cash',
   santanderNOInstallment = 'santander_installment_no',
+  applePay = 'apple_pay',
 }
