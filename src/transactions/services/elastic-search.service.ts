@@ -70,19 +70,23 @@ export class ElasticSearchService {
 
     return this.elasticSearchClient.search(ElasticTransactionEnum.index, body)
       .then((results: any) => {
-        return {
-          collection: results.body.hits.hits.map(
-            (elem: any) => {
-              elem._source._id = elem._source.mongoId;
-              delete elem._source.mongoId;
+        return results?.body?.hits?.hits && results?.body?.hits?.total
+          ? {
+            collection: results.body.hits.hits.map(
+              (elem: any) => {
+                elem._source._id = elem._source.mongoId;
+                delete elem._source.mongoId;
 
-              elem._source = TransactionDoubleConverter.unpack(elem._source);
+                elem._source = TransactionDoubleConverter.unpack(elem._source);
 
-              return elem._source;
-            },
-          ),
-          total: results.body.hits.total,
-        };
+                return elem._source;
+              },
+            ),
+            total: results.body.hits.total,
+          } : {
+            collection: [],
+            total: 0,
+          };
       });
   }
 
@@ -98,7 +102,7 @@ export class ElasticSearchService {
     return this.elasticSearchClient.count(ElasticTransactionEnum.index, body)
       .then((results: any) => {
         return {
-          count: results.body.count,
+          count: results?.body?.count ? results.body.count : 0,
         };
       });
   }
@@ -130,7 +134,9 @@ export class ElasticSearchService {
 
     return this.elasticSearchClient.search(ElasticTransactionEnum.index, body)
       .then((results: any) => {
-        return results.body.aggregations.total_amount.value / 100;
+        return results?.body?.aggregations?.total_amount?.value ?
+          results.body.aggregations.total_amount.value / 100 :
+          0;
       });
   }
 
@@ -162,7 +168,11 @@ export class ElasticSearchService {
     const amounts: Array<{ key: string, total_amount: { value: number }}> =
       await this.elasticSearchClient
         .search(ElasticTransactionEnum.index, body)
-        .then((results: any) => results.body.aggregations.total_amount.buckets)
+        .then((results: any) => {
+          return results?.body?.aggregations?.total_amount?.buckets ?
+            results.body.aggregations.total_amount.buckets :
+            null;
+        })
     ;
     let totalPerCurrency: number = 0;
     const calculator: ExchangeCalculator = this.exchangeCalculatorFactory.create();
@@ -201,10 +211,8 @@ export class ElasticSearchService {
 
     return this.elasticSearchClient.search(ElasticTransactionEnum.index, body)
       .then(
-        (result: any) => result
-          .body
-          .aggregations[field]
-          .buckets
+        (result: any) => result?.body?.aggregations[field]?.buckets ?
+          result.body.aggregations[field].buckets : null
         ,
       );
   }
