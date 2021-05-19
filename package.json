@@ -23,7 +23,7 @@
     "ws:prod": "node dist/src/ws.js"
   },
   "dependencies": {
-    "@nestjs/platform-socket.io": "7.6.5",
+    "@nestjs/platform-socket.io": "^7.6.17",
     "@nestjs/platform-ws": "7.6.5",
     "@nestjs/websockets": "7.6.5",
     "@pe/common-sdk": "^3.0.1",
