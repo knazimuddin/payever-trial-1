@@ -67,37 +67,21 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
     action = TransactionActionsToThirdPartyActions.get(action.toLowerCase());
     actionPayload.paymentId = transaction.uuid;
 
-    await this.runThirdPartyAction(transaction, action, actionPayload);
+    const result: any = await this.runThirdPartyAction(transaction, action, actionPayload);
+
+    await this.updateTransactionFromThirdPartyResult(transaction, result);
   }
 
   public async updateStatus(
     transaction: TransactionUnpackedDetailsInterface,
   ): Promise<void> {
-    const oldStatus: string = transaction.status;
-    const oldSpecificStatus: string = transaction.specific_status;
-
     const result: any = await this.runThirdPartyAction(
       transaction,
       ThirdPartyPaymentActionsEnum.actionUpdateStatus,
       { paymentId: transaction.uuid },
     );
 
-    const newStatus: string = result?.payment?.status;
-    const newSpecificStatus: string = result?.payment?.specificStatus;
-
-    const updateData: any = { };
-
-    if (newStatus && newStatus !== oldStatus) {
-      updateData.status = newStatus;
-    }
-
-    if (newSpecificStatus && newSpecificStatus !== oldSpecificStatus) {
-      updateData.specific_status = newSpecificStatus;
-    }
-
-    if (Object.keys(updateData).length > 0) {
-      await this.transactionsService.updateByUuid(transaction.uuid, updateData);
-    }
+    await this.updateTransactionFromThirdPartyResult(transaction, result);
   }
 
   public async downloadContract(
@@ -138,6 +122,30 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
       }),
     )
       .toPromise();
+  }
+
+  private async updateTransactionFromThirdPartyResult(
+    transaction: TransactionUnpackedDetailsInterface,
+    result: any,
+  ): Promise<void> {
+    const oldStatus: string = transaction.status;
+    const oldSpecificStatus: string = transaction.specific_status;
+    const newStatus: string = result?.payment?.status;
+    const newSpecificStatus: string = result?.payment?.specificStatus;
+
+    const updateData: any = { };
+
+    if (newStatus && newStatus !== oldStatus) {
+      updateData.status = newStatus;
+    }
+
+    if (newSpecificStatus && newSpecificStatus !== oldSpecificStatus) {
+      updateData.specific_status = newSpecificStatus;
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      await this.transactionsService.updateByUuid(transaction.uuid, updateData);
+    }
   }
 
   private async runThirdPartyAction(
