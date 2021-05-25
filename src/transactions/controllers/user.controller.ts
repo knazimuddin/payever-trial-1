@@ -37,7 +37,7 @@ export class UserController {
     @User() user: UserTokenInterface,
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
-    listDto.filters = UserFilter.apply(user.id, listDto.filters);
+    listDto.filters = UserFilter.apply(user?.id, listDto.filters);
     listDto.currency = this.defaultCurrency;
 
     return this.elasticSearchService.getResult(listDto);
@@ -49,7 +49,7 @@ export class UserController {
     @User() user: UserTokenInterface,
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
-    listDto.filters = UserFilter.apply(user.id, listDto.filters);
+    listDto.filters = UserFilter.apply(user?.id, listDto.filters);
     listDto.currency = this.defaultCurrency;
 
     return this.mongoSearchService.getResult(listDto);
