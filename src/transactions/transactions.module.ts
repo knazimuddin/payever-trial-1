@@ -6,6 +6,8 @@ import { DelayRemoveClient, ElasticSearchModule } from '@pe/elastic-kit';
 import { CollectorModule, EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { MigrationModule } from '@pe/migration-kit';
+import { FoldersPluginModule } from '@pe/folders-plugin';
+
 import { environment } from '../environments';
 import {
   BpoFixCommand,
@@ -136,6 +138,11 @@ import { RabbitChannels } from '../enums';
       host: environment.elasticSearchHost,
     }),
     MigrationModule,
+    FoldersPluginModule.forFeature({
+      schema: TransactionSchema,
+      schemaName: TransactionSchemaName,
+      useBusiness: true,
+    }),
   ],
   providers: [
     ActionsRetriever,
