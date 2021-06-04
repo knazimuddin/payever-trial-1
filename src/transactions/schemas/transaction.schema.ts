@@ -1,9 +1,5 @@
 import { Schema } from 'mongoose';
-import {
-  TransactionCartItemInterface,
-  TransactionHistoryEntryInterface,
-  TransactionRefundItemInterface,
-} from '../interfaces/transaction';
+import { TransactionCartItemInterface, TransactionRefundItemInterface } from '../interfaces/transaction';
 import { AddressSchema } from './address.schema';
 import { TransactionCartItemSchema } from './transaction-cart-item-schema';
 import { TransactionHistoryEntrySchema } from './transaction-history-entry.schema';
