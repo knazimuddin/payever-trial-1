@@ -256,90 +256,51 @@ Feature: Run payment action
 
   Scenario Outline: Run payment action for santander_installment_dk, should remove edit action, because it is not implemented at FE
     Given I authenticate as a user with the following data:
-      """
-      <token>
-      """
+    """
+    <token>
+    """
     And I use DB fixture "transactions/run-actions-santander-dk"
-    And I mock RPC request "payment_option.santander_installment_dk.action" to "rpc_payment_santander_dk" with:
-      """
-      {
-        "requestPayload": {
-          "action": "action.do"
-        },
-        "responsePayload": "s:82:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"payment\":{\"amount\":100},\"payment_items\":[]}}}\";"
-      }
-      """
-    And I mock RPC request "payment_option.santander_installment_dk.action" to "rpc_payment_santander_dk" with:
-      """
-      {
-        "requestPayload": {
-          "action": "action.list"
-        },
-        "responsePayload": "s:94:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"test_action\":true,\"edit\":false, \"another_action\": true}}}\";"
-      }
-      """
-    And I mock Elasticsearch method "singleIndex" with:
-      """
-      {
-        "arguments": [
-          "transactions",
-          {
-            "action_running": false,
-            "santander_applications": [],
-            "uuid": "{{transactionId}}"
-          }
-         ],
-        "result": {}
-      }
-      """
-    When I send a POST request to "<path>" with json:
-      """
+    And I mock an axios request with parameters:
+    """
         {
-          "fields": {},
-          "files": [
-            {
-              "url": "http://test.file/url"
-            },
-            {
-              "url": "http://test.file/url with spaces"
+          "request": {
+            "method": "post",
+            "url": "*/api/business/{{businessId}}/integration/santander_installment_dk/action/action-list",
+            "body": "{\"paymentId\":\"{{transactionId}}\"}",
+            "headers": {
+              "Accept": "application/json, text/plain, */*",
+              "Content-Type": "application/json;charset=utf-8",
+              "authorization": "*"
             }
-          ]
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "refund": true,
+              "edit": true,
+              "shipping_goods": false
+            }
+          }
         }
-      """
+        """
+    When I send a GET request to "<path>"
     Then print last response
     And the response status code should be 200
     And the response should not contain json:
-      """
-        {
-           "actions": [
-             {
-               "action": "edit",
-               "enabled": true
-             }
-           ]
-         }
-      """
-    And print Elasticsearch calls
-    And Elasticsearch calls stack should contain following ordered messages:
     """
-      [
-        [
-          "singleIndex",
-          [
-            "transactions",
-            {
-              "action_running": false,
-              "santander_applications": [],
-              "uuid": "{{transactionId}}"
-            }
-          ]
-        ]
+    {
+      "actions": [
+        {
+          "action": "edit",
+          "enabled": true
+        }
       ]
+    }
     """
     Examples:
-      | path                                                       | token                                                                                                                     |
-      | /api/business/{{businessId}}/{{transactionId}}/action/test | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
-      | /api/admin/{{transactionId}}/action/test                   | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
+      | path                                                  | token                                                                                                                     |
+      | /api/business/{{businessId}}/detail/{{transactionId}} | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | /api/admin/detail/{{transactionId}}                   | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
 
   Scenario Outline: Run santander se shipping goods action
     Given I authenticate as a user with the following data:
@@ -462,7 +423,6 @@ Feature: Run payment action
       | path                                                                 | token                                                                                                                     |
       | /api/business/{{businessId}}/{{transactionId}}/action/shipping_goods | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
       | /api/admin/{{transactionId}}/action/shipping_goods                   | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
-
 
   Scenario Outline: Run santander se shipping goods action with missing "fields" param
     Given I authenticate as a user with the following data:
