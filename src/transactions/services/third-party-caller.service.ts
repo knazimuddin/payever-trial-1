@@ -44,6 +44,14 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
         );
     }
 
+    /**
+     * This hack is only for FE improvement. FE for "Edit action" is not implemented in DK.
+     * Thus we disable it here to prevent inconveniences.
+     */
+    if (transaction.type === 'santander_installment_dk') {
+      actions = actions.filter((x: ActionItemInterface) => x.action !== 'edit');
+    }
+
     return actions;
   }
 
