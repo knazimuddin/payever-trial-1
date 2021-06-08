@@ -5,10 +5,12 @@ import {
   FiltersTranslationPrefix,
   ValuesService,
   PaymentOptionsEnum,
-  PaymentSpecificStatusEnum,
   ChannelTypesEnum,
 } from '@pe/common-sdk';
-import { PaymentStatusesEnum } from '../transactions/enum';
+import {
+  PaymentStatusesEnum,
+  PaymentSpecificStatusEnum,
+} from '../transactions/enum';
 
 export const FiltersConfig: FilterOptionInterface[] = [
   {
