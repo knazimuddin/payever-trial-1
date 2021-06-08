@@ -1,10 +1,10 @@
 import { DateStringHelper } from '../../converter';
-import { FilterConditionEnum } from '../../enum';
+import { FilterConditionEnum } from '@pe/common-sdk';
 import { StringFilterInterface } from '../interfaces';
 
 export class IsDateConditionFilter {
   public static getName(): string {
-    return FilterConditionEnum.IsDate;
+    return FilterConditionEnum.isDate;
   }
 
   public static apply(

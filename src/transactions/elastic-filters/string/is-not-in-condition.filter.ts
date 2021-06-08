@@ -1,9 +1,9 @@
-import { FilterConditionEnum } from '../../enum';
+import { FilterConditionEnum } from '@pe/common-sdk';
 import { StringFilterInterface } from '../interfaces';
 
 export class IsNotInConditionFilter {
   public static getName(): string {
-    return FilterConditionEnum.IsNotIn;
+    return FilterConditionEnum.isNotIn;
   }
 
   public static apply(

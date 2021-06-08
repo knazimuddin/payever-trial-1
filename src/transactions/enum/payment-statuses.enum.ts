@@ -1,4 +1,4 @@
-export const enum PaymentStatusesEnum {
+export enum PaymentStatusesEnum {
   New = 'STATUS_NEW',
   InProcess = 'STATUS_IN_PROCESS',
   Accepted = 'STATUS_ACCEPTED',
