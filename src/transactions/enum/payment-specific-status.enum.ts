@@ -1,6 +1,6 @@
 export enum PaymentSpecificStatusEnum {
   new = 'STATUS_NEW',
-  inProcess = 'ISTATUS_IN_PROCESS',
+  inProcess = 'STATUS_IN_PROCESS',
   accepted = 'STATUS_ACCEPTED',
   paid = 'STATUS_PAID',
   declined = 'STATUS_DECLINED',
