@@ -88,6 +88,7 @@ import {
 } from './services';
 import { EventsGateway } from './ws';
 import { RabbitChannels } from '../enums';
+import { FiltersConfig } from '../config';
 
 @Module({
   controllers: [
@@ -128,6 +129,7 @@ import { RabbitChannels } from '../enums';
       consumerModels: [
         CommonModelsNamesEnum.CurrencyModel,
       ],
+      filters: FiltersConfig,
       rsaPath: environment.rsa,
     }),
     EventDispatcherModule,

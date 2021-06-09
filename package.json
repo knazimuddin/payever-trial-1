@@ -26,7 +26,7 @@
     "@nestjs/platform-socket.io": "^7.6.17",
     "@nestjs/platform-ws": "7.6.5",
     "@nestjs/websockets": "7.6.5",
-    "@pe/common-sdk": "^3.0.1",
+    "@pe/common-sdk": "^3.1.0",
     "@pe/elastic-kit": "^3.2.0",
     "@pe/folders-plugin": "^1.6.1",
     "@pe/migration-kit": "^2.0.0",

@@ -1,9 +1,9 @@
-import { FilterConditionEnum } from '../../enum';
+import { FilterConditionEnum } from '@pe/common-sdk';
 import { StringFilterInterface } from '../interfaces';
 
 export class EndsWithConditionFilter {
   public static getName(): string {
-    return FilterConditionEnum.EndsWith;
+    return FilterConditionEnum.endsWith;
   }
 
   public static apply(
