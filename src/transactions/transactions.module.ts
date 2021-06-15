@@ -8,6 +8,7 @@ import { CollectorModule, EventDispatcherModule, IntercomModule } from '@pe/nest
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { MigrationModule } from '@pe/migration-kit';
 import { FoldersPluginModule } from '@pe/folders-plugin';
+import { RulesSdkModule } from '@pe/rules-sdk';
 
 import { environment } from '../environments';
 import {
@@ -91,6 +92,7 @@ import {
 } from './services';
 import { EventsGateway } from './ws';
 import { RabbitChannels } from '../enums';
+import { FiltersConfig, RulesFieldsConfig } from '../config';
 
 @Module({
   controllers: [
@@ -132,6 +134,7 @@ import { RabbitChannels } from '../enums';
       consumerModels: [
         CommonModelsNamesEnum.CurrencyModel,
       ],
+      filters: FiltersConfig,
       rsaPath: environment.rsa,
     }),
     EventDispatcherModule,
@@ -146,6 +149,9 @@ import { RabbitChannels } from '../enums';
       schema: TransactionSchema,
       schemaName: TransactionSchemaName,
       useBusiness: true,
+    }),
+    RulesSdkModule.forRoot({
+      fields: RulesFieldsConfig,
     }),
   ],
   providers: [
