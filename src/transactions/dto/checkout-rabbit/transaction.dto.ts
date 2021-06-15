@@ -79,7 +79,7 @@ export class TransactionDto implements CheckoutTransactionInterface {
   @IsNumber()
   public down_payment: number;
 
-  @IsString()
+  @IsBoolean()
   public fee_accepted: boolean;
 
   @IsOptional()
@@ -160,4 +160,7 @@ export class TransactionDto implements CheckoutTransactionInterface {
   @ValidateNested()
   @Type(() => TransactionPaymentDetailsDto)
   public payment_details: TransactionPaymentDetailsDto;
+
+  @IsBoolean()
+  public test_mode: boolean;
 }

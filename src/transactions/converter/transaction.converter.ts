@@ -120,6 +120,8 @@ export class TransactionConverter {
       total: transaction.total,
       type: transaction.type,
       user_uuid: transaction.user_uuid,
+
+      test_mode: transaction.test_mode,
     };
   }
 }

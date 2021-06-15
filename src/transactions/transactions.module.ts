@@ -1,6 +1,7 @@
 import { HttpModule, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
 import { DelayRemoveClient, ElasticSearchModule } from '@pe/elastic-kit';
 import { CollectorModule, EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
@@ -32,7 +33,6 @@ import {
   FlowEventsController,
   HistoryEventsController,
   MailerBusMessagesController,
-  MigrateEventsController,
   LegacyApiController,
   SampleProductsBusMessagesController,
   ShippingBusMessagesController,
@@ -41,6 +41,7 @@ import {
   UserController,
   InternalTransactionEventsController,
   ProxyController,
+  TestTransactionEventsController,
 } from './controllers';
 import { ExchangeCalculatorFactory } from './currency';
 import { EventListenersList } from './event-listeners/event-listeners.list';
@@ -64,6 +65,8 @@ import {
   TransactionSchemaName,
   SampleProductSchema,
   SampleProductSchemaName,
+  TestTransactionSchemaName,
+  TestTransactionSchema,
 } from './schemas';
 import {
   ActionsRetriever,
@@ -98,10 +101,10 @@ import { RabbitChannels } from '../enums';
     DailyReportTransactionBusMessagesController,
     FlowEventsController,
     HistoryEventsController,
-    MigrateEventsController,
     LegacyApiController,
     ThirdPartyEventsController,
     TransactionEventsController,
+    TestTransactionEventsController,
     UserController,
     ShippingBusMessagesController,
     MailerBusMessagesController,
@@ -119,6 +122,7 @@ import { RabbitChannels } from '../enums';
       { name: TransactionExampleSchemaName, schema: TransactionExampleSchema },
       { name: PaymentFlowSchemaName, schema: PaymentFlowSchema },
       { name: TransactionSchemaName, schema: TransactionSchema },
+      { name: TestTransactionSchemaName, schema: TestTransactionSchema },
       { name: BusinessSchemaName, schema: BusinessSchema },
       { name: SampleProductSchemaName, schema: SampleProductSchema },
     ]),
@@ -182,6 +186,10 @@ import { RabbitChannels } from '../enums';
     TransactionsExportForWidgetsCommand,
     TransactionsNotifier,
     TransactionsService,
+    {
+      provide: APP_INTERCEPTOR,
+      useExisting: TransactionsService,
+    },
     TriggerPayexCaptureCommand,
     ...EventListenersList,
     EventsGateway,

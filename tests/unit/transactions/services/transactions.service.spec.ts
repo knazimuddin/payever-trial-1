@@ -1,3 +1,4 @@
+/* tslint:disable:object-literal-sort-keys */
 import { Logger } from '@nestjs/common';
 import { DelayRemoveClient, ElasticSearchClient } from '@pe/elastic-kit';
 import { RabbitMqClient } from '@pe/nest-kit';
@@ -16,7 +17,12 @@ import {
   TransactionPackedDetailsInterface,
   TransactionUnpackedDetailsInterface,
 } from '../../../../src/transactions/interfaces';
-import { PaymentFlowModel, TransactionHistoryEntryModel, TransactionModel } from '../../../../src/transactions/models';
+import {
+  PaymentFlowModel,
+  TestTransactionModel,
+  TransactionHistoryEntryModel,
+  TransactionModel,
+} from '../../../../src/transactions/models';
 import { TransactionsNotifier } from '../../../../src/transactions/notifiers';
 import { AuthEventsProducer } from '../../../../src/transactions/producer';
 import { PaymentFlowService, TransactionsService } from '../../../../src/transactions/services';
@@ -29,6 +35,7 @@ describe('TransactionsService', () => {
   let sandbox: sinon.SinonSandbox;
   let testService: TransactionsService;
   let transactionModel: Model<TransactionModel>;
+  let testTransactionModel: Model<TestTransactionModel>;
   let notificationsEmitter: NotificationsEmitter;
   let paymentFlowService: PaymentFlowService;
   let elasticSearchClient: ElasticSearchClient;
@@ -44,13 +51,23 @@ describe('TransactionsService', () => {
     uuid: uuid.v4(),
     amount: 1,
     total: 12,
-    toObject(): any { return this },
+    toObject(): any { return this; },
     items: [],
     history: [],
   } as any;
 
   before(() => {
     transactionModel = {
+      create: (): any => { },
+      find: (): any => { },
+      findOne: (): any => { },
+      findOneAndRemove: (): any => { },
+      findOneAndUpdate: (): any => { },
+      limit(): any { return this },
+      sort(): any { return this },
+    } as any;
+
+    testTransactionModel = {
       create: (): any => { },
       find: (): any => { },
       findOne: (): any => { },
@@ -95,6 +112,7 @@ describe('TransactionsService', () => {
 
     testService = new TransactionsService(
       transactionModel,
+      testTransactionModel,
       notificationsEmitter,
       paymentFlowService,
       authEventsProducer,

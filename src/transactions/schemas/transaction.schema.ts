@@ -7,72 +7,79 @@ import { PaymentActionsEnum } from '../enum';
 
 export const TransactionSchemaName: string = 'Transaction';
 
-export const TransactionSchema: Schema = new Schema({
-  /** Original id for legacy purposes */
-  original_id: { type: String, unique: true },
-  uuid: { type: String, required: true, unique: true },
+export const TransactionSchema: Schema = new Schema(
+  {
+    /** Original id for legacy purposes */
+    original_id: { type: String, unique: true },
+    uuid: { type: String, required: true, unique: true },
 
-  api_call_id: { type: String, required: false },
+    api_call_id: { type: String, required: false },
 
-  action_running: { type: Boolean, required: false, default: false },
-  amount: Number,
-  billing_address: AddressSchema,
-  business_option_id: Number,
-  business_uuid: { type: String },
+    action_running: { type: Boolean, required: false, default: false },
+    amount: Number,
+    billing_address: AddressSchema,
+    business_option_id: Number,
+    business_uuid: { type: String },
 
-  channel: String,
-  channel_set_uuid: String,
-  channel_uuid: String,
+    channel: String,
+    channel_set_uuid: String,
+    channel_uuid: String,
 
-  customer_email: { type: String },
-  customer_name: { type: String, required: true },
+    customer_email: { type: String },
+    customer_name: { type: String, required: true },
 
-  is_shipping_order_processed: Boolean,
-  shipping_address: { type: AddressSchema },
-  shipping_category: String,
-  shipping_method_name: String,
-  shipping_option_name: String,
-  shipping_order_id: String,
-  specific_status: String,
+    is_shipping_order_processed: Boolean,
+    shipping_address: { type: AddressSchema },
+    shipping_category: String,
+    shipping_method_name: String,
+    shipping_option_name: String,
+    shipping_order_id: String,
+    specific_status: String,
 
-  created_at: { type: Date, required: true },
-  currency: { type: String, required: true },
-  delivery_fee: Number,
-  down_payment: Number,
-  fee_accepted: Boolean,
-  history: [TransactionHistoryEntrySchema],
-  invoice_id: String,
+    created_at: { type: Date, required: true },
+    currency: { type: String, required: true },
+    delivery_fee: Number,
+    down_payment: Number,
+    fee_accepted: Boolean,
+    history: [TransactionHistoryEntrySchema],
+    invoice_id: String,
 
-  captured_items: [TransactionCartItemSchema],
-  items: [TransactionCartItemSchema],
-  refunded_items: [TransactionCartItemSchema],
+    captured_items: [TransactionCartItemSchema],
+    items: [TransactionCartItemSchema],
+    refunded_items: [TransactionCartItemSchema],
 
-  merchant_email: String,
-  merchant_name: String,
-  /** Serialized big object */
-  payment_details: String,
-  payment_fee: Number,
-  payment_flow_id: String,
-  place: String,
-  reference: String,
-  santander_applications: [String],
+    merchant_email: String,
+    merchant_name: String,
+    /** Serialized big object */
+    payment_details: String,
+    payment_fee: Number,
+    payment_flow_id: String,
+    place: String,
+    reference: String,
+    santander_applications: [String],
 
-  status: { type: String, required: true },
-  status_color: { type: String },
-  store_id: String,
-  store_name: String,
-  total: { type: Number, required: true },
-  type: { type: String, required: true },
-  updated_at: Date,
-  user_uuid: String,
+    status: { type: String, required: true },
+    status_color: { type: String },
+    store_id: String,
+    store_name: String,
+    total: { type: Number, required: true },
+    type: { type: String, required: true },
+    updated_at: Date,
+    user_uuid: String,
 
-  seller_email: String,
-  seller_name: String,
+    seller_email: String,
+    seller_name: String,
 
-  example: Boolean,
-  example_shipping_label: String,
-  example_shipping_slip: String,
-});
+    example: Boolean,
+    example_shipping_label: String,
+    example_shipping_slip: String,
+
+    test_mode: { type: Boolean, required: true, default: false },
+  },
+  {
+    collection: 'transactions',
+  },
+);
 
 TransactionSchema.index({ santander_applications: 1 });
 TransactionSchema.index({ reference: 1 });
@@ -152,3 +159,7 @@ TransactionSchema.virtual('available_refund_items').get(function (): Transaction
 
   return refundItems;
 });
+
+export const TestTransactionSchemaName: string = 'TestTransaction';
+export const TestTransactionSchema: Schema = TransactionSchema.clone();
+TestTransactionSchema.set('collection', 'test_transactions');

@@ -1,24 +1,31 @@
-import { Controller, Logger } from '@nestjs/common';
+import { Controller, Logger, OnModuleInit } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { MessagePattern } from '@nestjs/microservices';
 import { RabbitRoutingKeys, RabbitChannels } from '../../enums';
-import { TransactionConverter } from '../converter';
+import { AtomDateConverter, TransactionConverter, TransactionHistoryEntryConverter } from '../converter';
 import { TransactionChangedDto, TransactionRemovedDto } from '../dto/checkout-rabbit';
 import { CheckoutTransactionInterface } from '../interfaces/checkout';
-import { TransactionPackedDetailsInterface } from '../interfaces/transaction';
-import { TransactionModel } from '../models';
+import { TransactionHistoryEntryInterface, TransactionPackedDetailsInterface } from '../interfaces/transaction';
+import { TransactionHistoryEntryModel, TransactionModel } from '../models';
 import { PaymentMailEventProducer } from '../producer';
 import { StatisticsService, TransactionsExampleService, TransactionsService } from '../services';
 import { PaymentStatusesEnum } from '../enum';
 
 @Controller()
-export class TransactionEventsController {
+export class TransactionEventsController implements OnModuleInit {
+  protected transactionsService: TransactionsService;
+
   constructor(
-    private readonly transactionsService: TransactionsService,
+    protected moduleRef: ModuleRef,
     private readonly statisticsService: StatisticsService,
     private readonly paymentMailEventProducer: PaymentMailEventProducer,
     private readonly exampleService: TransactionsExampleService,
     private readonly logger: Logger,
   ) { }
+
+  public async onModuleInit(): Promise<void> {
+    this.transactionsService = await this.moduleRef.resolve(TransactionsService);
+  }
 
   @MessagePattern({
     channel: RabbitChannels.Transactions,
@@ -80,5 +87,50 @@ export class TransactionEventsController {
     this.logger.log(data, 'PAYMENT.SUBMIT');
 
     return this.paymentMailEventProducer.produceOrderInvoiceEvent(data);
+  }
+
+  @MessagePattern({
+    channel: RabbitChannels.Transactions,
+    name: RabbitRoutingKeys.PaymentMigrate,
+  })
+  public async onTransactionMigrateEvent(data: TransactionChangedDto): Promise<void> {
+    this.logger.log({ text: 'PAYMENT.MIGRATE!', data });
+    const checkoutTransaction: CheckoutTransactionInterface = data.payment;
+    const transaction: TransactionPackedDetailsInterface =
+      TransactionConverter.fromCheckoutTransaction(checkoutTransaction);
+
+    const created: TransactionModel = await this.createOrUpdate(transaction);
+
+    const history: TransactionHistoryEntryModel[] = [];
+
+    if (checkoutTransaction.history && checkoutTransaction.history.length) {
+      for (const historyItem of checkoutTransaction.history) {
+        const record: TransactionHistoryEntryInterface =
+          TransactionHistoryEntryConverter.fromCheckoutTransactionHistoryItem(
+            historyItem.action,
+            (
+              historyItem.created_at && AtomDateConverter.fromAtomFormatToDate(historyItem.created_at)
+            ) || new Date(),
+            historyItem,
+          );
+
+        history.push(
+          created.history.create(record),
+        );
+      }
+    }
+
+    const createdWithHistory: TransactionModel =
+      await this.transactionsService.updateHistoryByUuid(created.uuid, history);
+
+    await this.statisticsService.processMigratedTransaction(createdWithHistory);
+  }
+
+  private async createOrUpdate(transaction: TransactionPackedDetailsInterface): Promise<TransactionModel> {
+    if (await this.transactionsService.findModelByUuid(transaction.uuid)) {
+      return this.transactionsService.updateByUuid(transaction.uuid, transaction);
+    }
+
+    return this.transactionsService.create(transaction);
   }
 }

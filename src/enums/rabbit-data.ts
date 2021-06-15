@@ -5,11 +5,18 @@ export enum RabbitChannels {
 export enum RabbitRoutingKeys {
   PaymentActionCompleted = 'payever.event.payment.action.completed',
   PaymentHistoryAdd = 'payever.microservice.payment.history.add',
+
   PaymentCreated = 'checkout.event.payment.created',
   PaymentUpdated = 'checkout.event.payment.updated',
   PaymentRemoved = 'checkout.event.payment.removed',
   PaymentMigrate = 'checkout.event.payment.migrate',
   PaymentSubmitted = 'checkout.event.payment.submitted',
+
+  PaymentCreatedTestMode = 'checkout.event.payment.created.test_mode',
+  PaymentUpdatedTestMode = 'checkout.event.payment.updated.test_mode',
+  PaymentRemovedTestMode = 'checkout.event.payment.removed.test_mode',
+  PaymentMigrateTestMode = 'checkout.event.payment.migrate.test_mode',
+  PaymentSubmittedTestMode = 'checkout.event.payment.submitted.test_mode',
 
   BpoCreated = 'checkout.event.business-payment-option.created',
   BpoUpdated = 'checkout.event.business-payment-option.updated',

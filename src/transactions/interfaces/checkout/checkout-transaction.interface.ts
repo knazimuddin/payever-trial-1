@@ -53,4 +53,6 @@ export interface CheckoutTransactionInterface extends UnpackedDetailsAwareInterf
   updated_at: string;
   user_uuid: string;
   payment_type?: string;
+
+  test_mode: boolean;
 }

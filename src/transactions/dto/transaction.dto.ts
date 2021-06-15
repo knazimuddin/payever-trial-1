@@ -53,4 +53,6 @@ export class TransactionDto implements TransactionPackedDetailsInterface {
   public example_shipping_label?: string;
   public example_shipping_slip?: string;
   public is_shipping_order_processed: boolean;
+
+  public test_mode: boolean;
 }

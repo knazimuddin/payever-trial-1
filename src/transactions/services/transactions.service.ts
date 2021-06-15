@@ -1,4 +1,4 @@
-import { Injectable, Logger, HttpException } from '@nestjs/common';
+import { Injectable, Logger, HttpException, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { DelayRemoveClient, ElasticSearchClient } from '@pe/elastic-kit';
@@ -6,6 +6,8 @@ import { Mutex } from '@pe/nest-kit/modules/mutex';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 import { Model, Types } from 'mongoose';
 import { v4 as uuid } from 'uuid';
+import { Observable } from 'rxjs';
+import { FastifyRequest } from 'fastify';
 
 import {
   TransactionCartConverter,
@@ -22,18 +24,27 @@ import {
   TransactionPackedDetailsInterface,
   TransactionUnpackedDetailsInterface,
 } from '../interfaces/transaction';
-import { PaymentFlowModel, TransactionCartItemModel, TransactionHistoryEntryModel, TransactionModel } from '../models';
+import {
+  PaymentFlowModel,
+  TestTransactionModel,
+  TransactionCartItemModel,
+  TransactionHistoryEntryModel,
+  TransactionModel,
+} from '../models';
 import { TransactionsNotifier } from '../notifiers';
 import { AuthEventsProducer } from '../producer';
-import { TransactionSchemaName } from '../schemas';
+import { TestTransactionSchemaName, TransactionSchemaName } from '../schemas';
 import { PaymentFlowService } from './payment-flow.service';
 
 const TransactionMutexKey: string = 'transactions-transaction';
 
 @Injectable()
-export class TransactionsService {
+export class TransactionsService implements NestInterceptor {
+  public transactionModel: Model<TransactionModel>;
+
   constructor(
-    @InjectModel(TransactionSchemaName) private readonly transactionModel: Model<TransactionModel>,
+    @InjectModel(TransactionSchemaName) private readonly liveTransactionModel: Model<TransactionModel>,
+    @InjectModel(TestTransactionSchemaName) private readonly testTransactionModel: Model<TestTransactionModel>,
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
     private readonly paymentFlowService: PaymentFlowService,
     private readonly authEventsProducer: AuthEventsProducer,
@@ -42,7 +53,21 @@ export class TransactionsService {
     private readonly delayRemoveClient: DelayRemoveClient,
     private readonly mutex: Mutex,
     private readonly logger: Logger,
-  ) { }
+  ) {
+    this.transactionModel = liveTransactionModel;
+  }
+
+  public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const request: FastifyRequest<any> = context.switchToHttp().getRequest<FastifyRequest<any>>();
+    const testMode: boolean = request?.query?.test_mode === 'true';
+    if (testMode) {
+      this.switchTestMode();
+    } else {
+      //this.switchLiveMode();
+    }
+
+    return next.handle();
+  }
 
   public async create(transactionDto: TransactionPackedDetailsInterface): Promise<TransactionModel> {
     if (transactionDto.id) {
@@ -324,6 +349,14 @@ export class TransactionsService {
         new: true,
       },
     );
+  }
+
+  public switchTestMode(): void {
+    this.transactionModel = this.testTransactionModel;
+  }
+
+  public switchLiveMode(): void {
+    this.transactionModel = this.liveTransactionModel;
   }
 
   private async applyPaymentProperties(

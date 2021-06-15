@@ -9,3 +9,4 @@ export * from './transaction-history-entry.model';
 export * from './transaction-cart-item.model';
 export * from './transaction-refund-item.model';
 export * from './transaction-upload-item.model';
+export * from './test-transaction.model';
