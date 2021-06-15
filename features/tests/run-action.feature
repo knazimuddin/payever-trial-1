@@ -260,29 +260,38 @@ Feature: Run payment action
     <token>
     """
     And I use DB fixture "transactions/run-actions-santander-dk"
-    And I mock an axios request with parameters:
-    """
-        {
-          "request": {
-            "method": "post",
-            "url": "*/api/business/{{businessId}}/integration/santander_installment_dk/action/action-list",
-            "body": "{\"paymentId\":\"{{transactionId}}\"}",
-            "headers": {
-              "Accept": "application/json, text/plain, */*",
-              "Content-Type": "application/json;charset=utf-8",
-              "authorization": "*"
-            }
-          },
-          "response": {
-            "status": 200,
-            "body": {
-              "refund": true,
-              "edit": true,
-              "shipping_goods": false
-            }
+    And I mock RPC request "payment_option.santander_installment_dk.action" to "rpc_payment_santander_dk" with:
+      """
+      {
+        "requestPayload": {
+          "action": "action.do"
+        },
+        "responsePayload": "s:82:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"payment\":{\"amount\":100},\"payment_items\":[]}}}\";"
+      }
+      """
+    And I mock RPC request "payment_option.santander_installment_dk.action" to "rpc_payment_santander_dk" with:
+      """
+      {
+        "requestPayload": {
+          "action": "action.list"
+        },
+        "responsePayload": "s:94:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"test_action\":true,\"edit\":false, \"another_action\": true}}}\";"
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "transactions",
+          {
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "{{transactionId}}"
           }
-        }
-        """
+         ],
+        "result": {}
+      }
+      """
     When I send a GET request to "<path>"
     Then print last response
     And the response status code should be 200
