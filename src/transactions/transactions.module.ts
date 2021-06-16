@@ -6,6 +6,9 @@ import { DelayRemoveClient, ElasticSearchModule } from '@pe/elastic-kit';
 import { CollectorModule, EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { MigrationModule } from '@pe/migration-kit';
+import { FoldersPluginModule } from '@pe/folders-plugin';
+import { RulesSdkModule } from '@pe/rules-sdk';
+
 import { environment } from '../environments';
 import {
   BpoFixCommand,
@@ -86,6 +89,7 @@ import {
 } from './services';
 import { EventsGateway } from './ws';
 import { RabbitChannels } from '../enums';
+import { FiltersConfig, RulesFieldsConfig } from '../config';
 
 @Module({
   controllers: [
@@ -126,6 +130,7 @@ import { RabbitChannels } from '../enums';
       consumerModels: [
         CommonModelsNamesEnum.CurrencyModel,
       ],
+      filters: FiltersConfig,
       rsaPath: environment.rsa,
     }),
     EventDispatcherModule,
@@ -136,6 +141,14 @@ import { RabbitChannels } from '../enums';
       host: environment.elasticSearchHost,
     }),
     MigrationModule,
+    FoldersPluginModule.forFeature({
+      schema: TransactionSchema,
+      schemaName: TransactionSchemaName,
+      useBusiness: true,
+    }),
+    RulesSdkModule.forRoot({
+      fields: RulesFieldsConfig,
+    }),
   ],
   providers: [
     ActionsRetriever,

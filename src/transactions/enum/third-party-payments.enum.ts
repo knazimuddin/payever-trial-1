@@ -13,6 +13,9 @@ export enum ThirdPartyPaymentsEnum {
   santanderDEFactoring = 'santander_factoring_de',
   santanderDEPosFactoring = 'santander_pos_factoring_de',
   wiretransfer = 'cash',
+  santanderDKInstallment = 'santander_installment_dk',
   santanderNOInstallment = 'santander_installment_no',
+  applePay = 'apple_pay',
   santanderNOInvoice = 'santander_invoice_no',
+  googlePay = 'google_pay',
 }

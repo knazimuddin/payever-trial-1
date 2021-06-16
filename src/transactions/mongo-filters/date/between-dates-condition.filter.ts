@@ -1,10 +1,10 @@
 import { DateStringHelper } from '../../converter';
-import { FilterConditionEnum } from '../../enum';
+import { FilterConditionEnum } from '@pe/common-sdk';
 import { BetweenFilterInterface } from '../interfaces';
 
 export class BetweenDatesConditionFilter {
   public static getName(): string {
-    return FilterConditionEnum.BetweenDates;
+    return FilterConditionEnum.betweenDates;
   }
 
   public static apply(

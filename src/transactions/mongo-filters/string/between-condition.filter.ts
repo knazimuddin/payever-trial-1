@@ -1,9 +1,9 @@
-import { FilterConditionEnum } from '../../enum';
+import { FilterConditionEnum } from '@pe/common-sdk';
 import { BetweenFilterInterface } from '../interfaces';
 
 export class BetweenConditionFilter {
   public static getName(): string {
-    return FilterConditionEnum.Between;
+    return FilterConditionEnum.between;
   }
 
   public static apply(
