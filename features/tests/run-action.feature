@@ -262,27 +262,27 @@ Feature: Run payment action
     And I use DB fixture "transactions/run-actions-santander-dk"
     And I mock an axios request with parameters:
     """
-    {
-      "request": {
-        "method": "post",
-        "url": "*/api/business/{{businessId}}/integration/santander_installment_dk/action/action-list",
-        "body": "{\"paymentId\":\"{{transactionId}}\"}",
-        "headers": {
-          "Accept": "application/json, text/plain, */*",
-          "Content-Type": "application/json;charset=utf-8",
-          "authorization": "*"
+        {
+          "request": {
+            "method": "post",
+            "url": "*/api/business/{{businessId}}/integration/santander_installment_dk/action/action-list",
+            "body": "{\"paymentId\":\"{{transactionId}}\"}",
+            "headers": {
+              "Accept": "application/json, text/plain, */*",
+              "Content-Type": "application/json;charset=utf-8",
+              "authorization": "*"
+            }
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "refund": true,
+              "edit": true,
+              "shipping_goods": false
+            }
+          }
         }
-      },
-      "response": {
-        "status": 200,
-        "body": {
-          "refund": true,
-          "edit": true,
-          "shipping_goods": false
-        }
-      }
-    }
-    """
+        """
     When I send a GET request to "<path>"
     Then print last response
     And the response status code should be 200
