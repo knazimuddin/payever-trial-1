@@ -8,7 +8,7 @@ import { TransactionEventsController } from './transaction-events.controller';
 @Controller()
 export class TestTransactionEventsController extends TransactionEventsController {
   public async onModuleInit(): Promise<void> {
-    this.transactionsService = await this.moduleRef.resolve(TransactionsService);
+    this.transactionsService = await this.moduleRef.create(TransactionsService);
     this.transactionsService.switchTestMode();
   }
 

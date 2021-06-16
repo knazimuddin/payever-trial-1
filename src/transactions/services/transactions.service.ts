@@ -58,12 +58,12 @@ export class TransactionsService implements NestInterceptor {
   }
 
   public intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    this.switchLiveMode();
+
     const request: FastifyRequest<any> = context.switchToHttp().getRequest<FastifyRequest<any>>();
     const testMode: boolean = request?.query?.test_mode === 'true';
     if (testMode) {
       this.switchTestMode();
-    } else {
-      //this.switchLiveMode();
     }
 
     return next.handle();

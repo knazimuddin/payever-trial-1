@@ -24,7 +24,7 @@ export class TransactionEventsController implements OnModuleInit {
   ) { }
 
   public async onModuleInit(): Promise<void> {
-    this.transactionsService = await this.moduleRef.resolve(TransactionsService);
+    this.transactionsService = await this.moduleRef.create(TransactionsService);
   }
 
   @MessagePattern({
