@@ -86,6 +86,7 @@ import {
   SampleProductsService,
   ExportMonthlyBusinessTransactionService,
   ActionValidatorsList,
+  TransactionsInfoService,
 } from './services';
 import { EventsGateway } from './ws';
 import { RabbitChannels } from '../enums';
@@ -193,6 +194,7 @@ import { FiltersConfig, RulesFieldsConfig } from '../config';
     EventsGateway,
     ExportMonthlyBusinessTransactionService,
     ...ActionValidatorsList,
+    TransactionsInfoService,
   ],
 })
 export class TransactionsModule { }
