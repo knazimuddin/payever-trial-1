@@ -7,6 +7,168 @@ Feature: Values
     And the response should contain json:
     """
     {
+      "channels": [
+        {
+          "icon": "#channel-shopify",
+          "label": "translation.channel_type.shopify",
+          "name": "shopify"
+        },
+        {
+          "icon": "#channel-facebook",
+          "label": "translation.channel_type.facebook",
+          "name": "facebook"
+        },
+        {
+          "icon": "#channel-finance_express",
+          "label": "translation.channel_type.financeExpress",
+          "name": "finance_express"
+        },
+        {
+          "icon": "#channel-shop",
+          "label": "translation.channel_type.shop",
+          "name": "shop"
+        },
+        {
+          "icon": "#channel-woo_commerce",
+          "label": "translation.channel_type.wooCommerce",
+          "name": "woo_commerce"
+        },
+        {
+          "icon": "#channel-magento",
+          "label": "translation.channel_type.magento",
+          "name": "magento"
+        },
+        {
+          "icon": "#channel-marketing",
+          "label": "translation.channel_type.marketing",
+          "name": "marketing"
+        },
+        {
+          "icon": "#channel-pos",
+          "label": "translation.channel_type.pos",
+          "name": "pos"
+        },
+        {
+          "icon": "#channel-shopware",
+          "label": "translation.channel_type.shopware",
+          "name": "shopware"
+        },
+        {
+          "icon": "#channel-debitoor",
+          "label": "translation.channel_type.debitoor",
+          "name": "debitoor"
+        },
+        {
+          "icon": "#channel-link",
+          "label": "translation.channel_type.link",
+          "name": "link"
+        },
+        {
+          "icon": "#channel-e-conomic",
+          "label": "translation.channel_type.eConomic",
+          "name": "e-conomic"
+        },
+        {
+          "icon": "#channel-jtl",
+          "label": "translation.channel_type.jtl",
+          "name": "jtl"
+        },
+        {
+          "icon": "#channel-oxid",
+          "label": "translation.channel_type.oxid",
+          "name": "oxid"
+        },
+        {
+          "icon": "#channel-weebly",
+          "label": "translation.channel_type.weebly",
+          "name": "weebly"
+        },
+        {
+          "icon": "#channel-plentymarkets",
+          "label": "translation.channel_type.plentyMarkets",
+          "name": "plentymarkets"
+        },
+        {
+          "icon": "#channel-advertising",
+          "label": "translation.channel_type.advertising",
+          "name": "advertising"
+        },
+        {
+          "icon": "#channel-offer",
+          "label": "translation.channel_type.offer",
+          "name": "offer"
+        },
+        {
+          "icon": "#channel-dandomain",
+          "label": "translation.channel_type.danDomain",
+          "name": "dandomain"
+        },
+        {
+          "icon": "#channel-presta",
+          "label": "translation.channel_type.prestaShop",
+          "name": "presta"
+        },
+        {
+          "icon": "#channel-xt_commerce",
+          "label": "translation.channel_type.xtCommerce",
+          "name": "xt_commerce"
+        },
+        {
+          "icon": "#channel-overlay",
+          "label": "translation.channel_type.overlay",
+          "name": "overlay"
+        },
+        {
+          "icon": "#channel-whatsapp",
+          "label": "translation.channel_type.whatsapp",
+          "name": "whatsapp"
+        },
+        {
+          "icon": "#channel-telegram",
+          "label": "translation.channel_type.telegram",
+          "name": "telegram"
+        },
+        {
+          "icon": "#channel-facebook_messenger",
+          "label": "translation.channel_type.facebookMessenger",
+          "name": "facebook_messenger"
+        },
+        {
+          "icon": "#channel-commercetools",
+          "label": "translation.channel_type.commercetools",
+          "name": "commercetools"
+        },
+        {
+          "icon": "#channel-ebay",
+          "label": "translation.channel_type.ebay",
+          "name": "ebay"
+        },
+        {
+          "icon": "#channel-mobilede",
+          "label": "translation.channel_type.mobilede",
+          "name": "mobilede"
+        },
+        {
+          "icon": "#channel-amazon",
+          "label": "translation.channel_type.amazon",
+          "name": "amazon"
+        },
+        {
+          "icon": "#channel-autoscout24",
+          "label": "translation.channel_type.autoscout24",
+          "name": "autoscout24"
+        },
+        {
+          "icon": "#channel-google_shopping",
+          "label": "translation.channel_type.googleShopping",
+          "name": "google_shopping"
+        },
+        {
+          "icon": "#channel-instagram",
+          "label": "translation.channel_type.instagram",
+          "name": "instagram"
+        }
+      ],
       "filters": [
         {
           "fieldName": "original_id",
@@ -18,7 +180,7 @@ Feature: Values
             "contains",
             "doesNotContain"
           ],
-          "label": "filters.original_id",
+          "label": "translation.original_id",
           "type": "string"
         },
         {
@@ -31,7 +193,7 @@ Feature: Values
             "contains",
             "doesNotContain"
           ],
-          "label": "filters.reference",
+          "label": "translation.reference",
           "type": "string"
         },
         {
@@ -43,7 +205,7 @@ Feature: Values
             "beforeDate",
             "betweenDates"
           ],
-          "label": "filters.date",
+          "label": "translation.date",
           "type": "date"
         },
         {
@@ -52,94 +214,94 @@ Feature: Values
             "is",
             "isNot"
           ],
-          "label": "filters.payment_option",
+          "label": "translation.payment_option",
           "options": [
             {
-              "label": "filters.payment_option.instantPayment",
+              "label": "translation.payment_option.instantPayment",
               "value": "instant_payment"
             },
             {
-              "label": "filters.payment_option.paypal",
+              "label": "translation.payment_option.paypal",
               "value": "paypal"
             },
             {
-              "label": "filters.payment_option.sofort",
+              "label": "translation.payment_option.sofort",
               "value": "sofort"
             },
             {
-              "label": "filters.payment_option.stripeCreditCard",
+              "label": "translation.payment_option.stripeCreditCard",
               "value": "stripe"
             },
             {
-              "label": "filters.payment_option.stripeDirectDebit",
+              "label": "translation.payment_option.stripeDirectDebit",
               "value": "stripe_directdebit"
             },
             {
-              "label": "filters.payment_option.santanderNLInstallment",
+              "label": "translation.payment_option.santanderNLInstallment",
               "value": "santander_installment_nl"
             },
             {
-              "label": "filters.payment_option.santanderATInstallment",
+              "label": "translation.payment_option.santanderATInstallment",
               "value": "santander_installment_at"
             },
             {
-              "label": "filters.payment_option.swedbankCreditCard",
+              "label": "translation.payment_option.swedbankCreditCard",
               "value": "swedbank_creditcard"
             },
             {
-              "label": "filters.payment_option.swedbankInvoice",
+              "label": "translation.payment_option.swedbankInvoice",
               "value": "swedbank_invoice"
             },
             {
-              "label": "filters.payment_option.santanderDEInvoice",
+              "label": "translation.payment_option.santanderDEInvoice",
               "value": "santander_invoice_de"
             },
             {
-              "label": "filters.payment_option.santanderDEPosInvoice",
+              "label": "translation.payment_option.santanderDEPosInvoice",
               "value": "santander_pos_invoice_de"
             },
             {
-              "label": "filters.payment_option.santanderDEFactoring",
+              "label": "translation.payment_option.santanderDEFactoring",
               "value": "santander_factoring_de"
             },
             {
-              "label": "filters.payment_option.santanderDEPosFactoring",
+              "label": "translation.payment_option.santanderDEPosFactoring",
               "value": "santander_pos_factoring_de"
             },
             {
-              "label": "filters.payment_option.wiretransfer",
+              "label": "translation.payment_option.wiretransfer",
               "value": "cash"
             },
             {
-              "label": "filters.payment_option.santanderDKInstallment",
+              "label": "translation.payment_option.santanderDKInstallment",
               "value": "santander_installment_dk"
             },
             {
-              "label": "filters.payment_option.santanderNOInstallment",
+              "label": "translation.payment_option.santanderNOInstallment",
               "value": "santander_installment_no"
             },
             {
-              "label": "filters.payment_option.applePay",
+              "label": "translation.payment_option.applePay",
               "value": "apple_pay"
             },
             {
-              "label": "filters.payment_option.santanderNOInvoice",
+              "label": "translation.payment_option.santanderNOInvoice",
               "value": "santander_invoice_no"
             },
             {
-              "label": "filters.payment_option.googlePay",
+              "label": "translation.payment_option.googlePay",
               "value": "google_pay"
             },
             {
-              "label": "filters.payment_option.santanderSeInstallment",
+              "label": "translation.payment_option.santanderSeInstallment",
               "value": "santander_installment_se"
             },
             {
-              "label": "filters.payment_option.santanderPosSeInstallment",
+              "label": "translation.payment_option.santanderPosSeInstallment",
               "value": "santander_pos_installment_se"
             },
             {
-              "label": "filters.payment_option.payExCreditCard",
+              "label": "translation.payment_option.payExCreditCard",
               "value": "payex_creditcard"
             }
           ],
@@ -151,38 +313,38 @@ Feature: Values
             "is",
             "isNot"
           ],
-          "label": "filters.status",
+          "label": "translation.status",
           "options": [
             {
-              "label": "filters.status.New",
+              "label": "translation.status.New",
               "value": "STATUS_NEW"
             },
             {
-              "label": "filters.status.InProcess",
+              "label": "translation.status.InProcess",
               "value": "STATUS_IN_PROCESS"
             },
             {
-              "label": "filters.status.Accepted",
+              "label": "translation.status.Accepted",
               "value": "STATUS_ACCEPTED"
             },
             {
-              "label": "filters.status.Paid",
+              "label": "translation.status.Paid",
               "value": "STATUS_PAID"
             },
             {
-              "label": "filters.status.Declined",
+              "label": "translation.status.Declined",
               "value": "STATUS_DECLINED"
             },
             {
-              "label": "filters.status.Refunded",
+              "label": "translation.status.Refunded",
               "value": "STATUS_REFUNDED"
             },
             {
-              "label": "filters.status.Failed",
+              "label": "translation.status.Failed",
               "value": "STATUS_FAILED"
             },
             {
-              "label": "filters.status.Cancelled",
+              "label": "translation.status.Cancelled",
               "value": "STATUS_CANCELLED"
             }
           ],
@@ -194,110 +356,110 @@ Feature: Values
             "is",
             "isNot"
           ],
-          "label": "filters.specific_status",
+          "label": "translation.specific_status",
           "options": [
             {
-              "label": "filters.specific_status.new",
+              "label": "translation.specific_status.new",
               "value": "STATUS_NEW"
             },
             {
-              "label": "filters.specific_status.inProcess",
+              "label": "translation.specific_status.inProcess",
               "value": "STATUS_IN_PROCESS"
             },
             {
-              "label": "filters.specific_status.accepted",
+              "label": "translation.specific_status.accepted",
               "value": "STATUS_ACCEPTED"
             },
             {
-              "label": "filters.specific_status.paid",
+              "label": "translation.specific_status.paid",
               "value": "STATUS_PAID"
             },
             {
-              "label": "filters.specific_status.declined",
+              "label": "translation.specific_status.declined",
               "value": "STATUS_DECLINED"
             },
             {
-              "label": "filters.specific_status.refunded",
+              "label": "translation.specific_status.refunded",
               "value": "STATUS_REFUNDED"
             },
             {
-              "label": "filters.specific_status.failed",
+              "label": "translation.specific_status.failed",
               "value": "STATUS_FAILED"
             },
             {
-              "label": "filters.specific_status.canceled",
+              "label": "translation.specific_status.canceled",
               "value": "STATUS_CANCELLED"
             },
             {
-              "label": "filters.specific_status.invoiceCancellation",
+              "label": "translation.specific_status.invoiceCancellation",
               "value": "STATUS_INVOICE_CANCELLATION"
             },
             {
-              "label": "filters.specific_status.invoiceIncollection",
+              "label": "translation.specific_status.invoiceIncollection",
               "value": "STATUS_INVOICE_INCOLLECTION"
             },
             {
-              "label": "filters.specific_status.invoiceLatepayment",
+              "label": "translation.specific_status.invoiceLatepayment",
               "value": "STATUS_INVOICE_LATEPAYMENT"
             },
             {
-              "label": "filters.specific_status.invoiceReminder",
+              "label": "translation.specific_status.invoiceReminder",
               "value": "STATUS_INVOICE_REMINDER"
             },
             {
-              "label": "filters.specific_status.santanderInProgress",
+              "label": "translation.specific_status.santanderInProgress",
               "value": "STATUS_SANTANDER_IN_PROGRESS"
             },
             {
-              "label": "filters.specific_status.santanderInProcess",
+              "label": "translation.specific_status.santanderInProcess",
               "value": "STATUS_SANTANDER_IN_PROCESS"
             },
             {
-              "label": "filters.specific_status.santanderDeclined",
+              "label": "translation.specific_status.santanderDeclined",
               "value": "STATUS_SANTANDER_DECLINED"
             },
             {
-              "label": "filters.specific_status.santanderApproved",
+              "label": "translation.specific_status.santanderApproved",
               "value": "STATUS_SANTANDER_APPROVED"
             },
             {
-              "label": "filters.specific_status.santanderApprovedWithRequirements",
+              "label": "translation.specific_status.santanderApprovedWithRequirements",
               "value": "STATUS_SANTANDER_APPROVED_WITH_REQUIREMENTS"
             },
             {
-              "label": "filters.specific_status.santanderDeferred",
+              "label": "translation.specific_status.santanderDeferred",
               "value": "STATUS_SANTANDER_DEFERRED"
             },
             {
-              "label": "filters.specific_status.santanderCanceled",
+              "label": "translation.specific_status.santanderCanceled",
               "value": "STATUS_SANTANDER_CANCELLED"
             },
             {
-              "label": "filters.specific_status.santanderAutomaticDecline",
+              "label": "translation.specific_status.santanderAutomaticDecline",
               "value": "STATUS_SANTANDER_AUTOMATIC_DECLINE declined"
             },
             {
-              "label": "filters.specific_status.santanderInDecision",
+              "label": "translation.specific_status.santanderInDecision",
               "value": "STATUS_SANTANDER_IN_DECISION"
             },
             {
-              "label": "filters.specific_status.santanderDecisionNextWorkingDay",
+              "label": "translation.specific_status.santanderDecisionNextWorkingDay",
               "value": "STATUS_SANTANDER_DECISION_NEXT_WORKING_DAY"
             },
             {
-              "label": "filters.specific_status.santanderInCancellation",
+              "label": "translation.specific_status.santanderInCancellation",
               "value": "STATUS_SANTANDER_IN_CANCELLATION"
             },
             {
-              "label": "filters.specific_status.santanderAccountOpened",
+              "label": "translation.specific_status.santanderAccountOpened",
               "value": "STATUS_SANTANDER_ACCOUNT_OPENED"
             },
             {
-              "label": "filters.specific_status.santanderCanceledAnother",
+              "label": "translation.specific_status.santanderCanceledAnother",
               "value": "STATUS_SANTANDER_CANCELLED_ANOTHER"
             },
             {
-              "label": "filters.specific_status.santanderShopTemporaryApproved",
+              "label": "translation.specific_status.santanderShopTemporaryApproved",
               "value": "STATUS_SANTANDER_SHOP_TEMPORARY_APPROVED"
             }
           ],
@@ -309,134 +471,134 @@ Feature: Values
             "is",
             "isNot"
           ],
-          "label": "filters.channel",
+          "label": "translation.channel",
           "options": [
             {
-              "label": "filters.channel_type.shopify",
+              "label": "translation.channel_type.shopify",
               "value": "shopify"
             },
             {
-              "label": "filters.channel_type.facebook",
+              "label": "translation.channel_type.facebook",
               "value": "facebook"
             },
             {
-              "label": "filters.channel_type.financeExpress",
+              "label": "translation.channel_type.financeExpress",
               "value": "finance_express"
             },
             {
-              "label": "filters.channel_type.shop",
+              "label": "translation.channel_type.shop",
               "value": "shop"
             },
             {
-              "label": "filters.channel_type.wooCommerce",
+              "label": "translation.channel_type.wooCommerce",
               "value": "woo_commerce"
             },
             {
-              "label": "filters.channel_type.magento",
+              "label": "translation.channel_type.magento",
               "value": "magento"
             },
             {
-              "label": "filters.channel_type.marketing",
+              "label": "translation.channel_type.marketing",
               "value": "marketing"
             },
             {
-              "label": "filters.channel_type.pos",
+              "label": "translation.channel_type.pos",
               "value": "pos"
             },
             {
-              "label": "filters.channel_type.shopware",
+              "label": "translation.channel_type.shopware",
               "value": "shopware"
             },
             {
-              "label": "filters.channel_type.debitoor",
+              "label": "translation.channel_type.debitoor",
               "value": "debitoor"
             },
             {
-              "label": "filters.channel_type.link",
+              "label": "translation.channel_type.link",
               "value": "link"
             },
             {
-              "label": "filters.channel_type.eConomic",
+              "label": "translation.channel_type.eConomic",
               "value": "e-conomic"
             },
             {
-              "label": "filters.channel_type.jtl",
+              "label": "translation.channel_type.jtl",
               "value": "jtl"
             },
             {
-              "label": "filters.channel_type.oxid",
+              "label": "translation.channel_type.oxid",
               "value": "oxid"
             },
             {
-              "label": "filters.channel_type.weebly",
+              "label": "translation.channel_type.weebly",
               "value": "weebly"
             },
             {
-              "label": "filters.channel_type.plentyMarkets",
+              "label": "translation.channel_type.plentyMarkets",
               "value": "plentymarkets"
             },
             {
-              "label": "filters.channel_type.advertising",
+              "label": "translation.channel_type.advertising",
               "value": "advertising"
             },
             {
-              "label": "filters.channel_type.offer",
+              "label": "translation.channel_type.offer",
               "value": "offer"
             },
             {
-              "label": "filters.channel_type.danDomain",
+              "label": "translation.channel_type.danDomain",
               "value": "dandomain"
             },
             {
-              "label": "filters.channel_type.prestaShop",
+              "label": "translation.channel_type.prestaShop",
               "value": "presta"
             },
             {
-              "label": "filters.channel_type.xtCommerce",
+              "label": "translation.channel_type.xtCommerce",
               "value": "xt_commerce"
             },
             {
-              "label": "filters.channel_type.overlay",
+              "label": "translation.channel_type.overlay",
               "value": "overlay"
             },
             {
-              "label": "filters.channel_type.whatsapp",
+              "label": "translation.channel_type.whatsapp",
               "value": "whatsapp"
             },
             {
-              "label": "filters.channel_type.telegram",
+              "label": "translation.channel_type.telegram",
               "value": "telegram"
             },
             {
-              "label": "filters.channel_type.facebookMessenger",
+              "label": "translation.channel_type.facebookMessenger",
               "value": "facebook_messenger"
             },
             {
-              "label": "filters.channel_type.commercetools",
+              "label": "translation.channel_type.commercetools",
               "value": "commercetools"
             },
             {
-              "label": "filters.channel_type.ebay",
+              "label": "translation.channel_type.ebay",
               "value": "ebay"
             },
             {
-              "label": "filters.channel_type.mobilede",
+              "label": "translation.channel_type.mobilede",
               "value": "mobilede"
             },
             {
-              "label": "filters.channel_type.amazon",
+              "label": "translation.channel_type.amazon",
               "value": "amazon"
             },
             {
-              "label": "filters.channel_type.autoscout24",
+              "label": "translation.channel_type.autoscout24",
               "value": "autoscout24"
             },
             {
-              "label": "filters.channel_type.googleShopping",
+              "label": "translation.channel_type.googleShopping",
               "value": "google_shopping"
             },
             {
-              "label": "filters.channel_type.instagram",
+              "label": "translation.channel_type.instagram",
               "value": "instagram"
             }
           ],
@@ -451,7 +613,7 @@ Feature: Values
             "lessThan",
             "between"
           ],
-          "label": "filters.amount",
+          "label": "translation.amount",
           "type": "number"
         },
         {
@@ -463,7 +625,7 @@ Feature: Values
             "lessThan",
             "between"
           ],
-          "label": "filters.total",
+          "label": "translation.total",
           "type": "number"
         },
         {
@@ -472,7 +634,7 @@ Feature: Values
             "is",
             "isNot"
           ],
-          "label": "filters.currency",
+          "label": "translation.currency",
           "type": "option",
           "options": []
         },
@@ -486,7 +648,7 @@ Feature: Values
             "contains",
             "doesNotContain"
           ],
-          "label": "filters.customer_name",
+          "label": "translation.customer_name",
           "type": "string"
         },
         {
@@ -499,7 +661,7 @@ Feature: Values
             "contains",
             "doesNotContain"
           ],
-          "label": "filters.customer_email",
+          "label": "translation.customer_email",
           "type": "string"
         },
         {
@@ -512,7 +674,7 @@ Feature: Values
             "contains",
             "doesNotContain"
           ],
-          "label": "filters.merchant_name",
+          "label": "translation.merchant_name",
           "type": "string"
         },
         {
@@ -525,7 +687,7 @@ Feature: Values
             "contains",
             "doesNotContain"
           ],
-          "label": "filters.merchant_email",
+          "label": "translation.merchant_email",
           "type": "string"
         },
         {
@@ -538,7 +700,7 @@ Feature: Values
             "contains",
             "doesNotContain"
           ],
-          "label": "filters.seller_name",
+          "label": "translation.seller_name",
           "type": "string"
         },
         {
@@ -551,8 +713,120 @@ Feature: Values
             "contains",
             "doesNotContain"
           ],
-          "label": "filters.seller_email",
+          "label": "translation.seller_email",
           "type": "string"
+        }
+      ],
+      "paymentOptions": [
+        {
+          "icon": "#payment-method-instant_payment",
+          "label": "translation.payment_option.instantPayment",
+          "name": "instant_payment"
+        },
+        {
+          "icon": "#payment-method-paypal",
+          "label": "translation.payment_option.paypal",
+          "name": "paypal"
+        },
+        {
+          "icon": "#payment-method-sofort",
+          "label": "translation.payment_option.sofort",
+          "name": "sofort"
+        },
+        {
+          "icon": "#payment-method-stripe",
+          "label": "translation.payment_option.stripeCreditCard",
+          "name": "stripe"
+        },
+        {
+          "icon": "#payment-method-stripe_directdebit",
+          "label": "translation.payment_option.stripeDirectDebit",
+          "name": "stripe_directdebit"
+        },
+        {
+          "icon": "#payment-method-santander_installment_nl",
+          "label": "translation.payment_option.santanderNLInstallment",
+          "name": "santander_installment_nl"
+        },
+        {
+          "icon": "#payment-method-santander_installment_at",
+          "label": "translation.payment_option.santanderATInstallment",
+          "name": "santander_installment_at"
+        },
+        {
+          "icon": "#payment-method-swedbank_creditcard",
+          "label": "translation.payment_option.swedbankCreditCard",
+          "name": "swedbank_creditcard"
+        },
+        {
+          "icon": "#payment-method-swedbank_invoice",
+          "label": "translation.payment_option.swedbankInvoice",
+          "name": "swedbank_invoice"
+        },
+        {
+          "icon": "#payment-method-santander_invoice_de",
+          "label": "translation.payment_option.santanderDEInvoice",
+          "name": "santander_invoice_de"
+        },
+        {
+          "icon": "#payment-method-santander_pos_invoice_de",
+          "label": "translation.payment_option.santanderDEPosInvoice",
+          "name": "santander_pos_invoice_de"
+        },
+        {
+          "icon": "#payment-method-santander_factoring_de",
+          "label": "translation.payment_option.santanderDEFactoring",
+          "name": "santander_factoring_de"
+        },
+        {
+          "icon": "#payment-method-santander_pos_factoring_de",
+          "label": "translation.payment_option.santanderDEPosFactoring",
+          "name": "santander_pos_factoring_de"
+        },
+        {
+          "icon": "#payment-method-cash",
+          "label": "translation.payment_option.wiretransfer",
+          "name": "cash"
+        },
+        {
+          "icon": "#payment-method-santander_installment_dk",
+          "label": "translation.payment_option.santanderDKInstallment",
+          "name": "santander_installment_dk"
+        },
+        {
+          "icon": "#payment-method-santander_installment_no",
+          "label": "translation.payment_option.santanderNOInstallment",
+          "name": "santander_installment_no"
+        },
+        {
+          "icon": "#payment-method-apple_pay",
+          "label": "translation.payment_option.applePay",
+          "name": "apple_pay"
+        },
+        {
+          "icon": "#payment-method-santander_invoice_no",
+          "label": "translation.payment_option.santanderNOInvoice",
+          "name": "santander_invoice_no"
+        },
+        {
+          "icon": "#payment-method-google_pay",
+          "label": "translation.payment_option.googlePay",
+          "name": "google_pay"
+        },
+        {
+          "icon": "#payment-method-santander_installment_se",
+          "label": "translation.payment_option.santanderSeInstallment",
+          "name": "santander_installment_se"
+        },
+        {
+          "icon": "#payment-method-santander_pos_installment_se",
+          "label": "translation.payment_option.santanderPosSeInstallment",
+          "name": "santander_pos_installment_se"
+        },
+        {
+          "icon": "#payment-method-payex_creditcard",
+          "label": "translation.payment_option.payExCreditCard",
+          "name": "payex_creditcard"
         }
       ]
     }
