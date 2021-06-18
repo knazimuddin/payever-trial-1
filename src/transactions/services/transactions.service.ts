@@ -19,7 +19,8 @@ import { RpcResultDto } from '../dto';
 import { ElasticTransactionEnum } from '../enum';
 import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
 import {
-  TransactionBasicInterface, TransactionCartItemInterface,
+  TransactionBasicInterface,
+  TransactionCartItemInterface,
   TransactionHistoryEntryInterface,
   TransactionPackedDetailsInterface,
   TransactionUnpackedDetailsInterface,
