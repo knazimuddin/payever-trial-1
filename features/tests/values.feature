@@ -129,9 +129,9 @@ Feature: Values
           "name": "telegram"
         },
         {
-          "icon": "#channel-facebook_messenger",
+          "icon": "#channel-facebook-messenger",
           "label": "translation.channel_type.facebookMessenger",
-          "name": "facebook_messenger"
+          "name": "facebook-messenger"
         },
         {
           "icon": "#channel-commercetools",
@@ -167,6 +167,11 @@ Feature: Values
           "icon": "#channel-instagram",
           "label": "translation.channel_type.instagram",
           "name": "instagram"
+        },
+        {
+          "icon": "#channel-api",
+          "label": "translation.channel_type.api",
+          "name": "api"
         }
       ],
       "filters": [
@@ -571,7 +576,7 @@ Feature: Values
             },
             {
               "label": "translation.channel_type.facebookMessenger",
-              "value": "facebook_messenger"
+              "value": "facebook-messenger"
             },
             {
               "label": "translation.channel_type.commercetools",
@@ -600,6 +605,10 @@ Feature: Values
             {
               "label": "translation.channel_type.instagram",
               "value": "instagram"
+            },
+            {
+              "label": "translation.channel_type.api",
+              "value": "api"
             }
           ],
           "type": "option"
