@@ -1,3 +1,5 @@
+import { OnModuleInit } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import * as WebSocket from 'ws';
 import { MessageNameEnum } from './enums/message-name.enum';
@@ -14,13 +16,18 @@ import { TransactionModel } from '../models';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 
 @WebSocketGateway()
-export class EventsGateway {
+export class EventsGateway implements OnModuleInit {
   @WebSocketServer() private server: any;
+  private transactionsService: TransactionsService;
 
   public constructor(
-    private readonly transactionService: TransactionsService,
+    private readonly moduleRef: ModuleRef,
     private readonly transactionActionService: TransactionActionService,
   ) { }
+
+  public async onModuleInit(): Promise<void> {
+    this.transactionsService = await this.moduleRef.create(TransactionsService);
+  }
 
   @SubscribeMessage(MessageNameEnum.CONNECT)
   public async onConnectEvent(client: WebSocket, payload: ConnectPayloadInterface): Promise<ConnectResponseInterface> {
@@ -47,8 +54,14 @@ export class EventsGateway {
       return updateStatusResponse;
     }
 
+    if (payload.testMode) {
+      this.transactionsService.switchTestMode();
+    } else {
+      this.transactionsService.switchLiveMode();
+    }
+
     try {
-      const transactionModel: TransactionModel = await this.transactionService.findModelByUuid(transactionId);
+      const transactionModel: TransactionModel = await this.transactionsService.findModelByUuid(transactionId);
 
       if (!transactionModel) {
         return updateStatusResponse;

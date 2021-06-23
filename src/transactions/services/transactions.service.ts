@@ -62,7 +62,7 @@ export class TransactionsService implements NestInterceptor {
     this.switchLiveMode();
 
     const request: FastifyRequest<any> = context.switchToHttp().getRequest<FastifyRequest<any>>();
-    const testMode: boolean = request?.query?.test_mode === 'true';
+    const testMode: boolean = request?.query?.testMode === 'true';
     if (testMode) {
       this.switchTestMode();
     }

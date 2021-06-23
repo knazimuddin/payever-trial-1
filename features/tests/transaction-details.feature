@@ -366,3 +366,25 @@ Feature: Transaction details for business
       | uri                                                                                   | token                                                                                                                     |
       | /api/business/{{businessId}}/transaction/ad738281-f9f0-4db7-a4f6-670b0dff5327/actions | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
 
+  Scenario Outline: Get regular transaction details with test mode flag should be not found
+    Given I authenticate as a user with the following data:
+      """
+      <token>
+      """
+    And I use DB fixture "transactions/transaction-details"
+    And I mock RPC request "payment_option.payex_creditcard.action" to "rpc_payment_payex" with:
+      """
+      {
+        "requestPayload": {
+          "action": "action.list"
+        },
+        "responsePayload": "s:80:\"{\"payload\":{\"status\":\"OK\",\"result\":{\"test_action\":true,\"another_action\":false}}}\";"
+      }
+      """
+    When I send a GET request to "<uri>"
+    Then print last response
+    And the response status code should be 404
+    Examples:
+      | uri                                                                                     | token                                                                                                                     |
+      | /api/business/{{businessId}}/detail/ad738281-f9f0-4db7-a4f6-670b0dff5327?testMode=true | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+

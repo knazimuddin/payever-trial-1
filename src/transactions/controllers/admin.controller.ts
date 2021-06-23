@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
+  NotFoundException,
   Param,
   Post,
   Res,
@@ -12,14 +13,13 @@ import {
 } from '@nestjs/common';
 import { FastifyReply } from 'fastify';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ParamModel, QueryDto } from '@pe/nest-kit';
+import { QueryDto } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
 import { ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
-import { TransactionSchemaName } from '../schemas';
 import {
   ActionsRetriever,
   ElasticSearchService,
@@ -39,7 +39,7 @@ import { ConfigService } from '@nestjs/config';
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class AdminController {
-  private defaultCurrency: string;
+  private readonly defaultCurrency: string;
 
   constructor(
     private readonly transactionsService: TransactionsService,
@@ -79,26 +79,30 @@ export class AdminController {
   @Get('detail/reference/:reference')
   @HttpCode(HttpStatus.OK)
   public async getDetailByReference(
-    @ParamModel(
-      {
-        reference: ':reference',
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('reference') reference: string,
   ): Promise<TransactionOutputInterface>  {
+    const transaction: TransactionModel = await this.transactionsService.findModelByParams({
+      reference: reference,
+    });
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by reference ${reference} not found`);
+    }
+
     return this.getDetails(transaction);
   }
 
   @Get('detail/:uuid')
   @HttpCode(HttpStatus.OK)
   public async getDetail(
-    @ParamModel(
-      {
-        uuid: ':uuid',
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('uuid') uuid: string,
   ): Promise<TransactionOutputInterface> {
+    const transaction: TransactionModel = await this.transactionsService.findModelByUuid(uuid);
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by uuid ${uuid} not found`);
+    }
+
     return this.getDetails(transaction);
   }
 
@@ -106,14 +110,15 @@ export class AdminController {
   @HttpCode(HttpStatus.OK)
   public async runAction(
     @Param('action') action: string,
-    @ParamModel(
-      {
-        uuid: ':uuid',
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('uuid') uuid: string,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionOutputInterface> {
+    const transaction: TransactionModel = await this.transactionsService.findModelByUuid(uuid);
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by uuid ${uuid} not found`);
+    }
+
     const updatedTransaction: TransactionUnpackedDetailsInterface = await this.transactionActionService.doAction(
         transaction,
         actionPayload,
@@ -129,13 +134,14 @@ export class AdminController {
   @Get(':uuid/update-status')
   @HttpCode(HttpStatus.OK)
   public async updateStatus(
-    @ParamModel(
-      {
-        uuid: ':uuid',
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('uuid') uuid: string,
   ): Promise<TransactionOutputInterface> {
+    const transaction: TransactionModel = await this.transactionsService.findModelByUuid(uuid);
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by uuid ${uuid} not found`);
+    }
+
     const updatedTransaction: TransactionUnpackedDetailsInterface =
       await this.transactionActionService.updateStatus(transaction);
 

@@ -1,13 +1,11 @@
-import { Controller, Get, HttpCode, HttpStatus, NotFoundException, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, NotFoundException, Param, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ParamModel, QueryDto } from '@pe/nest-kit';
+import { QueryDto } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum, User, UserTokenInterface } from '@pe/nest-kit/modules/auth';
 import { TransactionOutputConverter } from '../converter';
 import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionItemInterface } from '../interfaces';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
-import { TransactionModel } from '../models';
-import { TransactionSchemaName } from '../schemas';
 import { ElasticSearchService, MongoSearchService, TransactionsService } from '../services';
 import { UserFilter } from '../tools';
 import { ConfigService } from '@nestjs/config';
@@ -20,7 +18,7 @@ import { ConfigService } from '@nestjs/config';
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class UserController {
-  private defaultCurrency: string;
+  private readonly defaultCurrency: string;
 
   constructor(
     private readonly transactionsService: TransactionsService,
@@ -59,16 +57,11 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   public async getDetail(
     @User() user: UserTokenInterface,
-    @ParamModel(
-      {
-        uuid: ':uuid',
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('uuid') uuid: string,
   ): Promise<TransactionOutputInterface> {
     const actions: ActionItemInterface[] = [];
     const found: TransactionUnpackedDetailsInterface =
-      await this.transactionsService.findUnpackedByParams({ uuid: transaction.uuid, user_uuid: user.id });
+      await this.transactionsService.findUnpackedByParams({ uuid: uuid, user_uuid: user.id });
 
     if (!found) {
       throw new NotFoundException(`Transaction not found.`);

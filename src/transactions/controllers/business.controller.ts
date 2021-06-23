@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Acl, AclActionsEnum, ParamModel } from '@pe/nest-kit';
+import { Acl, AclActionsEnum } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
@@ -24,7 +24,6 @@ import { BusinessDto, ExportQueryDto, ListQueryDto, PagingResultDto } from '../d
 import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { BusinessModel, TransactionModel } from '../models';
-import { TransactionSchemaName } from '../schemas';
 import {
   ActionsRetriever,
   BusinessService,
@@ -36,12 +35,9 @@ import {
   TransactionsService,
   TransactionsInfoService,
 } from '../services';
-import { BusinessFilter, Exporter, ExportFormat } from '../tools';
+import { BusinessFilter, Exporter, ExportFormat, IsNotTestModeFilter } from '../tools';
 import { PaymentActionsEnum } from '../enum';
 import { ActionItemInterface } from 'src/transactions/interfaces';
-
-const BusinessPlaceholder: string = ':businessId';
-const UuidPlaceholder: string = ':uuid';
 
 @Controller('business/:businessId')
 @ApiTags('business')
@@ -50,7 +46,7 @@ const UuidPlaceholder: string = ':uuid';
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class BusinessController {
-  private defaultCurrency: string;
+  private readonly defaultCurrency: string;
 
   constructor(
     private readonly transactionsService: TransactionsService,
@@ -93,14 +89,18 @@ export class BusinessController {
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async getByOriginalId(
-    @ParamModel(
-      {
-        business_uuid: BusinessPlaceholder,
-        original_id: ':original_id',
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('businessId') businessId: string,
+    @Param('original_id') originalId: string,
   ): Promise<TransactionOutputInterface> {
+    const transaction: TransactionModel = await this.transactionsService.findModelByParams({
+      business_uuid: businessId,
+      original_id: originalId,
+    });
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by id ${originalId} not found`);
+    }
+
     return this.transactionsInfoService.getFullDetails(transaction);
   }
 
@@ -109,14 +109,18 @@ export class BusinessController {
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async getDetail(
-    @ParamModel(
-      {
-        business_uuid: BusinessPlaceholder,
-        uuid: UuidPlaceholder,
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('businessId') businessId: string,
+    @Param('uuid') transactionUuid: string,
   ): Promise<TransactionOutputInterface> {
+    const transaction: TransactionModel = await this.transactionsService.findModelByParams({
+      business_uuid: businessId,
+      uuid: transactionUuid,
+    });
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by uuid ${transactionUuid} not found`);
+    }
+
     return this.transactionsInfoService.getFullDetails(transaction);
   }
 
@@ -125,14 +129,18 @@ export class BusinessController {
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async getTransactionDetails(
-    @ParamModel(
-      {
-        business_uuid: BusinessPlaceholder,
-        uuid: UuidPlaceholder,
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('businessId') businessId: string,
+    @Param('uuid') transactionUuid: string,
   ): Promise<TransactionOutputInterface> {
+    const transaction: TransactionModel = await this.transactionsService.findModelByParams({
+      business_uuid: businessId,
+      uuid: transactionUuid,
+    });
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by uuid ${transactionUuid} not found`);
+    }
+
     return this.transactionsInfoService.getDetails(transaction);
   }
 
@@ -141,14 +149,18 @@ export class BusinessController {
   @Roles(RolesEnum.merchant, RolesEnum.oauth)
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async getTransactionActions(
-    @ParamModel(
-      {
-        business_uuid: BusinessPlaceholder,
-        uuid: UuidPlaceholder,
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('businessId') businessId: string,
+    @Param('uuid') transactionUuid: string,
   ): Promise<ActionItemInterface[]> {
+    const transaction: TransactionModel = await this.transactionsService.findModelByParams({
+      business_uuid: businessId,
+      uuid: transactionUuid,
+    });
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by uuid ${transactionUuid} not found`);
+    }
+
     return this.transactionsInfoService.getActionList(transaction);
   }
 
@@ -158,15 +170,19 @@ export class BusinessController {
   @Acl({ microservice: 'transactions', action: AclActionsEnum.update })
   public async runAction(
     @Param('action') action: string,
-    @ParamModel(
-      {
-        business_uuid: BusinessPlaceholder,
-        uuid: UuidPlaceholder,
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('businessId') businessId: string,
+    @Param('uuid') transactionUuid: string,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionOutputInterface> {
+    const transaction: TransactionModel = await this.transactionsService.findModelByParams({
+      business_uuid: businessId,
+      uuid: transactionUuid,
+    });
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by uuid ${transactionUuid} not found`);
+    }
+
     const updatedTransaction: TransactionUnpackedDetailsInterface = !transaction.example
       ? await this.transactionActionService.doAction(
         transaction,
@@ -194,15 +210,19 @@ export class BusinessController {
   @Roles(RolesEnum.anonymous)
   public async label(
     @Param('pdf') pdf: string,
-    @ParamModel(
-      {
-        business_uuid: BusinessPlaceholder,
-        uuid: UuidPlaceholder,
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('businessId') businessId: string,
+    @Param('uuid') transactionUuid: string,
     @Res() res: FastifyReply<any>,
   ): Promise<any> {
+    const transaction: TransactionModel = await this.transactionsService.findModelByParams({
+      business_uuid: businessId,
+      uuid: transactionUuid,
+    });
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by uuid ${transactionUuid} not found`);
+    }
+
     const pdfPath: string = path.resolve(`./example_data/${pdf}`);
     const pdfStream: ReadStream = createReadStream(pdfPath);
     const stats: Stats = statSync(pdfPath);
@@ -218,14 +238,6 @@ export class BusinessController {
   @Roles(RolesEnum.anonymous)
   public async slip(
     @Param('name') name: string,
-    @ParamModel({ business_uuid: BusinessPlaceholder }, TransactionSchemaName) business: BusinessModel,
-    @ParamModel(
-      {
-        business_uuid: BusinessPlaceholder,
-        uuid: UuidPlaceholder,
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
   ): Promise<any> {
     const slipPath: string = path.resolve(`./example_data/${name}`);
 
@@ -236,15 +248,19 @@ export class BusinessController {
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.oauth)
   public async runLegacyApiShippedAction(
-    @ParamModel(
-      {
-        business_uuid: BusinessPlaceholder,
-        uuid: UuidPlaceholder,
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('businessId') businessId: string,
+    @Param('uuid') transactionUuid: string,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionUnpackedDetailsInterface> {
+    const transaction: TransactionModel = await this.transactionsService.findModelByParams({
+      business_uuid: businessId,
+      uuid: transactionUuid,
+    });
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by uuid ${transactionUuid} not found`);
+    }
+
     return this.transactionActionService.doAction(
       transaction,
       actionPayload,
@@ -258,15 +274,19 @@ export class BusinessController {
   @Roles(RolesEnum.oauth)
   public async runLegacyApiAction(
     @Param('action') action: string,
-    @ParamModel(
-      {
-        business_uuid: BusinessPlaceholder,
-        uuid: UuidPlaceholder,
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('businessId') businessId: string,
+    @Param('uuid') transactionUuid: string,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionUnpackedDetailsInterface> {
+    const transaction: TransactionModel = await this.transactionsService.findModelByParams({
+      business_uuid: businessId,
+      uuid: transactionUuid,
+    });
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by uuid ${transactionUuid} not found`);
+    }
+
     return this.transactionActionService.doAction(
       transaction,
       actionPayload,
@@ -279,14 +299,18 @@ export class BusinessController {
   @Roles(RolesEnum.merchant)
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async updateStatus(
-    @ParamModel(
-      {
-        business_uuid: BusinessPlaceholder,
-        uuid: UuidPlaceholder,
-      },
-      TransactionSchemaName,
-    ) transaction: TransactionModel,
+    @Param('businessId') businessId: string,
+    @Param('uuid') transactionUuid: string,
   ): Promise<TransactionOutputInterface> {
+    const transaction: TransactionModel = await this.transactionsService.findModelByParams({
+      business_uuid: businessId,
+      uuid: transactionUuid,
+    });
+
+    if (!transaction) {
+      throw new NotFoundException(`Transaction by uuid ${transactionUuid} not found`);
+    }
+
     const updatedTransaction: TransactionUnpackedDetailsInterface =
       await this.transactionActionService.updateStatus(transaction);
 
@@ -307,6 +331,10 @@ export class BusinessController {
     listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
     const business: BusinessModel = await this.businessService.findBusinessById(businessId);
     listDto.currency = business ? business.currency : this.defaultCurrency;
+
+    if (!listDto.filters.test_mode) {
+      listDto.filters = IsNotTestModeFilter.apply(listDto.filters);
+    }
 
     return this.elasticSearchService.getResult(listDto);
   }
@@ -380,5 +408,4 @@ export class BusinessController {
   ): Promise<any> {
     return this.exampleService.createBusinessExamples(businessDto, []);
   }
-
 }

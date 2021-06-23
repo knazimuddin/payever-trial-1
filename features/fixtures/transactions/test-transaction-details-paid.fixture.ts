@@ -1,13 +1,17 @@
 /* tslint:disable:object-literal-sort-keys */
 import { BaseFixture } from '@pe/cucumber-sdk';
-import { BusinessPaymentOptionModel, PaymentFlowModel, TransactionModel } from '../../../src/transactions/models';
+import {
+  BusinessPaymentOptionModel,
+  PaymentFlowModel,
+  TestTransactionModel,
+} from '../../../src/transactions/models';
 import { businessPaymentOptionFactory, paymentFlowFactory, transactionFactory } from '../factories';
 import { Model } from 'mongoose';
 import { getModelToken } from '@nestjs/mongoose';
 import {
   BusinessPaymentOptionSchemaName,
   PaymentFlowSchemaName,
-  TransactionSchemaName,
+  TestTransactionSchemaName,
 } from '../../../src/transactions/schemas';
 import { PaymentStatusesEnum } from '../../../src/transactions/enum';
 
@@ -19,8 +23,8 @@ const paymentFlowId: string = '2';
 
 class TransactionDetailsFixture extends BaseFixture {
 
-  private readonly transactionModel: Model<TransactionModel> =
-    this.application.get(getModelToken(TransactionSchemaName));
+  private readonly testTransactionModel: Model<TestTransactionModel> =
+    this.application.get(getModelToken(TestTransactionSchemaName));
   private readonly businessPaymentOptionModel: Model<BusinessPaymentOptionModel> = this.application.get(
     getModelToken(BusinessPaymentOptionSchemaName),
   );
@@ -30,7 +34,7 @@ class TransactionDetailsFixture extends BaseFixture {
 
   public async apply(): Promise<void> {
 
-    await this.transactionModel.create(transactionFactory.create({
+    await this.testTransactionModel.create(transactionFactory.create({
       uuid: transactionId,
       billing_address: {
         salutation: 'SALUTATION_MR',
