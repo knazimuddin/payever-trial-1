@@ -74,6 +74,7 @@ describe('TransactionHistoryService', async () => {
   before(() => {
     transactionsService = {
       pushHistoryRecord: (): any => { },
+      switchModeByTransaction: (): any => { },
     } as any;
 
     logger = {

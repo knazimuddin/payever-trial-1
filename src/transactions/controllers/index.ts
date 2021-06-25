@@ -4,7 +4,6 @@ export * from './business.controller';
 export * from './business-bus-messages.controller';
 export * from './daily-report-transactions-bus-messages.controller';
 export * from './flow-events.controller';
-export * from './history-events.controller';
 export * from './legacy-api.controller';
 export * from './transaction-events.controller';
 export * from './test-transaction-events.controller';
