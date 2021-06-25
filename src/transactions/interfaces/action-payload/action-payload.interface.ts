@@ -6,4 +6,5 @@ export interface ActionPayloadInterface {
   paymentId?: string;
   fields?: FieldsInterface & UnwrappedFieldsInterface;
   files?: FileDataInterface[];
+  testMode?: boolean;
 }

@@ -66,6 +66,7 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
 
     action = TransactionActionsToThirdPartyActions.get(action.toLowerCase());
     actionPayload.paymentId = transaction.uuid;
+    actionPayload.testMode = transaction.test_mode;
 
     const result: any = await this.runThirdPartyAction(transaction, action, actionPayload);
 
@@ -78,7 +79,7 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
     const result: any = await this.runThirdPartyAction(
       transaction,
       ThirdPartyPaymentActionsEnum.actionUpdateStatus,
-      { paymentId: transaction.uuid },
+      { paymentId: transaction.uuid, testMode: transaction.test_mode },
     );
 
     await this.updateTransactionFromThirdPartyResult(transaction, result);
