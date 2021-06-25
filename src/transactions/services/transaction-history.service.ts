@@ -19,6 +19,8 @@ export class TransactionHistoryService {
     createdAt: Date,
     data: HistoryEventDataInterface,
   ): Promise<void> {
+    this.transactionsService.switchModeByTransaction(transaction);
+
     switch (type) {
       case 'refund':
       case 'return':

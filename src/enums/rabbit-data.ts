@@ -6,6 +6,9 @@ export enum RabbitRoutingKeys {
   PaymentActionCompleted = 'payever.event.payment.action.completed',
   PaymentHistoryAdd = 'payever.microservice.payment.history.add',
 
+  PaymentActionCompletedTestMode = 'payever.event.payment.action.completed.test_mode',
+  PaymentHistoryAddTestMode = 'payever.microservice.payment.history.add.test_mode',
+
   PaymentCreated = 'checkout.event.payment.created',
   PaymentUpdated = 'checkout.event.payment.updated',
   PaymentRemoved = 'checkout.event.payment.removed',
@@ -29,10 +32,13 @@ export enum RabbitRoutingKeys {
 
   /** @deprecated */
   TransactionsPaymentAdd = 'transactions.event.payment.add',
+
   TransactionsPaymentPaid = 'transactions.event.payment.paid',
   TransactionsPaymentRefund = 'transactions.event.payment.refund',
+
   /** @deprecated */
   TransactionsPaymentSubtract = 'transactions.event.payment.subtract',
+
   TransactionsPaymentRemoved = 'transactions.event.payment.removed',
   TransactionsMigrate = 'transactions.event.payment.migrate',
 

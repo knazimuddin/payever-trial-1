@@ -8,8 +8,16 @@ import { CheckoutTransactionInterface } from '../interfaces/checkout';
 import { TransactionHistoryEntryInterface, TransactionPackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionHistoryEntryModel, TransactionModel } from '../models';
 import { PaymentMailEventProducer } from '../producer';
-import { StatisticsService, TransactionsExampleService, TransactionsService } from '../services';
+import {
+  StatisticsService,
+  TransactionHistoryService,
+  TransactionsExampleService,
+  TransactionsService,
+} from '../services';
 import { PaymentStatusesEnum } from '../enum';
+import { ActionCompletedMessageDto, AddHistoryEventMessageDto } from '../dto/payment-micro';
+import { PaymentActionEventEnum } from '../enum/events';
+import { EventDispatcher } from '@pe/nest-kit';
 
 @Controller()
 export class TransactionEventsController implements OnModuleInit {
@@ -17,9 +25,11 @@ export class TransactionEventsController implements OnModuleInit {
 
   constructor(
     protected moduleRef: ModuleRef,
+    private readonly historyService: TransactionHistoryService,
     private readonly statisticsService: StatisticsService,
     private readonly paymentMailEventProducer: PaymentMailEventProducer,
     private readonly exampleService: TransactionsExampleService,
+    private readonly eventDispatcher: EventDispatcher,
     private readonly logger: Logger,
   ) { }
 
@@ -124,6 +134,69 @@ export class TransactionEventsController implements OnModuleInit {
       await this.transactionsService.updateHistoryByUuid(created.uuid, history);
 
     await this.statisticsService.processMigratedTransaction(createdWithHistory);
+  }
+
+  @MessagePattern({
+    channel: RabbitChannels.Transactions,
+    name: RabbitRoutingKeys.PaymentActionCompleted,
+  })
+  public async onActionCompletedEvent(
+    message: ActionCompletedMessageDto,
+  ): Promise<void> {
+    this.logger.log({ text: 'ACTION.COMPLETED', message });
+    const search: { [key: string]: string } = message.payment.uuid
+      ? { uuid: message.payment.uuid }
+      : { original_id: message.payment.id }
+    ;
+
+    this.logger.log({ text: 'ACTION.COMPLETED Search Params', searchParams: search });
+    const transaction: TransactionModel = await this.transactionsService.findModelByParams(search);
+    if (!transaction) {
+      this.logger.warn({ text: 'ACTION.COMPLETED: Transaction is not found', data: message.payment });
+
+      return;
+    }
+
+    this.logger.log({ text: 'ACTION.COMPLETED: Transaction found', transaction });
+
+    await this.eventDispatcher.dispatch(
+      PaymentActionEventEnum.PaymentActionCompleted,
+      transaction,
+      message,
+    );
+    this.logger.log({ text: 'ACTION.COMPLETED: Saved', transaction });
+  }
+
+  @MessagePattern({
+    channel: RabbitChannels.Transactions,
+    name: RabbitRoutingKeys.PaymentHistoryAdd,
+  })
+  public async onHistoryAddEvent(
+    message: AddHistoryEventMessageDto,
+  ): Promise<void> {
+    this.logger.log({ text: 'HISTORY.ADD', message });
+    // @TODO use only uuid later, no original_id
+    const search: { [key: string]: string } = message.payment.uuid
+      ? { uuid: message.payment.uuid }
+      : { original_id: message.payment.id }
+    ;
+
+    this.logger.log({ text: 'HISTORY.ADD Search Params', searchParams: search });
+    const transaction: TransactionModel = await this.transactionsService.findModelByParams(search);
+    if (!transaction) {
+      this.logger.warn({ text: 'HISTORY.ADD: Transaction is not found', data: message.payment });
+
+      return;
+    }
+
+    this.logger.log({ text: 'HISTORY.ADD: Transaction found', transaction });
+    await this.historyService.processHistoryRecord(
+      transaction,
+      message.history_type,
+      new Date(),
+      message.data,
+    );
+    this.logger.log({ text: 'HISTORY.ADD: Saved', transaction });
   }
 
   private async createOrUpdate(transaction: TransactionPackedDetailsInterface): Promise<TransactionModel> {

@@ -96,6 +96,7 @@ class TransactionDetailsFixture extends BaseFixture {
       status: PaymentStatusesEnum.Paid,
       specific_status: 'Test specific status',
       original_id: '440ec879-7f02-48d4-9ffb-77adfaf79a06',
+      test_mode: true,
     }));
 
     await this.businessPaymentOptionModel.create(businessPaymentOptionFactory.create({

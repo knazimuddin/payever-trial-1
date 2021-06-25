@@ -360,6 +360,14 @@ export class TransactionsService implements NestInterceptor {
     this.transactionModel = this.liveTransactionModel;
   }
 
+  public switchModeByTransaction(transaction: TransactionBasicInterface): void {
+    if (transaction.test_mode) {
+      this.switchTestMode();
+    } else {
+      this.switchLiveMode();
+    }
+  }
+
   private async applyPaymentProperties(
     transaction: TransactionUnpackedDetailsInterface,
     result: RpcResultDto,
