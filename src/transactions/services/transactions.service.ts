@@ -41,7 +41,7 @@ const TransactionMutexKey: string = 'transactions-transaction';
 
 @Injectable()
 export class TransactionsService implements NestInterceptor {
-  public transactionModel: Model<TransactionModel>;
+  private transactionModel: Model<TransactionModel>;
 
   constructor(
     @InjectModel(TransactionSchemaName) private readonly liveTransactionModel: Model<TransactionModel>,
