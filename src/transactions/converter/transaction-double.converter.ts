@@ -34,6 +34,10 @@ export class TransactionDoubleConverter {
   }
 
   public static unpack(transaction: TransactionBasicInterface): TransactionBasicInterface {
+    if (transaction.test_mode === undefined || transaction.test_mode === null) {
+      transaction.test_mode = false;
+    }
+
     transaction.amount = transaction.amount / 100;
     transaction.total = transaction.total / 100;
     transaction.delivery_fee = transaction.delivery_fee
