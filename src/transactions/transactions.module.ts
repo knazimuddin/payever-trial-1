@@ -6,8 +6,8 @@ import { DelayRemoveClient, ElasticSearchModule } from '@pe/elastic-kit';
 import { CollectorModule, EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
 import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { MigrationModule } from '@pe/migration-kit';
-import { FoldersPluginModule } from '@pe/folders-plugin';
 import { RulesSdkModule } from '@pe/rules-sdk';
+import { FoldersPluginModule } from '@pe/folders-plugin';
 
 import { environment } from '../environments';
 import {
