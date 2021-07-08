@@ -149,6 +149,7 @@ import { FiltersConfig, RulesFieldsConfig } from '../config';
     }),
     RulesSdkModule.forRoot({
       fields: RulesFieldsConfig,
+      useBusiness: true,
     }),
   ],
   providers: [
