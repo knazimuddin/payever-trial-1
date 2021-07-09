@@ -90,7 +90,7 @@ import {
 } from './services';
 import { EventsGateway } from './ws';
 import { RabbitChannels } from '../enums';
-import { FiltersConfig, RulesFieldsConfig } from '../config';
+import { FiltersConfig, RulesOptions } from '../config';
 
 @Module({
   controllers: [
@@ -147,10 +147,7 @@ import { FiltersConfig, RulesFieldsConfig } from '../config';
       schemaName: TransactionSchemaName,
       useBusiness: true,
     }),
-    RulesSdkModule.forRoot({
-      fields: RulesFieldsConfig,
-      useBusiness: true,
-    }),
+    RulesSdkModule.forRoot(RulesOptions),
   ],
   providers: [
     ActionsRetriever,
