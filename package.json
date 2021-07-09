@@ -32,7 +32,7 @@
     "@pe/migration-kit": "^2.0.0",
     "@pe/nest-kit": "^7.7.4",
     "@pe/notifications-sdk": "^5.0.0",
-    "@pe/rules-sdk": "^1.1.0-beta",
+    "@pe/rules-sdk": "^1.1.0-beta1",
     "form-data": "^2.5.1",
     "lodash": "^4.17.21",
     "moment": "^2.24.0",
