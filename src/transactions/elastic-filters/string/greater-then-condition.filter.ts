@@ -1,9 +1,9 @@
-import { FilterConditionEnum } from '../../enum';
+import { FilterConditionEnum } from '@pe/common-sdk';
 import { StringFilterInterface } from '../interfaces';
 
 export class GreaterThenConditionFilter {
   public static getName(): string {
-    return FilterConditionEnum.GreaterThan;
+    return FilterConditionEnum.greaterThan;
   }
 
   public static apply(

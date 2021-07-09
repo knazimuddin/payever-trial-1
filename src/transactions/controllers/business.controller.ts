@@ -19,12 +19,11 @@ import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
 import { createReadStream, readFileSync, ReadStream, Stats, statSync } from 'fs';
 import * as path from 'path';
-import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
+import { TransactionOutputConverter } from '../converter';
 import { BusinessDto, ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { BusinessModel, TransactionModel } from '../models';
-import { TransactionsNotifier } from '../notifiers';
 import { TransactionSchemaName } from '../schemas';
 import {
   ActionsRetriever,
@@ -35,9 +34,11 @@ import {
   TransactionActionService,
   TransactionsExampleService,
   TransactionsService,
+  TransactionsInfoService,
 } from '../services';
 import { BusinessFilter, Exporter, ExportFormat } from '../tools';
 import { PaymentActionsEnum } from '../enum';
+import { ActionItemInterface } from 'src/transactions/interfaces';
 
 const BusinessPlaceholder: string = ':businessId';
 const UuidPlaceholder: string = ':uuid';
@@ -61,8 +62,8 @@ export class BusinessController {
     private readonly logger: Logger,
     private readonly businessService: BusinessService,
     private readonly exampleService: TransactionsExampleService,
-    private readonly transactionsNotifier: TransactionsNotifier,
     private readonly configService: ConfigService,
+    private readonly transactionsInfoService: TransactionsInfoService,
   ) {
     this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
   }
@@ -84,7 +85,7 @@ export class BusinessController {
       throw new NotFoundException(`Transaction by reference ${reference} not found`);
     }
 
-    return this.getDetails(transaction);
+    return this.transactionsInfoService.getFullDetails(transaction);
   }
 
   @Get('detail/original_id/:original_id')
@@ -100,7 +101,7 @@ export class BusinessController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
   ): Promise<TransactionOutputInterface> {
-    return this.getDetails(transaction);
+    return this.transactionsInfoService.getFullDetails(transaction);
   }
 
   @Get('detail/:uuid')
@@ -116,7 +117,39 @@ export class BusinessController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
   ): Promise<TransactionOutputInterface> {
-    return this.getDetails(transaction);
+    return this.transactionsInfoService.getFullDetails(transaction);
+  }
+
+  @Get('transaction/:uuid/details')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
+  public async getTransactionDetails(
+    @ParamModel(
+      {
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+  ): Promise<TransactionOutputInterface> {
+    return this.transactionsInfoService.getDetails(transaction);
+  }
+
+  @Get('transaction/:uuid/actions')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
+  public async getTransactionActions(
+    @ParamModel(
+      {
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+  ): Promise<ActionItemInterface[]> {
+    return this.transactionsInfoService.getActionList(transaction);
   }
 
   @Post(':uuid/action/:action')
@@ -348,19 +381,4 @@ export class BusinessController {
     return this.exampleService.createBusinessExamples(businessDto, []);
   }
 
-  private async getDetails(transaction: TransactionModel): Promise<TransactionOutputInterface>  {
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
-    );
-
-    await this.transactionsNotifier.cancelNewTransactionNotification(transaction);
-
-    return TransactionOutputConverter.convert(
-      unpackedTransaction,
-      !transaction.example
-        ? await this.actionsRetriever.retrieve(unpackedTransaction)
-        : this.actionsRetriever.retrieveFakeActions(unpackedTransaction)
-      ,
-    );
-  }
 }
