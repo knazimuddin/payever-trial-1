@@ -71,7 +71,7 @@ spec:
         - name: node
           image: {{ $values.image.nodejs }}
           imagePullPolicy: IfNotPresent
-          command: [ "/bin/bash", "-c", "/payever/deploy/consumer.sh" ]
+          command: [ "/bin/bash", "-c", "/payever/deploy/consumer-folders.sh" ]
 
           livenessProbe:
             httpGet:
