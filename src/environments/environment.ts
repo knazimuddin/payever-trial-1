@@ -76,6 +76,22 @@ export const environment: any = {
           },
         ],
       },
+      {
+        name: 'transactions_folders',
+        options: { durable: true },
+        type: 'direct',
+
+        queues: [
+          {
+            name: RabbitChannels.TransactionsFolders,
+            options: {
+              deadLetterExchange: 'transactions_folders_fallback',
+              deadLetterRoutingKey: RabbitChannels.TransactionsFolders,
+              durable: true,
+            },
+          },
+        ],
+      },
     ],
   },
   redis: {

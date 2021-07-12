@@ -1,10 +1,12 @@
 import { ConditionsService, RulesSdkOptionsInterface, RuleActionEnum } from '@pe/rules-sdk';
+import { RabbitChannels } from '../enums';
 
 export const RulesOptions: RulesSdkOptionsInterface = {
   actions: [
     RuleActionEnum.copy,
     RuleActionEnum.move,
   ],
+  consumerChannel: RabbitChannels.TransactionsFolders,
   fields: [
     {
       conditions: ConditionsService.getStringConditions(),
