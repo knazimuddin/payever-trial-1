@@ -6,7 +6,6 @@ export const RulesOptions: RulesSdkOptionsInterface = {
     RuleActionEnum.copy,
     RuleActionEnum.move,
   ],
-  consumerChannel: RabbitChannels.TransactionsFolders,
   fields: [
     {
       conditions: ConditionsService.getStringConditions(),
@@ -89,6 +88,6 @@ export const RulesOptions: RulesSdkOptionsInterface = {
       label: 'filters.seller_email',
     },
   ],
-
+  rabbitExchange: RabbitChannels.TransactionsFolders,
   useBusiness: true,
 };

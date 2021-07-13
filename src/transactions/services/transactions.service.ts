@@ -159,6 +159,19 @@ export class TransactionsService {
     return transactionModel[0];
   }
 
+  public async findAllUuidByFilter(filter: any): Promise<string[]> {
+    const transactions: TransactionModel[] = await this.transactionModel.find(
+      filter,
+      {
+        _id: -1,
+        uuid: 1,
+      },
+    );
+
+    return transactions.map((transaction: TransactionModel) => { return transaction.uuid; });
+  }
+
+
   public async findCollectionByParams(params: any): Promise<TransactionModel[]> {
     return this.transactionModel.find(params);
   }

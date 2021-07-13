@@ -5,7 +5,7 @@ import { BusinessFilter } from '../tools';
 import { BusinessModel } from '../models';
 import { ListQueryDto, PagingResultDto } from '../dto';
 import { plainToClass } from 'class-transformer';
-import { BusinessService, ElasticSearchService } from '../services';
+import { BusinessService, ElasticSearchService, TransactionsService } from '../services';
 import { ConfigService } from '@nestjs/config';
 import { FilterConditionEnum } from '@pe/common-sdk';
 
@@ -17,6 +17,7 @@ export class GetFolderDocumentsListener {
     private readonly businessService: BusinessService,
     private readonly configService: ConfigService,
     private readonly elasticSearchService: ElasticSearchService,
+    private readonly transactionsService: TransactionsService,
   ) {
     this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
   }
@@ -35,6 +36,27 @@ export class GetFolderDocumentsListener {
   ): Promise<void> {
     const listDto: ListQueryDto = plainToClass(ListQueryDto, folderDocuments.queryDto);
     await this.getResults(folderDocuments, listDto, FilterConditionEnum.isNotIn, folderDocuments.excludedDocumentIds);
+  }
+
+  @EventListener(FoldersEventsEnum.GetFilteredRootDocumentIds)
+  public async getFilteredRootDocuments(
+    folderDocuments: FolderDocumentsResultsDto,
+  ): Promise<void> {
+    const filter: any = {
+      $and: [
+        ...folderDocuments.queryDto,
+        { uuid: {
+          $nin: folderDocuments.excludedDocumentIds,
+          },
+        },
+      ],
+    };
+
+    console.log(filter);
+    const filteredDocuments: string[] = await this.transactionsService.findAllUuidByFilter(filter);
+    console.log(filteredDocuments);
+
+    folderDocuments.results.push(...filteredDocuments);
   }
 
   private async getResults(
