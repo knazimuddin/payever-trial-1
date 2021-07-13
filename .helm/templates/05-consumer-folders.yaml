@@ -1,6 +1,6 @@
 {{ $chartName := .Chart.Name }}
 {{ $values := .Values }}
-{{ $appName := printf "%s-consumer" $chartName }}
+{{ $appName := printf "%s-folders-consumer" $chartName }}
 
 apiVersion: apps/v1
 kind: Deployment
