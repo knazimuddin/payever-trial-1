@@ -65,6 +65,11 @@ export class GetFolderDocumentsListener {
     condition: string,
     documentIds: string[],
   ): Promise<void> {
+    console.log(folderDocuments);
+    console.log(listDto);
+    console.log(condition);
+    console.log(documentIds);
+
     if (documentIds.length) {
       const uuid: any = [
         {
