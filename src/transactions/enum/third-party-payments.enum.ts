@@ -18,4 +18,6 @@ export enum ThirdPartyPaymentsEnum {
   applePay = 'apple_pay',
   santanderNOInvoice = 'santander_invoice_no',
   googlePay = 'google_pay',
+  santanderDEInstallment = 'santander_installment',
+  santanderDEPosInstallment = 'santander_pos_installment',
 }
