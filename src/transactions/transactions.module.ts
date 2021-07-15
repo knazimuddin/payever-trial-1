@@ -142,10 +142,10 @@ import { FiltersConfig, RulesOptions } from '../config';
       host: environment.elasticSearchHost,
     }),
     MigrationModule,
-    FoldersPluginModule.forFeature({
-      schema: TransactionSchema,
-      schemaName: TransactionSchemaName,
-      useBusiness: true,
+    FoldersPluginModule.forFeature(
+      {
+        combinedList: false,
+        useBusiness: true,
     }),
     RulesSdkModule.forRoot(RulesOptions),
   ],
