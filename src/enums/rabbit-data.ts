@@ -1,3 +1,8 @@
+export enum RabbitExchangesEnum {
+  asyncEvents = 'async_events',
+  transactionsFolders = 'transactions_folders',
+}
+
 export enum RabbitChannels {
   Transactions = 'async_events_transactions_micro',
   TransactionsFolders = 'async_events_transactions_folders_micro',
