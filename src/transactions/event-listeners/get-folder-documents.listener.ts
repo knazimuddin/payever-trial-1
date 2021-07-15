@@ -26,7 +26,10 @@ export class GetFolderDocumentsListener {
   public async getFolderDocuments(
     folderDocuments: FolderDocumentsResultsDto,
   ): Promise<void> {
-    const listDto: ListQueryDto = plainToClass(ListQueryDto, folderDocuments.queryDto);
+    let listDto: ListQueryDto = new ListQueryDto();
+    if (folderDocuments.query && (Object.keys(folderDocuments.query).length > 0) ) {
+      listDto = plainToClass<ListQueryDto, any>(ListQueryDto, folderDocuments.query);
+    }
     await this.getResults(folderDocuments, listDto, FilterConditionEnum.isIn, folderDocuments.documentIds);
   }
 
@@ -34,7 +37,7 @@ export class GetFolderDocumentsListener {
   public async getRootDocuments(
     folderDocuments: FolderDocumentsResultsDto,
   ): Promise<void> {
-    const listDto: ListQueryDto = plainToClass(ListQueryDto, folderDocuments.queryDto);
+    const listDto: ListQueryDto = plainToClass(ListQueryDto, folderDocuments.query);
     await this.getResults(folderDocuments, listDto, FilterConditionEnum.isNotIn, folderDocuments.excludedDocumentIds);
   }
 
@@ -44,7 +47,7 @@ export class GetFolderDocumentsListener {
   ): Promise<void> {
     const filter: any = {
       $and: [
-        ...folderDocuments.queryDto,
+        ...folderDocuments.query,
         { uuid: {
           $nin: folderDocuments.excludedDocumentIds,
           },
@@ -65,10 +68,6 @@ export class GetFolderDocumentsListener {
     condition: string,
     documentIds: string[],
   ): Promise<void> {
-    console.log(folderDocuments);
-    console.log(listDto);
-    console.log(condition);
-    console.log(documentIds);
 
     if (documentIds.length) {
       const uuid: any = [
