@@ -1,5 +1,5 @@
 import { ConditionsService, RulesSdkOptionsInterface, RuleActionEnum } from '@pe/rules-sdk';
-import { RabbitChannels } from '../enums';
+import { RabbitChannels, RabbitExchangesEnum } from '../enums';
 
 export const RulesOptions: RulesSdkOptionsInterface = {
   actions: [
@@ -88,6 +88,9 @@ export const RulesOptions: RulesSdkOptionsInterface = {
       label: 'filters.seller_email',
     },
   ],
-  rabbitExchange: RabbitChannels.TransactionsFolders,
+  rabbitConfig: {
+    channel: RabbitChannels.TransactionsFolders,
+    exchange: RabbitExchangesEnum.transactionsFolders,
+  },
   useBusiness: true,
 };
