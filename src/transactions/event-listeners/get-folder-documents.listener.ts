@@ -42,12 +42,13 @@ export class GetFolderDocumentsListener {
   }
 
   @EventListener(FoldersEventsEnum.GetFilteredRootDocumentIds)
-  public async getFilteredRootDocuments(
+  public async getFilteredRootDocumentIds(
     folderDocuments: FolderDocumentsResultsDto,
   ): Promise<void> {
+    console.log('GetFilteredRootDocumentIds', folderDocuments);
     const filter: any = {
       $and: [
-        ...folderDocuments.query,
+        folderDocuments.query,
         { uuid: {
           $nin: folderDocuments.excludedDocumentIds,
           },
