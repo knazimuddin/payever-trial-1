@@ -48,6 +48,7 @@ export class GetFolderDocumentsListener {
     console.log('GetFilteredRootDocumentIds', folderDocuments);
     const filter: any = {
       $and: [
+        { business_uuid: folderDocuments.businessId },
         folderDocuments.query,
         { uuid: {
           $nin: folderDocuments.excludedDocumentIds,

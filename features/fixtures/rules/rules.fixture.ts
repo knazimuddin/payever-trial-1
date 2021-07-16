@@ -60,6 +60,7 @@ class BusinessRulesFixture extends BaseFixture {
       {
         _id: RULE_4,
         action: RuleActionEnum.copy,
+        businessId: 'businessId',
         condition: RulesConditionEnum.equals,
         createdAt: new Date(),
         description: 'status accepted',
