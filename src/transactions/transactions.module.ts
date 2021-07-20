@@ -90,7 +90,7 @@ import {
 } from './services';
 import { EventsGateway } from './ws';
 import { RabbitChannels } from '../enums';
-import { FiltersConfig, RulesOptions } from '../config';
+import { FiltersConfig, FoldersConfig, RulesOptions } from '../config';
 
 @Module({
   controllers: [
@@ -142,11 +142,7 @@ import { FiltersConfig, RulesOptions } from '../config';
       host: environment.elasticSearchHost,
     }),
     MigrationModule,
-    FoldersPluginModule.forFeature(
-      {
-        combinedList: false,
-        useBusiness: true,
-    }),
+    FoldersPluginModule.forFeature(FoldersConfig),
     RulesSdkModule.forRoot(RulesOptions),
   ],
   providers: [

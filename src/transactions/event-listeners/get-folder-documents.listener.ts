@@ -33,19 +33,10 @@ export class GetFolderDocumentsListener {
     await this.getResults(folderDocuments, listDto, FilterConditionEnum.isIn, folderDocuments.documentIds);
   }
 
-  @EventListener(FoldersEventsEnum.GetRootDocuments)
-  public async getRootDocuments(
-    folderDocuments: FolderDocumentsResultsDto,
-  ): Promise<void> {
-    const listDto: ListQueryDto = plainToClass(ListQueryDto, folderDocuments.query);
-    await this.getResults(folderDocuments, listDto, FilterConditionEnum.isNotIn, folderDocuments.excludedDocumentIds);
-  }
-
   @EventListener(FoldersEventsEnum.GetFilteredRootDocumentIds)
   public async getFilteredRootDocumentIds(
     folderDocuments: FolderDocumentsResultsDto,
   ): Promise<void> {
-    console.log('GetFilteredRootDocumentIds', folderDocuments);
     const filter: any = {
       $and: [
         { business_uuid: folderDocuments.businessId },
@@ -57,9 +48,7 @@ export class GetFolderDocumentsListener {
       ],
     };
 
-    console.log(filter);
     const filteredDocuments: string[] = await this.transactionsService.findAllUuidByFilter(filter);
-    console.log(filteredDocuments);
 
     folderDocuments.results.push(...filteredDocuments);
   }
