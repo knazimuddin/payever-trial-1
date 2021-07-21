@@ -22,7 +22,6 @@ import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import {
   ActionsRetriever,
-  ElasticSearchService,
   MessagingService,
   MongoSearchService,
   TransactionActionService,
@@ -30,6 +29,7 @@ import {
 } from '../services';
 import { Exporter, ExportFormat, IsNotExampleFilter } from '../tools';
 import { ConfigService } from '@nestjs/config';
+import { ElasticSearchService } from '@pe/folders-plugin';
 
 @Controller('admin')
 @ApiTags('admin')

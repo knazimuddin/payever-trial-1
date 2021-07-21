@@ -5,11 +5,11 @@ import { Command, Positional } from '@pe/nest-kit';
 import { Model } from 'mongoose';
 import * as readline from 'readline';
 import { ListQueryDto, PagingResultDto } from '../dto';
-import { ElasticTransactionEnum } from '../enum';
 import { TransactionBasicInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
-import { ElasticSearchService } from '../services';
+import { ElasticSearchService } from '@pe/folders-plugin';
+import { ElasticConfig } from '../../config';
 
 @Injectable()
 export class TransactionsEsFixDiffCommand {
@@ -85,7 +85,7 @@ export class TransactionsEsFixDiffCommand {
           Logger.log(`Transaction ${transaction.uuid} is not in mongo. Removing...`);
 
           await this.elasticSearchClient.deleteByQuery(
-            ElasticTransactionEnum.index,
+            ElasticConfig.index.collection,
             {
               query: {
                 match_phrase: {

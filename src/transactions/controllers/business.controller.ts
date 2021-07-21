@@ -28,7 +28,6 @@ import { TransactionSchemaName } from '../schemas';
 import {
   ActionsRetriever,
   BusinessService,
-  ElasticSearchService,
   MessagingService,
   MongoSearchService,
   TransactionActionService,
@@ -39,6 +38,7 @@ import {
 import { BusinessFilter, Exporter, ExportFormat } from '../tools';
 import { PaymentActionsEnum } from '../enum';
 import { ActionItemInterface } from 'src/transactions/interfaces';
+import { ElasticSearchService } from '@pe/folders-plugin';
 
 const BusinessPlaceholder: string = ':businessId';
 const UuidPlaceholder: string = ':uuid';
