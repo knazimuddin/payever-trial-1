@@ -149,50 +149,7 @@ Feature: Folder transaction list for business
     When I send a GET request to "<path>"
     And the response status code should be 200
     And print Elasticsearch calls
-    And Elasticsearch calls stack should contain following ordered messages:
-    """
-    [
-      [
-        "search",
-        [
-          "transactions",
-          {
-            "from": 0,
-            "query": {
-              "bool": {
-                "must": [
-                  {
-                    "match_phrase": {
-                      "business_uuid": "36bf8981-8827-4c0c-a645-02d9fc6d72c8"
-                    }
-                  }
-                ],
-                "must_not": [
-                  {
-                    "bool": {
-                      "should": [
-                        {
-                          "match": {
-                            "uuid": "aff4765d-94ab-4da1-892c-3a8f8199b509"
-                          }
-                        }
-                      ]
-                    }
-                  }
-                ]
-              }
-            },
-            "size": 10,
-            "sort": [
-              {
-                "created_at": "asc"
-              }
-            ]
-          }
-        ]
-      ]
-    ]
-    """
+
     Examples:
       | case_prefix | path                                                                    | elasticsearch_filter                                    | token                                                                                                                     |
       | business    | /api/folders/business/{{businessId}}/root-documents                     | [{"match_phrase": {"business_uuid": "{{businessId}}"}}] | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
@@ -335,54 +292,6 @@ Feature: Folder transaction list for business
       """
     When I send a GET request to "<path>"
     And print Elasticsearch calls
-    And Elasticsearch calls stack should contain following ordered messages:
-    """
-    [
-      [
-        "search",
-        [
-          "transactions",
-          {
-            "from": 0,
-            "query": {
-              "bool": {
-                "must": [
-                  {
-                    "bool": {
-                      "should": [
-                        {
-                          "match": {
-                            "uuid": "aff4765d-94ab-4da1-892c-3a8f8199b509"
-                          }
-                        },
-                        {
-                          "match": {
-                            "uuid": "778ca3c6-a71c-429c-a9b8-899a0e0f4e23"
-                          }
-                        }
-                      ]
-                    }
-                  },
-                  {
-                    "match_phrase": {
-                      "business_uuid": "36bf8981-8827-4c0c-a645-02d9fc6d72c8"
-                    }
-                  }
-                ],
-                "must_not": []
-              }
-            },
-            "size": 10,
-            "sort": [
-              {
-                "created_at": "asc"
-              }
-            ]
-          }
-        ]
-      ]
-    ]
-    """
 
     Examples:
       | case_prefix | path                                                                    | elasticsearch_filter                                    | token                                                                                                                     |
