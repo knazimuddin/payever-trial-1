@@ -14,6 +14,7 @@ import {
   TransactionSantanderApplicationConverter,
 } from '../converter';
 import { RpcResultDto } from '../dto';
+import { ElasticTransactionEnum } from '../enum';
 import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
 import {
   TransactionBasicInterface,
@@ -27,7 +28,6 @@ import { TransactionsNotifier } from '../notifiers';
 import { AuthEventsProducer } from '../producer';
 import { TransactionSchemaName } from '../schemas';
 import { PaymentFlowService } from './payment-flow.service';
-import { ElasticConfig } from '../../config';
 
 const TransactionMutexKey: string = 'transactions-transaction';
 
@@ -61,7 +61,7 @@ export class TransactionsService {
     );
 
     await this.elasticSearchClient.singleIndex(
-      ElasticConfig.index.collection,
+      ElasticTransactionEnum.index,
       TransactionDoubleConverter.pack(created.toObject()),
     );
 
@@ -108,7 +108,7 @@ export class TransactionsService {
     );
 
     await this.elasticSearchClient.singleIndex(
-      ElasticConfig.index.collection,
+      ElasticTransactionEnum.index,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
 
@@ -138,7 +138,7 @@ export class TransactionsService {
     );
 
     await this.elasticSearchClient.singleIndex(
-      ElasticConfig.index.collection,
+      ElasticTransactionEnum.index,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
 
@@ -202,8 +202,8 @@ export class TransactionsService {
     }
 
     await this.delayRemoveClient.deleteByQuery(
-      ElasticConfig.index.collection,
-      ElasticConfig.index.type,
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
       {
         query: {
           match_phrase: {
@@ -235,7 +235,7 @@ export class TransactionsService {
     );
 
     await this.elasticSearchClient.singleIndex(
-      ElasticConfig.index.collection,
+      ElasticTransactionEnum.index,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
   }
@@ -387,7 +387,7 @@ export class TransactionsService {
     );
 
     await this.elasticSearchClient.singleIndex(
-      ElasticConfig.index.collection,
+      ElasticTransactionEnum.index,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
   }
@@ -418,7 +418,7 @@ export class TransactionsService {
     );
 
     await this.elasticSearchClient.singleIndex(
-      ElasticConfig.index.collection,
+      ElasticTransactionEnum.index,
       TransactionDoubleConverter.pack(updated.toObject()),
     );
   }

@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ElasticSearchClient } from '@pe/elastic-kit';
 import { Command } from '@pe/nest-kit';
-import { ElasticConfig } from '../../config';
+import { ElasticMappingFieldsConfig, ElasticTransactionEnum } from '../enum';
 
 @Injectable()
 export class TransactionsEsSetupCommand {
@@ -14,13 +14,13 @@ export class TransactionsEsSetupCommand {
     describe: 'Setup field-mapping transactions for ElasticSearch',
   })
   public async setup(): Promise<void> {
-    if (!await this.elasticSearchClient.isIndexExists(ElasticConfig.index.collection)) {
+    if (!await this.elasticSearchClient.isIndexExists(ElasticTransactionEnum.index)) {
       Logger.log(`Creating index.`);
-      await this.elasticSearchClient.createIndex(ElasticConfig.index.collection);
+      await this.elasticSearchClient.createIndex(ElasticTransactionEnum.index);
     }
 
     await this.elasticSearchClient.putIndexSettings(
-      ElasticConfig.index.collection,
+      ElasticTransactionEnum.index,
       {
         index: {
           max_result_window: 500000,
@@ -29,12 +29,12 @@ export class TransactionsEsSetupCommand {
       },
     );
 
-    for (const field in ElasticConfig.fieldsMapping) {
-      if (ElasticConfig.fieldsMapping[field]) {
+    for (const field in ElasticMappingFieldsConfig) {
+      if (ElasticMappingFieldsConfig[field]) {
         await this.elasticSearchClient.setupFieldMapping(
-          ElasticConfig.index.collection,
+          ElasticTransactionEnum.index,
           field,
-          ElasticConfig.fieldsMapping[field],
+          ElasticMappingFieldsConfig[field],
         );
       }
     }

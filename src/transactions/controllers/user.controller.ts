@@ -8,10 +8,9 @@ import { ActionItemInterface } from '../interfaces';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
-import { MongoSearchService, TransactionsService } from '../services';
+import { ElasticSearchService, MongoSearchService, TransactionsService } from '../services';
 import { UserFilter } from '../tools';
 import { ConfigService } from '@nestjs/config';
-import { ElasticSearchService } from '@pe/folders-plugin';
 
 @Controller('user')
 @ApiTags('user')

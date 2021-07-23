@@ -6,7 +6,7 @@ import { ValidateItemsBeforeActionListener } from './validate-items-before-actio
 import { SaveItemsAfterActionListener } from './save-items-after-action.listener';
 import { ValidateAmountBeforeActionListener } from './validate-amount-before-action.listener';
 import { ValidateAmountMatchesItemsBeforeActionListener } from './validate-amount-matches-items-before-action.listener';
-import { FolderDocumentsListener } from './folder-documents.listener';
+import { GetFolderDocumentsListener } from './get-folder-documents.listener';
 
 export const EventListenersList: any[] = [
   BeforeSantanderSeShippingGoodsEventListener,
@@ -17,5 +17,5 @@ export const EventListenersList: any[] = [
   ValidateAmountBeforeActionListener,
   ValidateAmountMatchesItemsBeforeActionListener,
   ValidateItemsBeforeActionListener,
-  FolderDocumentsListener,
+  GetFolderDocumentsListener,
 ];

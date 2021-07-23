@@ -8,10 +8,10 @@ import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import { ExchangeCalculator, ExchangeCalculatorFactory } from '../../../../src/transactions/currency';
 import { ListQueryDto, PagingResultDto } from '../../../../src/transactions/dto';
+import { ElasticTransactionEnum } from '../../../../src/transactions/enum';
 import { TransactionBasicInterface } from '../../../../src/transactions/interfaces';
-import { ElasticConfig } from '../../../../src/config';
-import { ElasticSearchService } from '@pe/folders-plugin';
-import { EventDispatcher } from '@pe/nest-kit';
+
+import { ElasticSearchService } from '../../../../src/transactions/services';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -23,7 +23,6 @@ describe('Elastic Search Service', () => {
   let exchangeCalculator: ExchangeCalculator;
   let exchangeCalculatorFactory: ExchangeCalculatorFactory;
   let elasticSearchClient: ElasticSearchClient;
-  let eventDispatcher: EventDispatcher;
 
   before(() => {
     exchangeCalculator = {
@@ -33,14 +32,11 @@ describe('Elastic Search Service', () => {
       create: (): any => { },
     } as any;
     elasticSearchClient = {
-      count: (): any => { },
       search: (): any => { },
-    } as any;
-    eventDispatcher = {
-      dispatch: (): any => { },
+      count: (): any => { },
     } as any;
 
-    testService = new ElasticSearchService(elasticSearchClient, ElasticConfig, eventDispatcher);
+    testService = new ElasticSearchService(elasticSearchClient, exchangeCalculatorFactory);
   });
 
   beforeEach(() => {
@@ -129,7 +125,6 @@ describe('Elastic Search Service', () => {
           value: '1f5fdd26-0ae5-4653-a524-5ac5d4dfbf52',
         },
         channel_set_uuid: {
-          condition: 'is',
           value: ['0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0'],
         },
         uuid: [
@@ -162,8 +157,18 @@ describe('Elastic Search Service', () => {
 
       const result: PagingResultDto = await testService.getResult(listDto);
 
+      expect(exchangeCalculator.getCurrencyExchangeRate)
+        .calledWith('NPR')
+        .calledWith('EUR');
       expect(elasticSearchClient.search)
-        .calledWithExactly(ElasticConfig.index.collection, {
+        .calledWithExactly(ElasticTransactionEnum.index, {
+          aggs: {
+            status: {
+              terms: {
+                field: 'status',
+              },
+            },
+          },
           from: 0,
           query: {
             bool: {
@@ -193,39 +198,76 @@ describe('Elastic Search Service', () => {
               must_not: [],
             },
           },
-          size: 10,
-          sort: [ { created_at: 'asc' } ],
+        })
+        .calledWithExactly(ElasticTransactionEnum.index, {
+          aggs: {
+            specific_status: {
+              terms: {
+                field: 'specific_status',
+              },
+            },
+          },
+          from: 0,
+          query: {
+            bool: {
+              must: [
+                {
+                  match_phrase: { business_uuid: '1f5fdd26-0ae5-4653-a524-5ac5d4dfbf52' },
+                },
+                {
+                  match_phrase: { channel_set_uuid: '0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0' },
+                },
+                { match_phrase: { uuid: '0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0' } },
+                {
+                  query_string: {
+                    fields: [
+                      'original_id^1',
+                      'customer_name^1',
+                      'merchant_name^1',
+                      'reference^1',
+                      'payment_details.finance_id^1',
+                      'payment_details.application_no^1',
+                      'customer_email^1',
+                    ],
+                    query: '*title=iphone*',
+                  },
+                },
+              ],
+              must_not: [],
+            },
+          },
         });
-
       expect(result).to.deep.equal({
         collection: [
           {
             _id: '5e2eeaab4c6f68dc49dbfdcd',
-            amount: 100,
-            delivery_fee: 2.99,
-            down_payment: 50,
-            history: [{ amount: 70 }],
+            amount: 1,
+            delivery_fee: 0.029900000000000003,
+            down_payment: 0.5,
+            history: [{ amount: 0.7 }],
             items: [
               {
-                fixed_shipping_price: 1.99,
-                price: 20,
-                price_net: 19,
-                shipping_price: 2,
-                shipping_settings_rate: 5,
-                vat_rate: 13,
-                weight: 200,
+                fixed_shipping_price: 0.0199,
+                price: 0.2,
+                price_net: 0.19,
+                shipping_price: 0.02,
+                shipping_settings_rate: 0.05,
+                vat_rate: 0.13,
+                weight: 2,
               },
             ],
-            payment_fee: 0.2,
-            total: 112,
+            payment_fee: 0.002,
+            total: 1.12,
           },
         ],
         filters: { },
         pagination_data: {
+          amount: 1.23,
+          amount_currency: 'EUR',
           page: 1,
           total: 1,
         },
-        usage: { },
+        usage: { specific_statuses: ['PENDING'], statuses: ['SUCEEDED'] },
       });
     });
 
@@ -306,7 +348,6 @@ describe('Elastic Search Service', () => {
           value: '1f5fdd26-0ae5-4653-a524-5ac5d4dfbf52',
         },
         channel_set_uuid: {
-          condition: 'is',
           value: ['0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0'],
         },
         uuid: [
@@ -338,8 +379,18 @@ describe('Elastic Search Service', () => {
 
       const result: PagingResultDto = await testService.getResult(listDto);
 
+      expect(exchangeCalculator.getCurrencyExchangeRate)
+        .not.calledWith('NPR')
+        .not.calledWith('EUR');
       expect(elasticSearchClient.search)
-        .calledWithExactly(ElasticConfig.index.collection, {
+        .calledWithExactly(ElasticTransactionEnum.index, {
+          aggs: {
+            status: {
+              terms: {
+                field: 'status',
+              },
+            },
+          },
           from: 0,
           query: {
             bool: {
@@ -369,41 +420,77 @@ describe('Elastic Search Service', () => {
               must_not: [],
             },
           },
-          size: 10,
-          sort: [ { created_at: 'asc' } ],
-        });
-
-      expect(result).to.deep.equal(
-        {
-          collection: [
-            {
-              _id: '5e2eeaab4c6f68dc49dbfdcd',
-              amount: 100,
-              delivery_fee: 2.99,
-              down_payment: 50,
-              history: [{ amount: 70 }],
-              items: [
+        })
+        .calledWithExactly(ElasticTransactionEnum.index, {
+          aggs: {
+            specific_status: {
+              terms: {
+                field: 'specific_status',
+              },
+            },
+          },
+          from: 0,
+          query: {
+            bool: {
+              must: [
                 {
-                  fixed_shipping_price: 1.99,
-                  price: 20,
-                  price_net: 19,
-                  shipping_price: 2,
-                  shipping_settings_rate: 5,
-                  vat_rate: 13,
-                  weight: 200,
+                  match_phrase: { business_uuid: '1f5fdd26-0ae5-4653-a524-5ac5d4dfbf52' },
+                },
+                {
+                  match_phrase: { channel_set_uuid: '0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0' },
+                },
+                { match_phrase: { uuid: '0f82d7e8-f24e-403e-ab0d-37fe9fd3e8d0' } },
+                {
+                  query_string: {
+                    fields: [
+                      'original_id^1',
+                      'customer_name^1',
+                      'merchant_name^1',
+                      'reference^1',
+                      'payment_details.finance_id^1',
+                      'payment_details.application_no^1',
+                      'customer_email^1',
+                    ],
+                    query: '*title=iphone*',
+                  },
                 },
               ],
-              payment_fee: 0.2,
-              total: 112,
+              must_not: [],
             },
-          ],
-          filters: { },
-          pagination_data: {
-            page: 1,
-            total: 1,
           },
-          usage: { },
         });
+      expect(result).to.deep.equal({
+        collection: [
+          {
+            _id: '5e2eeaab4c6f68dc49dbfdcd',
+            amount: 1,
+            delivery_fee: 0.029900000000000003,
+            down_payment: 0.5,
+            history: [{ amount: 0.7 }],
+            items: [
+              {
+                fixed_shipping_price: 0.0199,
+                price: 0.2,
+                price_net: 0.19,
+                shipping_price: 0.02,
+                shipping_settings_rate: 0.05,
+                vat_rate: 0.13,
+                weight: 2,
+              },
+            ],
+            payment_fee: 0.002,
+            total: 1.12,
+          },
+        ],
+        filters: { },
+        pagination_data: {
+          amount: 2,
+          amount_currency: undefined,
+          page: 1,
+          total: 1,
+        },
+        usage: { specific_statuses: ['PENDING'], statuses: ['SUCEEDED'] },
+      });
     });
 
     it('should get Result simple', async () => {
@@ -493,35 +580,73 @@ describe('Elastic Search Service', () => {
 
       const result: PagingResultDto = await testService.getResult(listDto);
 
+      expect(exchangeCalculator.getCurrencyExchangeRate)
+        .calledWith('NPR')
+        .calledWith('EUR');
+      expect(elasticSearchClient.search)
+        .calledWithExactly(ElasticTransactionEnum.index, {
+          aggs: {
+            status: {
+              terms: {
+                field: 'status',
+              },
+            },
+          },
+          from: 0,
+          query: {
+            bool: {
+              must: [],
+              must_not: [],
+            },
+          },
+        })
+        .calledWithExactly(ElasticTransactionEnum.index, {
+          aggs: {
+            specific_status: {
+              terms: {
+                field: 'specific_status',
+              },
+            },
+          },
+          from: 0,
+          query: {
+            bool: {
+              must: [],
+              must_not: [],
+            },
+          },
+        });
       expect(result).to.deep.equal({
         collection: [
           {
             _id: '5e2eeaab4c6f68dc49dbfdcd',
-            amount: 100,
-            delivery_fee: 2.99,
-            down_payment: 50,
-            history: [{ amount: 70 }],
+            amount: 1,
+            delivery_fee: 0.029900000000000003,
+            down_payment: 0.5,
+            history: [{ amount: 0.7 }],
             items: [
               {
-                fixed_shipping_price: 1.99,
-                price: 20,
-                price_net: 19,
-                shipping_price: 2,
-                shipping_settings_rate: 5,
-                vat_rate: 13,
-                weight: 200,
+                fixed_shipping_price: 0.0199,
+                price: 0.2,
+                price_net: 0.19,
+                shipping_price: 0.02,
+                shipping_settings_rate: 0.05,
+                vat_rate: 0.13,
+                weight: 2,
               },
             ],
-            payment_fee: 0.2,
-            total: 112,
+            payment_fee: 0.002,
+            total: 1.12,
           },
         ],
         filters: { },
         pagination_data: {
+          amount: 1.23,
+          amount_currency: 'EUR',
           page: 1,
           total: 1,
         },
-        usage: { },
+        usage: { specific_statuses: ['PENDING'], statuses: ['SUCEEDED'] },
       });
     });
   });

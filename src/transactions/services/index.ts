@@ -5,6 +5,7 @@ export * from './business.service';
 export * from './business-payment-option.service';
 export * from './dto-validation.service';
 export * from './daily-report-transactions.service';
+export * from './elastic-search.service';
 export * from './mongo-search.service';
 export * from './payment-flow.service';
 export * from './payments-micro.service';

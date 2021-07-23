@@ -4,9 +4,9 @@ import { ElasticSearchClient } from '@pe/elastic-kit';
 import { Command, Positional } from '@pe/nest-kit';
 import { Model } from 'mongoose';
 import { TransactionDoubleConverter } from '../converter';
+import { ElasticTransactionEnum } from '../enum';
 import { TransactionBasicInterface } from '../interfaces/transaction';
 import { TransactionModel } from '../models';
-import { ElasticConfig } from '../../config';
 
 @Injectable()
 export class TransactionsEsBusinessUpdateCommand {
@@ -33,7 +33,7 @@ export class TransactionsEsBusinessUpdateCommand {
 
     Logger.log(`Clearing "${business_uuid}" transactions from ElasticSearch.`);
     await this.elasticSearchClient.deleteByQuery(
-      ElasticConfig.index.collection,
+      ElasticTransactionEnum.index,
       {
         query: {
           match_phrase: {
@@ -60,7 +60,7 @@ export class TransactionsEsBusinessUpdateCommand {
       }
 
       await this.elasticSearchClient.bulkIndex(
-        ElasticConfig.index.collection,
+        ElasticTransactionEnum.index,
         prepared,
       );
 

@@ -6,8 +6,7 @@ import * as readline from 'readline';
 import { ListQueryDto, PagingResultDto } from '../dto';
 import { BusinessModel } from '../models';
 import { BusinessSchemaName } from '../schemas';
-import { MongoSearchService } from '../services';
-import { ElasticSearchService } from '@pe/folders-plugin';
+import { ElasticSearchService, MongoSearchService } from '../services';
 import { BusinessFilter } from '../tools';
 
 @Injectable()
