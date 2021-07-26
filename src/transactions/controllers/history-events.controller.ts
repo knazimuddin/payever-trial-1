@@ -7,6 +7,8 @@ import { PaymentActionEventEnum } from '../enum/events';
 import { TransactionModel } from '../models';
 import { TransactionHistoryService, TransactionsService } from '../services';
 
+const statusChangeActionName: string = 'statuschanged';
+
 @Controller()
 export class HistoryEventsController {
   constructor(
@@ -23,6 +25,11 @@ export class HistoryEventsController {
   public async onActionCompletedEvent(
     message: ActionCompletedMessageDto,
   ): Promise<void> {
+    // History is now created by transaction app itself, from events we listen only for status change event
+    if (message.action !== statusChangeActionName) {
+      return;
+    }
+
     this.logger.log({ text: 'ACTION.COMPLETED', message });
     const search: { [key: string]: string } = message.payment.uuid
       ? { uuid: message.payment.uuid }
@@ -54,6 +61,11 @@ export class HistoryEventsController {
   public async onHistoryAddEvent(
     message: AddHistoryEventMessageDto,
   ): Promise<void> {
+    // History is now created by transaction app itself, from events we listen only for status change event
+    if (message.history_type !== statusChangeActionName) {
+      return;
+    }
+
     this.logger.log({ text: 'HISTORY.ADD', message });
     // @TODO use only uuid later, no original_id
     const search: { [key: string]: string } = message.payment.uuid

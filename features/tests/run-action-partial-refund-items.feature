@@ -183,6 +183,20 @@ Feature: Partial refund - items flow
       }
     }
     """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "transactions",
+          {
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "{{transactionId}}"
+          }
+         ],
+        "result": {}
+      }
+      """
     And I use DB fixture "transactions/partial-capture/third-party-payment"
     When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/refund" with json:
     """
@@ -209,10 +223,10 @@ Feature: Partial refund - items flow
          "original_id": "*",
          "uuid": "{{transactionId}}",
          "amount": 100,
-         "amount_capture_rest": 105,
+         "amount_capture_rest": 80,
          "amount_captured": 0,
-         "amount_refund_rest": 100,
-         "amount_refunded": 0,
+         "amount_refund_rest": 75,
+         "amount_refunded": 25,
          "currency": "EUR",
          "total": 105
        }
