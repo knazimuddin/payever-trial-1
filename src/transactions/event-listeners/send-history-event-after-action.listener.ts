@@ -24,7 +24,7 @@ export class SendHistoryEventAfterActionListener {
       data: {
         amount: this.getAmountFromPayload(transaction, actionPayload),
         payment_status: transaction.status,
-        reason: actionPayload.fields?.reason ? actionPayload.fields.reason : '',
+        reason: this.getReasonFromPayload(actionPayload),
       },
       payment: {
         id: transaction.original_id,
@@ -68,5 +68,21 @@ export class SendHistoryEventAfterActionListener {
     }
 
     return amount ? amount : transaction.total;
+  }
+
+  private getReasonFromPayload(actionPayload: ActionPayloadDto): string {
+    let reason: string = actionPayload.fields?.reason ? actionPayload.fields.reason : null;
+
+    if (reason) {
+      return reason;
+    }
+
+    reason = actionPayload.fields?.payment_return?.reason
+      ? actionPayload.fields.payment_return.reason
+      : actionPayload.fields?.payment_cancel?.reason
+        ? actionPayload.fields.payment_cancel.reason
+        : null;
+
+    return reason ? reason : '';
   }
 }
