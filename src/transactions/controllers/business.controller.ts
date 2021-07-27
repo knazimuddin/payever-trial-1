@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Acl, AclActionsEnum, ParamModel } from '@pe/nest-kit';
+import { AccessTokenPayload, Acl, AclActionsEnum, ParamModel, User } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
@@ -50,7 +50,7 @@ const UuidPlaceholder: string = ':uuid';
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class BusinessController {
-  private defaultCurrency: string;
+  private readonly defaultCurrency: string;
 
   constructor(
     private readonly transactionsService: TransactionsService,
@@ -165,6 +165,7 @@ export class BusinessController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
+    @User() user: AccessTokenPayload,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionOutputInterface> {
     const updatedTransaction: TransactionUnpackedDetailsInterface = !transaction.example
@@ -172,6 +173,7 @@ export class BusinessController {
         transaction,
         actionPayload,
         action,
+        user,
       )
       : await this.transactionActionService.doFakeAction(
         transaction,
@@ -249,6 +251,7 @@ export class BusinessController {
       transaction,
       actionPayload,
       PaymentActionsEnum.ShippingGoods,
+      null,
       true,
     );
   }
