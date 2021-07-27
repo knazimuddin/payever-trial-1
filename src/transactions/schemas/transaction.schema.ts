@@ -122,7 +122,10 @@ TransactionSchema.virtual('amount_refund_rest').get(function (): number {
 });
 
 TransactionSchema.virtual('amount_capture_rest').get(function (): number {
-  return Math.round((this.total - this.amount_captured - this.amount_refunded + Number.EPSILON) * 100) / 100;
+  const amountCaptureRest: number =
+    Math.round((this.total - this.amount_captured - this.amount_refunded + Number.EPSILON) * 100) / 100;
+
+  return amountCaptureRest >= 0 ? amountCaptureRest : 0;
 });
 
 TransactionSchema.virtual('available_refund_items').get(function (): TransactionRefundItemInterface[] {
