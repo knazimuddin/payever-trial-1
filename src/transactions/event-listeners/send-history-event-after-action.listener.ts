@@ -5,6 +5,7 @@ import { TransactionModel } from '../models';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 import { TransactionCartItemInterface } from '../interfaces/transaction';
+import { PaymentActionsEnum } from '../enum';
 
 @Injectable()
 export class SendHistoryEventAfterActionListener {
@@ -22,7 +23,7 @@ export class SendHistoryEventAfterActionListener {
     const message: HistoryEventActionCompletedInterface = {
       action,
       data: {
-        amount: this.getAmountFromPayload(transaction, actionPayload),
+        amount: this.getAmountFromPayload(transaction, action, actionPayload),
         payment_status: transaction.status,
         reason: this.getReasonFromPayload(actionPayload),
       },
@@ -48,8 +49,19 @@ export class SendHistoryEventAfterActionListener {
     );
   }
 
-  private getAmountFromPayload(transaction: TransactionModel, actionPayload: ActionPayloadDto): number {
+  private getAmountFromPayload(transaction: TransactionModel, action: string, actionPayload: ActionPayloadDto): number {
     let amount: number = actionPayload.fields?.amount ? actionPayload.fields.amount : null;
+
+    if (amount) {
+      return amount;
+    }
+
+    switch (action) {
+      case PaymentActionsEnum.Refund:
+      case PaymentActionsEnum.Return:
+        amount = actionPayload.fields?.payment_return?.amount ? actionPayload.fields.payment_return.amount : null;
+        break;
+    }
 
     if (amount) {
       return amount;
