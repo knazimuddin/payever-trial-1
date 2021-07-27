@@ -7,7 +7,7 @@ import { PaymentActionEventEnum } from '../enum/events';
 import { TransactionModel } from '../models';
 import { TransactionHistoryService, TransactionsService } from '../services';
 
-const statusChangeActionName: string = 'statuschanged';
+const allowedHistoryActions: string[] = ['statuschanged', 'preauthorize', 'capture'];
 
 @Controller()
 export class HistoryEventsController {
@@ -25,8 +25,8 @@ export class HistoryEventsController {
   public async onActionCompletedEvent(
     message: ActionCompletedMessageDto,
   ): Promise<void> {
-    // History is now created by transaction app itself, from events we listen only for status change event
-    if (message.action !== statusChangeActionName) {
+    // History is now created by transaction app itself, from events we listen only for some specific events
+    if (!allowedHistoryActions.includes(message.action)) {
       return;
     }
 
@@ -61,8 +61,8 @@ export class HistoryEventsController {
   public async onHistoryAddEvent(
     message: AddHistoryEventMessageDto,
   ): Promise<void> {
-    // History is now created by transaction app itself, from events we listen only for status change event
-    if (message.history_type !== statusChangeActionName) {
+    // History is now created by transaction app itself, from events we listen only for some specific events
+    if (!allowedHistoryActions.includes(message.history_type)) {
       return;
     }
 
