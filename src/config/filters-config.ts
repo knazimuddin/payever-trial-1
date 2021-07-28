@@ -26,9 +26,9 @@ export const FiltersConfig: FilterOptionInterface[] = [
     type: FilterOptionTypeEnum.string,
   },
   {
-    fieldName: 'date',
+    fieldName: 'created_at',
     filterConditions: FiltersService.getDateFilterConditions(),
-    label: 'translation.date',
+    label: 'translation.created_at',
     type: FilterOptionTypeEnum.date,
   },
   {
