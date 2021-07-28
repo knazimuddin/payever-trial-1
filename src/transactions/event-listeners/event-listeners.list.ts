@@ -7,11 +7,13 @@ import { SaveItemsAfterActionListener } from './save-items-after-action.listener
 import { ValidateAmountBeforeActionListener } from './validate-amount-before-action.listener';
 import { ValidateAmountMatchesItemsBeforeActionListener } from './validate-amount-matches-items-before-action.listener';
 import { FolderDocumentsListener } from './folder-documents.listener';
+import { SendHistoryEventAfterActionListener } from './send-history-event-after-action.listener';
 
 export const EventListenersList: any[] = [
   BeforeSantanderSeShippingGoodsEventListener,
   HistoryRecordEventListener,
   SaveItemsAfterActionListener,
+  SendHistoryEventAfterActionListener,
   SendTransactionUpdateEventAfterActionListener,
   StatisticsEventListener,
   ValidateAmountBeforeActionListener,

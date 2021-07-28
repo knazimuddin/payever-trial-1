@@ -287,49 +287,11 @@ Feature: Partial capture - amount flow
       }
       """
     And I use DB fixture "transactions/partial-capture/third-party-payment"
-    When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
+    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
     """
     {
-      "name": "payever.event.payment.action.completed",
-      "payload": {
-        "payment": {
-          "id": "440ec879-7f02-48d4-9ffb-77adfaf79a06",
-          "uuid": "{{transactionId}}",
-          "amount": 100,
-          "total": 105,
-          "currency": "NOK",
-          "reference": "1906191249319025",
-          "customer_name": "Test Customer",
-          "customer_email": "test@test.com",
-          "specific_status": "PAID",
-          "status": "STATUS_CANCELLED",
-          "address": {
-            "country": "NO",
-            "city": "HAUGLANDSHELLA",
-            "zip_code": "5310",
-            "street": "Ravnetua 21",
-            "phone": "90782130",
-            "salutation": "SALUTATION_MR",
-            "first_name": "Christian",
-            "last_name": "Breivik"
-          },
-          "fee": 0,
-          "delivery_fee": 2,
-          "payment_fee": 3,
-          "down_payment": 0,
-          "place": "cancelled",
-          "business_payment_option": {
-            "payment_option": {
-              "payment_method": "santander_invoice_no"
-            }
-          },
-          "created_at": "2019-06-19T10:50:00+00:00"
-        },
-        "action": "shipping_goods",
-        "amount": "50",
-        "data": {
-          "amount": "50"
-        }
+      "fields":{
+        "amount": 50
       }
     }
     """

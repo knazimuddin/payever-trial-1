@@ -39,7 +39,7 @@ import { ConfigService } from '@nestjs/config';
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class AdminController {
-  private defaultCurrency: string;
+  private readonly defaultCurrency: string;
 
   constructor(
     private readonly transactionsService: TransactionsService,

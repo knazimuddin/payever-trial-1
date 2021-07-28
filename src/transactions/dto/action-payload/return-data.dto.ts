@@ -13,7 +13,7 @@ export class ReturnDataDto {
 
   @IsString()
   @IsOptional()
-  public reason: boolean;
+  public reason: string;
 
   @IsOptional()
   @ValidateNested()

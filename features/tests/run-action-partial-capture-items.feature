@@ -247,6 +247,20 @@ Feature: Partial capture - items flow
       }
     }
     """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "transactions",
+          {
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "{{transactionId}}"
+          }
+         ],
+        "result": {}
+      }
+      """
     And I use DB fixture "transactions/partial-capture/third-party-payment"
     When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
     """
@@ -279,8 +293,8 @@ Feature: Partial capture - items flow
          "original_id": "*",
          "uuid": "{{transactionId}}",
          "amount": 100,
-         "amount_capture_rest": 105,
-         "amount_captured": 0,
+         "amount_capture_rest": 30,
+         "amount_captured": 75,
          "amount_refund_rest": 100,
          "amount_refunded": 0,
          "currency": "EUR",
@@ -366,6 +380,20 @@ Feature: Partial capture - items flow
       }
     }
     """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "transactions",
+          {
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "{{transactionId}}"
+          }
+         ],
+        "result": {}
+      }
+      """
     And I use DB fixture "transactions/partial-capture/third-party-payment-partial-products"
     When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
     """
@@ -398,8 +426,8 @@ Feature: Partial capture - items flow
          "original_id": "*",
          "uuid": "{{transactionId}}",
          "amount": 100,
-         "amount_capture_rest": 105,
-         "amount_captured": 0,
+         "amount_capture_rest": 30,
+         "amount_captured": 75,
          "amount_refund_rest": 100,
          "amount_refunded": 0,
          "currency": "EUR",
