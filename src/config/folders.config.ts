@@ -73,7 +73,6 @@ export const FoldersConfig: FoldersPluginOptionsInterface = {
         type: 'text',
       },
       total: {
-        fielddata: true,
         type: 'long',
       },
       type: {

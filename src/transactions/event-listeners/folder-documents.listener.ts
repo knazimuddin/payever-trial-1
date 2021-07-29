@@ -83,8 +83,9 @@ export class FolderDocumentsListener {
       await this.elasticSearchService.distinctFieldValues('specific_status', additionalResults.elasticFilters);
 
     additionalResults.usage = {
-      specific_statuses: specific_status.map((bucket: { key: string }) => bucket.key.toUpperCase()),
-      statuses: status.map((bucket: { key: string }) => bucket.key.toUpperCase()),
+      specific_statuses: specific_status ?
+        specific_status.map((bucket: { key: string }) => bucket.key.toUpperCase()) : [],
+      statuses: status ? status.map((bucket: { key: string }) => bucket.key.toUpperCase()) : [],
     };
   }
 
@@ -158,12 +159,14 @@ export class FolderDocumentsListener {
     let totalPerCurrency: number = 0;
     const calculator: ExchangeCalculator = this.exchangeCalculatorFactory.create();
 
-    for (const amount of amounts) {
-      const currencyRate: number = await calculator.getCurrencyExchangeRate(amount.key);
-      totalPerCurrency += currencyRate
-        ? amount.total_amount.value / currencyRate
-        : amount.total_amount.value
-      ;
+    if (amounts) {
+      for (const amount of amounts) {
+        const currencyRate: number = await calculator.getCurrencyExchangeRate(amount.key);
+        totalPerCurrency += currencyRate
+          ? amount.total_amount.value / currencyRate
+          : amount.total_amount.value
+        ;
+      }
     }
     const rate: number = await calculator.getCurrencyExchangeRate(currency);
 
