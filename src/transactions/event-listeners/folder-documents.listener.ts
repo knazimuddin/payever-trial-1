@@ -113,7 +113,7 @@ export class FolderDocumentsListener {
       },
     };
 
-    return this.elasticSearchClient.search(FoldersConfig.elastic.index.collection, body)
+    return this.elasticSearchClient.search(FoldersConfig.elastic.index.elasticIndex, body)
       .then((results: any) => {
         return results?.body?.aggregations?.total_amount?.value ?
           results.body.aggregations.total_amount.value / 100 :
@@ -148,7 +148,7 @@ export class FolderDocumentsListener {
 
     const amounts: Array<{ key: string, total_amount: { value: number }}> =
       await this.elasticSearchClient
-        .search(FoldersConfig.elastic.index.collection, body)
+        .search(FoldersConfig.elastic.index.elasticIndex, body)
         .then((results: any) => {
           return results?.body?.aggregations?.total_amount?.buckets ?
             results.body.aggregations.total_amount.buckets :

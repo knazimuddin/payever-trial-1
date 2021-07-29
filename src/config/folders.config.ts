@@ -4,7 +4,7 @@ import { TransactionSchemaName, TransactionSchema } from '../transactions/schema
 import { FiltersConfig } from './filters-config';
 
 export const FoldersConfig: FoldersPluginOptionsInterface = {
-  combinedList: false,
+  combinedList: true,
   documentSchema: {
     schema: TransactionSchema,
     schemaName: TransactionSchemaName,
@@ -16,12 +16,73 @@ export const FoldersConfig: FoldersPluginOptionsInterface = {
       elasticSearchCloudId: environment.elasticSearchCloudId,
       elasticSearchHost: environment.elasticSearchHost,
     },
+
     index: {
       businessIdField: 'business_uuid',
-      collection: 'transactions',
       documentIdField: 'uuid',
-      type: 'transaction',
+      elasticIndex: 'folder_transactions',
+      type: 'folder_transaction',
     },
+
+    mappingFields: {
+      amount: {
+        type: 'long',
+      },
+      channel: {
+        fielddata: true,
+        type: 'text',
+      },
+      currency: {
+        fielddata: true,
+        type: 'text',
+      },
+      customer_name: {
+        fielddata: true,
+        type: 'text',
+      },
+      delivery_fee: {
+        type: 'long',
+      },
+      down_payment: {
+        type: 'long',
+      },
+      example: {
+        type: 'boolean',
+      },
+      merchant_name: {
+        fielddata: true,
+        type: 'text',
+      },
+      mongoId: {
+        fielddata: true,
+        type: 'text',
+      },
+      original_id: {
+        fielddata: true,
+        type: 'text',
+      },
+      payment_fee: {
+        type: 'long',
+      },
+      specific_status: {
+        fielddata: true,
+        type: 'text',
+      },
+      status: {
+        fielddata: true,
+        type: 'text',
+      },
+      total: {
+        fielddata: true,
+        type: 'long',
+      },
+      type: {
+        fielddata: true,
+        type: 'text',
+      },
+
+    },
+
     searchFields: [
       'original_id^1',
       'customer_name^1',
@@ -30,6 +91,27 @@ export const FoldersConfig: FoldersPluginOptionsInterface = {
       'payment_details.finance_id^1',
       'payment_details.application_no^1',
       'customer_email^1',
+    ],
+
+    storeFields: [
+      'original_id',
+      'reference',
+      'created_at',
+      'type',
+      'status',
+      'specific_status',
+      'channel',
+      'amount',
+      'total',
+      'currency',
+      'customer_name',
+      'customer_email',
+      'merchant_name',
+      'merchant_email',
+      'seller_name',
+      'seller_email',
+      'payment_details.finance_id',
+      'payment_details.application_no',
     ],
   },
   filters: FiltersConfig,
