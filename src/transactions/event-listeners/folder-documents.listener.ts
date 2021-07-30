@@ -12,7 +12,6 @@ import { BusinessModel } from '../models';
 import { ListQueryDto } from '../dto';
 import { BusinessService, TransactionsService } from '../services';
 import { ConfigService } from '@nestjs/config';
-import { TransactionDoubleConverter } from '../converter';
 import { FoldersConfig } from '../../config';
 import { ExchangeCalculator, ExchangeCalculatorFactory } from '../currency';
 
@@ -59,11 +58,22 @@ export class FolderDocumentsListener {
     listDto.currency = business ? business.currency : this.defaultCurrency;
   }
 
+  @EventListener(FoldersEventsEnum.ElasticBeforeIndexDocument)
+  public async elasticBeforeIndexDocument(
+    elasticSearchElementDto: ElasticSearchElementDto,
+  ): Promise<void> {
+    elasticSearchElementDto.result = elasticSearchElementDto.source;
+    elasticSearchElementDto.result.amount = Math.trunc(elasticSearchElementDto.result.amount * 100);
+    elasticSearchElementDto.result.total = Math.trunc(elasticSearchElementDto.result.total * 100);
+  }
+
   @EventListener(FoldersEventsEnum.ElasticProcessSearchResult)
   public async elasticProcessSearchResult(
     elasticSearchElementDto: ElasticSearchElementDto,
   ): Promise<void> {
-    elasticSearchElementDto.result = TransactionDoubleConverter.unpack(elasticSearchElementDto.source);
+    elasticSearchElementDto.result = elasticSearchElementDto.source;
+    elasticSearchElementDto.result.amount = elasticSearchElementDto.result.amount / 100;
+    elasticSearchElementDto.result.total = elasticSearchElementDto.result.total / 100;
   }
 
   @EventListener(FoldersEventsEnum.ElasticGetAdditionalSearchResults)
@@ -104,7 +114,7 @@ export class FolderDocumentsListener {
       aggs : {
         total_amount: {
           sum: {
-            field : 'total',
+            field : 'total.keyword',
           },
         },
       },
@@ -159,6 +169,7 @@ export class FolderDocumentsListener {
     let totalPerCurrency: number = 0;
     const calculator: ExchangeCalculator = this.exchangeCalculatorFactory.create();
 
+    console.log(amounts);
     if (amounts) {
       for (const amount of amounts) {
         const currencyRate: number = await calculator.getCurrencyExchangeRate(amount.key);
