@@ -30,7 +30,7 @@ export class FolderDocumentsListener {
     this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
   }
 
-  @EventListener(FoldersEventsEnum.GetRootDocumentIds)
+  @EventListener(FoldersEventsEnum.GetRootDocumentsIds)
   public async getFilteredRootDocumentIds(
     folderDocuments: FolderDocumentsResultsDto,
   ): Promise<void> {
@@ -62,18 +62,20 @@ export class FolderDocumentsListener {
   public async elasticBeforeIndexDocument(
     elasticSearchElementDto: ElasticSearchElementDto,
   ): Promise<void> {
-    elasticSearchElementDto.result = elasticSearchElementDto.source;
-    elasticSearchElementDto.result.amount = Math.trunc(elasticSearchElementDto.result.amount * 100);
-    elasticSearchElementDto.result.total = Math.trunc(elasticSearchElementDto.result.total * 100);
+    console.log('before ElasticBeforeIndexDocument', elasticSearchElementDto)
+    elasticSearchElementDto.document.amount = Math.trunc(elasticSearchElementDto.document.amount * 100);
+    elasticSearchElementDto.document.total = Math.trunc(elasticSearchElementDto.document.total * 100);
+    console.log('aftre ElasticBeforeIndexDocument', elasticSearchElementDto)
   }
 
   @EventListener(FoldersEventsEnum.ElasticProcessSearchResult)
   public async elasticProcessSearchResult(
     elasticSearchElementDto: ElasticSearchElementDto,
   ): Promise<void> {
-    elasticSearchElementDto.result = elasticSearchElementDto.source;
-    elasticSearchElementDto.result.amount = elasticSearchElementDto.result.amount / 100;
-    elasticSearchElementDto.result.total = elasticSearchElementDto.result.total / 100;
+    console.log('before ElasticProcessSearchResult', elasticSearchElementDto)
+    elasticSearchElementDto.document.amount = elasticSearchElementDto.document.amount / 100;
+    elasticSearchElementDto.document.total = elasticSearchElementDto.document.total / 100;
+    console.log('after ElasticProcessSearchResult', elasticSearchElementDto)
   }
 
   @EventListener(FoldersEventsEnum.ElasticGetAdditionalSearchResults)
@@ -81,6 +83,8 @@ export class FolderDocumentsListener {
     additionalResults: ElasticAdditionalSearchResultsDto,
   ): Promise<void> {
     const amount: number = await this.totalAmount(additionalResults.elasticFilters, additionalResults.currency);
+
+    console.log(additionalResults.elasticFilters);
 
     additionalResults.paginationData = {
       amount,
