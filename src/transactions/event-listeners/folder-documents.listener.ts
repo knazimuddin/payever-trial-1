@@ -114,7 +114,7 @@ export class FolderDocumentsListener {
       aggs : {
         total_amount: {
           sum: {
-            field : 'total.keyword',
+            field : 'total',
           },
         },
       },
@@ -169,7 +169,6 @@ export class FolderDocumentsListener {
     let totalPerCurrency: number = 0;
     const calculator: ExchangeCalculator = this.exchangeCalculatorFactory.create();
 
-    console.log(amounts);
     if (amounts) {
       for (const amount of amounts) {
         const currencyRate: number = await calculator.getCurrencyExchangeRate(amount.key);
