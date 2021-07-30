@@ -159,6 +159,22 @@ Feature: Partial capture - amount flow
         "result": {}
       }
       """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
+      }
+      """
     And I use DB fixture "transactions/partial-capture/third-party-payment-captured-amount"
     When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/legacy-api-action/shipped" with json:
     """
@@ -284,6 +300,22 @@ Feature: Partial capture - amount flow
           }
          ],
         "result": {}
+      }
+      """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
       }
       """
     And I use DB fixture "transactions/partial-capture/third-party-payment"

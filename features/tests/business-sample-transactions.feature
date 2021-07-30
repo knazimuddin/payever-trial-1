@@ -85,6 +85,22 @@ Feature: Handling business events
 
   Scenario: Create sample products
     Given I use DB fixture "business-sample-transactions"
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
+      }
+      """
     Given I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
       """
       {

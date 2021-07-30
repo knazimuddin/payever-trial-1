@@ -197,6 +197,22 @@ Feature: Partial refund - items flow
         "result": {}
       }
       """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
+      }
+      """
     And I use DB fixture "transactions/partial-capture/third-party-payment"
     When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/refund" with json:
     """

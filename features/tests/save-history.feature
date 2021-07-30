@@ -13,6 +13,22 @@ Feature: Save history records
         "result": {}
       }
       """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
+      }
+      """
     When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
       """
       {
@@ -93,6 +109,22 @@ Feature: Save history records
         "result": {}
       }
       """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
+      }
+      """
     When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
       """
       {
@@ -140,6 +172,22 @@ Feature: Save history records
         "result": {}
       }
       """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
+      }
+      """
     When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
       """
       {
@@ -181,6 +229,22 @@ Feature: Save history records
           }
          ],
         "result": {}
+      }
+      """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
       }
       """
     When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:

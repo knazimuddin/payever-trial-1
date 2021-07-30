@@ -1,4 +1,5 @@
 import { Injectable, Logger, HttpException } from '@nestjs/common';
+import { EventDispatcher } from '@pe/nest-kit';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
 import { DelayRemoveClient, ElasticSearchClient } from '@pe/elastic-kit';
@@ -6,6 +7,7 @@ import { Mutex } from '@pe/nest-kit/modules/mutex';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 import { Model, Types } from 'mongoose';
 import { v4 as uuid } from 'uuid';
+import { FoldersEventsEnum } from '@pe/folders-plugin';
 
 import {
   TransactionCartConverter,
@@ -43,6 +45,7 @@ export class TransactionsService {
     private readonly delayRemoveClient: DelayRemoveClient,
     private readonly mutex: Mutex,
     private readonly logger: Logger,
+    private readonly eventDispatcher: EventDispatcher,
   ) { }
 
   public async create(transactionDto: TransactionPackedDetailsInterface): Promise<TransactionModel> {
@@ -58,6 +61,13 @@ export class TransactionsService {
       TransactionMutexKey,
       transactionDto.uuid,
       async () => this.transactionModel.create(transactionDto as TransactionModel),
+    );
+
+
+    const folderDocument: any = { ...created };
+    await this.eventDispatcher.dispatch(
+      FoldersEventsEnum.FolderActionUpdateDocument,
+      folderDocument,
     );
 
     await this.elasticSearchClient.singleIndex(
@@ -107,6 +117,12 @@ export class TransactionsService {
       ),
     );
 
+    const folderDocument: any = { ...updated };
+    await this.eventDispatcher.dispatch(
+      FoldersEventsEnum.FolderActionUpdateDocument,
+      folderDocument,
+    );
+
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
       TransactionDoubleConverter.pack(updated.toObject()),
@@ -135,6 +151,12 @@ export class TransactionsService {
           new: true,
         },
       ),
+    );
+
+    const folderDocument: any = { ...updated };
+    await this.eventDispatcher.dispatch(
+      FoldersEventsEnum.FolderActionUpdateDocument,
+      folderDocument,
     );
 
     await this.elasticSearchClient.singleIndex(
@@ -201,6 +223,11 @@ export class TransactionsService {
       return;
     }
 
+    await this.eventDispatcher.dispatch(
+      FoldersEventsEnum.FolderActionDeleteDocument,
+      transaction.uuid,
+    );
+
     await this.delayRemoveClient.deleteByQuery(
       ElasticTransactionEnum.index,
       ElasticTransactionEnum.type,
@@ -232,6 +259,12 @@ export class TransactionsService {
           new: true,
         },
       ),
+    );
+
+    const folderDocument: any = { ...updated };
+    await this.eventDispatcher.dispatch(
+      FoldersEventsEnum.FolderActionUpdateDocument,
+      folderDocument,
     );
 
     await this.elasticSearchClient.singleIndex(
@@ -386,6 +419,12 @@ export class TransactionsService {
       ),
     );
 
+    const folderDocument: any = { ...updated };
+    await this.eventDispatcher.dispatch(
+      FoldersEventsEnum.FolderActionUpdateDocument,
+      folderDocument,
+    );
+
     await this.elasticSearchClient.singleIndex(
       ElasticTransactionEnum.index,
       TransactionDoubleConverter.pack(updated.toObject()),
@@ -415,6 +454,12 @@ export class TransactionsService {
           new: true,
         },
       ),
+    );
+
+    const folderDocument: any = { ...updated };
+    await this.eventDispatcher.dispatch(
+      FoldersEventsEnum.FolderActionUpdateDocument,
+      folderDocument,
     );
 
     await this.elasticSearchClient.singleIndex(

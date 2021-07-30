@@ -4,7 +4,7 @@ import { TransactionSchemaName, TransactionSchema } from '../transactions/schema
 import { FiltersConfig } from './filters-config';
 
 export const FoldersConfig: FoldersPluginOptionsInterface = {
-  combinedList: true,
+  combinedList: false,
   documentSchema: {
     schema: TransactionSchema,
     schemaName: TransactionSchemaName,
