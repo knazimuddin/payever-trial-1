@@ -6,7 +6,7 @@ import {
   FolderDocumentsResultsDto,
   ElasticSearchElementDto,
   ElasticAdditionalSearchResultsDto,
-  ElasticSearchService,
+  FoldersElasticSearchService,
 } from '@pe/folders-plugin';
 import { BusinessModel } from '../models';
 import { ListQueryDto } from '../dto';
@@ -25,7 +25,7 @@ export class FolderDocumentsListener {
     private readonly elasticSearchClient: ElasticSearchClient,
     private readonly transactionsService: TransactionsService,
     private readonly exchangeCalculatorFactory: ExchangeCalculatorFactory,
-    private readonly elasticSearchService: ElasticSearchService,
+    private readonly elasticSearchService: FoldersElasticSearchService,
   ) {
     this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
   }
