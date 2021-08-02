@@ -8,6 +8,7 @@ import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { MigrationModule } from '@pe/migration-kit';
 import { FoldersPluginModule } from '@pe/folders-plugin';
 import { RulesSdkModule } from '@pe/rules-sdk';
+import { BusinessModule } from '@pe/business-kit';
 
 import { environment } from '../environments';
 import {
@@ -27,7 +28,6 @@ import {
   AdminController,
   AuthEventsController,
   BpoEventsController,
-  BusinessBusMessagesController,
   BusinessController,
   DailyReportTransactionBusMessagesController,
   FlowEventsController,
@@ -69,7 +69,6 @@ import {
 import {
   ActionsRetriever,
   BusinessPaymentOptionService,
-  BusinessService,
   DailyReportTransactionsService,
   DtoValidationService,
   ElasticSearchService,
@@ -96,7 +95,6 @@ import { FiltersConfig, RulesFieldsConfig } from '../config';
   controllers: [
     AdminController,
     BpoEventsController,
-    BusinessBusMessagesController,
     BusinessController,
     DailyReportTransactionBusMessagesController,
     FlowEventsController,
@@ -117,6 +115,9 @@ import { FiltersConfig, RulesFieldsConfig } from '../config';
     ConfigModule,
     HttpModule,
     IntercomModule,
+    BusinessModule.forRoot({
+      customSchema: BusinessSchema,
+    }),
     MongooseModule.forFeature([
       { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
       { name: TransactionExampleSchemaName, schema: TransactionExampleSchema },
@@ -156,7 +157,6 @@ import { FiltersConfig, RulesFieldsConfig } from '../config';
     AuthEventsProducer,
     BpoFixCommand,
     BusinessPaymentOptionService,
-    BusinessService,
     CollectorModule,
     ConfigService,
     DailyReportTransactionMailerReportEventProducer,
