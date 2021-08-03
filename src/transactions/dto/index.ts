@@ -1,5 +1,3 @@
-export * from './business.dto';
-export * from './remove-business.dto';
 export * from './code-updated.dto';
 export * from './company-details.dto';
 export * from './list-query.dto';
