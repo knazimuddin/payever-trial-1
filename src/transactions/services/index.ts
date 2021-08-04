@@ -1,7 +1,6 @@
 export * from './third-party-caller.service';
 export * from './messaging.service';
 export * from './actions.retriever';
-export * from './business.service';
 export * from './business-payment-option.service';
 export * from './dto-validation.service';
 export * from './daily-report-transactions.service';

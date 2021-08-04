@@ -8,6 +8,7 @@ import { ValidateAmountBeforeActionListener } from './validate-amount-before-act
 import { ValidateAmountMatchesItemsBeforeActionListener } from './validate-amount-matches-items-before-action.listener';
 import { FolderDocumentsListener } from './folder-documents.listener';
 import { SendHistoryEventAfterActionListener } from './send-history-event-after-action.listener';
+import { BusinessEventListener } from './business-event.listener';
 
 export const EventListenersList: any[] = [
   BeforeSantanderSeShippingGoodsEventListener,
@@ -20,4 +21,5 @@ export const EventListenersList: any[] = [
   ValidateAmountMatchesItemsBeforeActionListener,
   ValidateItemsBeforeActionListener,
   FolderDocumentsListener,
+  BusinessEventListener,
 ];
