@@ -31,7 +31,7 @@
     "@pe/elastic-kit": "^3.2.3",
     "@pe/folders-plugin": "^3.0.1-beta",
     "@pe/migration-kit": "^2.0.0",
-    "@pe/nest-kit": "^7.7.4",
+    "@pe/nest-kit": "^7.9.1-beta",
     "@pe/notifications-sdk": "^5.0.0",
     "@pe/rules-sdk": "^1.1.0",
     "form-data": "^2.5.1",
