@@ -24,4 +24,4 @@ async function bootstrap(): Promise<void> {
   app.listen(() => logger.log(`Transactions queue: ${queueName} consumer started`, 'NestApplication'));
 }
 // tslint:disable-next-line no-floating-promises
-bootstrap().then();
+bootstrap().catch();

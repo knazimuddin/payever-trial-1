@@ -65,15 +65,20 @@ export class TransactionsService {
 
 
     const folderDocument: any = { ...created };
+    console.log(folderDocument)
     await this.eventDispatcher.dispatch(
       FoldersEventsEnum.FolderActionUpdateDocument,
       folderDocument,
     );
 
-    await this.elasticSearchClient.singleIndex(
-      ElasticTransactionEnum.index,
-      TransactionDoubleConverter.pack(created.toObject()),
-    );
+    try {
+      await this.elasticSearchClient.singleIndex(
+        ElasticTransactionEnum.index,
+        TransactionDoubleConverter.pack(created.toObject()),
+      );
+    } catch (e) {
+      console.log(e)
+    }
 
     await this.notifier.sendNewTransactionNotification(created);
     const flow: PaymentFlowModel = await this.paymentFlowService.findOne({ id: created.payment_flow_id });
