@@ -115,8 +115,10 @@ import { FiltersConfig, FoldersConfig, RulesOptions } from '../config';
     ConfigModule,
     HttpModule,
     IntercomModule,
-    BusinessModule.forRoot({
-      customSchema: BusinessSchema,
+    BusinessModule.forRoot(
+      {
+        customSchema: BusinessSchema,
+        rabbitChannel: RabbitChannels.Transactions,
     }),
     MongooseModule.forFeature([
       { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },

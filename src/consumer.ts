@@ -11,9 +11,12 @@ async function bootstrap(): Promise<void> {
   const consumerName: string = ProviderNameTransformer.transform(queueName);
   const server: Consumer = context.get(consumerName);
 
-  const app: INestMicroservice = await NestFactory.createMicroservice(AppModule, {
-    strategy: server,
-  });
+  const app: INestMicroservice = await NestFactory.createMicroservice(
+    AppModule,
+    {
+      logger: false,
+      strategy: server,
+    });
 
   const logger: NestKitLogger = app.get(NestKitLogger);
   app.useLogger(logger);
