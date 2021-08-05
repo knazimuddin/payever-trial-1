@@ -64,7 +64,7 @@ export class TransactionsService {
     );
 
 
-    const folderDocument: any = { ...created };
+    const folderDocument: any = created.toObject();
     console.log(folderDocument)
     await this.eventDispatcher.dispatch(
       FoldersEventsEnum.FolderActionUpdateDocument,
@@ -122,7 +122,8 @@ export class TransactionsService {
       ),
     );
 
-    const folderDocument: any = { ...updated };
+    const folderDocument: any = updated.toObject();
+    console.log(folderDocument)
     await this.eventDispatcher.dispatch(
       FoldersEventsEnum.FolderActionUpdateDocument,
       folderDocument,
@@ -158,7 +159,8 @@ export class TransactionsService {
       ),
     );
 
-    const folderDocument: any = { ...updated };
+    const folderDocument: any = updated.toObject();
+    console.log(folderDocument)
     await this.eventDispatcher.dispatch(
       FoldersEventsEnum.FolderActionUpdateDocument,
       folderDocument,
@@ -266,7 +268,8 @@ export class TransactionsService {
       ),
     );
 
-    const folderDocument: any = { ...updated };
+    const folderDocument: any = updated.toObject();
+    console.log(folderDocument)
     await this.eventDispatcher.dispatch(
       FoldersEventsEnum.FolderActionUpdateDocument,
       folderDocument,
@@ -424,7 +427,8 @@ export class TransactionsService {
       ),
     );
 
-    const folderDocument: any = { ...updated };
+    const folderDocument: any = updated.toObject();
+    console.log(folderDocument)
     await this.eventDispatcher.dispatch(
       FoldersEventsEnum.FolderActionUpdateDocument,
       folderDocument,
@@ -461,7 +465,8 @@ export class TransactionsService {
       ),
     );
 
-    const folderDocument: any = { ...updated };
+    const folderDocument: any = updated.toObject();
+    console.log(folderDocument)
     await this.eventDispatcher.dispatch(
       FoldersEventsEnum.FolderActionUpdateDocument,
       folderDocument,
