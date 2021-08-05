@@ -8,12 +8,13 @@ import {
   ElasticAdditionalSearchResultsDto,
   FoldersElasticSearchService,
 } from '@pe/folders-plugin';
-import { BusinessModel } from '../models';
 import { ListQueryDto } from '../dto';
-import { BusinessService, TransactionsService } from '../services';
+import { TransactionsService } from '../services';
 import { ConfigService } from '@nestjs/config';
 import { FoldersConfig } from '../../config';
 import { ExchangeCalculator, ExchangeCalculatorFactory } from '../currency';
+import { BusinessService } from '@pe/business-kit';
+import { BusinessModel } from '../models';
 
 @Injectable()
 export class FolderDocumentsListener {
@@ -54,7 +55,7 @@ export class FolderDocumentsListener {
     listDto: ListQueryDto,
     businessId: string,
   ): Promise<void> {
-    const business: BusinessModel = await this.businessService.findBusinessById(businessId);
+    const business: BusinessModel = await this.businessService.findOneById(businessId) as unknown as BusinessModel;
     listDto.currency = business ? business.currency : this.defaultCurrency;
   }
 
