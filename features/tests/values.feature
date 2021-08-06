@@ -202,7 +202,7 @@ Feature: Values
           "type": "string"
         },
         {
-          "fieldName": "date",
+          "fieldName": "created_at",
           "filterConditions": [
             "isDate",
             "isNotDate",
@@ -210,7 +210,7 @@ Feature: Values
             "beforeDate",
             "betweenDates"
           ],
-          "label": "translation.date",
+          "label": "translation.created_at",
           "type": "date"
         },
         {

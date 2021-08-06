@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { DelayRemoveClient, ElasticSearchClient } from '@pe/elastic-kit';
-import { RabbitMqClient } from '@pe/nest-kit';
+import { EventDispatcher, RabbitMqClient } from '@pe/nest-kit';
 import { Mutex } from '@pe/nest-kit/modules/mutex';
 import { NotificationsEmitter } from '@pe/notifications-sdk';
 import * as chai from 'chai';
@@ -38,6 +38,7 @@ describe('TransactionsService', () => {
   let rabbitClient: RabbitMqClient;
   let mutex: Mutex;
   let logger: Logger;
+  let eventDispatcher: EventDispatcher;
 
   const transaction: TransactionModel = {
     id: uuid.v4(),
@@ -93,16 +94,19 @@ describe('TransactionsService', () => {
       warn: (): any => { },
     } as any;
 
+    eventDispatcher = {
+      dispatch: (): any => { },
+    } as any;
+
     testService = new TransactionsService(
       transactionModel,
       notificationsEmitter,
       paymentFlowService,
       authEventsProducer,
-      elasticSearchClient,
       notifier,
-      delayRemoveClient,
       mutex,
       logger,
+      eventDispatcher,
     );
   });
 

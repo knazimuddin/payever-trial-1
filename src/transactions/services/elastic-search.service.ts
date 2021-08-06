@@ -44,8 +44,8 @@ export class ElasticSearchService {
             total: res[4].count,
           },
           usage: {
-            specific_statuses: res[3].map((bucket: { key: string }) => bucket.key.toUpperCase()),
-            statuses: res[2].map((bucket: { key: string }) => bucket.key.toUpperCase()),
+            specific_statuses: res[3] ? res[3].map((bucket: { key: string }) => bucket.key.toUpperCase()) : [],
+            statuses: res[2] ? res[2].map((bucket: { key: string }) => bucket.key.toUpperCase()) : [],
           },
         };
       })
@@ -177,12 +177,14 @@ export class ElasticSearchService {
     let totalPerCurrency: number = 0;
     const calculator: ExchangeCalculator = this.exchangeCalculatorFactory.create();
 
-    for (const amount of amounts) {
-      const currencyRate: number = await calculator.getCurrencyExchangeRate(amount.key);
-      totalPerCurrency += currencyRate
-        ? amount.total_amount.value / currencyRate
-        : amount.total_amount.value
-      ;
+    if (amounts) {
+      for (const amount of amounts) {
+        const currencyRate: number = await calculator.getCurrencyExchangeRate(amount.key);
+        totalPerCurrency += currencyRate
+          ? amount.total_amount.value / currencyRate
+          : amount.total_amount.value
+        ;
+      }
     }
     const rate: number = await calculator.getCurrencyExchangeRate(currency);
 

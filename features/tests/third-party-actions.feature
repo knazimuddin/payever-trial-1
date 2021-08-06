@@ -212,6 +212,22 @@ Feature: Third party payment actions
         "result": {}
       }
       """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
+      }
+      """
     And I use DB fixture "transactions/third-party-payment"
     When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/shipping_goods" with json:
     """
@@ -402,6 +418,22 @@ Feature: Third party payment actions
           }
          ],
         "result": {}
+      }
+      """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
       }
       """
     And I use DB fixture "transactions/third-party-payment"
@@ -610,6 +642,22 @@ Feature: Third party payment actions
           }
          ],
         "result": {}
+      }
+      """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
       }
       """
     And I use DB fixture "transactions/third-party-payment-status-update"

@@ -89,7 +89,7 @@ import {
 } from './services';
 import { EventsGateway } from './ws';
 import { RabbitChannels } from '../enums';
-import { FiltersConfig, RulesFieldsConfig } from '../config';
+import { FiltersConfig, FoldersConfig, RulesOptions } from '../config';
 
 @Module({
   controllers: [
@@ -115,8 +115,10 @@ import { FiltersConfig, RulesFieldsConfig } from '../config';
     ConfigModule,
     HttpModule,
     IntercomModule,
-    BusinessModule.forRoot({
-      customSchema: BusinessSchema,
+    BusinessModule.forRoot(
+      {
+        customSchema: BusinessSchema,
+        rabbitChannel: RabbitChannels.Transactions,
     }),
     MongooseModule.forFeature([
       { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
@@ -143,14 +145,8 @@ import { FiltersConfig, RulesFieldsConfig } from '../config';
       host: environment.elasticSearchHost,
     }),
     MigrationModule,
-    FoldersPluginModule.forFeature({
-      schema: TransactionSchema,
-      schemaName: TransactionSchemaName,
-      useBusiness: true,
-    }),
-    RulesSdkModule.forRoot({
-      fields: RulesFieldsConfig,
-    }),
+    FoldersPluginModule.forFeature(FoldersConfig),
+    RulesSdkModule.forRoot(RulesOptions),
   ],
   providers: [
     ActionsRetriever,

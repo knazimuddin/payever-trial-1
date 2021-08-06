@@ -36,4 +36,5 @@ export const FiltersList: any[] = [
   StartsWithConditionFilter,
   IsInConditionFilter,
   IsNotInConditionFilter,
+
 ];
