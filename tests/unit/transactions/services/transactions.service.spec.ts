@@ -104,7 +104,6 @@ describe('TransactionsService', () => {
       paymentFlowService,
       authEventsProducer,
       notifier,
-      delayRemoveClient,
       mutex,
       logger,
       eventDispatcher,

@@ -4,12 +4,13 @@ import { TransactionEventEnum } from '../enum/events';
 import { TransactionModel } from '../models';
 import { ElasticTransactionEnum } from '../enum';
 import { TransactionDoubleConverter } from '../converter';
-import { ElasticSearchClient } from '@pe/elastic-kit';
+import { DelayRemoveClient, ElasticSearchClient } from '@pe/elastic-kit';
 
 @Injectable()
 export class TransactionElasticListener {
   constructor(
     private readonly elasticSearchClient: ElasticSearchClient,
+    private readonly delayRemoveClient: DelayRemoveClient,
   ) { }
 
   @EventListener(TransactionEventEnum.TransactionCreated)
@@ -24,6 +25,23 @@ export class TransactionElasticListener {
     transaction: TransactionModel,
   ): Promise<void> {
     await this.indexTransaction(transaction);
+  }
+
+  @EventListener(TransactionEventEnum.TransactionDeleted)
+  public async transactionDeleted(
+    transactionId: string,
+  ): Promise<void> {
+    await this.delayRemoveClient.deleteByQuery(
+      ElasticTransactionEnum.index,
+      ElasticTransactionEnum.type,
+      {
+        query: {
+          match_phrase: {
+            uuid: transactionId,
+          },
+        },
+      },
+    );
   }
 
   private async indexTransaction(

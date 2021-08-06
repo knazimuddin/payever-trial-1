@@ -57,6 +57,17 @@ export class FolderDocumentsListener {
     );
   }
 
+  @EventListener(TransactionEventEnum.TransactionDeleted)
+  public async transactionDeleted(
+    transactionId: string,
+  ): Promise<void> {
+
+    await this.eventDispatcher.dispatch(
+      FoldersEventsEnum.FolderActionDeleteDocument,
+      transactionId,
+    );
+  }
+
   @EventListener(FoldersEventsEnum.GetRootDocumentsIds)
   public async getFilteredRootDocumentIds(
     folderDocuments: FolderDocumentsResultsDto,

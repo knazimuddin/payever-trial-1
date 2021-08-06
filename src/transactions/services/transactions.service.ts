@@ -2,12 +2,10 @@ import { Injectable, Logger, HttpException } from '@nestjs/common';
 import { EventDispatcher } from '@pe/nest-kit';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
-import { DelayRemoveClient } from '@pe/elastic-kit';
 import { Mutex } from '@pe/nest-kit/modules/mutex';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 import { Model, Types } from 'mongoose';
 import { v4 as uuid } from 'uuid';
-import { FoldersEventsEnum } from '@pe/folders-plugin';
 
 import {
   TransactionCartConverter,
@@ -15,7 +13,6 @@ import {
   TransactionSantanderApplicationConverter,
 } from '../converter';
 import { RpcResultDto } from '../dto';
-import { ElasticTransactionEnum } from '../enum';
 import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
 import {
   TransactionBasicInterface,
@@ -41,7 +38,6 @@ export class TransactionsService {
     private readonly paymentFlowService: PaymentFlowService,
     private readonly authEventsProducer: AuthEventsProducer,
     private readonly notifier: TransactionsNotifier,
-    private readonly delayRemoveClient: DelayRemoveClient,
     private readonly mutex: Mutex,
     private readonly logger: Logger,
     private readonly eventDispatcher: EventDispatcher,
@@ -204,20 +200,8 @@ export class TransactionsService {
     }
 
     await this.eventDispatcher.dispatch(
-      FoldersEventsEnum.FolderActionDeleteDocument,
+      TransactionEventEnum.TransactionDeleted,
       transaction.uuid,
-    );
-
-    await this.delayRemoveClient.deleteByQuery(
-      ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
-      {
-        query: {
-          match_phrase: {
-            uuid: transactionId,
-          },
-        },
-      },
     );
   }
 
