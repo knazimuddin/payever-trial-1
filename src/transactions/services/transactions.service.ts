@@ -63,7 +63,7 @@ export class TransactionsService {
     );
 
     await this.eventDispatcher.dispatch(
-      TransactionEventEnum.TransactionUpdated,
+      TransactionEventEnum.TransactionCreated,
       created,
     );
 

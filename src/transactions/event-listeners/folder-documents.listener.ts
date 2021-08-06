@@ -33,6 +33,18 @@ export class FolderDocumentsListener {
     this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
   }
 
+  @EventListener(TransactionEventEnum.TransactionCreated)
+  public async transactionCreated(
+    transaction: TransactionModel,
+  ): Promise<void> {
+
+    const folderDocument: any = transaction.toObject();
+    await this.eventDispatcher.dispatch(
+      FoldersEventsEnum.FolderActionCreateDocument,
+      folderDocument,
+    );
+  }
+
   @EventListener(TransactionEventEnum.TransactionUpdated)
   public async transactionUpdated(
     transaction: TransactionModel,
