@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EventListener } from '@pe/nest-kit';
+import { EventDispatcher, EventListener } from '@pe/nest-kit';
 import { ElasticSearchClient } from '@pe/elastic-kit';
 import {
   FoldersEventsEnum,
@@ -14,7 +14,8 @@ import { ConfigService } from '@nestjs/config';
 import { FoldersConfig } from '../../config';
 import { ExchangeCalculator, ExchangeCalculatorFactory } from '../currency';
 import { BusinessService } from '@pe/business-kit';
-import { BusinessModel } from '../models';
+import { BusinessModel, TransactionModel } from '../models';
+import { TransactionEventEnum } from '../enum/events';
 
 @Injectable()
 export class FolderDocumentsListener {
@@ -27,8 +28,21 @@ export class FolderDocumentsListener {
     private readonly transactionsService: TransactionsService,
     private readonly exchangeCalculatorFactory: ExchangeCalculatorFactory,
     private readonly elasticSearchService: FoldersElasticSearchService,
+    private readonly eventDispatcher: EventDispatcher,
   ) {
     this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
+  }
+
+  @EventListener(TransactionEventEnum.TransactionUpdated)
+  public async transactionUpdated(
+    transaction: TransactionModel,
+  ): Promise<void> {
+
+    const folderDocument: any = transaction.toObject();
+    await this.eventDispatcher.dispatch(
+      FoldersEventsEnum.FolderActionUpdateDocument,
+      folderDocument,
+    );
   }
 
   @EventListener(FoldersEventsEnum.GetRootDocumentsIds)

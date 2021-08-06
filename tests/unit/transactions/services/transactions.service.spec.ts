@@ -103,7 +103,6 @@ describe('TransactionsService', () => {
       notificationsEmitter,
       paymentFlowService,
       authEventsProducer,
-      elasticSearchClient,
       notifier,
       delayRemoveClient,
       mutex,

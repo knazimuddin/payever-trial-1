@@ -2,7 +2,7 @@ import { Injectable, Logger, HttpException } from '@nestjs/common';
 import { EventDispatcher } from '@pe/nest-kit';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
-import { DelayRemoveClient, ElasticSearchClient } from '@pe/elastic-kit';
+import { DelayRemoveClient } from '@pe/elastic-kit';
 import { Mutex } from '@pe/nest-kit/modules/mutex';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 import { Model, Types } from 'mongoose';
@@ -11,7 +11,6 @@ import { FoldersEventsEnum } from '@pe/folders-plugin';
 
 import {
   TransactionCartConverter,
-  TransactionDoubleConverter,
   TransactionPaymentDetailsConverter,
   TransactionSantanderApplicationConverter,
 } from '../converter';
@@ -30,6 +29,7 @@ import { TransactionsNotifier } from '../notifiers';
 import { AuthEventsProducer } from '../producer';
 import { TransactionSchemaName } from '../schemas';
 import { PaymentFlowService } from './payment-flow.service';
+import { TransactionEventEnum } from '../enum/events';
 
 const TransactionMutexKey: string = 'transactions-transaction';
 
@@ -40,7 +40,6 @@ export class TransactionsService {
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
     private readonly paymentFlowService: PaymentFlowService,
     private readonly authEventsProducer: AuthEventsProducer,
-    private readonly elasticSearchClient: ElasticSearchClient,
     private readonly notifier: TransactionsNotifier,
     private readonly delayRemoveClient: DelayRemoveClient,
     private readonly mutex: Mutex,
@@ -63,22 +62,10 @@ export class TransactionsService {
       async () => this.transactionModel.create(transactionDto as TransactionModel),
     );
 
-
-    const folderDocument: any = created.toObject();
-    console.log(folderDocument)
     await this.eventDispatcher.dispatch(
-      FoldersEventsEnum.FolderActionUpdateDocument,
-      folderDocument,
+      TransactionEventEnum.TransactionUpdated,
+      created,
     );
-
-    try {
-      await this.elasticSearchClient.singleIndex(
-        ElasticTransactionEnum.index,
-        TransactionDoubleConverter.pack(created.toObject()),
-      );
-    } catch (e) {
-      console.log(e)
-    }
 
     await this.notifier.sendNewTransactionNotification(created);
     const flow: PaymentFlowModel = await this.paymentFlowService.findOne({ id: created.payment_flow_id });
@@ -122,16 +109,9 @@ export class TransactionsService {
       ),
     );
 
-    const folderDocument: any = updated.toObject();
-    console.log(folderDocument)
     await this.eventDispatcher.dispatch(
-      FoldersEventsEnum.FolderActionUpdateDocument,
-      folderDocument,
-    );
-
-    await this.elasticSearchClient.singleIndex(
-      ElasticTransactionEnum.index,
-      TransactionDoubleConverter.pack(updated.toObject()),
+      TransactionEventEnum.TransactionUpdated,
+      updated,
     );
 
     return updated;
@@ -159,16 +139,9 @@ export class TransactionsService {
       ),
     );
 
-    const folderDocument: any = updated.toObject();
-    console.log(folderDocument)
     await this.eventDispatcher.dispatch(
-      FoldersEventsEnum.FolderActionUpdateDocument,
-      folderDocument,
-    );
-
-    await this.elasticSearchClient.singleIndex(
-      ElasticTransactionEnum.index,
-      TransactionDoubleConverter.pack(updated.toObject()),
+      TransactionEventEnum.TransactionUpdated,
+      updated,
     );
 
     return updated;
@@ -268,16 +241,9 @@ export class TransactionsService {
       ),
     );
 
-    const folderDocument: any = updated.toObject();
-    console.log(folderDocument)
     await this.eventDispatcher.dispatch(
-      FoldersEventsEnum.FolderActionUpdateDocument,
-      folderDocument,
-    );
-
-    await this.elasticSearchClient.singleIndex(
-      ElasticTransactionEnum.index,
-      TransactionDoubleConverter.pack(updated.toObject()),
+      TransactionEventEnum.TransactionUpdated,
+      updated,
     );
   }
 
@@ -427,16 +393,9 @@ export class TransactionsService {
       ),
     );
 
-    const folderDocument: any = updated.toObject();
-    console.log(folderDocument)
     await this.eventDispatcher.dispatch(
-      FoldersEventsEnum.FolderActionUpdateDocument,
-      folderDocument,
-    );
-
-    await this.elasticSearchClient.singleIndex(
-      ElasticTransactionEnum.index,
-      TransactionDoubleConverter.pack(updated.toObject()),
+      TransactionEventEnum.TransactionUpdated,
+      updated,
     );
   }
 
@@ -465,16 +424,9 @@ export class TransactionsService {
       ),
     );
 
-    const folderDocument: any = updated.toObject();
-    console.log(folderDocument)
     await this.eventDispatcher.dispatch(
-      FoldersEventsEnum.FolderActionUpdateDocument,
-      folderDocument,
-    );
-
-    await this.elasticSearchClient.singleIndex(
-      ElasticTransactionEnum.index,
-      TransactionDoubleConverter.pack(updated.toObject()),
+      TransactionEventEnum.TransactionUpdated,
+      updated,
     );
   }
 }
