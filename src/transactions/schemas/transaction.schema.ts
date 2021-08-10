@@ -1,9 +1,5 @@
 import { Schema } from 'mongoose';
-import {
-  TransactionCartItemInterface,
-  TransactionHistoryEntryInterface,
-  TransactionRefundItemInterface,
-} from '../interfaces/transaction';
+import { TransactionCartItemInterface, TransactionRefundItemInterface } from '../interfaces/transaction';
 import { AddressSchema } from './address.schema';
 import { TransactionCartItemSchema } from './transaction-cart-item-schema';
 import { TransactionHistoryEntrySchema } from './transaction-history-entry.schema';
@@ -126,7 +122,10 @@ TransactionSchema.virtual('amount_refund_rest').get(function (): number {
 });
 
 TransactionSchema.virtual('amount_capture_rest').get(function (): number {
-  return Math.round((this.total - this.amount_captured - this.amount_refunded + Number.EPSILON) * 100) / 100;
+  const amountCaptureRest: number =
+    Math.round((this.total - this.amount_captured - this.amount_refunded + Number.EPSILON) * 100) / 100;
+
+  return amountCaptureRest >= 0 ? amountCaptureRest : 0;
 });
 
 TransactionSchema.virtual('available_refund_items').get(function (): TransactionRefundItemInterface[] {

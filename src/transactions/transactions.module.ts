@@ -8,6 +8,7 @@ import { NotificationsSdkModule } from '@pe/notifications-sdk';
 import { MigrationModule } from '@pe/migration-kit';
 import { FoldersPluginModule } from '@pe/folders-plugin';
 import { RulesSdkModule } from '@pe/rules-sdk';
+import { BusinessModule } from '@pe/business-kit';
 
 import { environment } from '../environments';
 import {
@@ -27,7 +28,6 @@ import {
   AdminController,
   AuthEventsController,
   BpoEventsController,
-  BusinessBusMessagesController,
   BusinessController,
   DailyReportTransactionBusMessagesController,
   FlowEventsController,
@@ -69,7 +69,6 @@ import {
 import {
   ActionsRetriever,
   BusinessPaymentOptionService,
-  BusinessService,
   DailyReportTransactionsService,
   DtoValidationService,
   ElasticSearchService,
@@ -90,13 +89,12 @@ import {
 } from './services';
 import { EventsGateway } from './ws';
 import { RabbitChannels } from '../enums';
-import { FiltersConfig, RulesFieldsConfig } from '../config';
+import { FiltersConfig, FoldersConfig, RulesOptions } from '../config';
 
 @Module({
   controllers: [
     AdminController,
     BpoEventsController,
-    BusinessBusMessagesController,
     BusinessController,
     DailyReportTransactionBusMessagesController,
     FlowEventsController,
@@ -117,6 +115,11 @@ import { FiltersConfig, RulesFieldsConfig } from '../config';
     ConfigModule,
     HttpModule,
     IntercomModule,
+    BusinessModule.forRoot(
+      {
+        customSchema: BusinessSchema,
+        rabbitChannel: RabbitChannels.Transactions,
+    }),
     MongooseModule.forFeature([
       { name: BusinessPaymentOptionSchemaName, schema: BusinessPaymentOptionSchema },
       { name: TransactionExampleSchemaName, schema: TransactionExampleSchema },
@@ -142,21 +145,14 @@ import { FiltersConfig, RulesFieldsConfig } from '../config';
       host: environment.elasticSearchHost,
     }),
     MigrationModule,
-    FoldersPluginModule.forFeature({
-      schema: TransactionSchema,
-      schemaName: TransactionSchemaName,
-      useBusiness: true,
-    }),
-    RulesSdkModule.forRoot({
-      fields: RulesFieldsConfig,
-    }),
+    FoldersPluginModule.forFeature(FoldersConfig),
+    RulesSdkModule.forRoot(RulesOptions),
   ],
   providers: [
     ActionsRetriever,
     AuthEventsProducer,
     BpoFixCommand,
     BusinessPaymentOptionService,
-    BusinessService,
     CollectorModule,
     ConfigService,
     DailyReportTransactionMailerReportEventProducer,

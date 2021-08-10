@@ -549,6 +549,22 @@ Feature: Full real payment flow
         "result": {}
       }
       """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
+      }
+      """
     Then I process messages from RabbitMQ "async_events_transactions_micro" channel
     Then print RabbitMQ message list
     Then debug RabbitMQ message list
@@ -743,6 +759,22 @@ Feature: Full real payment flow
           }
          ],
         "result": {}
+      }
+      """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
       }
       """
     When I process messages from RabbitMQ "async_events_transactions_micro" channel

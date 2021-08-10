@@ -11,7 +11,7 @@ import { MessagingService } from './messaging.service';
 import { ThirdPartyCallerService } from './third-party-caller.service';
 import { TransactionsExampleService } from './transactions-example.service';
 import { TransactionsService } from './transactions.service';
-import { EventDispatcher } from '@pe/nest-kit';
+import { AccessTokenPayload, EventDispatcher } from '@pe/nest-kit';
 import { PaymentActionEventEnum } from '../enum/events';
 
 @Injectable()
@@ -30,6 +30,7 @@ export class TransactionActionService {
     transaction: TransactionModel,
     actionPayload: ActionPayloadDto,
     action: string,
+    user: AccessTokenPayload = null,
     skipValidation: boolean = false,
   ): Promise<TransactionUnpackedDetailsInterface> {
     this.dtoValidation.checkFileUploadDto(actionPayload);
@@ -74,11 +75,14 @@ export class TransactionActionService {
       throw new BadRequestException(e.message);
     }
 
+    transaction = await this.transactionsService.findModelByUuid(unpackedTransaction.uuid);
+
     await this.eventDispatcher.dispatch(
       PaymentActionEventEnum.PaymentActionAfter,
       transaction,
       actionPayload,
       action,
+      user,
     );
 
     return this.transactionsService.findUnpackedByUuid(unpackedTransaction.uuid);

@@ -78,7 +78,7 @@ class ThirdPartyPaymentFixture extends BaseFixture {
       delivery_fee: 2,
       shipping_method_name: 'some shipping name',
       shipping_order_id: '5db105b8-2da6-421e-8e6a-1c67048cda2b',
-      status: 'STATUS_ACCEPTED',
+      status: 'STATUS_REFUNDED',
       specific_status: 'NONE',
       original_id: '440ec879-7f02-48d4-9ffb-77adfaf79a06',
     }));

@@ -1,5 +1,6 @@
 import { TransactionRefundItemInterface } from './transaction-refund-item.interface';
 import { TransactionUploadItemInterface } from './transaction-upload-item.interface';
+import { HistoryEventUserInterface } from '../history-event-message/history-event-user.interface';
 
 export interface TransactionHistoryEntryInterface {
   action: string;
@@ -15,4 +16,5 @@ export interface TransactionHistoryEntryInterface {
     event_id: string,
     template_name: string,
   };
+  user?: HistoryEventUserInterface;
 }

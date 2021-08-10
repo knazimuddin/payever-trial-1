@@ -6,7 +6,7 @@ import { options } from './options';
 export class CustomWorld extends AbstractWorld {
   public constructor({ attach, parameters }: { attach: any, parameters: any }) {
     super(
-      {attach, parameters},
+      { attach, parameters},
       AppModule,
       options,
     );

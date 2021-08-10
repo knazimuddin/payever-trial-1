@@ -1,7 +1,7 @@
 import { Injectable, Logger, HttpException } from '@nestjs/common';
+import { EventDispatcher } from '@pe/nest-kit';
 import { RpcException } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
-import { DelayRemoveClient, ElasticSearchClient } from '@pe/elastic-kit';
 import { Mutex } from '@pe/nest-kit/modules/mutex';
 import { InjectNotificationsEmitter, NotificationsEmitter } from '@pe/notifications-sdk';
 import { Model, Types } from 'mongoose';
@@ -9,12 +9,10 @@ import { v4 as uuid } from 'uuid';
 
 import {
   TransactionCartConverter,
-  TransactionDoubleConverter,
   TransactionPaymentDetailsConverter,
   TransactionSantanderApplicationConverter,
 } from '../converter';
 import { RpcResultDto } from '../dto';
-import { ElasticTransactionEnum } from '../enum';
 import { CheckoutTransactionInterface, CheckoutTransactionRpcUpdateInterface } from '../interfaces/checkout';
 import {
   TransactionBasicInterface,
@@ -28,6 +26,7 @@ import { TransactionsNotifier } from '../notifiers';
 import { AuthEventsProducer } from '../producer';
 import { TransactionSchemaName } from '../schemas';
 import { PaymentFlowService } from './payment-flow.service';
+import { TransactionEventEnum } from '../enum/events';
 
 const TransactionMutexKey: string = 'transactions-transaction';
 
@@ -38,11 +37,10 @@ export class TransactionsService {
     @InjectNotificationsEmitter() private readonly notificationsEmitter: NotificationsEmitter,
     private readonly paymentFlowService: PaymentFlowService,
     private readonly authEventsProducer: AuthEventsProducer,
-    private readonly elasticSearchClient: ElasticSearchClient,
     private readonly notifier: TransactionsNotifier,
-    private readonly delayRemoveClient: DelayRemoveClient,
     private readonly mutex: Mutex,
     private readonly logger: Logger,
+    private readonly eventDispatcher: EventDispatcher,
   ) { }
 
   public async create(transactionDto: TransactionPackedDetailsInterface): Promise<TransactionModel> {
@@ -60,9 +58,9 @@ export class TransactionsService {
       async () => this.transactionModel.create(transactionDto as TransactionModel),
     );
 
-    await this.elasticSearchClient.singleIndex(
-      ElasticTransactionEnum.index,
-      TransactionDoubleConverter.pack(created.toObject()),
+    await this.eventDispatcher.dispatch(
+      TransactionEventEnum.TransactionCreated,
+      created,
     );
 
     await this.notifier.sendNewTransactionNotification(created);
@@ -107,9 +105,9 @@ export class TransactionsService {
       ),
     );
 
-    await this.elasticSearchClient.singleIndex(
-      ElasticTransactionEnum.index,
-      TransactionDoubleConverter.pack(updated.toObject()),
+    await this.eventDispatcher.dispatch(
+      TransactionEventEnum.TransactionUpdated,
+      updated,
     );
 
     return updated;
@@ -137,9 +135,9 @@ export class TransactionsService {
       ),
     );
 
-    await this.elasticSearchClient.singleIndex(
-      ElasticTransactionEnum.index,
-      TransactionDoubleConverter.pack(updated.toObject()),
+    await this.eventDispatcher.dispatch(
+      TransactionEventEnum.TransactionUpdated,
+      updated,
     );
 
     return updated;
@@ -158,6 +156,19 @@ export class TransactionsService {
 
     return transactionModel[0];
   }
+
+  public async findAllUuidByFilter(filter: any): Promise<string[]> {
+    const transactions: TransactionModel[] = await this.transactionModel.find(
+      filter,
+      {
+        _id: -1,
+        uuid: 1,
+      },
+    );
+
+    return transactions.map((transaction: TransactionModel) => { return transaction.uuid; });
+  }
+
 
   public async findCollectionByParams(params: any): Promise<TransactionModel[]> {
     return this.transactionModel.find(params);
@@ -188,16 +199,9 @@ export class TransactionsService {
       return;
     }
 
-    await this.delayRemoveClient.deleteByQuery(
-      ElasticTransactionEnum.index,
-      ElasticTransactionEnum.type,
-      {
-        query: {
-          match_phrase: {
-            uuid: transactionId,
-          },
-        },
-      },
+    await this.eventDispatcher.dispatch(
+      TransactionEventEnum.TransactionDeleted,
+      transaction.uuid,
     );
   }
 
@@ -221,9 +225,9 @@ export class TransactionsService {
       ),
     );
 
-    await this.elasticSearchClient.singleIndex(
-      ElasticTransactionEnum.index,
-      TransactionDoubleConverter.pack(updated.toObject()),
+    await this.eventDispatcher.dispatch(
+      TransactionEventEnum.TransactionUpdated,
+      updated,
     );
   }
 
@@ -373,9 +377,9 @@ export class TransactionsService {
       ),
     );
 
-    await this.elasticSearchClient.singleIndex(
-      ElasticTransactionEnum.index,
-      TransactionDoubleConverter.pack(updated.toObject()),
+    await this.eventDispatcher.dispatch(
+      TransactionEventEnum.TransactionUpdated,
+      updated,
     );
   }
 
@@ -404,9 +408,9 @@ export class TransactionsService {
       ),
     );
 
-    await this.elasticSearchClient.singleIndex(
-      ElasticTransactionEnum.index,
-      TransactionDoubleConverter.pack(updated.toObject()),
+    await this.eventDispatcher.dispatch(
+      TransactionEventEnum.TransactionUpdated,
+      updated,
     );
   }
 }

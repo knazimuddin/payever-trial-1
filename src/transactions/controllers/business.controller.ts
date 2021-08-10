@@ -13,21 +13,21 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Acl, AclActionsEnum, ParamModel } from '@pe/nest-kit';
+import { AccessTokenPayload, Acl, AclActionsEnum, ParamModel, User } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
 import { createReadStream, readFileSync, ReadStream, Stats, statSync } from 'fs';
 import * as path from 'path';
+import { BusinessDto,  BusinessService } from '@pe/business-kit';
 import { TransactionOutputConverter } from '../converter';
-import { BusinessDto, ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
+import { ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { BusinessModel, TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import {
   ActionsRetriever,
-  BusinessService,
   ElasticSearchService,
   MessagingService,
   MongoSearchService,
@@ -50,7 +50,7 @@ const UuidPlaceholder: string = ':uuid';
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class BusinessController {
-  private defaultCurrency: string;
+  private readonly defaultCurrency: string;
 
   constructor(
     private readonly transactionsService: TransactionsService,
@@ -165,6 +165,7 @@ export class BusinessController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
+    @User() user: AccessTokenPayload,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionOutputInterface> {
     const updatedTransaction: TransactionUnpackedDetailsInterface = !transaction.example
@@ -172,6 +173,7 @@ export class BusinessController {
         transaction,
         actionPayload,
         action,
+        user,
       )
       : await this.transactionActionService.doFakeAction(
         transaction,
@@ -249,6 +251,7 @@ export class BusinessController {
       transaction,
       actionPayload,
       PaymentActionsEnum.ShippingGoods,
+      null,
       true,
     );
   }
@@ -305,7 +308,8 @@ export class BusinessController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
-    const business: BusinessModel = await this.businessService.findBusinessById(businessId);
+    const business: BusinessModel = await this.businessService
+    .findOneById(businessId) as unknown as BusinessModel;
     listDto.currency = business ? business.currency : this.defaultCurrency;
 
     return this.elasticSearchService.getResult(listDto);
@@ -320,7 +324,9 @@ export class BusinessController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
-    const business: BusinessModel = await this.businessService.findBusinessById(businessId);
+    const business: BusinessModel = await this.businessService
+    .findOneById(businessId) as unknown as BusinessModel;
+
     listDto.currency = business ? business.currency : this.defaultCurrency;
 
     return this.mongoSearchService.getResult(listDto);
@@ -339,7 +345,8 @@ export class BusinessController {
     exportDto.limit = 10000;
     exportDto.page = 1;
     exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
-    const business: BusinessModel = await this.businessService.findBusinessById(businessId);
+    const business: BusinessModel = await this.businessService
+    .findOneById(businessId) as unknown as BusinessModel;
     exportDto.currency = business ? business.currency : this.defaultCurrency;
     const result: PagingResultDto =  await this.elasticSearchService.getResult(exportDto);
     const format: ExportFormat = exportDto.format;
