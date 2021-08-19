@@ -31,7 +31,7 @@
     "@pe/elastic-kit": "^3.2.3",
     "@pe/folders-plugin": "^3.0.1",
     "@pe/migration-kit": "^2.0.0",
-    "@pe/nest-kit": "^7.9.0",
+    "@pe/nest-kit": "^7.12.0",
     "@pe/notifications-sdk": "^5.0.0",
     "@pe/rules-sdk": "^1.1.0",
     "form-data": "^2.5.1",
@@ -44,7 +44,7 @@
     "xlsx": "^0.16.9"
   },
   "devDependencies": {
-    "@pe/cucumber-sdk": "^2.1.1",
+    "@pe/cucumber-sdk": "^2.13.1",
     "@pe/dev-kit": "^2.0.2",
     "@pe/pact-kit": "^2.1.1"
   }
