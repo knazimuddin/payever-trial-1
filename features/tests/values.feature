@@ -308,6 +308,10 @@ Feature: Values
             {
               "label": "translation.payment_option.payExCreditCard",
               "value": "payex_creditcard"
+            },
+            {
+              "label": "translation.payment_option.openbank",
+              "value": "openbank"
             }
           ],
           "type": "option"
@@ -836,6 +840,11 @@ Feature: Values
           "icon": "#payment-method-payex_creditcard",
           "label": "translation.payment_option.payExCreditCard",
           "name": "payex_creditcard"
+        },
+        {
+          "icon": "#payment-method-openbank",
+          "label": "translation.payment_option.openbank",
+          "name": "openbank"
         }
       ]
     }
