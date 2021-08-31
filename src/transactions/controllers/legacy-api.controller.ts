@@ -59,9 +59,9 @@ export class LegacyApiController {
       throw new NotFoundException(`Transaction by id ${transactionId} not found`);
     }
 
-    const businessId: string = this.getOauthUserBusiness(user, transaction.business_uuid);
+    const businessId: string = this.getOauthUserBusiness(user, transaction.businessId);
 
-    if (transaction.business_uuid !== businessId) {
+    if (transaction.businessId !== businessId) {
       throw new ForbiddenException(`You're not allowed to get transaction with id ${transactionId}`);
     }
 

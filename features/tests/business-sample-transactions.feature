@@ -175,7 +175,7 @@ Feature: Handling business events
     Then I look for model "Transaction" by following JSON and remember as "transactions1":
     """
       {
-        "business_uuid": "42bf8f24-d383-4e5a-ba18-e17d2e03bb0e"
+        "businessId": "42bf8f24-d383-4e5a-ba18-e17d2e03bb0e"
       }
     """
     And stored value "transactions1" should contain json:

@@ -297,7 +297,7 @@ export class MessagingService implements ActionCallerInterface {
     const payload: CheckoutTransactionInterface = TransactionConverter.toCheckoutTransaction(transaction);
     const dto: CheckoutTransactionRpcActionInterface = {
       business: {
-        id: transaction.business_uuid,
+        id: transaction.businessId,
       },
       payment: payload,
       payment_details: transaction.payment_details,

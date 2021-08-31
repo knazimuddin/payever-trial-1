@@ -24,13 +24,13 @@ describe('BusinessFilter', () => {
 
   describe('apply()', () => {
     it('should apply the given business filter', async () => {
-      
+
       const filter: any = {};
       const businessId: string = uuid.v4();
       const result: any = BusinessFilter.apply(businessId, filter);
       expect(result).to.deep.equal(
-        { 
-          business_uuid : [{
+        {
+          businessId : [{
           condition: 'is',
           value: [businessId],
           }]
@@ -39,7 +39,7 @@ describe('BusinessFilter', () => {
     });
 
     it('should apply the given business filter', async () => {
-      
+
       const filter: any = undefined;
       const spy: sinon.SinonSpy = sandbox.spy(BusinessFilter.apply);
       try {

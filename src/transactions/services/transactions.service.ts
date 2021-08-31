@@ -189,7 +189,7 @@ export class TransactionsService {
   }
 
   public async findAll(businessId: string): Promise<TransactionModel[]> {
-    return this.transactionModel.find({ business_uuid: businessId });
+    return this.transactionModel.find({ businessId: businessId });
   }
 
   public async removeByUuid(transactionId: string): Promise<void> {
@@ -388,7 +388,7 @@ export class TransactionsService {
     result: RpcResultDto,
   ): Promise<void> {
     const items: Types.DocumentArray<TransactionCartItemModel> =
-      TransactionCartConverter.fromCheckoutTransactionCart(result.payment_items, transaction.business_uuid);
+      TransactionCartConverter.fromCheckoutTransactionCart(result.payment_items, transaction.businessId);
 
     const updated: TransactionModel = await this.mutex.lock(
       TransactionMutexKey,

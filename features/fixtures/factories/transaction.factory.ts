@@ -49,7 +49,7 @@ const defaultTransactionFactory = (): TransactionModel => {
       street : 'Rödingsmarkt',
     },
     type : `type_${seq.current}`,
-    business_uuid : uuid.v4(),
+    businessId : uuid.v4(),
     merchant_name : `test_merchant_${seq.current}`,
     merchant_email : `testcases_${seq.current}@merchant.com`,
     payment_flow_id : uuid.v4(),

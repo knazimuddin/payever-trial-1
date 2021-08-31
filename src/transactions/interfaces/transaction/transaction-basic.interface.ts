@@ -18,7 +18,7 @@ export interface TransactionBasicInterface extends SantanderApplicationAwareInte
   available_refund_items?: TransactionRefundItemInterface[];
   billing_address: AddressInterface;
   business_option_id: number;
-  business_uuid: string;
+  businessId: string;
   channel: string; // 'store', ...
   channel_uuid: string;
   channel_set_uuid: string;

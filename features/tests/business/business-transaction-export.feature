@@ -51,7 +51,7 @@ Feature: Transaction export for business
                 "must": [
                   {
                     "match_phrase": {
-                      "business_uuid": "{{businessId}}"
+                      "businessId": "{{businessId}}"
                     }
                   }
                 ],
@@ -95,7 +95,7 @@ Feature: Transaction export for business
                "must": [
                  {
                    "match_phrase": {
-                     "business_uuid": "{{businessId}}"
+                     "businessId": "{{businessId}}"
                    }
                  }
                ],
@@ -126,7 +126,7 @@ Feature: Transaction export for business
                "must": [
                  {
                    "match_phrase": {
-                     "business_uuid": "{{businessId}}"
+                     "businessId": "{{businessId}}"
                    }
                  }
                ],
@@ -157,7 +157,7 @@ Feature: Transaction export for business
                "must": [
                  {
                    "match_phrase": {
-                     "business_uuid": "{{businessId}}"
+                     "businessId": "{{businessId}}"
                    }
                  }
                ],
@@ -180,7 +180,7 @@ Feature: Transaction export for business
                 "must": [
                   {
                     "match_phrase": {
-                      "business_uuid": "{{businessId}}"
+                      "businessId": "{{businessId}}"
                     }
                   }
                 ],

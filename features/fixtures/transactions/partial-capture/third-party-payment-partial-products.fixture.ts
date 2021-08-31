@@ -30,7 +30,7 @@ class ThirdPartyPaymentFixture extends BaseFixture {
 
     await this.transactionModel.create(transactionFactory.create({
       action_running: false,
-      business_uuid : businessId,
+      businessId: businessId,
       santander_applications: [ 'stub_usage_text' ],
       delivery_fee: 2,
       payment_fee: 3,

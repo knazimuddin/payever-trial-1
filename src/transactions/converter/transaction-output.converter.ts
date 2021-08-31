@@ -60,7 +60,7 @@ export class TransactionOutputConverter {
 
       billing_address: transaction.billing_address,
       business: {
-        uuid: transaction.business_uuid,
+        uuid: transaction.businessId,
       },
       cart: {
         available_refund_items: transaction.available_refund_items,

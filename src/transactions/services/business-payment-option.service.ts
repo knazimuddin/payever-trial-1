@@ -13,14 +13,17 @@ export class BusinessPaymentOptionService {
   ) { }
 
   public async createOrUpdate(
-    businessPaymentOptionDto: BusinessPaymentOptionInterface,
+    businessPaymentOptionDto: Omit<BusinessPaymentOptionInterface, 'businessId'> & { business_uuid: string },
   ): Promise<BusinessPaymentOptionModel> {
     await this.model.updateOne(
       {
         id: businessPaymentOptionDto.id,
       },
       {
-        $set: this.wrap(businessPaymentOptionDto),
+        $set: this.wrap({
+          ...businessPaymentOptionDto,
+          businessId: businessPaymentOptionDto.business_uuid,
+        }),
       },
       {
         new: true,
@@ -32,11 +35,11 @@ export class BusinessPaymentOptionService {
   }
 
   public async findOneByBusinessAndPaymentTypeAndEnabled(
-    businessUuid: string,
+    businessId: string,
     paymentType: string,
   ): Promise<BusinessPaymentOptionModel> {
     return this.model.findOne({
-      business_uuid: businessUuid,
+      businessId: businessId,
       completed: true,
       payment_method: paymentType,
       status: 'enabled',

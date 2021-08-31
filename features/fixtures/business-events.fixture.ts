@@ -11,7 +11,7 @@ class BusinessEventsFixture extends BaseFixture {
   private readonly businessModel: Model<BusinessModel> = this.application.get(getModelToken(BusinessSchemaName));
 
   public async apply(): Promise<void> {
-    await this.businessModel.create(businessFactory.create({_id: businessId}));
+    await this.businessModel.create(businessFactory.create({ _id: businessId }));
   }
 }
 

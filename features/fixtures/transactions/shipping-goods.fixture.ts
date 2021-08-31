@@ -9,7 +9,7 @@ const shippingOrderId: string = '3263d46c-755d-4fe6-b02e-ede4d63748b4';
 export = fixture<TransactionModel>('TransactionModel', transactionFactory.create, [
   {
     uuid: transactionId,
-    business_uuid : businessId,
+    businessId : businessId,
     shipping_order_id: shippingOrderId,
     merchant_name: 'Test merchant'
   }

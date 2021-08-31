@@ -37,7 +37,7 @@ export class TransactionConverter {
     }
 
     if (checkoutTransaction.business) {
-      transaction.business_uuid = checkoutTransaction.business.uuid;
+      transaction.businessId = checkoutTransaction.business.uuid;
       transaction.merchant_name = checkoutTransaction.business.company_name;
       transaction.merchant_email = checkoutTransaction.business.company_email;
     }
@@ -53,7 +53,7 @@ export class TransactionConverter {
     if (checkoutTransaction.items.length) {
       transaction.items = TransactionCartConverter.fromCheckoutTransactionCart(
         checkoutTransaction.items,
-        transaction.business_uuid,
+        transaction.businessId,
       );
     }
 
@@ -88,7 +88,7 @@ export class TransactionConverter {
       action_running: transaction.action_running,
       amount: transaction.amount,
       business_option_id: transaction.business_option_id,
-      business_uuid: transaction.business_uuid,
+      business_uuid: transaction.businessId,
       channel: transaction.channel,
       channel_set_uuid: transaction.channel_set_uuid,
       channel_uuid: transaction.channel_uuid,

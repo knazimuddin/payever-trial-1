@@ -104,7 +104,7 @@ describe('TransactionsExampleService', () => {
 
       const transaction: TransactionModel = {
         amount: 123,
-        business_uuid: uuid.v4(),
+        businessId: uuid.v4(),
         channel_set_uuid: uuid.v4(),
         updated_at: new Date('2020-10-19'),
         uuid: uuid.v4(),
@@ -131,7 +131,7 @@ describe('TransactionsExampleService', () => {
       const transactions: TransactionModel[] = [
         {
           _id: 'ed376e5e-b954-4eb1-83a1-9b174e512441',
-          business_uuid: '4b94f63b-fe21-4a97-9288-07583cb74d67',
+          businessId: '4b94f63b-fe21-4a97-9288-07583cb74d67',
           uuid: '5fe5f561-fdad-4634-ad3e-8fe72b649d93',
         },
       ] as TransactionModel[];
@@ -151,7 +151,7 @@ describe('TransactionsExampleService', () => {
     it('should send rabbit message', async () => {
       const transaction: TransactionModel = {
         amount: 123,
-        business_uuid: uuid.v4(),
+        businessId: uuid.v4(),
         channel_set_uuid: uuid.v4(),
         updated_at: new Date('2020-10-19'),
         uuid: uuid.v4(),
@@ -171,7 +171,7 @@ describe('TransactionsExampleService', () => {
           payload: {
             amount: refund,
             business: {
-              id: transaction.business_uuid,
+              id: transaction.businessId,
             },
             channel_set: {
               id: transaction.channel_set_uuid,

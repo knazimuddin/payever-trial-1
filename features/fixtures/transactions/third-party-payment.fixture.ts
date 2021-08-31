@@ -41,7 +41,7 @@ class ThirdPartyPaymentFixture extends BaseFixture {
         zip_code : '12345',
         street : 'Rödingsmarkt',
       },
-      business_uuid : businessId,
+      businessId : businessId,
       user_uuid: userId,
       business_option_id: businessOptionId,
       payment_flow_id: paymentFlowId,

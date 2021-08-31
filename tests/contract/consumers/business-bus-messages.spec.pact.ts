@@ -2,7 +2,7 @@ import 'mocha';
 import { Matchers, MessageConsumerPact } from '@pact-foundation/pact';
 import { asyncConsumerChecker, ExpectedMessageDto, MessageConsumerPactFactory } from '@pe/pact-kit';
 import { pactConfiguration, ProvidersEnum } from '../config';
-import { BusinessDto, RemoveBusinessDto } from '../../../src/transactions/dto';
+import { BusinessDto, RemoveBusinessDto } from '@pe/business-kit';
 
 const messages: ExpectedMessageDto[] = [
   {

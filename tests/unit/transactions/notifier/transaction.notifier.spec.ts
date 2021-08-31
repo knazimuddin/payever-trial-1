@@ -48,7 +48,7 @@ describe('TransactionsNoifier', () => {
       expect(notificationsEmitter.sendNotification).to.be.calledWithExactly(
         {
           app: 'transactions',
-          entity: transaction.business_uuid,
+          entity: transaction.businessId,
           kind: 'business',
         },
         `notification.transactions.title.new_transaction`,
@@ -67,7 +67,7 @@ describe('TransactionsNoifier', () => {
       expect(notificationsEmitter.cancelNotification).to.be.calledWithExactly(
         {
           app: 'transactions',
-          entity: transaction.business_uuid,
+          entity: transaction.businessId,
           kind: 'business',
         },
         `notification.transactions.title.new_transaction`,

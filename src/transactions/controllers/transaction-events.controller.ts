@@ -35,7 +35,7 @@ export class TransactionEventsController {
     const created: TransactionModel = await this.transactionsService.create(transaction);
     this.logger.log({ text: 'PAYMENT.CREATE: Created transaction', transaction: created.toObject() });
 
-    await this.exampleService.removeBusinessExamples(created.business_uuid);
+    await this.exampleService.removeBusinessExamples(created.businessId);
   }
 
   @MessagePattern({

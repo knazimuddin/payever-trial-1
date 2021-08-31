@@ -46,12 +46,14 @@ describe('BusinessPaymentOption', () => {
     sandbox = undefined;
   });
 
+  type BusinessPaymentOptionInterfaceEntry = BusinessPaymentOptionInterface & { business_uuid: string };
+
   describe('createOrUpdate()', async () => {
     it('should create or update business payment model', async () => {
-      const dto: BusinessPaymentOptionInterface = {
+      const dto: BusinessPaymentOptionInterfaceEntry = {
         credentials: [],
         options: '{}',
-      } as BusinessPaymentOptionInterface;
+      } as BusinessPaymentOptionInterfaceEntry;
 
       const bpo: BusinessPaymentOptionModel = {
         id: 12345678,
@@ -71,7 +73,7 @@ describe('BusinessPaymentOption', () => {
     });
 
     it('should create or update business payment model with illigal character in options', async () => {
-      const dto: BusinessPaymentOptionInterface = {
+      const dto: BusinessPaymentOptionInterfaceEntry = {
         credentials: {},
         options: {
           bigInt: BigInt(9007199254740991),
@@ -98,7 +100,7 @@ describe('BusinessPaymentOption', () => {
     });
 
     it('should create or update business payment model with no \'options\'', async () => {
-      const dto: BusinessPaymentOptionInterface = {
+      const dto: BusinessPaymentOptionInterfaceEntry = {
         credentials: [],
       } as any;
 

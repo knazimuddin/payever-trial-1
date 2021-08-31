@@ -24,11 +24,11 @@ export class TransactionsEsCompareCommand {
   public async compare(
     @Positional({
       name: 'business',
-    }) business_uuid: string,
+    }) businessId: string,
   ): Promise<void> {
     const criteria: any = { };
-    if (business_uuid) {
-      criteria._id = business_uuid;
+    if (businessId) {
+      criteria._id = businessId;
     }
 
     const total: number = await this.businessModel.countDocuments(criteria);
@@ -61,8 +61,8 @@ export class TransactionsEsCompareCommand {
               + `\n mongo  : transactions ${mongoTotal}, amount ${mongoAmount}`
               + `\n`,
           );
-        } else if (business_uuid) {
-          Logger.log(`Business "${business_uuid}" is equal.`);
+        } else if (businessId) {
+          Logger.log(`Business "${businessId}" is equal.`);
         }
 
         readline.moveCursor(process.stdout, 0, -1);

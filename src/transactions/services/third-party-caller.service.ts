@@ -90,7 +90,7 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
 
     const url: string =
       `${this.thirdPartyPaymentsMicroUrl}`
-      + `/api/download-resource/business/${transaction.business_uuid}/integration/${transaction.type}/action/contract?paymentId=${transaction.original_id}&rawData=true`;
+      + `/api/download-resource/business/${transaction.businessId}/integration/${transaction.type}/action/contract?paymentId=${transaction.original_id}&rawData=true`;
 
     this.logger.log({
       message: 'Starting third party download contract action call',
@@ -153,7 +153,7 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
     action: string,
     actionPayload?: ActionPayloadInterface,
   ): Promise<{ }> {
-    const businessId: string = transaction.business_uuid;
+    const businessId: string = transaction.businessId;
     const integrationName: string = transaction.type;
 
     const url: string =

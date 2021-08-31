@@ -28,7 +28,7 @@ class RunActionsSantanderSeFixture extends BaseFixture {
 
     await this.transactionModel.create(transactionFactory.create({
       uuid: transactionId,
-      business_uuid : businessId,
+      businessId: businessId,
       merchant_name: 'Test merchant',
       business_option_id: businessOptionId,
       payment_flow_id: paymentFlowId,
@@ -39,13 +39,13 @@ class RunActionsSantanderSeFixture extends BaseFixture {
 
     await this.businessPaymentOptionModel.create(businessPaymentOptionFactory.create({
       id: businessOptionId,
-      business_uuid: businessId,
+      businessId: businessId,
       payment_method: 'santander_installment_se',
     }));
 
     await this.businessPaymentOptionModel.create(businessPaymentOptionFactory.create({
       id: '55',
-      business_uuid: businessId,
+      businessId: businessId,
       payment_method: 'payex_creditcard',
       completed: true,
       status: 'enabled',

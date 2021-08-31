@@ -149,7 +149,7 @@ export class TransactionEventProducer {
     const payload: TransactionPaymentInterface = {
       amount: amount,
       business: {
-        id: transaction.business_uuid,
+        id: transaction.businessId,
       },
       channel_set: {
         id: transaction.channel_set_uuid,

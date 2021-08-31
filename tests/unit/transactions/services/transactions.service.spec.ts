@@ -328,8 +328,8 @@ describe('TransactionsService', () => {
   describe('findAll()', () => {
     it('should find all transaction model instances by businessid', async () => {
       sandbox.stub(transactionModel, 'find');
-      await testService.findAll(transaction.business_uuid);
-      expect(transactionModel.find).calledOnceWithExactly({ business_uuid: transaction.business_uuid });
+      await testService.findAll(transaction.businessId);
+      expect(transactionModel.find).calledOnceWithExactly({ businessId: transaction.businessId });
     });
   });
 
@@ -337,7 +337,6 @@ describe('TransactionsService', () => {
     it('should remove transaction model by uuid', async () => {
       sandbox.stub(transactionModel, 'findOneAndRemove').resolves(transaction);
       await testService.removeByUuid(transaction._id);
-
     });
 
     it('should remove transaction model by uuid', async () => {
@@ -505,7 +504,7 @@ describe('TransactionsService', () => {
         total: 234,
         items: [],
         history: [],
-        business_uuid: uuid.v4(),
+        businessId: uuid.v4(),
       } as any;
 
       sandbox.stub(transactionModel, 'findOneAndUpdate').resolves(transaction);

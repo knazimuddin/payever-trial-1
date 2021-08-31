@@ -29,7 +29,7 @@ export class RunActionsFixture extends BaseFixture {
 
     await this.transactionModel.create(transactionFactory.create({
       uuid: transactionId,
-      business_uuid : businessId,
+      businessId : businessId,
       merchant_name: 'Test merchant',
       business_option_id: businessOptionId,
       payment_flow_id: paymentFlowId,

@@ -15,7 +15,7 @@ export class ShippingGoodsMailDtoConverter extends AbstractPaymentMailDtoConvert
       template_name: 'shipping_order_template',
 
       business: {
-        uuid: transaction.business_uuid,
+        uuid: transaction.businessId,
       },
       payment: {
         address: transaction.shipping_address || transaction.billing_address,

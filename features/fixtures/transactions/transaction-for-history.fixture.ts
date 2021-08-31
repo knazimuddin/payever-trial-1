@@ -17,7 +17,7 @@ class TransactionForHistoryFixture extends BaseFixture {
 
     await this.transactionModel.create(transactionFactory.create({
       uuid: transactionId,
-      business_uuid : businessId,
+      businessId : businessId,
       shipping_order_id: shippingOrderId,
       merchant_name: 'Test merchant'
     }));

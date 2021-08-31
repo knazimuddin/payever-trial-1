@@ -3,7 +3,7 @@ export class BusinessFilter {
     businessId: string,
     filters: any = { },
   ): any {
-    filters.business_uuid = [{
+    filters.businessId = [{
       condition: 'is',
       value: [businessId],
     }];

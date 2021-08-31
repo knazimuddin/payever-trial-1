@@ -74,7 +74,7 @@ export class FolderDocumentsListener {
   ): Promise<void> {
     const filter: any = {
       $and: [
-        { business_uuid: folderDocuments.businessId },
+        { businessId: folderDocuments.businessId },
         { uuid: {
             $nin: folderDocuments.excludedDocumentIds,
           },

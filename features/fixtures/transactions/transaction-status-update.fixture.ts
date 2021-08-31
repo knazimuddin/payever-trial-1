@@ -42,7 +42,7 @@ class TransactionDetailsFixture extends BaseFixture {
         zip_code : '12345',
         street : 'Rödingsmarkt',
       },
-      business_uuid : businessId,
+      businessId : businessId,
       user_uuid: userId,
       merchant_name: 'Test merchant',
       business_option_id: businessOptionId,

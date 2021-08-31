@@ -5,7 +5,7 @@ import {
   TransactionPackedDetailsInterface,
 } from '../interfaces/transaction';
 
-export class TransactionDto implements TransactionPackedDetailsInterface {
+export class TransactionDto implements Omit<TransactionPackedDetailsInterface, 'businessId'> {
   public id: string;
   public original_id: string; // id from mysql db
   public uuid: string;
@@ -13,6 +13,7 @@ export class TransactionDto implements TransactionPackedDetailsInterface {
   public amount: number;
   public api_call_id?: string;
   public billing_address: AddressInterface;
+  public businessId: string;
   public business_option_id: number;
   public business_uuid: string;
   public channel: string; // 'store', ...

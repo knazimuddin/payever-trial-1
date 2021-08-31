@@ -28,7 +28,7 @@ export class BeforeSantanderSeShippingGoodsEventListener {
     }
 
     const bpo: BusinessPaymentOptionModel = await this.bpoService.findOneByBusinessAndPaymentTypeAndEnabled(
-      transaction.business_uuid,
+      transaction.businessId,
       PaymentTypesEnum.payExCreditCard,
     );
 

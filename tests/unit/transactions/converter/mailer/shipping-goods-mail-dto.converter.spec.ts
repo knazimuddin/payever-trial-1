@@ -46,7 +46,7 @@ describe('ShippingGoodsMailDtoConverter', () => {
           zip_code: '12344',
         },
         business_option_id: 12,
-        business_uuid: 'fd45dae7-27c1-46c4-9309-d4d0fbd67a8d',
+        businessId: 'fd45dae7-27c1-46c4-9309-d4d0fbd67a8d',
         channel: 'channel_1', // 'store', ...
         channel_uuid: '0b66ec21-1de8-4f63-8776-8cdc0ceba73e',
         channel_set_uuid: 'a20927f2-738b-4a65-8e13-59453fbd06c9',
@@ -183,7 +183,7 @@ describe('ShippingGoodsMailDtoConverter', () => {
           zip_code: '12344',
         },
         business_option_id: 12,
-        business_uuid: 'fd45dae7-27c1-46c4-9309-d4d0fbd67a8d',
+        businessId: 'fd45dae7-27c1-46c4-9309-d4d0fbd67a8d',
         channel: 'channel_1', // 'store', ...
         channel_uuid: '0b66ec21-1de8-4f63-8776-8cdc0ceba73e',
         channel_set_uuid: 'a20927f2-738b-4a65-8e13-59453fbd06c9',

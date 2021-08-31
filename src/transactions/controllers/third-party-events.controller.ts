@@ -26,7 +26,7 @@ export class ThirdPartyEventsController {
     data: ThirdPartyActionRequestInterface,
   ): Promise<TransactionUnpackedDetailsInterface> {
     const transaction: TransactionModel = await this.transactionService.findModelByParams({
-      business_uuid: data.business.id,
+      businessId: data.business.id,
       reference: data.reference,
     });
 

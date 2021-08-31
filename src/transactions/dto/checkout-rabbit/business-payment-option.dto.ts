@@ -1,7 +1,7 @@
 import { IsString, IsNotEmpty, IsNumber, IsBoolean, IsOptional } from 'class-validator';
 import { BusinessPaymentOptionInterface } from '../../interfaces';
 
-export class BusinessPaymentOptionDto implements BusinessPaymentOptionInterface {
+export class BusinessPaymentOptionDto implements Omit<BusinessPaymentOptionInterface, 'businessId'> {
   @IsNotEmpty()
   @IsNumber()
   public id: number;

@@ -52,7 +52,7 @@ describe('PaymentMailEventProducer ', () => {
       const amount: number = 100;
 
       const transaction: TransactionPackedDetailsInterface = {
-        business_uuid: uuid.v4(),
+        businessId: uuid.v4(),
         channel_set_uuid: uuid.v4(),
         items: [],
         updated_at: new Date(),
@@ -62,7 +62,7 @@ describe('PaymentMailEventProducer ', () => {
       const payload: TransactionPaymentInterface = {
         amount: amount,
         business: {
-          id: transaction.business_uuid,
+          id: transaction.businessId,
         },
         channel_set: {
           id: transaction.channel_set_uuid,
@@ -94,7 +94,7 @@ describe('PaymentMailEventProducer ', () => {
       const amount: number = 100;
 
       const transaction: TransactionModel = {
-        business_uuid: uuid.v4(),
+        businessId: uuid.v4(),
         channel_set_uuid: uuid.v4(),
         items: [],
         updated_at: new Date(),
@@ -104,7 +104,7 @@ describe('PaymentMailEventProducer ', () => {
       const payload: TransactionPaymentInterface = {
         amount: amount,
         business: {
-          id: transaction.business_uuid,
+          id: transaction.businessId,
         },
         channel_set: {
           id: transaction.channel_set_uuid,
@@ -137,7 +137,7 @@ describe('PaymentMailEventProducer ', () => {
       const amount: number = 100;
 
       const transaction: TransactionPackedDetailsInterface = {
-        business_uuid: uuid.v4(),
+        businessId: uuid.v4(),
         channel_set_uuid: uuid.v4(),
         items: [],
         updated_at: new Date(),
@@ -147,7 +147,7 @@ describe('PaymentMailEventProducer ', () => {
       const payload: TransactionPaymentInterface = {
         amount: amount,
         business: {
-          id: transaction.business_uuid,
+          id: transaction.businessId,
         },
         channel_set: {
           id: transaction.channel_set_uuid,
@@ -178,7 +178,7 @@ describe('PaymentMailEventProducer ', () => {
       const eventName = RabbitRoutingKeys.TransactionsPaymentSubtract;
 
       const transaction: TransactionModel = {
-        business_uuid: uuid.v4(),
+        businessId: uuid.v4(),
         channel_set_uuid: uuid.v4(),
         items: [],
         updated_at: new Date(),
@@ -199,7 +199,7 @@ describe('PaymentMailEventProducer ', () => {
       const payload: TransactionPaymentInterface = {
         amount: refund.data.amount,
         business: {
-          id: transaction.business_uuid,
+          id: transaction.businessId,
         },
         channel_set: {
           id: transaction.channel_set_uuid,
@@ -231,7 +231,7 @@ describe('PaymentMailEventProducer ', () => {
 
       const transaction: TransactionModel = {
         amount: 100,
-        business_uuid: uuid.v4(),
+        businessId: uuid.v4(),
         channel_set_uuid: uuid.v4(),
         items: [],
         updated_at: new Date(),
@@ -241,7 +241,7 @@ describe('PaymentMailEventProducer ', () => {
       const payload: TransactionPaymentInterface = {
         amount: transaction.amount,
         business: {
-          id: transaction.business_uuid,
+          id: transaction.businessId,
         },
         channel_set: {
           id: transaction.channel_set_uuid,

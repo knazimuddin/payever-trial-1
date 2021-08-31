@@ -22,22 +22,22 @@ export class TransactionsEsBusinessUpdateCommand {
   public async update(
     @Positional({
       name: 'business',
-    }) business_uuid: string,
+    }) businessId: string,
   ): Promise<void> {
-    if (!business_uuid) {
+    if (!businessId) {
       throw new Error('This command should run only with "business" option.');
     }
 
     const criteria: any = { };
-    criteria.business_uuid = business_uuid;
+    criteria.businessId = businessId;
 
-    Logger.log(`Clearing "${business_uuid}" transactions from ElasticSearch.`);
+    Logger.log(`Clearing "${businessId}" transactions from ElasticSearch.`);
     await this.elasticSearchClient.deleteByQuery(
       ElasticTransactionEnum.index,
       {
         query: {
           match_phrase: {
-            business_uuid: business_uuid,
+            businessId: businessId,
           },
         },
       },

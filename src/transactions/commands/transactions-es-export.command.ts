@@ -25,7 +25,7 @@ export class TransactionsEsExportCommand {
     }) before: string,
     @Positional({
       name: 'business',
-    }) business_uuid: string,
+    }) businessId: string,
     @Positional({
       name: 'remove_old',
     }) remove_old: boolean,
@@ -40,8 +40,8 @@ export class TransactionsEsExportCommand {
     if (after) {
       criteria.updated_at.$gte = new Date(after);
     }
-    if (business_uuid) {
-      criteria.business_uuid = business_uuid;
+    if (businessId) {
+      criteria.businessId = businessId;
     }
 
     Logger.log(`Criteria is ${JSON.stringify(criteria, null, 2)}.`);

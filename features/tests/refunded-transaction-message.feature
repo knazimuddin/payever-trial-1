@@ -118,7 +118,7 @@ Feature: Refunded transactions message sending
         "payload": {
           "amount": 25,
           "business": {
-            "id": "{{transaction.business_uuid}}"
+            "id": "{{transaction.businessId}}"
           },
           "channel_set": {
             "id": "{{transaction.channel_set_uuid}}"

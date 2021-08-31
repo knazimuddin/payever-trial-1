@@ -28,16 +28,16 @@ export class TransactionsEsBusinessCheckCommand {
   public async check(
     @Positional({
       name: 'business',
-    }) business_uuid: string,
+    }) businessId: string,
     @Positional({
       name: 'after',
     }) after: string,
   ): Promise<void> {
-    if (!business_uuid) {
+    if (!businessId) {
       throw new Error('This command should run only with "business" option.');
     }
 
-    const business: BusinessModel = await this.getBusiness(business_uuid);
+    const business: BusinessModel = await this.getBusiness(businessId);
 
     const listDto: ListQueryDto = new ListQueryDto();
     listDto.filters = BusinessFilter.apply(business.id, listDto.filters);

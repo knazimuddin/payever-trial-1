@@ -14,7 +14,7 @@ export class StatisticsMessagesMock extends AbstractMessageMock {
   private existing: TransactionModel = {
     _id: uuid.v4(),
     billing_address: {} as any,
-    business_uuid: uuid.v4(),
+    businessId: uuid.v4(),
     channel_set_uuid: uuid.v4(),
     updated_at: new Date(),
     amount: 123,

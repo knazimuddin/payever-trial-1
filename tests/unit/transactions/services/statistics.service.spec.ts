@@ -28,14 +28,14 @@ describe('StatisticsService', () => {
 
   const transactionsADD: TransactionModel = {
     _id: 'ed376e5e-b954-4eb1-83a1-9b174e512441',
-    business_uuid: '4b94f63b-fe21-4a97-9288-07583cb74d67',
+    businessId: '4b94f63b-fe21-4a97-9288-07583cb74d67',
     status: 'STATUS_ADD',
     uuid: '5fe5f561-fdad-4634-ad3e-8fe72b649d93',
   } as TransactionModel;
 
   const transactionsPAID: TransactionModel = {
     _id: 'ed376e5e-b954-4eb1-83a1-9b174e512441',
-    business_uuid: '4b94f63b-fe21-4a97-9288-07583cb74d67',
+    businessId: '4b94f63b-fe21-4a97-9288-07583cb74d67',
     status: 'STATUS_PAID',
     uuid: '5fe5f561-fdad-4634-ad3e-8fe72b649d93',
     updated_at: new Date('2020-11-10'),

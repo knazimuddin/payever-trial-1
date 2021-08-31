@@ -77,7 +77,7 @@ export class BusinessController {
     @Param('reference') reference: string,
   ): Promise<TransactionOutputInterface>  {
     const transaction: TransactionModel = await this.transactionsService.findModelByParams({
-      business_uuid: businessId,
+      businessId: businessId,
       reference: reference,
     });
 
@@ -95,7 +95,7 @@ export class BusinessController {
   public async getByOriginalId(
     @ParamModel(
       {
-        business_uuid: BusinessPlaceholder,
+        businessId: BusinessPlaceholder,
         original_id: ':original_id',
       },
       TransactionSchemaName,
@@ -111,7 +111,7 @@ export class BusinessController {
   public async getDetail(
     @ParamModel(
       {
-        business_uuid: BusinessPlaceholder,
+        businessId: BusinessPlaceholder,
         uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
@@ -127,7 +127,7 @@ export class BusinessController {
   public async getTransactionDetails(
     @ParamModel(
       {
-        business_uuid: BusinessPlaceholder,
+        businessId: BusinessPlaceholder,
         uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
@@ -143,7 +143,7 @@ export class BusinessController {
   public async getTransactionActions(
     @ParamModel(
       {
-        business_uuid: BusinessPlaceholder,
+        businessId: BusinessPlaceholder,
         uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
@@ -160,7 +160,7 @@ export class BusinessController {
     @Param('action') action: string,
     @ParamModel(
       {
-        business_uuid: BusinessPlaceholder,
+        businessId: BusinessPlaceholder,
         uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
@@ -198,7 +198,7 @@ export class BusinessController {
     @Param('pdf') pdf: string,
     @ParamModel(
       {
-        business_uuid: BusinessPlaceholder,
+        businessId: BusinessPlaceholder,
         uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
@@ -220,10 +220,10 @@ export class BusinessController {
   @Roles(RolesEnum.anonymous)
   public async slip(
     @Param('name') name: string,
-    @ParamModel({ business_uuid: BusinessPlaceholder }, TransactionSchemaName) business: BusinessModel,
+    @ParamModel({ businessId: BusinessPlaceholder }, TransactionSchemaName) business: BusinessModel,
     @ParamModel(
       {
-        business_uuid: BusinessPlaceholder,
+        businessId: BusinessPlaceholder,
         uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
@@ -240,7 +240,7 @@ export class BusinessController {
   public async runLegacyApiShippedAction(
     @ParamModel(
       {
-        business_uuid: BusinessPlaceholder,
+        businessId: BusinessPlaceholder,
         uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
@@ -263,7 +263,7 @@ export class BusinessController {
     @Param('action') action: string,
     @ParamModel(
       {
-        business_uuid: BusinessPlaceholder,
+        businessId: BusinessPlaceholder,
         uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
@@ -284,7 +284,7 @@ export class BusinessController {
   public async updateStatus(
     @ParamModel(
       {
-        business_uuid: BusinessPlaceholder,
+        businessId: BusinessPlaceholder,
         uuid: UuidPlaceholder,
       },
       TransactionSchemaName,
@@ -308,8 +308,8 @@ export class BusinessController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
-    const business: BusinessModel = await this.businessService
-    .findOneById(businessId) as unknown as BusinessModel;
+    const business: BusinessModel =
+      await this.businessService.findOneById(businessId) as unknown as BusinessModel;
     listDto.currency = business ? business.currency : this.defaultCurrency;
 
     return this.elasticSearchService.getResult(listDto);

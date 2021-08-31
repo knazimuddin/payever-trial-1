@@ -50,7 +50,7 @@ export class TransactionsExampleService {
         original_id: uuid().split('-').join(''),
         uuid: uuid(),
 
-        business_uuid: business._id,
+        businessId: business._id,
         merchant_email: business.contactEmails.shift(),
         merchant_name: business.name,
         user_uuid: uuid(),
@@ -74,7 +74,7 @@ export class TransactionsExampleService {
             payload: {
               amount: created.amount,
               business: {
-                id: created.business_uuid,
+                id: created.businessId,
               },
               channel_set: {
                 id: created.channel_set_uuid,
@@ -91,7 +91,7 @@ export class TransactionsExampleService {
 
   public async removeBusinessExamples(businessId: string): Promise<void> {
     const transactions: TransactionModel[] = await this.transactionsService.findCollectionByParams({
-      business_uuid: businessId,
+      businessId: businessId,
       example: true,
     });
 
@@ -113,7 +113,7 @@ export class TransactionsExampleService {
           payload: {
             amount: refund,
             business: {
-              id: transaction.business_uuid,
+              id: transaction.businessId,
             },
             channel_set: {
               id: transaction.channel_set_uuid,

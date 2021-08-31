@@ -169,10 +169,10 @@ export class TransactionActionService {
           transaction.billing_address.id === 'cccccccc-cccc-cccc-cccc-cccccccccccc'
         ) {
           transaction.example_shipping_label =
-            `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
+            `/api/business/${transaction.businessId}/${transaction.uuid}/`
             + `label/${transaction.billing_address.id}.pdf`;
           transaction.example_shipping_slip =
-            `/api/business/${transaction.business_uuid}/${transaction.uuid}/`
+            `/api/business/${transaction.businessId}/${transaction.uuid}/`
             + `slip/${transaction.billing_address.id}.json`;
 
         }

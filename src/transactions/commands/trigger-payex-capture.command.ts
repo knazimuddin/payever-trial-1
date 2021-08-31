@@ -52,7 +52,7 @@ export class TriggerPayexCaptureCommand {
     }
 
     const payexBpo: BusinessPaymentOptionModel = await this.bpoService.findOneByBusinessAndPaymentTypeAndEnabled(
-      transaction.business_uuid,
+      transaction.businessId,
       PaymentTypesEnum.payExCreditCard,
     );
 

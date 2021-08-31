@@ -10,7 +10,7 @@ export class TransactionsNotifier {
     await this.notificationsEmitter.sendNotification(
       {
         app: 'transactions',
-        entity: transaction.business_uuid,
+        entity: transaction.businessId,
         kind: 'business',
       },
       `notification.transactions.title.new_transaction`,
@@ -25,7 +25,7 @@ export class TransactionsNotifier {
     await this.notificationsEmitter.cancelNotification(
       {
         app: 'transactions',
-        entity: transaction.business_uuid,
+        entity: transaction.businessId,
         kind: 'business',
       },
       `notification.transactions.title.new_transaction`,

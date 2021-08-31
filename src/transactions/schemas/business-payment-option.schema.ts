@@ -8,7 +8,7 @@ export const BusinessPaymentOptionSchema: Schema = new Schema(
     uuid: { type: String, unique: true },
 
     accept_fee: Boolean,
-    business_uuid: String,
+    businessId: String,
     completed: Boolean,
     credentials: Schema.Types.Mixed,
     fixed_fee: Number,
@@ -22,6 +22,14 @@ export const BusinessPaymentOptionSchema: Schema = new Schema(
   },
   {
     id: false,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 )
-  .index({ business_uuid: 1, completed: 1, payment_method: 1, status: 1 });
+  .index({ businessId: 1, completed: 1, payment_method: 1, status: 1 });
+  // .index({ business_uuid: 1, completed: 1, payment_method: 1, status: 1 });
+
+// For backwards compatibility
+BusinessPaymentOptionSchema.virtual('business_uuid').get(function (): string {
+  return this.businessId;
+});

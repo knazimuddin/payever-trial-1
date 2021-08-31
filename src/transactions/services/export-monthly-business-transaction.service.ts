@@ -48,7 +48,7 @@ export class ExportMonthlyBusinessTransactionService {
         },
         {
           '$group': {
-            '_id': '$business_uuid',
+            '_id': '$businessId',
             'amount': {
               '$sum': '$amount',
             },

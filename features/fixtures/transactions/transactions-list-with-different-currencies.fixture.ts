@@ -23,7 +23,7 @@ export class TransactionsListWithDifferentCurrenciesFixture extends BaseFixture 
 
     await this.transactionModel.create(transactionFactory.create({
       uuid: 'aff4765d-94ab-4da1-892c-3a8f8199b509',
-      business_uuid : businessId1,
+      businessId : businessId1,
       user_uuid: userId,
       amount: 50,
       total: 50,
@@ -32,7 +32,7 @@ export class TransactionsListWithDifferentCurrenciesFixture extends BaseFixture 
 
     await this.transactionModel.create(transactionFactory.create({
       uuid: '778ca3c6-a71c-429c-a9b8-899a0e0f4e23',
-      business_uuid : businessId1,
+      businessId : businessId1,
       user_uuid: userId,
       amount: 50,
       total: 50,
@@ -41,7 +41,7 @@ export class TransactionsListWithDifferentCurrenciesFixture extends BaseFixture 
 
     await this.transactionModel.create(transactionFactory.create({
       uuid: '5456c5e1-3c48-4d2c-a731-f91ab09c856f',
-      business_uuid : businessId1,
+      businessId : businessId1,
       amount: 50,
       total: 50,
       currency: 'DK',
@@ -49,7 +49,7 @@ export class TransactionsListWithDifferentCurrenciesFixture extends BaseFixture 
 
     await this.transactionModel.create(transactionFactory.create({
       uuid: 'c35ce841-13f5-4406-8a2d-7859930b69a6',
-      business_uuid : businessId1,
+      businessId : businessId1,
       amount: 50,
       total: 50,
       currency: 'CZK',
@@ -57,7 +57,7 @@ export class TransactionsListWithDifferentCurrenciesFixture extends BaseFixture 
 
     await this.transactionModel.create(transactionFactory.create({
       uuid: 'aff4765d-94ab-4da1-892c-3a8f8199b502',
-      business_uuid : businessId2,
+      businessId : businessId2,
       user_uuid: userId,
       amount: 50,
       total: 50,
@@ -66,7 +66,7 @@ export class TransactionsListWithDifferentCurrenciesFixture extends BaseFixture 
 
     await this.transactionModel.create(transactionFactory.create({
       uuid: '778ca3c6-a71c-429c-a9b8-899a0e0f4e22',
-      business_uuid : businessId2,
+      businessId : businessId2,
       user_uuid: userId,
       amount: 50,
       total: 50,
@@ -75,7 +75,7 @@ export class TransactionsListWithDifferentCurrenciesFixture extends BaseFixture 
 
     await this.transactionModel.create(transactionFactory.create({
       uuid: '5456c5e1-3c48-4d2c-a731-f91ab09c8562',
-      business_uuid : businessId2,
+      businessId : businessId2,
       amount: 50,
       total: 50,
       currency: 'DK',
@@ -83,7 +83,7 @@ export class TransactionsListWithDifferentCurrenciesFixture extends BaseFixture 
 
     await this.transactionModel.create(transactionFactory.create({
       uuid: 'c35ce841-13f5-4406-8a2d-7859930b69a2',
-      business_uuid : businessId2,
+      businessId : businessId2,
       amount: 50,
       total: 50,
       currency: 'CZK',
