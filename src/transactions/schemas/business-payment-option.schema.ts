@@ -27,7 +27,6 @@ export const BusinessPaymentOptionSchema: Schema = new Schema(
   },
 )
   .index({ businessId: 1, completed: 1, payment_method: 1, status: 1 });
-  // .index({ business_uuid: 1, completed: 1, payment_method: 1, status: 1 });
 
 // For backwards compatibility
 BusinessPaymentOptionSchema.virtual('business_uuid').get(function (): string {

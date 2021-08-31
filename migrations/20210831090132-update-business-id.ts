@@ -1,4 +1,4 @@
-import { BaseMigration } from "@pe/migration-kit";
+import { BaseMigration } from '@pe/migration-kit';
 
 export class UpdateBusinessIdMigration extends BaseMigration {
 
