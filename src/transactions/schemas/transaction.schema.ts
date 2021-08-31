@@ -16,8 +16,8 @@ export const TransactionSchema: Schema = new Schema({
 
   action_running: { type: Boolean, required: false, default: false },
   amount: Number,
-  businessId: { type: String },
   billing_address: AddressSchema,
+  businessId: { type: String },
   business_option_id: Number,
 
   channel: String,
@@ -72,7 +72,7 @@ export const TransactionSchema: Schema = new Schema({
   example: Boolean,
   example_shipping_label: String,
   example_shipping_slip: String,
-}, {
+},                                                  {
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 });
@@ -84,13 +84,11 @@ TransactionSchema.index({ customer_email: 1 });
 TransactionSchema.index({ merchant_name: 1 });
 TransactionSchema.index({ merchant_email: 1 });
 TransactionSchema.index({ status: 1, _id: 1 });
-// TransactionSchema.index({ business_uuid: 1 });
 TransactionSchema.index({ businessId: 1 });
 TransactionSchema.index({ example: 1 });
 TransactionSchema.index({ type: 1 });
 TransactionSchema.index({ created_at: -1 });
 TransactionSchema.index({ created_at: 1 });
-// TransactionSchema.index({ business_uuid: 1, example: 1 });
 TransactionSchema.index({ businessId: 1, example: 1 });
 
 TransactionSchema.virtual('amount_refunded').get(function (): number {
