@@ -11,6 +11,9 @@ const messages: ExpectedMessageDto[] = [
       currency: Matchers.like('EUR'),
       companyAddress: {
         country: Matchers.like('DE'),
+        city: Matchers.like('Los Angeles'),
+        street: Matchers.like('Beverly Hills'),
+        zipCode: Matchers.like('90210'),
       },
       companyDetails: {
         product: Matchers.like('id'),
@@ -26,6 +29,9 @@ const messages: ExpectedMessageDto[] = [
       currency: Matchers.like('EUR'),
       companyAddress: {
         country: Matchers.like('DE'),
+        city: Matchers.like('Los Angeles'),
+        street: Matchers.like('Beverly Hills'),
+        zipCode: Matchers.like('90210'),
       },
       companyDetails: {
         product: Matchers.like('id'),
@@ -41,6 +47,9 @@ const messages: ExpectedMessageDto[] = [
       currency: Matchers.like('EUR'),
       companyAddress: {
         country: Matchers.like('DE'),
+        city: Matchers.like('Los Angeles'),
+        street: Matchers.like('Beverly Hills'),
+        zipCode: Matchers.like('90210'),
       },
       companyDetails: {
         product: Matchers.like('id'),
