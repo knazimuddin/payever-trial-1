@@ -29,7 +29,7 @@
     "@pe/business-kit": "^0.7.0",
     "@pe/common-sdk": "^4.1.0",
     "@pe/elastic-kit": "^3.2.3",
-    "@pe/folders-plugin": "^3.1.0",
+    "@pe/folders-plugin": "3.1.1-FOLDER-13.45",
     "@pe/migration-kit": "^2.0.0",
     "@pe/nest-kit": "^7.13.2",
     "@pe/notifications-sdk": "^5.0.0",
