@@ -90,6 +90,7 @@ import {
 import { EventsGateway } from './ws';
 import { RabbitChannels } from '../enums';
 import { FiltersConfig, FoldersConfig, RulesOptions } from '../config';
+import { ExportMonthlyBusinessTransactionCronService } from '../cron/export-monthly-business-transaction.cron.service';
 
 @Module({
   controllers: [
@@ -191,6 +192,7 @@ import { FiltersConfig, FoldersConfig, RulesOptions } from '../config';
     ExportMonthlyBusinessTransactionService,
     ...ActionValidatorsList,
     TransactionsInfoService,
+    ExportMonthlyBusinessTransactionCronService,
   ],
 })
 export class TransactionsModule { }
