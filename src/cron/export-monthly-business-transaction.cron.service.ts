@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@pe/cron-kit';
-import { ExportMonthlyBusinessTransactionService } from '.';
+import { ExportMonthlyBusinessTransactionService } from '../transactions/services/export-monthly-business-transaction.service';
 
 @Injectable()
-export class CronService {
+export class ExportMonthlyBusinessTransactionCronService {
   constructor(
     private readonly exportMonthlyBusinessTransactionService: ExportMonthlyBusinessTransactionService,
   ) { }

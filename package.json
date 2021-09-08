@@ -4,6 +4,7 @@
     "cli": "ts-node src/cli.ts",
     "cli:prod": "node dist/src/cli.js",
     "cron": "tsc-watch -p tsconfig.build.json --onSuccess \"node dist/src/cron.js\"",
+    "cron:prod": "node dist/src/cron.js",
     "consume:prod": "node dist/src/consumer.js",
     "consumer": "tsc-watch -p tsconfig.build.json --onSuccess \"node dist/src/consumer.js\"",
     "http": "tsc-watch -p tsconfig.build.json --onSuccess \"node dist/src/http.js\"",

@@ -17,4 +17,4 @@ async function bootstrap(): Promise<void> {
   app.listen(() => logger.log(`Cron server started`, 'NestApplication'));
 }
 
-void bootstrap().catch();
+bootstrap().catch();
