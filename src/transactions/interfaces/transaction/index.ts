@@ -10,3 +10,4 @@ export * from './transaction-unpacked-details.interface';
 export * from './transaction-upload-item.interface';
 export * from './unpacked-details.interface';
 export * from './monthly-business-transaction.interface';
+export * from './monthly-user-per-business-transaction.interface';
