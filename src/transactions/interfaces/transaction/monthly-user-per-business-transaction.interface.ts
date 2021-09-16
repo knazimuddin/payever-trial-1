@@ -3,5 +3,6 @@ export interface MonthlyUserPerBusinessTransactionInterface {
   date: string;
   userId: string;
   businessId: string;
+  currency: string;
   totalSpent: number;
 }

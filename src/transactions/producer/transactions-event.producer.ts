@@ -2,18 +2,24 @@ import { Injectable } from '@nestjs/common';
 import { RabbitMqClient } from '@pe/nest-kit';
 import { plainToClass } from 'class-transformer';
 import { RabbitRoutingKeys } from '../../enums';
-import { TransactionExportBusinessDto, TransactionExportChannelSetDto, TransactionExportDto } from '../dto';
+import {
+  TransactionExportBusinessDto,
+  TransactionExportChannelSetDto,
+  TransactionExportDto,
+} from '../dto';
 
 import {
   MonthlyBusinessTransactionInterface,
   TransactionPackedDetailsInterface,
   TransactionUnpackedDetailsInterface,
   MonthlyUserPerBusinessTransactionInterface,
+  TotalUserPerBusinessTransactionInterface,
 } from '../interfaces';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 import { TransactionPaymentInterface } from '../interfaces/transaction';
 import { BusinessPaymentOptionModel, TransactionModel } from '../models';
 import { TransactionPaymentDetailsConverter } from '../converter';
+import { TransactionPaymentDto } from '../dto/checkout-rabbit';
 
 @Injectable()
 export class TransactionEventProducer {
@@ -41,7 +47,7 @@ export class TransactionEventProducer {
   }
 
   public async produceTransactionRefundEventPayload(
-    payload: any,
+    payload: TransactionPaymentDto,
   ): Promise<void> {
 
     await this.send(RabbitRoutingKeys.TransactionsPaymentRefund, payload);
@@ -84,6 +90,14 @@ export class TransactionEventProducer {
   ): Promise<void> {
     for (const item of items) {
       await this.send(RabbitRoutingKeys.ExportMonthlyUserPerBusinessTransaction, item);
+    }
+  }
+
+  public async produceExportTotalUserPerBusinessTransactionEvent(
+    data: TotalUserPerBusinessTransactionInterface[],
+  ): Promise<void> {
+    for (const item of data) {
+      await this.send(RabbitRoutingKeys.ExportTotalUserPerBusinessTransaction, item);
     }
   }
 
@@ -159,6 +173,13 @@ export class TransactionEventProducer {
       amount: amount,
       business: {
         id: transaction.business_uuid,
+      },
+      customer: {
+        email: transaction.customer_email,
+        name: transaction.customer_name,
+      },
+      user: {
+        id: transaction.user_uuid,
       },
       channel_set: {
         id: transaction.channel_set_uuid,

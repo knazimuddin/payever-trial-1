@@ -1,12 +1,15 @@
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { MonthlyUserPerBusinessTransactionInterface } from '../interfaces';
+import {
+  MonthlyUserPerBusinessTransactionInterface,
+  TotalUserPerBusinessTransactionInterface,
+} from '../interfaces';
 import { TransactionModel } from '../models';
 import { TransactionEventProducer } from '../producer';
 import { TransactionSchemaName } from '../schemas';
 
-export class ExportMonthlyUserPerBusinessTransactionService {
+export class ExportUserPerBusinessTransactionService {
   constructor(
     @InjectModel(TransactionSchemaName) private readonly transactionsModel: Model<TransactionModel>,
     private readonly transactionsEventProducer: TransactionEventProducer,
@@ -20,6 +23,14 @@ export class ExportMonthlyUserPerBusinessTransactionService {
       await this.getMonthlyUserTransactions(firstDayLastMonth, lastDayLastMonth);
 
     await this.transactionsEventProducer.produceExportMonthlyUserPerBusinessTransactionEvent(monthlyUserTransactions);
+  }
+
+  public async exportUserPerBusinessTransactionTotal(): Promise<void> {
+    const userPerBusinessTransactionsTotal: TotalUserPerBusinessTransactionInterface[] =
+      await this.getTotalUserPerBusinessTransactions();
+
+    await this.transactionsEventProducer
+      .produceExportTotalUserPerBusinessTransactionEvent(userPerBusinessTransactionsTotal);
   }
 
   private async getMonthlyUserTransactions(
@@ -75,6 +86,46 @@ export class ExportMonthlyUserPerBusinessTransactionService {
             'currency': '$byBusiness.currency',
             'date': '$byBusiness.date',
             'totalSpent': '$byBusiness.totalSpent',
+            'userId': '$_id',
+          },
+        },
+      ],
+    );
+  }
+
+  private async getTotalUserPerBusinessTransactions(): Promise<TotalUserPerBusinessTransactionInterface[]> {
+    return this.transactionsModel.aggregate(
+      [
+        {
+          '$match': {
+            'user_uuid': '28804dcf-9fa0-4543-9b3d-e68464ccd69a',
+          },
+        }, {
+          '$group': {
+            '_id': '$user_uuid',
+            'byBusiness': {
+              '$addToSet': {
+                'businessId': '$business_uuid',
+                'currency': '$currency',
+                'totalSpent': {
+                  '$sum': '$amount',
+                },
+                'transactions': {
+                  '$sum': 1,
+                },
+              },
+            },
+          },
+        }, {
+          '$unwind': {
+            'path': '$byBusiness',
+          },
+        }, {
+          '$project': {
+            'businessId': '$byBusiness.businessId',
+            'currency': '$byBusiness.currency',
+            'totalSpent': '$byBusiness.totalSpent',
+            'transactions': '$byBusiness.transactions',
             'userId': '$_id',
           },
         },

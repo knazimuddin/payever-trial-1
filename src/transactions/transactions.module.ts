@@ -84,7 +84,7 @@ import {
   TransactionsService,
   SampleProductsService,
   ExportMonthlyBusinessTransactionService,
-  ExportMonthlyUserPerBusinessTransactionService,
+  ExportUserPerBusinessTransactionService,
   ActionValidatorsList,
   TransactionsInfoService,
 } from './services';
@@ -191,7 +191,7 @@ import { ExportMonthlyBusinessTransactionCronService } from '../cron/export-mont
     ...EventListenersList,
     EventsGateway,
     ExportMonthlyBusinessTransactionService,
-    ExportMonthlyUserPerBusinessTransactionService,
+    ExportUserPerBusinessTransactionService,
     ...ActionValidatorsList,
     TransactionsInfoService,
     ExportMonthlyBusinessTransactionCronService,

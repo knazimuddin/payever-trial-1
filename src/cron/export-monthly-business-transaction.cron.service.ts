@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@pe/cron-kit';
-import { ExportMonthlyBusinessTransactionService, ExportMonthlyUserPerBusinessTransactionService } from '../transactions/services';
+import { ExportMonthlyBusinessTransactionService, ExportUserPerBusinessTransactionService } from '../transactions/services';
 
 @Injectable()
 export class ExportMonthlyBusinessTransactionCronService {
   constructor(
     private readonly exportMonthlyBusinessTransactionService: ExportMonthlyBusinessTransactionService,
-    private readonly exportMonthlyUserPerBusinessTransactionService: ExportMonthlyUserPerBusinessTransactionService,
+    private readonly exportUserPerBusinessTransactionService: ExportUserPerBusinessTransactionService,
   ) { }
 
   @Cron('0 0 0 1 * *', { name: 'exportMonthlyBusinessTransactions' })
@@ -16,7 +16,7 @@ export class ExportMonthlyBusinessTransactionCronService {
 
   @Cron('0 0 0 1 * *', { name: 'exportMonthlyUserPerBusinessTransactions' })
   public async exportMonthlyUserPerBusinessTransactions(): Promise<void> {
-    return this.exportMonthlyUserPerBusinessTransactionService.exportUserPerBusinessTransactionPreviousNMonth(1);
+    return this.exportUserPerBusinessTransactionService.exportUserPerBusinessTransactionPreviousNMonth(1);
   }
 }
 
