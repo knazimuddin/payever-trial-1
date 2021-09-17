@@ -37,6 +37,8 @@ export class ExportUserPerBusinessTransactionService {
     firstDayLastMonth: Date,
     lastDayLastMonth: Date,
   ): Promise<any[]> {
+    return this.getUserPerBusinessTransactionsInPeriod(firstDayLastMonth, lastDayLastMonth);
+    /*
     return this.transactionsModel.aggregate(
       [
         {
@@ -91,11 +93,76 @@ export class ExportUserPerBusinessTransactionService {
         },
       ],
     );
+    */
   }
 
-  private async getTotalUserPerBusinessTransactions(): Promise<TotalUserPerBusinessTransactionInterface[]> {
+  private async getUserPerBusinessTransactionsInPeriod(start?: Date, end?: Date): Promise<any[]> {
+    const matches: any[] = [];
+    if (start && end) {
+      matches.push({
+        'updated_at': {
+          '$gte': start,
+          '$lte': end,
+        },
+      });
+    }
+
     return this.transactionsModel.aggregate(
       [
+        {
+          '$match': {
+            '$and': [
+              {
+                'status': {
+                  '$in': [
+                    'STATUS_ACCEPTED', 'STATUS_PAID', 'STATUS_REFUNDED',
+                  ],
+                },
+              },
+              ...matches,
+            ],
+          },
+        }, {
+          '$group': {
+            '_id': {
+              'userId': '$user_uuid',
+              'businessId': '$business_uuid',
+              'period': {
+                '$dateToString': {
+                  'date': '$updated_at',
+                  'format': '%Y-%m',
+                },
+              },
+            },
+            'currency': {
+              '$first': '$currency',
+            },
+            'totalSpent': {
+              '$sum': '$amount',
+            },
+            'transactions': {
+              '$sum': 1,
+            },
+          },
+        }, {
+          '$project': {
+            'userId': '$_id.userId',
+            'businessId': '$_id.businessId',
+            'currency': '$currency',
+            'date': '$_id.period',
+            'totalSpent': '$totalSpent',
+            'transactions': '$transactions',
+          },
+        },
+      ],
+      /*
+      [
+        {
+          '$match': {
+            'business_uuid': '00d6d43b-4f6f-4d37-ae22-cf5158920e90',
+            'user_uuid': '2673fa45-82b9-484c-bcbe-46da250c2639',
+          },
+        },
         {
           '$match': {
             'user_uuid': '28804dcf-9fa0-4543-9b3d-e68464ccd69a',
@@ -130,7 +197,12 @@ export class ExportUserPerBusinessTransactionService {
           },
         },
       ],
+      */
     );
+  }
+
+  private async getTotalUserPerBusinessTransactions(): Promise<TotalUserPerBusinessTransactionInterface[]> {
+    return this.getUserPerBusinessTransactionsInPeriod();
   }
 
   private getFirstDayOfPreviousNMonth(n: number): Date {
@@ -151,3 +223,46 @@ export class ExportUserPerBusinessTransactionService {
 }
 
 
+
+
+
+/*
+
+[
+  {
+    '$match': {
+      'business_uuid': '00d6d43b-4f6f-4d37-ae22-cf5158920e90',
+      'user_uuid': '2673fa45-82b9-484c-bcbe-46da250c2639'
+    }
+  }, {
+    '$group': {
+      '_id': {
+        'userId': '$user_uuid',
+        'businessId': '$business_uuid',
+        'period': {
+          '$dateToString': {
+            'date': '$updated_at',
+            'format': '%Y-%m'
+          }
+        }
+      },
+      'currency': {
+        '$first': '$currency'
+      },
+      'totalSpent': {
+        '$sum': '$amount'
+      }
+    }
+  }, {
+    '$project': {
+      'userId': '$_id.userId',
+      'businessId': '$_id.businessId',
+      'currency': '$currency',
+      'date': '$_id.period',
+      'totalSpent': '$totalSpent'
+    }
+  }
+]
+
+
+*/
