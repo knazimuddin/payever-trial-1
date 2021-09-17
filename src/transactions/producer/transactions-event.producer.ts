@@ -173,20 +173,20 @@ export class TransactionEventProducer {
       business: {
         id: transaction.business_uuid,
       },
+      channel_set: {
+        id: transaction.channel_set_uuid,
+      },
       customer: {
         email: transaction.customer_email,
         name: transaction.customer_name,
-      },
-      user: {
-        id: transaction.user_uuid,
-      },
-      channel_set: {
-        id: transaction.channel_set_uuid,
       },
       date: transaction.updated_at,
       id: transaction.uuid,
       items: transaction.items,
       last_updated: last_updated,
+      user: {
+        id: transaction.user_uuid,
+      },
     };
 
     await this.send(event, payload);
