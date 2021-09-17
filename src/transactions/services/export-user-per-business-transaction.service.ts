@@ -19,24 +19,17 @@ export class ExportUserPerBusinessTransactionService {
     const lastDayLastMonth: Date = this.getLastDayOfPreviousNMonth(n);
 
     const monthlyUserTransactions: UserPerBusinessTransactionInPeriodInterface[] =
-      await this.getMonthlyUserTransactions(firstDayLastMonth, lastDayLastMonth);
+      await this.getUserPerBusinessTransactionsInPeriod(firstDayLastMonth, lastDayLastMonth);
 
     await this.transactionsEventProducer.produceExportMonthlyUserPerBusinessTransactionEvent(monthlyUserTransactions);
   }
 
   public async exportUserPerBusinessTransactionTotal(): Promise<void> {
     const userPerBusinessTransactionsTotal: UserPerBusinessTransactionInPeriodInterface[] =
-      await this.getTotalUserPerBusinessTransactions();
+      await this.getUserPerBusinessTransactionsInPeriod();;
 
     await this.transactionsEventProducer
       .produceExportTotalUserPerBusinessTransactionEvent(userPerBusinessTransactionsTotal);
-  }
-
-  private async getMonthlyUserTransactions(
-    firstDayLastMonth: Date,
-    lastDayLastMonth: Date,
-  ): Promise<UserPerBusinessTransactionInPeriodInterface[]> {
-    return this.getUserPerBusinessTransactionsInPeriod(firstDayLastMonth, lastDayLastMonth);
   }
 
   private async getUserPerBusinessTransactionsInPeriod(
@@ -104,10 +97,6 @@ export class ExportUserPerBusinessTransactionService {
         },
       ],
     );
-  }
-
-  private async getTotalUserPerBusinessTransactions(): Promise<UserPerBusinessTransactionInPeriodInterface[]> {
-    return this.getUserPerBusinessTransactionsInPeriod();
   }
 
   private getFirstDayOfPreviousNMonth(n: number): Date {
