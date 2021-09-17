@@ -12,8 +12,7 @@ import {
   MonthlyBusinessTransactionInterface,
   TransactionPackedDetailsInterface,
   TransactionUnpackedDetailsInterface,
-  MonthlyUserPerBusinessTransactionInterface,
-  TotalUserPerBusinessTransactionInterface,
+  UserPerBusinessTransactionInPeriodInterface,
 } from '../interfaces';
 import { HistoryEventActionCompletedInterface } from '../interfaces/history-event-message';
 import { TransactionPaymentInterface } from '../interfaces/transaction';
@@ -86,7 +85,7 @@ export class TransactionEventProducer {
   }
 
   public async produceExportMonthlyUserPerBusinessTransactionEvent(
-    items: MonthlyUserPerBusinessTransactionInterface[],
+    items: UserPerBusinessTransactionInPeriodInterface[],
   ): Promise<void> {
     for (const item of items) {
       await this.send(RabbitRoutingKeys.ExportMonthlyUserPerBusinessTransaction, item);
@@ -94,7 +93,7 @@ export class TransactionEventProducer {
   }
 
   public async produceExportTotalUserPerBusinessTransactionEvent(
-    data: TotalUserPerBusinessTransactionInterface[],
+    data: UserPerBusinessTransactionInPeriodInterface[],
   ): Promise<void> {
     for (const item of data) {
       await this.send(RabbitRoutingKeys.ExportTotalUserPerBusinessTransaction, item);
