@@ -26,7 +26,7 @@ export class ExportUserPerBusinessTransactionService {
 
   public async exportUserPerBusinessTransactionTotal(): Promise<void> {
     const userPerBusinessTransactionsTotal: UserPerBusinessTransactionInPeriodInterface[] =
-      await this.getUserPerBusinessTransactionsInPeriod();;
+      await this.getUserPerBusinessTransactionsInPeriod();
 
     await this.transactionsEventProducer
       .produceExportTotalUserPerBusinessTransactionEvent(userPerBusinessTransactionsTotal);
