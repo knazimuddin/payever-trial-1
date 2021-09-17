@@ -165,7 +165,7 @@ export class ExportUserPerBusinessTransactionService {
             'userId': '$_id.userId',
             'businessId': '$_id.businessId',
             'currency': '$currency',
-            'date': 'date',
+            'date': '$date',
             'totalSpent': '$totalSpent',
             'transactions': '$transactions',
           },
