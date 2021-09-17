@@ -127,12 +127,14 @@ export class ExportUserPerBusinessTransactionService {
             '_id': {
               'userId': '$user_uuid',
               'businessId': '$business_uuid',
+              /*
               'period': {
                 '$dateToString': {
                   'date': '$updated_at',
                   'format': '%Y-%m',
                 },
               },
+              */
             },
             'currency': {
               '$first': '$currency',
@@ -142,6 +144,14 @@ export class ExportUserPerBusinessTransactionService {
             },
             'transactions': {
               '$sum': 1,
+            },
+            'date': {
+              '$first': {
+                '$dateToString': {
+                  'date': '$updated_at',
+                  'format': '%Y-%m',
+                },
+              },
             },
           },
         }, {
