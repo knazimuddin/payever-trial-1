@@ -15,3 +15,5 @@ export * from './auth-events.controller';
 export * from './sample-products-bus-messages.controller';
 export * from './internal-transaction-controller';
 export * from './proxy.controller';
+export * from './admin-folders.controller';
+export * from './business-folders.controller';
