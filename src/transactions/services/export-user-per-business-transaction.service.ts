@@ -106,6 +106,12 @@ export class ExportUserPerBusinessTransactionService {
         },
       });
     }
+    /*
+    matches.push({
+      'business_uuid': '00d6d43b-4f6f-4d37-ae22-cf5158920e90',
+      'user_uuid': '2673fa45-82b9-484c-bcbe-46da250c2639',
+    });
+    */
 
     return this.transactionsModel.aggregate(
       [
@@ -159,7 +165,7 @@ export class ExportUserPerBusinessTransactionService {
             'userId': '$_id.userId',
             'businessId': '$_id.businessId',
             'currency': '$currency',
-            'date': '$_id.period',
+            'date': 'date',
             'totalSpent': '$totalSpent',
             'transactions': '$transactions',
           },
