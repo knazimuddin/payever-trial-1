@@ -27,3 +27,4 @@ export * from './transactions-export/transaction-export-history.dto';
 export * from './transactions-export/transaction-export-channel-set.dto';
 export * from './transactions-export/transaction-export.dto';
 export * from './generic.dto';
+export * from './transaction-folders-index';
