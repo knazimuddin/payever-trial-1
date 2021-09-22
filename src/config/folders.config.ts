@@ -91,6 +91,9 @@ export const FoldersConfig: FoldersPluginOptionsInterface = {
       'payment_details.application_no^1',
       'customer_email^1',
     ],
+
+    storeFields: [
+    ],
   },
   filters: FiltersConfig,
   useBusiness: true,

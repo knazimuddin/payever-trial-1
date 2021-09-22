@@ -32,7 +32,7 @@
     "@pe/common-sdk": "^4.2.0",
     "@pe/cron-kit": "^1.0.1",
     "@pe/elastic-kit": "^3.5.0",
-    "@pe/folders-plugin": "^4.0.0-beta",
+    "@pe/folders-plugin": "^3.5.0",
     "@pe/migration-kit": "^2.0.0",
     "@pe/nest-kit": "^7.13.2",
     "@pe/notifications-sdk": "^5.0.0",
