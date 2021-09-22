@@ -58,7 +58,7 @@ Feature: Transaction export for business
                 "must_not": []
               }
             },
-            "size": 10000,
+            "size": 1000,
             "sort": [
               {
                 "created_at": "desc"

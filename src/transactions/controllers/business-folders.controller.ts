@@ -37,8 +37,8 @@ export class BusinessFoldersController {
     @QueryDto() exportDto: ExportQueryDto,
     @Res() res: FastifyReply<any>,
   ): Promise<void> {
-    // override the page and limit (max: 10000)
-    exportDto.limit = 10000;
+    // override the page and limit (max: 1000)
+    exportDto.limit = 1000;
     exportDto.page = 1;
     exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
     const business: BusinessModel = await this.businessService
