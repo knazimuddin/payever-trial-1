@@ -8,7 +8,7 @@ import {
   ElasticAdditionalSearchResultsDto,
   FoldersElasticSearchService,
 } from '@pe/folders-plugin';
-import { ListQueryDto } from '../dto';
+import { ListQueryDto, TransactionFoldersIndexDto } from '../dto';
 import { TransactionsService } from '../services';
 import { ConfigService } from '@nestjs/config';
 import { FoldersConfig } from '../../config';
@@ -16,6 +16,7 @@ import { ExchangeCalculator, ExchangeCalculatorFactory } from '../currency';
 import { BusinessService } from '@pe/business-kit';
 import { BusinessModel, TransactionModel } from '../models';
 import { TransactionEventEnum } from '../enum/events';
+import { TransactionTransformer } from '../transformers';
 
 @Injectable()
 export class FolderDocumentsListener {
@@ -100,8 +101,12 @@ export class FolderDocumentsListener {
   public async elasticBeforeIndexDocument(
     elasticSearchElementDto: ElasticSearchElementDto,
   ): Promise<void> {
-    elasticSearchElementDto.document.amount = Math.trunc(elasticSearchElementDto.document.amount * 100);
-    elasticSearchElementDto.document.total = Math.trunc(elasticSearchElementDto.document.total * 100);
+    const transactionFoldersIndex: TransactionFoldersIndexDto =
+      TransactionTransformer.transactionToFoldersIndex(elasticSearchElementDto.document);
+    transactionFoldersIndex.amount = Math.trunc(transactionFoldersIndex.amount * 100);
+    transactionFoldersIndex.total = Math.trunc(transactionFoldersIndex.total * 100);
+
+    elasticSearchElementDto.document = transactionFoldersIndex;
   }
 
   @EventListener(FoldersEventsEnum.ElasticProcessSearchResult)

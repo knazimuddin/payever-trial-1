@@ -43,7 +43,7 @@ Feature: Transaction export for business
       """
       {
         "arguments": [
-          "transactions",
+          "folder_transactions",
           {
             "from": 0,
             "query": {
@@ -73,7 +73,7 @@ Feature: Transaction export for business
       """
       {
         "arguments": [
-          "transactions",
+          "folder_transactions",
           {
            "aggs": {
              "total_amount": {
@@ -111,7 +111,7 @@ Feature: Transaction export for business
       """
       {
         "arguments": [
-          "transactions",
+          "folder_transactions",
           {
            "aggs": {
              "status": {
@@ -142,7 +142,7 @@ Feature: Transaction export for business
       """
       {
         "arguments": [
-          "transactions",
+          "folder_transactions",
           {
            "aggs": {
              "specific_status": {
@@ -173,7 +173,7 @@ Feature: Transaction export for business
       """
       {
         "arguments": [
-          "transactions",
+          "folder_transactions",
           {
             "query": {
               "bool": {

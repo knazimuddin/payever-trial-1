@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { ExportFormat } from '../tools';
-import { ListQueryDto } from './list-query.dto';
+import { ListQueryDto } from '@pe/folders-plugin';
 
 export class ExportQueryDto extends ListQueryDto {
   @ApiProperty()

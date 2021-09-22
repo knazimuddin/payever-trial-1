@@ -21,7 +21,7 @@ import { createReadStream, readFileSync, ReadStream, Stats, statSync } from 'fs'
 import * as path from 'path';
 import { BusinessDto,  BusinessService } from '@pe/business-kit';
 import { TransactionOutputConverter } from '../converter';
-import { ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
+import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { BusinessModel, TransactionModel } from '../models';
@@ -36,7 +36,7 @@ import {
   TransactionsService,
   TransactionsInfoService,
 } from '../services';
-import { BusinessFilter, Exporter, ExportFormat } from '../tools';
+import { BusinessFilter } from '../tools';
 import { PaymentActionsEnum } from '../enum';
 import { ActionItemInterface } from 'src/transactions/interfaces';
 
@@ -330,29 +330,6 @@ export class BusinessController {
     listDto.currency = business ? business.currency : this.defaultCurrency;
 
     return this.mongoSearchService.getResult(listDto);
-  }
-
-  @Get('export')
-  @HttpCode(HttpStatus.OK)
-  @Roles(RolesEnum.merchant)
-  @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
-  public async export(
-    @Param('businessId') businessId: string,
-    @QueryDto() exportDto: ExportQueryDto,
-    @Res() res: FastifyReply<any>,
-  ): Promise<void> {
-    // override the page and limit (max: 10000)
-    exportDto.limit = 10000;
-    exportDto.page = 1;
-    exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
-    const business: BusinessModel = await this.businessService
-    .findOneById(businessId) as unknown as BusinessModel;
-    exportDto.currency = business ? business.currency : this.defaultCurrency;
-    const result: PagingResultDto =  await this.elasticSearchService.getResult(exportDto);
-    const format: ExportFormat = exportDto.format;
-    const fileName: string = `"${exportDto.businessName.replace(/[^\x00-\x7F]/g, '')}"`;
-    const columns: Array<{ title: string, name: string }> = JSON.parse(exportDto.columns);
-    Exporter.export(result.collection as TransactionModel[] , res, fileName, columns, format);
   }
 
   @Get('settings')
