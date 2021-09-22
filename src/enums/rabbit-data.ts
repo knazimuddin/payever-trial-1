@@ -56,4 +56,6 @@ export enum RabbitRoutingKeys {
   MailerReportDailyReportRequested = 'mailer-report.event.transactions-daily.request',
 
   ExportMonthlyBusinessTransaction = 'transactions.event.export.monthly-business-transaction',
+  ExportMonthlyUserPerBusinessTransaction = 'transactions.event.export.monthly-user-per-business-transaction',
+  ExportTotalUserPerBusinessTransaction = 'transactions.event.export.total-user-per-business-transaction',
 }

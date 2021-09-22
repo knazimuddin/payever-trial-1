@@ -67,6 +67,13 @@ describe('PaymentMailEventProducer ', () => {
         channel_set: {
           id: transaction.channel_set_uuid,
         },
+        customer: {
+          email: transaction.customer_email,
+          name: transaction.customer_name,
+        },
+        user: {
+          id: transaction.user_uuid,
+        },
         date: transaction.updated_at,
         id: transaction.uuid,
         items: transaction.items,
@@ -108,6 +115,13 @@ describe('PaymentMailEventProducer ', () => {
         },
         channel_set: {
           id: transaction.channel_set_uuid,
+        },
+        customer: {
+          email: transaction.customer_email,
+          name: transaction.customer_name,
+        },
+        user: {
+          id: transaction.user_uuid,
         },
         date: transaction.updated_at,
         id: transaction.uuid,
@@ -151,6 +165,13 @@ describe('PaymentMailEventProducer ', () => {
         },
         channel_set: {
           id: transaction.channel_set_uuid,
+        },
+        customer: {
+          email: transaction.customer_email,
+          name: transaction.customer_name,
+        },
+        user: {
+          id: transaction.user_uuid,
         },
         date: transaction.updated_at,
         id: transaction.uuid,
@@ -204,6 +225,13 @@ describe('PaymentMailEventProducer ', () => {
         channel_set: {
           id: transaction.channel_set_uuid,
         },
+        customer: {
+          email: transaction.customer_email,
+          name: transaction.customer_name,
+        },
+        user: {
+          id: transaction.user_uuid,
+        },
         date: transaction.updated_at,
         id: transaction.uuid,
         items: transaction.items,
@@ -245,6 +273,13 @@ describe('PaymentMailEventProducer ', () => {
         },
         channel_set: {
           id: transaction.channel_set_uuid,
+        },
+        customer: {
+          email: transaction.customer_email,
+          name: transaction.customer_name,
+        },
+        user: {
+          id: transaction.user_uuid,
         },
         date: transaction.updated_at,
         id: transaction.uuid,

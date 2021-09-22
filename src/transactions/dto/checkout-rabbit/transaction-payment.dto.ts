@@ -7,6 +7,13 @@ export class TransactionPaymentDto implements TransactionPaymentInterface {
   public business: {
     id: string,
   };
+  public customer: {
+    email: string;
+    name: string;
+  };
+  public user: {
+    id: string;
+  };
   public channel_set: {
     id: string,
   };
