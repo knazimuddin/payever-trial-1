@@ -20,6 +20,7 @@ export interface TransactionBasicInterface extends SantanderApplicationAwareInte
   business_option_id: number;
   business_uuid: string;
   channel: string; // 'store', ...
+  channel_type?: string;
   channel_uuid: string;
   channel_set_uuid: string;
   created_at: Date;

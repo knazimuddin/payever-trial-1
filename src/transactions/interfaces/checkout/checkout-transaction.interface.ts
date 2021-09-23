@@ -23,6 +23,7 @@ export interface CheckoutTransactionInterface extends UnpackedDetailsAwareInterf
   channel: string; // 'store', ...
   channel_uuid: string;
   channel_set_uuid: string;
+  channel_type?: string;
   created_at: string;
   currency: string;
   customer_email: string;

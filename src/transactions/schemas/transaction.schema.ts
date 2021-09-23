@@ -22,6 +22,7 @@ export const TransactionSchema: Schema = new Schema({
 
   channel: String,
   channel_set_uuid: String,
+  channel_type: String,
   channel_uuid: String,
 
   customer_email: { type: String },

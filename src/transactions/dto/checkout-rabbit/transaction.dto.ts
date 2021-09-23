@@ -61,6 +61,10 @@ export class TransactionDto implements CheckoutTransactionInterface {
   @IsString()
   public channel_set_uuid: string;
 
+  @IsOptional()
+  @IsString()
+  public channel_type: string;
+
   @IsString()
   public created_at: string;
 
