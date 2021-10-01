@@ -1,13 +1,16 @@
-import { FastifyReply } from 'fastify';
-import * as moment from 'moment';
 import * as path from 'path';
 import * as PdfMakePrinter from 'pdfmake/src/printer';
 import * as XLSX from 'xlsx';
-import { TransactionModel } from '../models';
+import { BusinessModel, TransactionModel } from '../models';
+import { ExportFormatEnum } from '../enum';
+import { BusinessFilter } from '../tools';
+import { ExportedFileResultDto, ExportQueryDto, PagingResultDto } from '../dto';
+import { FoldersElasticSearchService } from '@pe/folders-plugin';
+import { BusinessService } from '@pe/business-kit';
+import { ConfigService } from '@nestjs/config';
+import { Injectable } from '@nestjs/common';
 
-export type ExportFormat = 'xlsx' | 'csv' | 'ods' | 'pdf';
-
-const shippingsColumns: Array<{ title: string, name: string }> = [
+const shippingColumns: Array<{ title: string, name: string }> = [
   { title: 'Shipping City', name: 'city' },
   { title: 'Shipping Company', name: 'company' },
   { title: 'Shipping Country', name: 'country_name' },
@@ -26,53 +29,102 @@ const productColumnsFunc: any = (key: number): Array<{ index: number, title: str
   { index: key, title: `Lineitem${key + 1} quantity`, name: 'quantity' },
 ];
 
-export class Exporter {
-  public static export(
+@Injectable()
+export class ExporterService {
+  private readonly defaultCurrency: string;
+
+  constructor(
+    private readonly elasticSearchService: FoldersElasticSearchService,
+    private readonly businessService: BusinessService,
+    private readonly configService: ConfigService,
+  ) {
+    this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
+  }
+
+  public async exportBusinessTransactions(
+    exportDto: ExportQueryDto,
+    businessId: string,
+  ): Promise<ExportedFileResultDto> {
+    exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
+    const business: BusinessModel = await this.businessService
+      .findOneById(businessId) as unknown as BusinessModel;
+    exportDto.currency = business ? business.currency : this.defaultCurrency;
+    const fileName: string = `"${exportDto.businessName.replace(/[^\x00-\x7F]/g, '')}"`;
+
+    return {
+      data: await this.exportToFile(exportDto, fileName),
+      fileName,
+    };
+  }
+
+  public async exportAdminTransactions(
+    exportDto: ExportQueryDto,
+  ): Promise<ExportedFileResultDto> {
+    const fileName: string = 'export';
+
+    return {
+      data: this.exportToFile(exportDto, fileName),
+      fileName,
+    };
+  }
+
+
+  private async exportToFile(
+    exportDto: ExportQueryDto,
+    fileName: string,
+  ): Promise<any> {
+    exportDto.page = 1;
+    const result: PagingResultDto =  await this.elasticSearchService.getResult(exportDto);
+    const columns: Array<{ title: string, name: string }> = JSON.parse(exportDto.columns);
+    const transactions: TransactionModel[] =  result.collection as TransactionModel[];
+
+    if (exportDto.format === ExportFormatEnum.pdf) {
+      return this.exportPDF(transactions, columns);
+    } else {
+      return this.exportXLSX(transactions, fileName, columns, exportDto.format);
+    }
+  }
+
+  private async exportXLSX(
     transactions: TransactionModel[],
-    res: FastifyReply<any>,
     fileName: string,
     columns: Array<{ title: string, name: string }>,
-    format: ExportFormat = 'csv',
-  ): void {
-    if (format === 'pdf') {
-      return this.exportPDF(transactions, res, fileName, columns);
-    }
-    const productColumns: Array<{ index: number, title: string, name: string }> = this.getProductColumns(transactions);
+    format: ExportFormatEnum = ExportFormatEnum.csv,
+  ): Promise<any> {
+    const bookType: XLSX.BookType = ExporterService.exportFormatToBookType(format);
+    const productColumns: Array<{ index: number, title: string, name: string }> =
+      ExporterService.getProductColumns(transactions);
     const header: string[] = [
       ...['CHANNEL', 'ID', 'TOTAL'],
-      ...shippingsColumns.map((c: { title: string, name: string }) => c.title ),
+      ...shippingColumns.map((c: { title: string, name: string }) => c.title ),
       ...productColumns.map((c: { index: number, title: string, name: string }) => c.title ),
       ...columns.map((c: { title: string, name: string }) => c.title )];
-    const data: string[][] = this.getTransactionData(transactions, productColumns, columns);
+    const data: string[][] = ExporterService.getTransactionData(transactions, productColumns, columns);
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([header, ...data]);
     XLSX.utils.book_append_sheet(wb, ws, `${fileName}`.slice(0, 30));
-    const file: any = XLSX.write(wb, { bookType: format, bookSST: true, type: 'buffer' });
-    res.header('Content-Transfer-Encoding', `binary`);
-    res.header('Access-Control-Expose-Headers', `Content-Disposition,X-Suggested-Filename`);
-    res.header('Content-disposition', `attachment;filename=${fileName}-${moment().format('DD-MM-YYYY')}.${format}`);
-    res.send(file);
+
+    return XLSX.write(wb, { bookType: bookType, bookSST: true, type: 'buffer' });
   }
 
-  public static exportPDF(
+  private async exportPDF(
     transactions: TransactionModel[],
-    res: FastifyReply<any>,
-    fileName: string,
     columns: Array<{ title: string, name: string }>,
-  ): void {
+  ): Promise<void> {
     const pageHeight: number = 5000;
-    const productColumns: Array<{ index: number, title: string, name: string }> = this.getProductColumns(transactions);
+    const productColumns: Array<{ index: number, title: string, name: string }> =
+      ExporterService.getProductColumns(transactions);
     const header: any[] = [
       ...['CHANNEL', 'ID', 'TOTAL'],
-      ...shippingsColumns.map((c: { title: string, name: string }) => c.title ),
+      ...shippingColumns.map((c: { title: string, name: string }) => c.title ),
       ...productColumns.map((c: { index: number, title: string, name: string }) => c.title ),
       ...columns.map((c: { title: string, name: string }) => c.title )]
       .map((h: string) => ({ text: h, style: 'tableHeader'}));
 
-    const data: any[][] = this.getTransactionData(transactions, productColumns, columns, true)
+    const data: any[][] = ExporterService.getTransactionData(transactions, productColumns, columns, true)
       .map((entity: any) => entity.map((e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 })));
 
-    const allColumns: any[] = [...shippingsColumns, ...productColumns, ...columns];
+    const allColumns: any[] = [...shippingColumns, ...productColumns, ...columns];
     const cp: number = 100 / (allColumns.length + 2);
     const docDefinition: any = {
       content: [
@@ -123,23 +175,12 @@ export class Exporter {
     };
 
     const printer: PdfMakePrinter = new PdfMakePrinter(fonts);
-    const doc: any = printer.createPdfKitDocument(
+
+    return printer.createPdfKitDocument(
       docDefinition,
       {
         pdfVersion: '1.7ext3',
       });
-    const chunks: any[] = [];
-    doc.on('data', (chunk: any) => {
-      chunks.push(chunk);
-    });
-
-    doc.on('end', () => {
-      res.header('Content-Transfer-Encoding', `binary`);
-      res.header('Access-Control-Expose-Headers', `Content-Disposition,X-Suggested-Filename`);
-      res.header('Content-disposition', `attachment;filename=${fileName}-${moment().format('DD-MM-YYYY')}.pdf`);
-      res.send(   Buffer.concat(chunks));
-    });
-    doc.end();
   }
 
   private static getProductColumns(transactions: TransactionModel[]): any[] {
@@ -164,7 +205,7 @@ export class Exporter {
     return transactions
       .map((t: TransactionModel) => [
         ...[t.channel, t.original_id, t.total],
-        ...shippingsColumns
+        ...shippingColumns
           .map((c: { title: string, name: string }) => {
             return t.shipping_address && c.name in t.shipping_address
               ? t.shipping_address[c.name]
@@ -197,5 +238,16 @@ export class Exporter {
     return (value).map((item: { name: string, value: string }) => {
       return `${item.name}:${item.value}`;
     }).join(', ');
+  }
+
+  private static exportFormatToBookType(exportFormat: ExportFormatEnum): XLSX.BookType {
+    switch (exportFormat) {
+      case ExportFormatEnum.xlsx:
+        return 'xlsx';
+      case ExportFormatEnum.ods:
+        return 'ods';
+      default:
+        return 'csv';
+    }
   }
 }

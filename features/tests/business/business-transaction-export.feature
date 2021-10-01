@@ -1,3 +1,4 @@
+@export
 Feature: Transaction export for business
   Background:
     Given I remember as "businessId" following value:
@@ -58,7 +59,7 @@ Feature: Transaction export for business
                 "must_not": []
               }
             },
-            "size": 1000,
+            "size": 20,
             "sort": [
               {
                 "created_at": "desc"

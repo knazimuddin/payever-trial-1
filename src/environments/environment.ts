@@ -92,6 +92,22 @@ export const environment: any = {
           },
         ],
       },
+      {
+        name: RabbitExchangesEnum.transactionsExport,
+        options: { durable: true },
+        type: 'direct',
+
+        queues: [
+          {
+            name: RabbitChannels.TransactionsExport,
+            options: {
+              deadLetterExchange: 'transactions_export_fallback',
+              deadLetterRoutingKey: RabbitChannels.TransactionsExport,
+              durable: true,
+            },
+          },
+        ],
+      },
     ],
   },
   redis: {

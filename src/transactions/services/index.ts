@@ -20,3 +20,4 @@ export * from './action-item-validators/action-item-validators.collector';
 export * from './action-amount-validators/action-amount-validators.collector';
 export * from './action-validators.list';
 export * from './transactions-info.service';
+export * from './exporter.service';

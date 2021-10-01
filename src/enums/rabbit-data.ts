@@ -1,11 +1,13 @@
 export enum RabbitExchangesEnum {
   asyncEvents = 'async_events',
   transactionsFolders = 'transactions_folders',
+  transactionsExport = 'transactions_export',
 }
 
 export enum RabbitChannels {
   Transactions = 'async_events_transactions_micro',
   TransactionsFolders = 'async_events_transactions_folders_micro',
+  TransactionsExport = 'async_events_transactions_export_micro',
 }
 
 export enum RabbitRoutingKeys {
@@ -58,4 +60,7 @@ export enum RabbitRoutingKeys {
   ExportMonthlyBusinessTransaction = 'transactions.event.export.monthly-business-transaction',
   ExportMonthlyUserPerBusinessTransaction = 'transactions.event.export.monthly-user-per-business-transaction',
   ExportTotalUserPerBusinessTransaction = 'transactions.event.export.total-user-per-business-transaction',
+
+  InternalTransactionExport = 'transactions.event.export',
+
 }
