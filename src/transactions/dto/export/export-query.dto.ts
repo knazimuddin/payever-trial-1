@@ -27,7 +27,7 @@ export class ExportQueryDto extends ListQueryDto {
   @ApiProperty()
   @IsOptional()
   @IsNumber()
-  @Max(10000)
+  @Max(20000)
   public limit: number = 10;
 
 }

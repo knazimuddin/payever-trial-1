@@ -1,15 +1,16 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Logger, Param, Res, UseGuards } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { ExportedFileResultDto, ExportQueryDto } from '../dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-import { Acl, AclActionsEnum } from '@pe/nest-kit';
+import { Acl, AclActionsEnum, RabbitMqClient } from '@pe/nest-kit';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
 import * as moment from 'moment';
 import { ExporterService } from '../services';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ExportFormatEnum } from '../enum';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -19,6 +20,8 @@ export class ExportTransactionsController {
   constructor(
     private readonly configService: ConfigService,
     private readonly exporterService: ExporterService,
+    private readonly rabbitClient: RabbitMqClient,
+    private readonly logger: Logger,
   ) { }
 
   @Get('business/:businessId/export')
@@ -32,9 +35,13 @@ export class ExportTransactionsController {
     @QueryDto() exportDto: ExportQueryDto,
     @Res() res: FastifyReply<any>,
   ): Promise<void> {
-    const document: ExportedFileResultDto =
-      await this.exporterService.exportBusinessTransactions(exportDto, businessId);
-    await this.returnDocument(document, res);
+    if (exportDto.limit > 1000) {
+      await this.sendRabbitEvent(exportDto, businessId);
+    } else {
+      const document: ExportedFileResultDto =
+        await this.exporterService.exportBusinessTransactions(exportDto, businessId);
+      await this.returnDocument(exportDto.format, document, res);
+    }
   }
 
   @Get('admin/export')
@@ -46,8 +53,12 @@ export class ExportTransactionsController {
     @QueryDto() exportDto: ExportQueryDto,
     @Res() res: FastifyReply<any>,
   ): Promise<void> {
-    const document: ExportedFileResultDto = await this.exporterService.exportAdminTransactions(exportDto);
-    await this.returnDocumentBuChunks(document, res);
+    if (exportDto.limit > 1000) {
+      await this.sendRabbitEvent(exportDto);
+    } else {
+      const document: ExportedFileResultDto = await this.exporterService.exportAdminTransactions(exportDto);
+      await this.returnDocument(exportDto.format, document, res);
+    }
   }
 
   @MessagePattern({
@@ -58,8 +69,40 @@ export class ExportTransactionsController {
     exportDto: ExportQueryDto,
     businessId?: string,
   ): Promise<void> {
-    const document: ExportedFileResultDto =
-      await this.exporterService.exportBusinessTransactions(exportDto, businessId);
+    this.logger.log(
+      {
+        businessId: businessId,
+        exportDto: exportDto,
+        text: 'Received export transactions event',
+      },
+    );
+
+    await this.exporterService.exportTransactionsToLink(exportDto, businessId);
+  }
+
+  private async returnDocument(
+    exportFormat: ExportFormatEnum,
+    document: ExportedFileResultDto,
+    res: FastifyReply<any>,
+  ): Promise<void> {
+    if (exportFormat === ExportFormatEnum.pdf) {
+      await this.returnDocumentBuChunks(document, res);
+    } else {
+      await this.returnDocumentInOnePart(document, res);
+    }
+  }
+
+  private async returnDocumentInOnePart(
+    document: ExportedFileResultDto,
+    res: FastifyReply<any>,
+  ): Promise<void> {
+    res.header('Content-Transfer-Encoding', `binary`);
+    res.header('Access-Control-Expose-Headers', `Content-Disposition,X-Suggested-Filename`);
+    res.header(
+      'Content-disposition',
+      `attachment;filename=${document.fileName}`,
+    );
+    res.send(document.data);
   }
 
   private async returnDocumentBuChunks(document: ExportedFileResultDto, res: FastifyReply<any>): Promise<void> {
@@ -80,14 +123,20 @@ export class ExportTransactionsController {
     document.data.end();
   }
 
-  private async returnDocument(document: ExportedFileResultDto, res: FastifyReply<any>): Promise<void> {
-    res.header('Content-Transfer-Encoding', `binary`);
-    res.header('Access-Control-Expose-Headers', `Content-Disposition,X-Suggested-Filename`);
-    res.header(
-      'Content-disposition',
-      `attachment;filename=${document.fileName}-${moment().format('DD-MM-YYYY')}.pdf`,
+  private async sendRabbitEvent(exportDto: ExportQueryDto, businessId?: string): Promise<void> {
+    await this.rabbitClient.send(
+      {
+        channel: RabbitRoutingKeys.InternalTransactionExport,
+        exchange: RabbitChannels.TransactionsExport,
+      },
+      {
+        name: RabbitRoutingKeys.InternalTransactionExport,
+        payload: {
+          businessId,
+          exportDto,
+        },
+      },
     );
-    res.send(document.data);
   }
 
 }

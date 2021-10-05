@@ -8,7 +8,13 @@ import { ExportedFileResultDto, ExportQueryDto, PagingResultDto } from '../dto';
 import { FoldersElasticSearchService } from '@pe/folders-plugin';
 import { BusinessService } from '@pe/business-kit';
 import { ConfigService } from '@nestjs/config';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpService, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Observable } from 'rxjs';
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { catchError, map } from 'rxjs/operators';
+import { environment } from '../../environments';
+import * as FormData from 'form-data';
+import * as moment from 'moment';
 
 const shippingColumns: Array<{ title: string, name: string }> = [
   { title: 'Shipping City', name: 'city' },
@@ -37,8 +43,29 @@ export class ExporterService {
     private readonly elasticSearchService: FoldersElasticSearchService,
     private readonly businessService: BusinessService,
     private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
+    private readonly logger: Logger,
   ) {
     this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
+  }
+
+  public async exportTransactionsToLink(
+    exportDto: ExportQueryDto,
+    businessId?: string,
+  ): Promise<void> {
+    let document: any;
+    if (businessId) {
+      document = await this.exportBusinessTransactions(exportDto, businessId);
+    } else {
+      document = await this.exportAdminTransactions(exportDto);
+    }
+
+    if (exportDto.format === ExportFormatEnum.pdf) {
+      document.data.end();
+    }
+    const documentLink: string = await this.storeFileInMedia(document);
+
+    await this.sendEmailToDownloadFileByLink(documentLink);
   }
 
   public async exportBusinessTransactions(
@@ -49,7 +76,9 @@ export class ExporterService {
     const business: BusinessModel = await this.businessService
       .findOneById(businessId) as unknown as BusinessModel;
     exportDto.currency = business ? business.currency : this.defaultCurrency;
-    const fileName: string = `"${exportDto.businessName.replace(/[^\x00-\x7F]/g, '')}"`;
+    let businessName: string = `${exportDto.businessName.replace(/[^\x00-\x7F]/g, '')}`;
+    businessName = businessName.replace(/\s/, '-');
+    const fileName: string = `${businessName}-${moment().format('DD-MM-YYYY')}.${exportDto.format}`;
 
     return {
       data: await this.exportToFile(exportDto, fileName),
@@ -60,14 +89,13 @@ export class ExporterService {
   public async exportAdminTransactions(
     exportDto: ExportQueryDto,
   ): Promise<ExportedFileResultDto> {
-    const fileName: string = 'export';
+    const fileName: string = `transactions-${moment().format('DD-MM-YYYY')}.${exportDto.format}`;
 
     return {
       data: this.exportToFile(exportDto, fileName),
       fileName,
     };
   }
-
 
   private async exportToFile(
     exportDto: ExportQueryDto,
@@ -110,7 +138,7 @@ export class ExporterService {
   private async exportPDF(
     transactions: TransactionModel[],
     columns: Array<{ title: string, name: string }>,
-  ): Promise<void> {
+  ): Promise<any> {
     const pageHeight: number = 5000;
     const productColumns: Array<{ index: number, title: string, name: string }> =
       ExporterService.getProductColumns(transactions);
@@ -250,4 +278,56 @@ export class ExporterService {
         return 'csv';
     }
   }
+
+  private async storeFileInMedia(document: ExportedFileResultDto): Promise<string> {
+    const url: string = `${environment.microUrlMedia}/api/storage/file`;
+    const bodyFormData: FormData = new FormData();
+
+    bodyFormData.append('file', document.data, { filename: document.fileName});
+    const axiosRequestConfig: AxiosRequestConfig = {
+      data: bodyFormData,
+      headers: bodyFormData.getHeaders(),
+      method: 'POST',
+      url: url,
+    };
+
+    const request: Observable<any> = await this.httpService.request(axiosRequestConfig);
+
+    return request.pipe(
+      map(( response: AxiosResponse<any>) => {
+        this.logger.log({
+          data: response.data,
+          message: 'Received response from media call',
+          url: url,
+        });
+
+        return response.data.url;
+      }),
+      catchError((error: AxiosError) => {
+        const errorData: any = error.response?.data ? error.response.data : error.message;
+        const errorStatus: number =
+          error.response?.status ? error.response.status : HttpStatus.INTERNAL_SERVER_ERROR;
+        this.logger.error(
+          {
+            error: errorData,
+            errorStatus: errorStatus,
+            message: 'Failed response from media call',
+            url: url,
+        });
+
+        throw new HttpException(errorData, errorStatus);
+      }),
+    )
+      .toPromise();
+  }
+
+
+  private async sendEmailToDownloadFileByLink(documentLink: string): Promise<void> {
+    this.logger.log(
+      {
+        document: documentLink,
+        message: 'Send email with link to file',
+      });
+  }
+
 }
