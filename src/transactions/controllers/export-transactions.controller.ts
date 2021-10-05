@@ -14,7 +14,6 @@ import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ExportFormatEnum } from '../enum';
 
 @Controller()
-@UseGuards(JwtAuthGuard)
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class ExportTransactionsController {
@@ -25,10 +24,26 @@ export class ExportTransactionsController {
     private readonly logger: Logger,
   ) { }
 
+  @MessagePattern({
+    channel: RabbitChannels.TransactionsExport,
+    name: RabbitRoutingKeys.InternalTransactionExport,
+  })
+  public async onExportTransactionEvent(data: any): Promise<void> {
+    this.logger.log({
+      data: data,
+      text: 'Received export transactions event',
+    });
+
+    const settings: ExportTransactionsSettingsDto = plainToClass(ExportTransactionsSettingsDto, data);
+
+    await this.exporterService.exportTransactionsToLink(settings.exportDto, settings.businessId);
+  }
+
   @Get('business/:businessId/export')
   @ApiTags('business')
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
   @Roles(RolesEnum.merchant)
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async exportBusinessTransactions(
@@ -50,6 +65,7 @@ export class ExportTransactionsController {
 
   @Get('admin/export')
   @ApiTags('admin')
+  @UseGuards(JwtAuthGuard)
   @Roles(RolesEnum.admin)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
@@ -66,25 +82,6 @@ export class ExportTransactionsController {
       const document: ExportedFileResultDto = await this.exporterService.exportAdminTransactions(exportDto);
       await this.returnDocument(exportDto.format, document, res);
     }
-  }
-
-  @MessagePattern({
-    channel: RabbitChannels.TransactionsExport,
-    name: RabbitRoutingKeys.InternalTransactionExport,
-  })
-  public async onExportTransactionEvent (
-    data: any,
-  ): Promise<void> {
-    this.logger.log(
-      {
-        data: data,
-        text: 'Received export transactions event',
-      },
-    );
-
-    const settings: ExportTransactionsSettingsDto = plainToClass(ExportTransactionsSettingsDto, data);
-
-    await this.exporterService.exportTransactionsToLink(settings.exportDto, settings.businessId);
   }
 
   private async returnDocument(
