@@ -1,9 +1,6 @@
-import { Controller, Get, HttpCode, HttpStatus, Logger, Param, Res, UseGuards } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
-import { MessagePattern } from '@nestjs/microservices';
+import { Controller, Get, HttpCode, HttpStatus, Param, Res, UseGuards } from '@nestjs/common';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
 import { ExportedFileResultDto, ExportQueryDto, ExportTransactionsSettingsDto } from '../dto';
-import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { Acl, AclActionsEnum, RabbitMqClient } from '@pe/nest-kit';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
@@ -14,36 +11,19 @@ import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ExportFormatEnum } from '../enum';
 
 @Controller()
+@UseGuards(JwtAuthGuard)
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class ExportTransactionsController {
   constructor(
-    private readonly configService: ConfigService,
     private readonly exporterService: ExporterService,
     private readonly rabbitClient: RabbitMqClient,
-    private readonly logger: Logger,
   ) { }
-
-  @MessagePattern({
-    channel: RabbitChannels.TransactionsExport,
-    name: RabbitRoutingKeys.InternalTransactionExport,
-  })
-  public async onExportTransactionEvent(data: any): Promise<void> {
-    this.logger.log({
-      data: data,
-      text: 'Received export transactions event',
-    });
-
-    const settings: ExportTransactionsSettingsDto = plainToClass(ExportTransactionsSettingsDto, data);
-
-    await this.exporterService.exportTransactionsToLink(settings.exportDto, settings.businessId);
-  }
 
   @Get('business/:businessId/export')
   @ApiTags('business')
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
   @Roles(RolesEnum.merchant)
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async exportBusinessTransactions(

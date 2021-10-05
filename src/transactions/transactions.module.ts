@@ -43,6 +43,7 @@ import {
   InternalTransactionEventsController,
   ProxyController,
   ExportTransactionsController,
+  ExportTransactionsBusMessagesController,
 } from './controllers';
 import { ExchangeCalculatorFactory } from './currency';
 import { EventListenersList } from './event-listeners/event-listeners.list';
@@ -115,6 +116,7 @@ import { ExportMonthlyBusinessTransactionCronService } from '../cron/export-mont
     InternalTransactionEventsController,
     ProxyController,
     ExportTransactionsController,
+    ExportTransactionsBusMessagesController,
   ],
   imports: [
     ConfigModule,
