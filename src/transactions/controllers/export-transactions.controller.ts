@@ -75,15 +75,14 @@ export class ExportTransactionsController {
   public async onExportTransactionEvent (
     data: any,
   ): Promise<void> {
-    const settings: ExportTransactionsSettingsDto = plainToClass(ExportTransactionsSettingsDto, data);
-
     this.logger.log(
       {
-        businessId: settings.businessId,
-        exportDto: settings.exportDto,
+        data: data,
         text: 'Received export transactions event',
       },
     );
+
+    const settings: ExportTransactionsSettingsDto = plainToClass(ExportTransactionsSettingsDto, data);
 
     await this.exporterService.exportTransactionsToLink(settings.exportDto, settings.businessId);
   }
