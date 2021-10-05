@@ -49,6 +49,14 @@ export class ExporterService {
     this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
   }
 
+  public async getTransactionsCount(
+    exportDto: ExportQueryDto,
+  ): Promise<number> {
+    const result: PagingResultDto =  await this.elasticSearchService.getResult(exportDto);
+
+    return result.pagination_data.total;
+  }
+
   public async exportTransactionsToLink(
     exportDto: ExportQueryDto,
     businessId?: string,

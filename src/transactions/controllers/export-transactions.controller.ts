@@ -35,6 +35,9 @@ export class ExportTransactionsController {
     @QueryDto() exportDto: ExportQueryDto,
     @Res() res: FastifyReply<any>,
   ): Promise<void> {
+    exportDto.page = 1;
+    exportDto.limit = await this.exporterService.getTransactionsCount(exportDto);
+
     if (exportDto.limit > 1000) {
       await this.sendRabbitEvent(exportDto, businessId);
     } else {
@@ -53,6 +56,9 @@ export class ExportTransactionsController {
     @QueryDto() exportDto: ExportQueryDto,
     @Res() res: FastifyReply<any>,
   ): Promise<void> {
+    exportDto.page = 1;
+    exportDto.limit = await this.exporterService.getTransactionsCount(exportDto);
+
     if (exportDto.limit > 1000) {
       await this.sendRabbitEvent(exportDto);
     } else {
