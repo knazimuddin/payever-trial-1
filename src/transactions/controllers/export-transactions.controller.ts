@@ -1,7 +1,8 @@
 import { Controller, Get, HttpCode, HttpStatus, Logger, Param, Res, UseGuards } from '@nestjs/common';
+import { plainToClass } from 'class-transformer';
 import { MessagePattern } from '@nestjs/microservices';
 import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
-import { ExportedFileResultDto, ExportQueryDto } from '../dto';
+import { ExportedFileResultDto, ExportQueryDto, ExportTransactionsSettingsDto } from '../dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { Acl, AclActionsEnum, RabbitMqClient } from '@pe/nest-kit';
@@ -72,18 +73,19 @@ export class ExportTransactionsController {
     name: RabbitRoutingKeys.InternalTransactionExport,
   })
   public async onExportTransactionEvent (
-    exportDto: ExportQueryDto,
-    businessId?: string,
+    data: any,
   ): Promise<void> {
+    const settings: ExportTransactionsSettingsDto = plainToClass(ExportTransactionsSettingsDto, data);
+
     this.logger.log(
       {
-        businessId: businessId,
-        exportDto: exportDto,
+        businessId: settings.businessId,
+        exportDto: settings.exportDto,
         text: 'Received export transactions event',
       },
     );
 
-    await this.exporterService.exportTransactionsToLink(exportDto, businessId);
+    await this.exporterService.exportTransactionsToLink(settings.exportDto, settings.businessId);
   }
 
   private async returnDocument(
@@ -130,6 +132,11 @@ export class ExportTransactionsController {
   }
 
   private async sendRabbitEvent(exportDto: ExportQueryDto, businessId?: string): Promise<void> {
+    const exportTransactionsSettings: ExportTransactionsSettingsDto = {
+      businessId,
+      exportDto,
+    };
+
     await this.rabbitClient.send(
       {
         channel: RabbitRoutingKeys.InternalTransactionExport,
@@ -137,10 +144,7 @@ export class ExportTransactionsController {
       },
       {
         name: RabbitRoutingKeys.InternalTransactionExport,
-        payload: {
-          businessId,
-          exportDto,
-        },
+        payload: exportTransactionsSettings,
       },
     );
   }
