@@ -1,5 +1,5 @@
 import { Controller, Get, HttpCode, HttpStatus, Param, Res, UseGuards } from '@nestjs/common';
-import { RabbitChannels, RabbitRoutingKeys } from '../../enums';
+import { RabbitChannels, RabbitExchangesEnum, RabbitRoutingKeys } from '../../enums';
 import { ExportedFileResultDto, ExportQueryDto, ExportTransactionsSettingsDto } from '../dto';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { Acl, AclActionsEnum, RabbitMqClient } from '@pe/nest-kit';
@@ -116,7 +116,7 @@ export class ExportTransactionsController {
     await this.rabbitClient.send(
       {
         channel: RabbitRoutingKeys.InternalTransactionExport,
-        exchange: RabbitChannels.TransactionsExport,
+        exchange: RabbitExchangesEnum.transactionsExport,
       },
       {
         name: RabbitRoutingKeys.InternalTransactionExport,
