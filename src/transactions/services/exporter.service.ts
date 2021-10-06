@@ -307,6 +307,12 @@ export class ExporterService {
       url: url,
     };
 
+    this.logger.log({
+      bodyFormDataSize: bodyFormData.getLengthSync(),
+      fileName: document.fileName,
+      message: 'Sending file to media',
+    });
+
     const request: Observable<any> = await this.httpService.request(axiosRequestConfig);
 
     return request.pipe(
