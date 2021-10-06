@@ -54,6 +54,9 @@ export class ExporterService {
   ): Promise<number> {
     const result: PagingResultDto =  await this.elasticSearchService.getResult(exportDto);
 
+    console.log('exportDto', exportDto)
+    console.log('result', result)
+
     return result.pagination_data.total;
   }
 
