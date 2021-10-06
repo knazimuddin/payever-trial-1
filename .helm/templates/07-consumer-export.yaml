@@ -92,7 +92,7 @@ spec:
             failureThreshold: 15
 
           resources:
-{{ toYaml $values.resources | indent 12 }}
+{{ toYaml $values.resources.consumer_export | indent 12 }}
 
           envFrom:
             - configMapRef:
