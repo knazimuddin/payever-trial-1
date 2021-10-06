@@ -40,6 +40,35 @@ Feature: Transaction export for business
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-statuses-response.json" content and remember as "statusesResponse"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-specific-statuses-response.json" content and remember as "specificStatusesResponse"
     And I get file "features/fixtures/json/transaction-list-elastica/business-transactions-list-response.json" content and remember as "transactionsListJson"
+    And I mock Elasticsearch method "count" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions",
+          {
+            "query": {
+              "bool": {
+                "must": [
+                  {
+                    "term": {
+                      "isFolder": false
+                    }
+                  },
+                  {
+                    "match_phrase": {
+                      "businessId": "{{businessId}}"
+                    }
+                  }
+                ],
+                "must_not": [],
+                "should": []
+              }
+            }
+          }
+        ],
+        "result": {{elasticTransactionsCountJson}}
+      }
+      """
     And I mock Elasticsearch method "search" with:
       """
       {
@@ -59,7 +88,7 @@ Feature: Transaction export for business
                 "must_not": []
               }
             },
-            "size": 20,
+            "size": 4,
             "sort": [
               {
                 "created_at": "desc"

@@ -5,7 +5,7 @@ import { BusinessModel, TransactionModel } from '../models';
 import { ExportFormatEnum } from '../enum';
 import { BusinessFilter } from '../tools';
 import { ExportedFileResultDto, ExportQueryDto, PagingResultDto } from '../dto';
-import { FoldersElasticSearchService } from '@pe/folders-plugin';
+import { FoldersElasticSearchService, ElasticFilterBodyInterface, ElasticSearchCountResultsDto } from '@pe/folders-plugin';
 import { BusinessService } from '@pe/business-kit';
 import { ConfigService } from '@nestjs/config';
 import { HttpException, HttpService, HttpStatus, Injectable, Logger } from '@nestjs/common';
@@ -51,13 +51,17 @@ export class ExporterService {
 
   public async getTransactionsCount(
     exportDto: ExportQueryDto,
+    businessId?: string,
   ): Promise<number> {
-    const result: PagingResultDto =  await this.elasticSearchService.getResult(exportDto);
+    const filter: ElasticFilterBodyInterface = this.elasticSearchService.createFiltersBody();
+    filter.must.push({ term: { isFolder: false}});
+    if (businessId) {
+      filter.must.push({ match_phrase: { businessId: businessId}});
+    }
 
-    console.log('exportDto', exportDto)
-    console.log('result', result)
+    const result: ElasticSearchCountResultsDto = await this.elasticSearchService.count(filter);
 
-    return result.pagination_data.total;
+    return result.count;
   }
 
   public async exportTransactionsToLink(
@@ -84,6 +88,7 @@ export class ExporterService {
     businessId: string,
   ): Promise<ExportedFileResultDto> {
     exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
+
     const business: BusinessModel = await this.businessService
       .findOneById(businessId) as unknown as BusinessModel;
     exportDto.currency = business ? business.currency : this.defaultCurrency;

@@ -1,5 +1,5 @@
 import { Controller, Get, HttpCode, HttpStatus, Param, Res, UseGuards } from '@nestjs/common';
-import { RabbitChannels, RabbitExchangesEnum, RabbitRoutingKeys } from '../../enums';
+import { RabbitExchangesEnum, RabbitRoutingKeys } from '../../enums';
 import { ExportedFileResultDto, ExportQueryDto, ExportTransactionsSettingsDto } from '../dto';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { Acl, AclActionsEnum, RabbitMqClient } from '@pe/nest-kit';
@@ -32,7 +32,7 @@ export class ExportTransactionsController {
     @Res() res: FastifyReply<any>,
   ): Promise<void> {
     exportDto.page = 1;
-    exportDto.limit = await this.exporterService.getTransactionsCount(exportDto);
+    exportDto.limit = await this.exporterService.getTransactionsCount(exportDto, businessId);
 
     if (exportDto.limit > 1000) {
       await this.sendRabbitEvent(exportDto, businessId);
