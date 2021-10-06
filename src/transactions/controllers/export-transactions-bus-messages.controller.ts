@@ -24,6 +24,15 @@ export class ExportTransactionsBusMessagesController {
 
     const settings: ExportTransactionsSettingsDto = plainToClass(ExportTransactionsSettingsDto, data);
 
+    if (settings.exportDto.limit > 10000) {
+      this.logger.warn({
+        settings: data,
+        text: 'Limit more than 10000',
+      });
+
+      settings.exportDto.limit = 10000;
+    }
+
     await this.exporterService.exportTransactionsToLink(settings.exportDto, settings.businessId);
   }
 
