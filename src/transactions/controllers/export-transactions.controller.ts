@@ -35,7 +35,8 @@ export class ExportTransactionsController {
     exportDto.limit = await this.exporterService.getTransactionsCount(exportDto, businessId);
 
     if (exportDto.limit > 1000) {
-      await this.sendRabbitEvent(exportDto, businessId);
+      this.sendRabbitEvent(exportDto, businessId);
+      this.returnExportingStarted(res);
     } else {
       const document: ExportedFileResultDto =
         await this.exporterService.exportBusinessTransactions(exportDto, businessId);
@@ -57,7 +58,8 @@ export class ExportTransactionsController {
     exportDto.limit = await this.exporterService.getTransactionsCount(exportDto);
 
     if (exportDto.limit > 1000) {
-      await this.sendRabbitEvent(exportDto);
+      this.sendRabbitEvent(exportDto);
+      this.returnExportingStarted(res);
     } else {
       const document: ExportedFileResultDto = await this.exporterService.exportAdminTransactions(exportDto);
       await this.returnDocument(exportDto.format, document, res);
@@ -74,6 +76,13 @@ export class ExportTransactionsController {
     } else {
       await this.returnDocumentInOnePart(document, res);
     }
+  }
+
+  private returnExportingStarted(
+    res: FastifyReply<any>,
+  ): void {
+    res.code(HttpStatus.ACCEPTED);
+    res.send('Exporting started');
   }
 
   private async returnDocumentInOnePart(
@@ -107,13 +116,13 @@ export class ExportTransactionsController {
     document.data.end();
   }
 
-  private async sendRabbitEvent(exportDto: ExportQueryDto, businessId?: string): Promise<void> {
+  private sendRabbitEvent(exportDto: ExportQueryDto, businessId?: string): void {
     const exportTransactionsSettings: ExportTransactionsSettingsDto = {
       businessId,
       exportDto,
     };
 
-    await this.rabbitClient.send(
+    this.rabbitClient.send(
       {
         channel: RabbitRoutingKeys.InternalTransactionExport,
         exchange: RabbitExchangesEnum.transactionsExport,
@@ -122,7 +131,7 @@ export class ExportTransactionsController {
         name: RabbitRoutingKeys.InternalTransactionExport,
         payload: exportTransactionsSettings,
       },
-    );
+    ).then();
   }
 
 }

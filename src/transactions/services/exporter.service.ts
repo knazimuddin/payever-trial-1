@@ -303,12 +303,20 @@ export class ExporterService {
     const axiosRequestConfig: AxiosRequestConfig = {
       data: bodyFormData,
       headers: bodyFormData.getHeaders(),
+      maxBodyLength: 524288000,
       method: 'POST',
       url: url,
     };
 
+    let bodyLength: number;
+    try {
+      bodyLength = bodyFormData.getLengthSync();
+    } catch (e) {
+      bodyLength = 0;
+    }
+
     this.logger.log({
-      bodyFormDataSize: bodyFormData.getLengthSync(),
+      bodyFormDataSize: bodyLength,
       fileName: document.fileName,
       message: 'Sending file to media',
     });
