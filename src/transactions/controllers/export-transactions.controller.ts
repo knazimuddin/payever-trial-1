@@ -11,7 +11,7 @@ import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ExportFormatEnum } from '../enum';
 
 @Controller()
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class ExportTransactionsController {
@@ -22,7 +22,7 @@ export class ExportTransactionsController {
 
   @Get('business/:businessId/export')
   @ApiTags('business')
-  @ApiBearerAuth()
+  // @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.merchant)
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
@@ -82,7 +82,7 @@ export class ExportTransactionsController {
     res: FastifyReply<any>,
   ): void {
     res.code(HttpStatus.ACCEPTED);
-    res.send('Exporting started');
+    res.send();
   }
 
   private async returnDocumentInOnePart(
