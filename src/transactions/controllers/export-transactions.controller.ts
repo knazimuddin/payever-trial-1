@@ -35,9 +35,7 @@ export class ExportTransactionsController {
     exportDto.limit = await this.exporterService.getTransactionsCount(exportDto, businessId);
 
     if (exportDto.limit > 1000) {
-      if (exportDto.limit > 10000) {
-        exportDto.limit = 10000;
-      }
+      exportDto.limit = exportDto.limit > 20000 ? 20000 : exportDto.limit;
       this.sendRabbitEvent(exportDto, businessId);
       this.returnExportingStarted(res);
     } else {
@@ -61,9 +59,7 @@ export class ExportTransactionsController {
     exportDto.limit = await this.exporterService.getTransactionsCount(exportDto);
 
     if (exportDto.limit > 1000) {
-      if (exportDto.limit > 10000) {
-        exportDto.limit = 10000;
-      }
+      exportDto.limit = exportDto.limit > 20000 ? 20000 : exportDto.limit;
       this.sendRabbitEvent(exportDto);
       this.returnExportingStarted(res);
     } else {
