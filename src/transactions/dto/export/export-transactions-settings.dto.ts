@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, IsNumber } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ExportQueryDto } from './';
 
@@ -13,4 +13,14 @@ export class ExportTransactionsSettingsDto {
   @Expose()
   @IsOptional()
   public businessId?: string;
+
+  @IsString()
+  @Expose()
+  @IsOptional()
+  public fileName?: string;
+
+  @IsNumber()
+  @Expose()
+  public transactionsCount: number;
+
 }

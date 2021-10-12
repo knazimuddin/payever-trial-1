@@ -37,14 +37,14 @@
     "@pe/nest-kit": "^7.13.2",
     "@pe/notifications-sdk": "^5.0.0",
     "@pe/rules-sdk": "^1.1.0",
-    "form-data": "^2.5.1",
+    "form-data": "^4.0.0",
     "lodash": "^4.17.21",
     "moment": "^2.24.0",
-    "pdfmake": "^0.1.68",
+    "pdfmake": "^0.2.2",
     "php-serialize": "^2.1.0",
     "php-unserialize": "0.0.1",
     "uuid": "^8.3.2",
-    "xlsx": "^0.16.9"
+    "xlsx": "^0.17.2"
   },
   "devDependencies": {
     "@pe/cucumber-sdk": "^2.14.0",

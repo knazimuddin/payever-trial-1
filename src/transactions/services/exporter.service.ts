@@ -4,7 +4,7 @@ import * as XLSX from 'xlsx';
 import { BusinessModel, TransactionModel } from '../models';
 import { ExportFormatEnum } from '../enum';
 import { BusinessFilter } from '../tools';
-import { ExportedFileResultDto, ExportQueryDto, PagingResultDto } from '../dto';
+import { ExportedFileResultDto, ExportQueryDto, ExportTransactionsSettingsDto, PagingResultDto } from '../dto';
 import { FoldersElasticSearchService, ElasticFilterBodyInterface, ElasticSearchCountResultsDto } from '@pe/folders-plugin';
 import { BusinessService } from '@pe/business-kit';
 import { ConfigService } from '@nestjs/config';
@@ -15,6 +15,8 @@ import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../environments';
 import * as FormData from 'form-data';
 import * as moment from 'moment';
+import { RabbitExchangesEnum, RabbitRoutingKeys } from '../../enums';
+import { RabbitMqClient } from '@pe/nest-kit';
 
 const shippingColumns: Array<{ title: string, name: string }> = [
   { title: 'Shipping City', name: 'city' },
@@ -45,6 +47,7 @@ export class ExporterService {
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
     private readonly logger: Logger,
+    private readonly rabbitClient: RabbitMqClient,
   ) {
     this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
   }
@@ -64,28 +67,31 @@ export class ExporterService {
     return result.count;
   }
 
-  public async exportTransactionsToLink(
-    exportDto: ExportQueryDto,
-    businessId?: string,
+  public async exportTransactionsViaLink(
+    exportSettings: ExportTransactionsSettingsDto,
   ): Promise<void> {
-    let document: any;
-    if (businessId) {
-      document = await this.exportBusinessTransactions(exportDto, businessId);
+    let exportedDocument: ExportedFileResultDto;
+    if (exportSettings.businessId) {
+      exportedDocument = await this.exportBusinessTransactions(
+        exportSettings.exportDto,
+        exportSettings.businessId,
+        exportSettings.transactionsCount,
+      );
     } else {
-      document = await this.exportAdminTransactions(exportDto);
+      exportedDocument = await this.exportAdminTransactions(
+        exportSettings.exportDto,
+        exportSettings.transactionsCount,
+      );
     }
 
-    if (exportDto.format === ExportFormatEnum.pdf) {
-      document.data.end();
-    }
-    const documentLink: string = await this.storeFileInMedia(document);
-
+    const documentLink: string = await this.storeFileInMedia(exportedDocument);
     await this.sendEmailToDownloadFileByLink(documentLink);
   }
 
   public async exportBusinessTransactions(
     exportDto: ExportQueryDto,
     businessId: string,
+    totalCount: number,
   ): Promise<ExportedFileResultDto> {
     exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
 
@@ -94,38 +100,83 @@ export class ExporterService {
     exportDto.currency = business ? business.currency : this.defaultCurrency;
     let businessName: string = `${exportDto.businessName.replace(/[^\x00-\x7F]/g, '')}`;
     businessName = businessName.replace(/\s/, '-');
-    const fileName: string = `${businessName}-${moment().format('DD-MM-YYYY')}.${exportDto.format}`;
+    const fileName: string = `${businessName}-${moment().format('DD-MM-YYYY-HH-MM-SS')}.${exportDto.format}`;
+
+    console.log(`${new Date()} : ${fileName}`);
 
     return {
-      data: await this.exportToFile(exportDto, fileName),
+      data: await this.exportToFile(exportDto, fileName, totalCount),
       fileName,
     };
   }
 
   public async exportAdminTransactions(
     exportDto: ExportQueryDto,
+    totalCount: number,
   ): Promise<ExportedFileResultDto> {
-    const fileName: string = `transactions-${moment().format('DD-MM-YYYY')}.${exportDto.format}`;
+    const fileName: string = `transactions-${moment().format('DD-MM-YYYY-HH-MM-SS')}.${exportDto.format}`;
 
     return {
-      data: this.exportToFile(exportDto, fileName),
+      data: this.exportToFile(exportDto, fileName, totalCount),
       fileName,
     };
+  }
+
+  public sendRabbitEvent(
+    exportDto: ExportQueryDto,
+    transactionsCount: number,
+    fileName?: string,
+    businessId?: string,
+  ): void {
+    const exportTransactionsSettings: ExportTransactionsSettingsDto = {
+      businessId,
+      exportDto,
+      fileName,
+      transactionsCount,
+    };
+
+    this.rabbitClient.send(
+      {
+        channel: RabbitRoutingKeys.InternalTransactionExport,
+        exchange: RabbitExchangesEnum.transactionsExport,
+      },
+      {
+        name: RabbitRoutingKeys.InternalTransactionExport,
+        payload: exportTransactionsSettings,
+      },
+    ).then();
   }
 
   private async exportToFile(
     exportDto: ExportQueryDto,
     fileName: string,
+    totalCount: number,
   ): Promise<any> {
-    exportDto.page = 1;
-    const result: PagingResultDto =  await this.elasticSearchService.getResult(exportDto);
+    console.log(`${new Date()} : start exportToFile`);
+
+    let exportedCount: number = 0;
+    const transactions: TransactionModel[] = [];
+    let maxItemsCount: number = 0;
+    while (exportedCount < totalCount) {
+      console.log(`${new Date()} : exporting page ${exportDto.page}`);
+      const result: PagingResultDto = await this.elasticSearchService.getResult(exportDto);
+      for (const item of result.collection) {
+        const transaction: TransactionModel = item as TransactionModel;
+        transactions.push(transaction);
+        maxItemsCount = transaction.items.length > maxItemsCount ? transaction.items.length : maxItemsCount;
+      }
+      exportedCount += result.collection.length;
+      exportDto.page++;
+    }
+
+    console.log(`${new Date()} : got results+`);
+
     const columns: Array<{ title: string, name: string }> = JSON.parse(exportDto.columns);
-    const transactions: TransactionModel[] =  result.collection as TransactionModel[];
 
     if (exportDto.format === ExportFormatEnum.pdf) {
-      return this.exportPDF(transactions, columns);
+      return this.exportPDF(transactions, columns, maxItemsCount);
     } else {
-      return this.exportXLSX(transactions, fileName, columns, exportDto.format);
+      return this.exportXLSX(transactions, fileName, columns, exportDto.format, maxItemsCount);
     }
   }
 
@@ -134,19 +185,39 @@ export class ExporterService {
     fileName: string,
     columns: Array<{ title: string, name: string }>,
     format: ExportFormatEnum = ExportFormatEnum.csv,
+    maxItemsCount: number,
   ): Promise<any> {
     const bookType: XLSX.BookType = ExporterService.exportFormatToBookType(format);
     const productColumns: Array<{ index: number, title: string, name: string }> =
-      ExporterService.getProductColumns(transactions);
+      ExporterService.getProductColumns(maxItemsCount);
     const header: string[] = [
       ...['CHANNEL', 'ID', 'TOTAL'],
-      ...shippingColumns.map((c: { title: string, name: string }) => c.title ),
-      ...productColumns.map((c: { index: number, title: string, name: string }) => c.title ),
-      ...columns.map((c: { title: string, name: string }) => c.title )];
+      ...shippingColumns.map((c: { title: string, name: string }) => c.title),
+      ...productColumns.map((c: { index: number, title: string, name: string }) => c.title),
+      ...columns.map((c: { title: string, name: string }) => c.title)];
     const data: string[][] = ExporterService.getTransactionData(transactions, productColumns, columns);
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([header, ...data]);
+
+    let wb: XLSX.WorkBook;
+    let ws: XLSX.WorkSheet;
+
+    console.log(`${new Date()} : create new sheet`);
+    wb = XLSX.utils.book_new();
+    ws = XLSX.utils.aoa_to_sheet([header]);
+    let addedCount: number = 0;
+    while (data.length > 0) {
+      const recordsToAdd: string[][] = [];
+      while ((data.length > 0) && (recordsToAdd.length < 1000)) {
+        recordsToAdd.push(data.shift());
+      }
+      console.log(`${new Date()} : add 1K records to sheet, left: ${data.length}`);
+      XLSX.utils.sheet_add_aoa(ws, [...recordsToAdd], { origin: -1});
+      addedCount++;
+      console.log(`${new Date()} : added 1K records to sheet ${addedCount * 1000}`);
+    }
+
     XLSX.utils.book_append_sheet(wb, ws, `${fileName}`.slice(0, 30));
+
+    console.log(`${new Date()} : before write`);
 
     return XLSX.write(wb, { bookType: bookType, bookSST: true, type: 'buffer' });
   }
@@ -154,10 +225,11 @@ export class ExporterService {
   private async exportPDF(
     transactions: TransactionModel[],
     columns: Array<{ title: string, name: string }>,
+    maxItemsCount: number,
   ): Promise<any> {
     const pageHeight: number = 5000;
     const productColumns: Array<{ index: number, title: string, name: string }> =
-      ExporterService.getProductColumns(transactions);
+      ExporterService.getProductColumns(maxItemsCount);
     const header: any[] = [
       ...['CHANNEL', 'ID', 'TOTAL'],
       ...shippingColumns.map((c: { title: string, name: string }) => c.title ),
@@ -223,17 +295,15 @@ export class ExporterService {
     return printer.createPdfKitDocument(
       docDefinition,
       {
+        compress: true,
         pdfVersion: '1.7ext3',
       });
   }
 
-  private static getProductColumns(transactions: TransactionModel[]): any[] {
+  private static getProductColumns(maxItemsCount: number): any[] {
     let productColumns: any[] = [];
-    const maxItems: number = Math.max.apply(
-      Math,
-      transactions.map((t: TransactionModel) => t.items ? t.items.length : 0),
-    );
-    for (let i: number = 0; i < maxItems; i++) {
+
+    for (let i: number = 0; i < maxItemsCount; i++) {
       productColumns = [...productColumns, ...productColumnsFunc(i)];
     }
 
@@ -296,6 +366,8 @@ export class ExporterService {
   }
 
   private async storeFileInMedia(document: ExportedFileResultDto): Promise<string> {
+    console.log(`${new Date()} : storeFileInMedia`);
+
     const url: string = `${environment.microUrlMedia}/api/storage/file`;
     const bodyFormData: FormData = new FormData();
 
@@ -321,6 +393,7 @@ export class ExporterService {
       message: 'Sending file to media',
     });
 
+    console.log(`${new Date()} : uploading`);
     const request: Observable<any> = await this.httpService.request(axiosRequestConfig);
 
     return request.pipe(

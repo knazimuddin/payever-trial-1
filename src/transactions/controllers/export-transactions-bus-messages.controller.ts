@@ -24,7 +24,7 @@ export class ExportTransactionsBusMessagesController {
 
     const settings: ExportTransactionsSettingsDto = plainToClass(ExportTransactionsSettingsDto, data);
 
-    await this.exporterService.exportTransactionsToLink(settings.exportDto, settings.businessId);
+    await this.exporterService.exportTransactionsViaLink(settings);
   }
 
 }

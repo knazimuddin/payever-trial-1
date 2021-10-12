@@ -1,8 +1,7 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, Res, UseGuards } from '@nestjs/common';
-import { RabbitExchangesEnum, RabbitRoutingKeys } from '../../enums';
-import { ExportedFileResultDto, ExportQueryDto, ExportTransactionsSettingsDto } from '../dto';
+import { Controller, Get, HttpCode, HttpStatus, Param, Res, UseGuards, BadRequestException } from '@nestjs/common';
+import { ExportedFileResultDto, ExportQueryDto } from '../dto';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-import { Acl, AclActionsEnum, RabbitMqClient } from '@pe/nest-kit';
+import { Acl, AclActionsEnum } from '@pe/nest-kit';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
 import * as moment from 'moment';
@@ -11,20 +10,19 @@ import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ExportFormatEnum } from '../enum';
 
 @Controller()
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class ExportTransactionsController {
   constructor(
     private readonly exporterService: ExporterService,
-    private readonly rabbitClient: RabbitMqClient,
   ) { }
 
   @Get('business/:businessId/export')
   @ApiTags('business')
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  @Roles(RolesEnum.merchant)
+  // @Roles(RolesEnum.merchant)
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async exportBusinessTransactions(
     @Param('businessId') businessId: string,
@@ -32,15 +30,19 @@ export class ExportTransactionsController {
     @Res() res: FastifyReply<any>,
   ): Promise<void> {
     exportDto.page = 1;
-    exportDto.limit = await this.exporterService.getTransactionsCount(exportDto, businessId);
+    const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto, businessId);
 
-    if (exportDto.limit > 1000) {
-      exportDto.limit = exportDto.limit > 20000 ? 20000 : exportDto.limit;
-      this.sendRabbitEvent(exportDto, businessId);
+    if (transactionsCount > 10000) {
+      if (exportDto.format === ExportFormatEnum.pdf) {
+        throw new BadRequestException(`transactions.export.error.limit_more_than_1000_not_allowed_for_pdf`);
+      }
+      exportDto.limit = 1000;
+      this.exporterService.sendRabbitEvent(exportDto, transactionsCount, '', businessId);
       this.returnExportingStarted(res);
     } else {
+      exportDto.limit = transactionsCount;
       const document: ExportedFileResultDto =
-        await this.exporterService.exportBusinessTransactions(exportDto, businessId);
+        await this.exporterService.exportBusinessTransactions(exportDto, businessId, transactionsCount);
       await this.returnDocument(exportDto.format, document, res);
     }
   }
@@ -56,14 +58,19 @@ export class ExportTransactionsController {
     @Res() res: FastifyReply<any>,
   ): Promise<void> {
     exportDto.page = 1;
-    exportDto.limit = await this.exporterService.getTransactionsCount(exportDto);
+    const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto);
 
-    if (exportDto.limit > 1000) {
-      exportDto.limit = exportDto.limit > 20000 ? 20000 : exportDto.limit;
-      this.sendRabbitEvent(exportDto);
+    if (transactionsCount > 10000) {
+      if (exportDto.format === ExportFormatEnum.pdf) {
+        throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
+      }
+      exportDto.limit = 10000;
+      this.exporterService.sendRabbitEvent(exportDto, transactionsCount);
       this.returnExportingStarted(res);
     } else {
-      const document: ExportedFileResultDto = await this.exporterService.exportAdminTransactions(exportDto);
+      exportDto.limit = transactionsCount;
+      const document: ExportedFileResultDto =
+        await this.exporterService.exportAdminTransactions(exportDto, transactionsCount);
       await this.returnDocument(exportDto.format, document, res);
     }
   }
@@ -116,24 +123,6 @@ export class ExportTransactionsController {
       res.send(Buffer.concat(chunks));
     });
     document.data.end();
-  }
-
-  private sendRabbitEvent(exportDto: ExportQueryDto, businessId?: string): void {
-    const exportTransactionsSettings: ExportTransactionsSettingsDto = {
-      businessId,
-      exportDto,
-    };
-
-    this.rabbitClient.send(
-      {
-        channel: RabbitRoutingKeys.InternalTransactionExport,
-        exchange: RabbitExchangesEnum.transactionsExport,
-      },
-      {
-        name: RabbitRoutingKeys.InternalTransactionExport,
-        payload: exportTransactionsSettings,
-      },
-    ).then();
   }
 
 }
