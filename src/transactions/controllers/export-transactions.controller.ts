@@ -10,7 +10,7 @@ import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ExportFormatEnum } from '../enum';
 
 @Controller()
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class ExportTransactionsController {
@@ -22,7 +22,7 @@ export class ExportTransactionsController {
   @ApiTags('business')
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  // @Roles(RolesEnum.merchant)
+  @Roles(RolesEnum.merchant)
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async exportBusinessTransactions(
     @Param('businessId') businessId: string,
@@ -34,7 +34,7 @@ export class ExportTransactionsController {
 
     if (transactionsCount > 10000) {
       if (exportDto.format === ExportFormatEnum.pdf) {
-        throw new BadRequestException(`transactions.export.error.limit_more_than_1000_not_allowed_for_pdf`);
+        throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
       }
       exportDto.limit = 1000;
       this.exporterService.sendRabbitEvent(exportDto, transactionsCount, '', businessId);

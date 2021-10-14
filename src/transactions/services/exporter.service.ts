@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as PdfMakePrinter from 'pdfmake/src/printer';
-import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
+import * as fs from 'fs';
 import { BusinessModel, TransactionModel } from '../models';
 import { ExportFormatEnum } from '../enum';
 import { BusinessFilter } from '../tools';
@@ -100,12 +101,10 @@ export class ExporterService {
     exportDto.currency = business ? business.currency : this.defaultCurrency;
     let businessName: string = `${exportDto.businessName.replace(/[^\x00-\x7F]/g, '')}`;
     businessName = businessName.replace(/\s/, '-');
-    const fileName: string = `${businessName}-${moment().format('DD-MM-YYYY-HH-MM-SS')}.${exportDto.format}`;
-
-    console.log(`${new Date()} : ${fileName}`);
+    const fileName: string = `${businessName}-${moment().format('DD-MM-YYYY-hh-mm-ss')}.${exportDto.format}`;
 
     return {
-      data: await this.exportToFile(exportDto, fileName, totalCount),
+      data: await this.exportToFile(exportDto, fileName, totalCount, businessName),
       fileName,
     };
   }
@@ -114,10 +113,10 @@ export class ExporterService {
     exportDto: ExportQueryDto,
     totalCount: number,
   ): Promise<ExportedFileResultDto> {
-    const fileName: string = `transactions-${moment().format('DD-MM-YYYY-HH-MM-SS')}.${exportDto.format}`;
+    const fileName: string = `transactions-${moment().format('DD-MM-YYYY-hh-mm-ss')}.${exportDto.format}`;
 
     return {
-      data: this.exportToFile(exportDto, fileName, totalCount),
+      data: this.exportToFile(exportDto, fileName, totalCount, 'transactions'),
       fileName,
     };
   }
@@ -151,75 +150,111 @@ export class ExporterService {
     exportDto: ExportQueryDto,
     fileName: string,
     totalCount: number,
+    fileNamePrefix: string,
   ): Promise<any> {
-    console.log(`${new Date()} : start exportToFile`);
-
     let exportedCount: number = 0;
     const transactions: TransactionModel[] = [];
+
+    // TODO enable or remove next 2 lines it depends of test results
+    //  doing pre request to prevent disconnect form rmq server local issue
+    // exportDto.limit = 1;
+    // await this.elasticSearchService.getResult(exportDto);
+
+    exportDto.limit = totalCount > 1000 ? 1000 : totalCount;
     let maxItemsCount: number = 0;
+
     while (exportedCount < totalCount) {
-      console.log(`${new Date()} : exporting page ${exportDto.page}`);
       const result: PagingResultDto = await this.elasticSearchService.getResult(exportDto);
       for (const item of result.collection) {
         const transaction: TransactionModel = item as TransactionModel;
         transactions.push(transaction);
-        maxItemsCount = transaction.items.length > maxItemsCount ? transaction.items.length : maxItemsCount;
+        if (transaction.items.length > maxItemsCount) {
+          maxItemsCount = transaction.items.length;
+        }
       }
       exportedCount += result.collection.length;
       exportDto.page++;
+      await this.sleep(2);
     }
-
-    console.log(`${new Date()} : got results+`);
 
     const columns: Array<{ title: string, name: string }> = JSON.parse(exportDto.columns);
 
-    if (exportDto.format === ExportFormatEnum.pdf) {
-      return this.exportPDF(transactions, columns, maxItemsCount);
-    } else {
-      return this.exportXLSX(transactions, fileName, columns, exportDto.format, maxItemsCount);
+    switch (exportDto.format) {
+      case ExportFormatEnum.csv: {
+        return this.exportCSV(transactions, columns, maxItemsCount);
+      }
+      case ExportFormatEnum.xlsx: {
+        return this.exportXLSX(transactions, fileName, fileNamePrefix, columns, maxItemsCount);
+      }
+      case ExportFormatEnum.pdf: {
+        return this.exportPDF(transactions, columns, maxItemsCount);
+      }
     }
+  }
+
+  private async exportCSV(
+    transactions: TransactionModel[],
+    columns: Array<{ title: string, name: string }>,
+    maxItemsCount: number,
+  ): Promise<any> {
+    const productColumns: Array<{ index: number, title: string, name: string }> =
+      ExporterService.getProductColumns(maxItemsCount);
+    const data: string[][] = ExporterService.getTransactionData(transactions, productColumns, columns);
+    transactions = null;
+
+    let workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
+    let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('sheet1');
+    let addedCount: number = 0;
+    const stepCount: number = 100;
+    while (data.length > 0) {
+      const addRecordsCount: number = data.length < stepCount ? data.length : stepCount;
+      const records: string[][] = data.splice(0, addRecordsCount);
+      worksheet.addRows(records);
+      await this.sleep(2);
+      addedCount += addRecordsCount;
+    }
+
+    const documentBuffer: ExcelJS.Buffer = await workbook.csv.writeBuffer();
+    worksheet.destroy();
+    worksheet = null;
+    workbook = null;
+
+    return documentBuffer;
   }
 
   private async exportXLSX(
     transactions: TransactionModel[],
     fileName: string,
+    sheetName: string,
     columns: Array<{ title: string, name: string }>,
-    format: ExportFormatEnum = ExportFormatEnum.csv,
     maxItemsCount: number,
   ): Promise<any> {
-    const bookType: XLSX.BookType = ExporterService.exportFormatToBookType(format);
     const productColumns: Array<{ index: number, title: string, name: string }> =
       ExporterService.getProductColumns(maxItemsCount);
-    const header: string[] = [
-      ...['CHANNEL', 'ID', 'TOTAL'],
-      ...shippingColumns.map((c: { title: string, name: string }) => c.title),
-      ...productColumns.map((c: { index: number, title: string, name: string }) => c.title),
-      ...columns.map((c: { title: string, name: string }) => c.title)];
     const data: string[][] = ExporterService.getTransactionData(transactions, productColumns, columns);
+    transactions = null;
 
-    let wb: XLSX.WorkBook;
-    let ws: XLSX.WorkSheet;
+    const options: ExcelJS.stream.xlsx.WorkbookStreamWriterOptions = {
+      filename: fileName,
+    } as any ;
 
-    console.log(`${new Date()} : create new sheet`);
-    wb = XLSX.utils.book_new();
-    ws = XLSX.utils.aoa_to_sheet([header]);
-    let addedCount: number = 0;
-    while (data.length > 0) {
-      const recordsToAdd: string[][] = [];
-      while ((data.length > 0) && (recordsToAdd.length < 1000)) {
-        recordsToAdd.push(data.shift());
+    const workbookWriter: ExcelJS.stream.xlsx.WorkbookWriter = new ExcelJS.stream.xlsx.WorkbookWriter(options);
+    const worksheet: ExcelJS.Worksheet = workbookWriter.addWorksheet(sheetName);
+
+    for (let rowIndex: number = 0; rowIndex < data.length; rowIndex++) {
+      const row: ExcelJS.Row = worksheet.addRow( data[rowIndex]);
+      row.commit();
+      if (rowIndex % 100 === 0) {
+        await this.sleep(2);
       }
-      console.log(`${new Date()} : add 1K records to sheet, left: ${data.length}`);
-      XLSX.utils.sheet_add_aoa(ws, [...recordsToAdd], { origin: -1});
-      addedCount++;
-      console.log(`${new Date()} : added 1K records to sheet ${addedCount * 1000}`);
     }
+    await worksheet.commit();
+    await workbookWriter.commit();
 
-    XLSX.utils.book_append_sheet(wb, ws, `${fileName}`.slice(0, 30));
+    const documentBuffer: any = fs.readFileSync(fileName);
+    fs.unlinkSync(fileName);
 
-    console.log(`${new Date()} : before write`);
-
-    return XLSX.write(wb, { bookType: bookType, bookSST: true, type: 'buffer' });
+    return documentBuffer;
   }
 
   private async exportPDF(
@@ -230,15 +265,9 @@ export class ExporterService {
     const pageHeight: number = 5000;
     const productColumns: Array<{ index: number, title: string, name: string }> =
       ExporterService.getProductColumns(maxItemsCount);
-    const header: any[] = [
-      ...['CHANNEL', 'ID', 'TOTAL'],
-      ...shippingColumns.map((c: { title: string, name: string }) => c.title ),
-      ...productColumns.map((c: { index: number, title: string, name: string }) => c.title ),
-      ...columns.map((c: { title: string, name: string }) => c.title )]
-      .map((h: string) => ({ text: h, style: 'tableHeader'}));
-
     const data: any[][] = ExporterService.getTransactionData(transactions, productColumns, columns, true)
       .map((entity: any) => entity.map((e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 })));
+    transactions = null;
 
     const allColumns: any[] = [...shippingColumns, ...productColumns, ...columns];
     const cp: number = 100 / (allColumns.length + 2);
@@ -254,10 +283,7 @@ export class ExporterService {
           },
           style: 'tableStyle',
           table: {
-            body: [
-              header,
-              ...data,
-            ],
+            body: data,
             headerRows: 1,
             widths: [ `${cp / 2}%`, `${cp}%`, `${cp / 2}%`, ...allColumns.map(() => `${cp}%`)],
           },
@@ -310,13 +336,20 @@ export class ExporterService {
     return productColumns;
   }
 
+  // tslint:disable-next-line:cognitive-complexity
   private static getTransactionData(
     transactions: TransactionModel[],
     productColumns: Array<{ index: number, title: string, name: string }>,
     columns: Array<{ title: string, name: string }>,
     isFormatDate: boolean = false,
   ): any[] {
-    return transactions
+    const header: string[] = [
+      ...['CHANNEL', 'ID', 'TOTAL'],
+      ...shippingColumns.map((c: { title: string, name: string }) => c.title),
+      ...productColumns.map((c: { index: number, title: string, name: string }) => c.title),
+      ...columns.map((c: { title: string, name: string }) => c.title)];
+
+    const exportedTransactions: any[] = transactions
       .map((t: TransactionModel) => [
         ...[t.channel, t.original_id, t.total],
         ...shippingColumns
@@ -333,12 +366,15 @@ export class ExporterService {
           }),
         ...columns
           .map((c: { title: string, name: string }) =>
-            isFormatDate && c.name === 'created_at'
-                ? new Date(t[c.name]).toUTCString()
-                : t[c.name],
+                 isFormatDate && c.name === 'created_at'
+                   ? new Date(t[c.name]).toUTCString()
+                   : t[c.name] ? t[c.name] : '',
           ),
       ]);
+
+    return [header, ...exportedTransactions];
   }
+
 
   private static getProductValue(field: string, value: string | any[]): string {
     if (field !== 'options') {
@@ -354,20 +390,7 @@ export class ExporterService {
     }).join(', ');
   }
 
-  private static exportFormatToBookType(exportFormat: ExportFormatEnum): XLSX.BookType {
-    switch (exportFormat) {
-      case ExportFormatEnum.xlsx:
-        return 'xlsx';
-      case ExportFormatEnum.ods:
-        return 'ods';
-      default:
-        return 'csv';
-    }
-  }
-
   private async storeFileInMedia(document: ExportedFileResultDto): Promise<string> {
-    console.log(`${new Date()} : storeFileInMedia`);
-
     const url: string = `${environment.microUrlMedia}/api/storage/file`;
     const bodyFormData: FormData = new FormData();
 
@@ -393,7 +416,6 @@ export class ExporterService {
       message: 'Sending file to media',
     });
 
-    console.log(`${new Date()} : uploading`);
     const request: Observable<any> = await this.httpService.request(axiosRequestConfig);
 
     return request.pipe(
@@ -431,6 +453,18 @@ export class ExporterService {
         document: documentLink,
         message: 'Send email with link to file',
       });
+  }
+
+  private async sleep(timeMs: number): Promise<void> {
+    return new Promise((ok: any) =>
+      setTimeout(
+        () =>
+        {
+          ok();
+        },
+        timeMs,
+      ),
+    );
   }
 
 }
