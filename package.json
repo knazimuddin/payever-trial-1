@@ -47,7 +47,7 @@
     "xlsx": "^0.16.9"
   },
   "devDependencies": {
-    "@pe/cucumber-sdk": "^2.20.1",
+    "@pe/cucumber-sdk": "^2.20.2",
     "@pe/dev-kit": "^2.0.2",
     "@pe/pact-kit": "^2.1.1"
   }
