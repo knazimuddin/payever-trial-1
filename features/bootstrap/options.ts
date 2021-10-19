@@ -3,7 +3,6 @@ import {
   AxiosContext,
   CucumberOptionsInterface,
   DatabaseContext,
-  ElasticsearchContext,
   HttpContext,
   HttpProvider,
   InMemoryProvider,
@@ -15,6 +14,7 @@ import {
 import { ElasticSearchProvider } from '@pe/cucumber-sdk/module/elasticsearch';
 import { RabbitMqProvider } from '@pe/cucumber-sdk/module/rabbit';
 import { RedisProvider } from '@pe/cucumber-sdk/module/redis';
+import { ElasticsearchContext } from '@pe/cucumber-sdk/module/contexts/elasticsearch.context';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 import { AppConfigurator } from './app.configurator';
