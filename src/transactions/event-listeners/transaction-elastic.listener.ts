@@ -1,16 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { EventListener } from '@pe/nest-kit';
+import { EventDispatcher, EventListener } from '@pe/nest-kit';
 import { TransactionEventEnum } from '../enum/events';
 import { TransactionModel } from '../models';
 import { ElasticTransactionEnum } from '../enum';
 import { TransactionDoubleConverter } from '../converter';
 import { DelayRemoveClient, ElasticSearchClient } from '@pe/elastic-kit';
+import { FoldersEventsEnum } from '@pe/folders-plugin';
 
 @Injectable()
 export class TransactionElasticListener {
   constructor(
     private readonly elasticSearchClient: ElasticSearchClient,
     private readonly delayRemoveClient: DelayRemoveClient,
+    private readonly eventDispatcher: EventDispatcher,
   ) { }
 
   @EventListener(TransactionEventEnum.TransactionCreated)
@@ -18,6 +20,7 @@ export class TransactionElasticListener {
     transaction: TransactionModel,
   ): Promise<void> {
     await this.indexTransaction(transaction);
+    await this.eventDispatcher.dispatch(FoldersEventsEnum.FolderActionCreateDocument, transaction);
   }
 
   @EventListener(TransactionEventEnum.TransactionUpdated)
