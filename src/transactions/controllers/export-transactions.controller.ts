@@ -1,7 +1,7 @@
 import { Controller, Get, HttpCode, HttpStatus, Param, Res, UseGuards, BadRequestException } from '@nestjs/common';
 import { ExportedFileResultDto, ExportQueryDto } from '../dto';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
-import { Acl, AclActionsEnum } from '@pe/nest-kit';
+import { Acl, AclActionsEnum, AccessTokenPayload, User } from '@pe/nest-kit';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
 import * as moment from 'moment';
@@ -25,6 +25,7 @@ export class ExportTransactionsController {
   @Roles(RolesEnum.merchant)
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async exportBusinessTransactions(
+    @User() user: AccessTokenPayload,
     @Param('businessId') businessId: string,
     @QueryDto() exportDto: ExportQueryDto,
     @Res() res: FastifyReply<any>,
@@ -37,7 +38,7 @@ export class ExportTransactionsController {
         throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
       }
       exportDto.limit = 1000;
-      this.exporterService.sendRabbitEvent(exportDto, transactionsCount, '', businessId);
+      this.exporterService.sendRabbitEvent(exportDto, transactionsCount, user.email, '', businessId);
       this.returnExportingStarted(res);
     } else {
       exportDto.limit = transactionsCount;
@@ -54,6 +55,7 @@ export class ExportTransactionsController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   public async exportAdminTransactions(
+    @User() user: AccessTokenPayload,
     @QueryDto() exportDto: ExportQueryDto,
     @Res() res: FastifyReply<any>,
   ): Promise<void> {
@@ -65,7 +67,7 @@ export class ExportTransactionsController {
         throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
       }
       exportDto.limit = 10000;
-      this.exporterService.sendRabbitEvent(exportDto, transactionsCount);
+      this.exporterService.sendRabbitEvent(exportDto, transactionsCount, user.email);
       this.returnExportingStarted(res);
     } else {
       exportDto.limit = transactionsCount;

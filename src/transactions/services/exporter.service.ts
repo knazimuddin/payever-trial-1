@@ -5,7 +5,13 @@ import * as fs from 'fs';
 import { BusinessModel, TransactionModel } from '../models';
 import { ExportFormatEnum } from '../enum';
 import { BusinessFilter } from '../tools';
-import { ExportedFileResultDto, ExportQueryDto, ExportTransactionsSettingsDto, PagingResultDto } from '../dto';
+import {
+  ExportedFileResultDto,
+  ExportQueryDto,
+  ExportTransactionsSettingsDto,
+  PagingResultDto,
+  ExportedTransactionsMailDto,
+} from '../dto';
 import { FoldersElasticSearchService, ElasticFilterBodyInterface, ElasticSearchCountResultsDto } from '@pe/folders-plugin';
 import { BusinessService } from '@pe/business-kit';
 import { ConfigService } from '@nestjs/config';
@@ -86,7 +92,7 @@ export class ExporterService {
     }
 
     const documentLink: string = await this.storeFileInMedia(exportedDocument);
-    await this.sendEmailToDownloadFileByLink(documentLink);
+    await this.sendEmailToDownloadFileByLink(documentLink, exportSettings.sendEmailTo);
   }
 
   public async exportBusinessTransactions(
@@ -124,6 +130,7 @@ export class ExporterService {
   public sendRabbitEvent(
     exportDto: ExportQueryDto,
     transactionsCount: number,
+    sendEmailTo: string,
     fileName?: string,
     businessId?: string,
   ): void {
@@ -131,6 +138,7 @@ export class ExporterService {
       businessId,
       exportDto,
       fileName,
+      sendEmailTo: sendEmailTo,
       transactionsCount,
     };
 
@@ -447,12 +455,33 @@ export class ExporterService {
   }
 
 
-  private async sendEmailToDownloadFileByLink(documentLink: string): Promise<void> {
+  private async sendEmailToDownloadFileByLink(documentLink: string, sendEmailTo: string): Promise<void> {
     this.logger.log(
       {
         document: documentLink,
         message: 'Send email with link to file',
       });
+
+    const emailData: ExportedTransactionsMailDto = {
+      locale: 'en',
+      templateName: 'transactions.exported_data_link',
+      to: sendEmailTo,
+      variables: {
+        fileUrl: documentLink,
+      },
+    };
+
+    this.rabbitClient.send(
+      {
+        channel: RabbitRoutingKeys.PayeverMailerSend,
+        exchange: RabbitExchangesEnum.asyncEvents,
+      },
+      {
+        name: RabbitRoutingKeys.PayeverMailerSend,
+        payload: emailData,
+      },
+    ).then();
+
   }
 
   private async sleep(timeMs: number): Promise<void> {

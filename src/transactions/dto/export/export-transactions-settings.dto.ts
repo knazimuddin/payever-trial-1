@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsDefined } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { ExportQueryDto } from './';
 
@@ -8,6 +8,11 @@ export class ExportTransactionsSettingsDto {
   @Type(() => ExportQueryDto)
   @Expose()
   public exportDto: ExportQueryDto;
+
+  @IsString()
+  @Expose()
+  @IsDefined()
+  public sendEmailTo: string;
 
   @IsString()
   @Expose()
