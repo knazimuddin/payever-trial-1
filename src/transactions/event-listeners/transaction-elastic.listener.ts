@@ -20,6 +20,7 @@ export class TransactionElasticListener {
     transaction: TransactionModel,
   ): Promise<void> {
     await this.indexTransaction(transaction);
+    console.log('create document', transaction);
     await this.eventDispatcher.dispatch(FoldersEventsEnum.FolderActionCreateDocument, transaction);
   }
 

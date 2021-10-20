@@ -63,6 +63,8 @@ export class TransactionsExampleService {
 
       const created: TransactionModel = await this.transactionsService.create(transactionDto);
 
+      console.log("transaction", created);
+
       await this.rabbitClient
         .send(
           {
