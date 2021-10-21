@@ -473,11 +473,11 @@ export class ExporterService {
 
     this.rabbitClient.send(
       {
-        channel: RabbitRoutingKeys.PayeverMailerSend,
+        channel: RabbitRoutingKeys.PayeverEventUserEmail,
         exchange: RabbitExchangesEnum.asyncEvents,
       },
       {
-        name: RabbitRoutingKeys.PayeverMailerSend,
+        name: RabbitRoutingKeys.PayeverEventUserEmail,
         payload: emailData,
       },
     ).then();

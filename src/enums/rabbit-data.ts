@@ -51,7 +51,7 @@ export enum RabbitRoutingKeys {
   BusinessRemoved = 'users.event.business.removed',
 
   MailerPaymentMailSent = 'mailer.event.payment-mail.sent',
-  PayeverMailerSend = 'payever.event.mailer.send',
+  PayeverEventUserEmail = 'payever.event.user.email',
 
   GetSellerName = 'auth.commands.get_user_data',
   SellerNamePropagated = 'auth.event.propagate_user_data',
