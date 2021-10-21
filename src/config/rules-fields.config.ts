@@ -1,5 +1,6 @@
 import { ConditionsService, RulesSdkOptionsInterface, RuleActionEnum } from '@pe/rules-sdk';
 import { RabbitChannels, RabbitExchangesEnum } from '../enums';
+import { FoldersConfig } from './folders.config';
 
 export const RulesOptions: RulesSdkOptionsInterface = {
   actions: [
@@ -93,4 +94,5 @@ export const RulesOptions: RulesSdkOptionsInterface = {
     exchange: RabbitExchangesEnum.transactionsFolders,
   },
   useBusiness: true,
+  folderConfig: FoldersConfig,
 };
