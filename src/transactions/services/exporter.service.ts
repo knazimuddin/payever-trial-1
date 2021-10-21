@@ -163,11 +163,6 @@ export class ExporterService {
     let exportedCount: number = 0;
     const transactions: TransactionModel[] = [];
 
-    // TODO enable or remove next 2 lines it depends of test results
-    //  doing pre request to prevent disconnect form rmq server local issue
-    // exportDto.limit = 1;
-    // await this.elasticSearchService.getResult(exportDto);
-
     exportDto.limit = totalCount > 1000 ? 1000 : totalCount;
     let maxItemsCount: number = 0;
 
@@ -244,6 +239,12 @@ export class ExporterService {
 
     const options: ExcelJS.stream.xlsx.WorkbookStreamWriterOptions = {
       filename: fileName,
+      zip: {
+        store: false,
+        zlib: {
+          level: 9,
+        },
+      },
     } as any ;
 
     const workbookWriter: ExcelJS.stream.xlsx.WorkbookWriter = new ExcelJS.stream.xlsx.WorkbookWriter(options);
