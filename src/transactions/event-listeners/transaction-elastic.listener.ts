@@ -29,6 +29,7 @@ export class TransactionElasticListener {
     transaction: TransactionModel,
   ): Promise<void> {
     await this.indexTransaction(transaction);
+    await this.eventDispatcher.dispatch(FoldersEventsEnum.FolderActionUpdateDocument, transaction);
   }
 
   @EventListener(TransactionEventEnum.TransactionDeleted)
