@@ -29,7 +29,7 @@ resources:
       cpu: 256m
       memory: 284Mi
     limits:
-      memory: 5Gi
+      memory: 8Gi
 #high
 replicas:
   http:

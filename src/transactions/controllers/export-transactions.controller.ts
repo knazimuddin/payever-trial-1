@@ -31,7 +31,8 @@ export class ExportTransactionsController {
     @Res() res: FastifyReply<any>,
   ): Promise<void> {
     exportDto.page = 1;
-    const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto, businessId);
+    // const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto, businessId);
+    const transactionsCount: number = 15000;
 
     if (transactionsCount > 10000) {
       if (exportDto.format === ExportFormatEnum.pdf) {
