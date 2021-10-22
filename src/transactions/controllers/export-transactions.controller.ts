@@ -4,7 +4,6 @@ import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { Acl, AclActionsEnum, AccessTokenPayload, User } from '@pe/nest-kit';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
-import * as moment from 'moment';
 import { ExporterService } from '../services';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ExportFormatEnum } from '../enum';
@@ -31,8 +30,7 @@ export class ExportTransactionsController {
     @Res() res: FastifyReply<any>,
   ): Promise<void> {
     exportDto.page = 1;
-    // const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto, businessId);
-    const transactionsCount: number = 15000;
+    const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto, businessId);
 
     if (transactionsCount > 10000) {
       if (exportDto.format === ExportFormatEnum.pdf) {
@@ -121,7 +119,7 @@ export class ExportTransactionsController {
       res.header('Access-Control-Expose-Headers', `Content-Disposition,X-Suggested-Filename`);
       res.header(
         'Content-disposition',
-        `attachment;filename=${document.fileName}-${moment().format('DD-MM-YYYY')}.pdf`,
+        `attachment;filename=${document.fileName}`,
       );
       res.send(Buffer.concat(chunks));
     });
