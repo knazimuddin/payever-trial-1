@@ -40,6 +40,8 @@ export class FolderDocumentsListener {
   ): Promise<void> {
 
     const folderDocument: any = transaction.toObject();
+    console.log("folder document", folderDocument);
+    
     await this.eventDispatcher.dispatch(
       FoldersEventsEnum.FolderActionCreateDocument,
       folderDocument,
