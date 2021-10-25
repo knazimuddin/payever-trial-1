@@ -2,8 +2,8 @@
 // tslint:disable:no-big-function
 import 'mocha';
 import * as sinon from 'sinon';
-import { chaiAssert, chaiExpect, matchLodash } from '../../../bootstrap';
-import { HttpService, INestApplication, Logger } from '@nestjs/common';
+import { chaiExpect } from '../../../bootstrap';
+import { HttpService, Logger } from '@nestjs/common';
 import { TransactionModel } from '../../../../src/transactions/models';
 import { ExportedFileResultDto, ExportQueryDto } from '../../../../src/transactions/dto';
 import { ExportFormatEnum } from '../../../../src/transactions/enum';
@@ -15,6 +15,7 @@ import { BusinessService } from '@pe/business-kit';
 import { ConfigService } from '@nestjs/config';
 import { RabbitMqClient } from '@pe/nest-kit';
 import { ExporterService } from '../../../../src/transactions/services';
+import { PagingResultDto } from '@pe/folders-plugin/module/dto';
 
 const expect: Chai.ExpectStatic = chaiExpect;
 
@@ -105,7 +106,6 @@ describe('ExporterService', () => {
   let httpService: HttpService;
   let logger: Logger;
   let rabbitClient: RabbitMqClient;
-  let app: INestApplication;
 
   const exportDto: ExportQueryDto  = new ExportQueryDto();
   exportDto.direction = 'desc';
@@ -113,7 +113,19 @@ describe('ExporterService', () => {
 
   before(async () => {
     elasticSearchService = {
-      getResult: (): any => { },
+      getResult: (): PagingResultDto => {
+        return {
+          collection: [transaction],
+          filters: undefined,
+          pagination_data: {
+            total: 1,
+            page: 1,
+            amount: 102.99,
+            amount_currency: 'EUR',
+          },
+          usage: undefined,
+        };
+      },
     } as any;
     businessService = {
       findOneById: async (args: any): Promise<any> => { },
