@@ -82,7 +82,7 @@ export class ExportTransactionsController {
     res: FastifyReply<any>,
   ): Promise<void> {
     if (exportFormat === ExportFormatEnum.pdf) {
-      await this.returnDocumentBuChunks(document, res);
+      await this.returnDocumentByChunks(document, res);
     } else {
       await this.returnDocumentInOnePart(document, res);
     }
@@ -108,7 +108,7 @@ export class ExportTransactionsController {
     res.send(document.data);
   }
 
-  private async returnDocumentBuChunks(document: ExportedFileResultDto, res: FastifyReply<any>): Promise<void> {
+  private async returnDocumentByChunks(document: ExportedFileResultDto, res: FastifyReply<any>): Promise<void> {
     const chunks: any[] = [];
     document.data.on('data', (chunk: any) => {
       chunks.push(chunk);
