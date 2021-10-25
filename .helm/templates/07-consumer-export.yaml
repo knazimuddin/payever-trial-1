@@ -1,10 +1,9 @@
 {{ $chartName := .Chart.Name }}
 {{ $values := .Values }}
-{{ $appName := printf "%s-cron" $chartName }}
+{{ $appName := printf "%s-export-consumer" $chartName }}
 
 apiVersion: apps/v1
 kind: Deployment
-
 metadata:
   name: {{ $appName }}
   namespace: {{ $values.namespace }}
@@ -12,21 +11,16 @@ metadata:
   labels:
     app: {{ $appName }}
     tier: nodejs
-    type: cron
-
+    type: consumer
   annotations:
     "werf.io/set-replicas-only-on-creation": "true"
-
 spec:
-  replicas: {{ $values.replicas.cron }}
-
+  replicas: 1
   strategy:
     type: RollingUpdate
-
     rollingUpdate:
-      maxSurge: 1
+      maxSurge: 25%
       maxUnavailable: 0
-
   selector:
     matchLabels:
       app: {{ $appName }}
@@ -36,7 +30,7 @@ spec:
       labels:
         app: {{ $appName }}
         tier: nodejs
-        type: cron
+        type: consumer
 
       annotations:
         seccomp.security.alpha.kubernetes.io/pod: 'runtime/default'
@@ -46,11 +40,38 @@ spec:
       imagePullSecrets:
         - name: {{ $values.image.pullSecretName }}
 
+      terminationGracePeriodSeconds: 60
+
       containers:
+{{- if $values.enableRmqFallbackRepub }}
+        - name: rmq
+          image: {{ $values.image.rmq_repub }}
+          imagePullPolicy: IfNotPresent
+          command: [ "python", "rmqFallbackRepub.py", "async_events_transactions_export_micro" ]
+
+          resources:
+            requests:
+              cpu: 20m
+              memory: 40Mi
+            limits:
+              memory: 100Mi
+
+          envFrom:
+            - configMapRef:
+                name: {{ $chartName }}
+            - configMapRef:
+                name: micro-url-map
+            - secretRef:
+                name: {{ $chartName }}
+
+          env:
+            - name: KUBERNETES_DEPLOYED
+              value: "{{ now }}"
+{{- end }}
         - name: node
           image: {{ $values.image.nodejs }}
           imagePullPolicy: IfNotPresent
-          command: [ "/bin/bash", "-c", "/payever/deploy/cron.sh" ]
+          command: [ "/bin/bash", "-c", "/payever/deploy/consumer-export.sh" ]
 
           livenessProbe:
             httpGet:
@@ -71,7 +92,7 @@ spec:
             failureThreshold: 15
 
           resources:
-{{ toYaml $values.resources.app | indent 12 }}
+{{ toYaml $values.resources.consumer_export | indent 12 }}
 
           envFrom:
             - configMapRef:

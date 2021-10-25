@@ -14,6 +14,7 @@ async function bootstrap(): Promise<void> {
   const app: NestFastifyApplication = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({
+      bodyLimit: 524288000,
       maxParamLength: 255,
       querystringParser: (str: string): any => qs.parse(str),
     }),

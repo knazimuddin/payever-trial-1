@@ -3,7 +3,7 @@ import { environment } from '../environments';
 import { TransactionSchemaName, TransactionSchema } from '../transactions/schemas';
 import { FiltersConfig } from './filters-config';
 
-export const FoldersConfig: FoldersPluginOptionsInterface = {
+export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
   combinedList: false,
   documentSchema: {
     schema: TransactionSchema,

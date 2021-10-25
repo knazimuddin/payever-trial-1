@@ -1,4 +1,4 @@
-@export
+@export-bus-message
 Feature: Transaction export for business
   Background:
     Given I remember as "businessId" following value:
@@ -27,12 +27,7 @@ Feature: Transaction export for business
       }
       """
 
-  Scenario: User doesn't have permission to business
-    When I send a GET request to "/api/business/{{anotherBusinessId}}/export"
-    Then print last response
-    And the response status code should be 403
-
-  Scenario Outline: Export transactions for business "<formatType>"
+  Scenario: Export transactions by message
     Given I use DB fixture "transactions/transactions-list-with-different-currencies"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-transactions-list.json" content and remember as "elasticTransactionsListJson"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-transactions-count.json" content and remember as "elasticTransactionsCountJson"
@@ -40,35 +35,6 @@ Feature: Transaction export for business
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-statuses-response.json" content and remember as "statusesResponse"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-specific-statuses-response.json" content and remember as "specificStatusesResponse"
     And I get file "features/fixtures/json/transaction-list-elastica/business-transactions-list-response.json" content and remember as "transactionsListJson"
-    And I mock Elasticsearch method "count" with:
-      """
-      {
-        "arguments": [
-          "folder_transactions",
-          {
-            "query": {
-              "bool": {
-                "must": [
-                  {
-                    "term": {
-                      "isFolder": false
-                    }
-                  },
-                  {
-                    "match_phrase": {
-                      "businessId": "{{businessId}}"
-                    }
-                  }
-                ],
-                "must_not": [],
-                "should": []
-              }
-            }
-          }
-        ],
-        "result": {{elasticTransactionsCountJson}}
-      }
-      """
     And I mock Elasticsearch method "search" with:
       """
       {
@@ -88,7 +54,7 @@ Feature: Transaction export for business
                 "must_not": []
               }
             },
-            "size": 4,
+            "size": 20,
             "sort": [
               {
                 "created_at": "desc"
@@ -222,10 +188,24 @@ Feature: Transaction export for business
         "result": {{elasticTransactionsCountJson}}
       }
       """
-    When I send a GET request to "<path>"
-    And the response status code should be 200
-    Examples:
-      | formatType  | path |
-      | pdf         | /api/business/{{businessId}}/export?orderBy=created_at&direction=desc&limit=20&page=1&currency=EUR&format=pdf&businessName=test&columns=%5B%7B%22name%22:%22type%22,%22title%22:%22Payment%20type%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22customer_name%22,%22title%22:%22Customer%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22merchant_name%22,%22title%22:%22Merchant%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22created_at%22,%22title%22:%22Date%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22status%22,%22title%22:%22Status%22,%22isActive%22:true,%22isToggleable%22:true%7D%5D  |
-      | csv         | /api/business/{{businessId}}/export?orderBy=created_at&direction=desc&limit=20&page=1&currency=EUR&format=csv&businessName=test&columns=%5B%7B%22name%22:%22type%22,%22title%22:%22Payment%20type%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22customer_name%22,%22title%22:%22Customer%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22merchant_name%22,%22title%22:%22Merchant%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22created_at%22,%22title%22:%22Date%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22status%22,%22title%22:%22Status%22,%22isActive%22:true,%22isToggleable%22:true%7D%5D  |
-      | xlsx        | /api/business/{{businessId}}/export?orderBy=created_at&direction=desc&limit=20&page=1&currency=EUR&format=xlsx&businessName=test&columns=%5B%7B%22name%22:%22type%22,%22title%22:%22Payment%20type%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22customer_name%22,%22title%22:%22Customer%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22merchant_name%22,%22title%22:%22Merchant%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22created_at%22,%22title%22:%22Date%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22status%22,%22title%22:%22Status%22,%22isActive%22:true,%22isToggleable%22:true%7D%5D |
+    Given I publish in RabbitMQ channel "async_events_transactions_export_micro" message with json:
+    """
+    {
+      "name":"transactions.event.export",
+      "payload": {
+        "businessId": "{{businessId}}",
+        "exportDto": {
+          "direction": "desc",
+          "page": 1,
+          "limit": 20,
+          "filters": {},
+          "format": "csv",
+          "businessName": "test",
+          "columns": "[{\"name\":\"type\",\"title\":\"Payment type\",\"isActive\":true,\"isToggleable\":true},{\"name\":\"customer_name\",\"title\":\"Customer name\",\"isActive\":true,\"isToggleable\":true},{\"name\":\"merchant_name\",\"title\":\"Merchant name\",\"isActive\":true,\"isToggleable\":true},{\"name\":\"created_at\",\"title\":\"Date\",\"isActive\":true,\"isToggleable\":true},{\"name\":\"status\",\"title\":\"Status\",\"isActive\":true,\"isToggleable\":true}]",
+          "orderBy": "created_at",
+          "currency": "EUR"
+        }
+      }
+    }
+    """
+    And I process messages from RabbitMQ "async_events_transactions_export_micro" channel

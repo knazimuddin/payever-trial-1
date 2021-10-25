@@ -42,8 +42,8 @@ import {
   UserController,
   InternalTransactionEventsController,
   ProxyController,
-  BusinessFoldersController,
-  AdminFoldersController,
+  ExportTransactionsController,
+  ExportTransactionsBusMessagesController,
 } from './controllers';
 import { ExchangeCalculatorFactory } from './currency';
 import { EventListenersList } from './event-listeners/event-listeners.list';
@@ -89,6 +89,7 @@ import {
   ExportUserPerBusinessTransactionService,
   ActionValidatorsList,
   TransactionsInfoService,
+  ExporterService,
 } from './services';
 import { EventsGateway } from './ws';
 import { RabbitChannels } from '../enums';
@@ -114,8 +115,8 @@ import { ExportMonthlyBusinessTransactionCronService } from '../cron/export-mont
     SampleProductsBusMessagesController,
     InternalTransactionEventsController,
     ProxyController,
-    BusinessFoldersController,
-    AdminFoldersController,
+    ExportTransactionsController,
+    ExportTransactionsBusMessagesController,
   ],
   imports: [
     ConfigModule,
@@ -199,6 +200,7 @@ import { ExportMonthlyBusinessTransactionCronService } from '../cron/export-mont
     ...ActionValidatorsList,
     TransactionsInfoService,
     ExportMonthlyBusinessTransactionCronService,
+    ExporterService,
   ],
 })
 export class TransactionsModule { }
