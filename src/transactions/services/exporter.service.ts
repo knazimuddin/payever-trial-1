@@ -127,13 +127,13 @@ export class ExporterService {
     };
   }
 
-  public sendRabbitEvent(
+  public async sendRabbitEvent(
     exportDto: ExportQueryDto,
     transactionsCount: number,
     sendEmailTo: string,
     fileName?: string,
     businessId?: string,
-  ): void {
+  ): Promise<void> {
     const exportTransactionsSettings: ExportTransactionsSettingsDto = {
       businessId,
       exportDto,
@@ -142,7 +142,7 @@ export class ExporterService {
       transactionsCount,
     };
 
-    this.rabbitClient.send(
+    await this.rabbitClient.send(
       {
         channel: RabbitRoutingKeys.InternalTransactionExport,
         exchange: RabbitExchangesEnum.transactionsExport,
@@ -151,7 +151,7 @@ export class ExporterService {
         name: RabbitRoutingKeys.InternalTransactionExport,
         payload: exportTransactionsSettings,
       },
-    ).then();
+    );
   }
 
   private async exportToFile(
@@ -203,10 +203,9 @@ export class ExporterService {
     const productColumns: Array<{ index: number, title: string, name: string }> =
       ExporterService.getProductColumns(maxItemsCount);
     const data: string[][] = ExporterService.getTransactionData(transactions, productColumns, columns);
-    transactions = null;
 
-    let workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
-    let worksheet: ExcelJS.Worksheet = workbook.addWorksheet('sheet1');
+    const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
+    const worksheet: ExcelJS.Worksheet = workbook.addWorksheet('sheet1');
     let addedCount: number = 0;
     const stepCount: number = 100;
     while (data.length > 0) {
@@ -219,8 +218,6 @@ export class ExporterService {
 
     const documentBuffer: ExcelJS.Buffer = await workbook.csv.writeBuffer();
     worksheet.destroy();
-    worksheet = null;
-    workbook = null;
 
     return documentBuffer;
   }
@@ -235,7 +232,6 @@ export class ExporterService {
     const productColumns: Array<{ index: number, title: string, name: string }> =
       ExporterService.getProductColumns(maxItemsCount);
     const data: string[][] = ExporterService.getTransactionData(transactions, productColumns, columns);
-    transactions = null;
 
     const options: ExcelJS.stream.xlsx.WorkbookStreamWriterOptions = {
       filename: fileName,
@@ -245,7 +241,7 @@ export class ExporterService {
           level: 9,
         },
       },
-    } as any ;
+    } as any;
 
     const workbookWriter: ExcelJS.stream.xlsx.WorkbookWriter = new ExcelJS.stream.xlsx.WorkbookWriter(options);
     const worksheet: ExcelJS.Worksheet = workbookWriter.addWorksheet(sheetName);
@@ -257,7 +253,7 @@ export class ExporterService {
         await this.sleep(2);
       }
     }
-    await worksheet.commit();
+    worksheet.commit();
     await workbookWriter.commit();
 
     const documentBuffer: any = fs.readFileSync(fileName);
@@ -276,7 +272,6 @@ export class ExporterService {
       ExporterService.getProductColumns(maxItemsCount);
     const data: any[][] = ExporterService.getTransactionData(transactions, productColumns, columns, true)
       .map((entity: any) => entity.map((e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 })));
-    transactions = null;
 
     const allColumns: any[] = [...shippingColumns, ...productColumns, ...columns];
     const cp: number = 100 / (allColumns.length + 2);
@@ -425,7 +420,7 @@ export class ExporterService {
       message: 'Sending file to media',
     });
 
-    const request: Observable<any> = await this.httpService.request(axiosRequestConfig);
+    const request: Observable<any> = this.httpService.request(axiosRequestConfig);
 
     return request.pipe(
       map(( response: AxiosResponse<any>) => {
@@ -472,7 +467,7 @@ export class ExporterService {
       },
     };
 
-    this.rabbitClient.send(
+    await this.rabbitClient.send(
       {
         channel: RabbitRoutingKeys.PayeverEventUserEmail,
         exchange: RabbitExchangesEnum.asyncEvents,

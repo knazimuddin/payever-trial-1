@@ -37,7 +37,7 @@ export class ExportTransactionsController {
         throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
       }
       exportDto.limit = 1000;
-      this.exporterService.sendRabbitEvent(exportDto, transactionsCount, user.email, '', businessId);
+      await this.exporterService.sendRabbitEvent(exportDto, transactionsCount, user.email, '', businessId);
       this.returnExportingStarted(res);
     } else {
       exportDto.limit = transactionsCount;
@@ -66,7 +66,7 @@ export class ExportTransactionsController {
         throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
       }
       exportDto.limit = 10000;
-      this.exporterService.sendRabbitEvent(exportDto, transactionsCount, user.email);
+      await this.exporterService.sendRabbitEvent(exportDto, transactionsCount, user.email);
       this.returnExportingStarted(res);
     } else {
       exportDto.limit = transactionsCount;
