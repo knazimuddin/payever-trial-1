@@ -13,6 +13,22 @@ Feature: Save history records
         "result": {}
       }
       """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
+      }
+      """
     When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
       """
       {
@@ -51,10 +67,9 @@ Feature: Save history records
             },
             "created_at": "2019-06-19T10:50:00+00:00"
           },
-          "action": "shipping_goods",
+          "action": "statuschanged",
           "data": {
-            "amount": "5290",
-            "refunded_amount": 0
+            "payment_status": "STATUS_CANCELLED"
           }
         }
       }
@@ -71,8 +86,8 @@ Feature: Save history records
       {
         "history": [
           {
-            "action" : "shipping_goods",
-            "amount" : 5290,
+            "action" : "statuschanged",
+            "payment_status" : "STATUS_CANCELLED",
             "refund_items" : [],
             "upload_items" : []
           }
@@ -92,6 +107,22 @@ Feature: Save history records
           }
          ],
         "result": {}
+      }
+      """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
       }
       """
     When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
@@ -141,6 +172,22 @@ Feature: Save history records
         "result": {}
       }
       """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
+      }
+      """
     When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
       """
       {
@@ -182,6 +229,22 @@ Feature: Save history records
           }
          ],
         "result": {}
+      }
+      """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
       }
       """
     When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:

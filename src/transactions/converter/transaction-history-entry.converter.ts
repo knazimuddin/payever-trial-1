@@ -32,6 +32,10 @@ export class TransactionHistoryEntryConverter {
       item.mail_event = data.mail_event;
     }
 
+    if (data.user) {
+      item.user = data.user;
+    }
+
     return item;
   }
 
@@ -54,6 +58,10 @@ export class TransactionHistoryEntryConverter {
       ? this.processRefundItems(transaction, data.refund_items)
       : []
     ;
+
+    if (data.user) {
+      history.user = data.user;
+    }
 
     return history;
   }

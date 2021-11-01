@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
-import { ExportFormat } from '../tools';
-import { ListQueryDto } from './list-query.dto';
+import { ExportFormatEnum } from '../../enum';
+import { ListQueryDto } from '@pe/folders-plugin';
 
 export class ExportQueryDto extends ListQueryDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  public format: ExportFormat = 'csv';
+  public format: ExportFormatEnum = ExportFormatEnum.csv;
 
   @ApiProperty()
   @IsOptional()
@@ -27,7 +27,7 @@ export class ExportQueryDto extends ListQueryDto {
   @ApiProperty()
   @IsOptional()
   @IsNumber()
-  @Max(10000)
+  @Max(20000)
   public limit: number = 10;
 
 }

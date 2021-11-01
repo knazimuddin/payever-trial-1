@@ -23,7 +23,6 @@
 .vscode/*
 
 # misc
-/coverage/*
 npm-debug.log
 
 #System Files

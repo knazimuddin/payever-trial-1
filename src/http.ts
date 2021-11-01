@@ -4,6 +4,7 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import jwt from 'fastify-jwt';
 import * as qs from 'qs';
+import { useContainer } from 'class-validator';
 
 import { NestKitLogger } from '@pe/nest-kit/modules/logging/services';
 import { AppModule } from './app.module';
@@ -13,6 +14,7 @@ async function bootstrap(): Promise<void> {
   const app: NestFastifyApplication = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({
+      bodyLimit: 524288000,
       maxParamLength: 255,
       querystringParser: (str: string): any => qs.parse(str),
     }),
@@ -30,6 +32,8 @@ async function bootstrap(): Promise<void> {
   }
 
   app.enableShutdownHooks();
+
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   const options: DocumentBuilder = new DocumentBuilder()
     .setTitle('Transactions')

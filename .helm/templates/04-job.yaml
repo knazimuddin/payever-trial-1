@@ -37,7 +37,7 @@ spec:
           command: [ "/bin/bash", "-c", "/payever/deploy/job.sh" ]
 
           resources:
-{{ toYaml $values.resources | indent 12 }}
+{{ toYaml $values.resources.app | indent 12 }}
 
           envFrom:
             - configMapRef:

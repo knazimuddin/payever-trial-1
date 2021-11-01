@@ -1,78 +1,122 @@
 Feature: Refunded transactions message sending
+  Background:
+    Given I remember as "businessId" following value:
+    """
+    "36bf8981-8827-4c0c-a645-02d9fc6d72c8"
+    """
+    Given I remember as "transactionId" following value:
+    """
+    "ad738281-f9f0-4db7-a4f6-670b0dff5327"
+    """
   Scenario: Payment action "refund" completed
-    Given I use DB fixture "transactions/shipping-goods"
+    Given I authenticate as a user with the following data:
+    """
+    {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
+    """
+    And I mock an axios request with parameters:
+    """
+    {
+      "request": {
+        "method": "post",
+        "url": "*/api/business/{{businessId}}/integration/stripe/action/action-refund",
+        "body": "{\"fields\":{\"amount\":25},\"paymentId\":\"{{transactionId}}\"}",
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "Content-Type": "application/json;charset=utf-8",
+          "authorization": "*"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {}
+      }
+    }
+    """
+    And I mock an axios request with parameters:
+    """
+    {
+      "request": {
+        "method": "post",
+        "url": "*/api/business/{{businessId}}/integration/stripe/action/action-list",
+        "body": "{\"paymentId\":\"{{transactionId}}\"}",
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "Content-Type": "application/json;charset=utf-8",
+          "authorization": "*"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "refund": true
+        }
+      }
+    }
+    """
     And I mock Elasticsearch method "singleIndex" with:
       """
       {
         "arguments": [
           "transactions",
           {
-            "uuid": "ad738281-f9f0-4db7-a4f6-670b0dff5327"
+            "action_running": false,
+            "santander_applications": [],
+            "uuid": "{{transactionId}}"
           }
          ],
         "result": {}
       }
       """
-    When I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
+      }
+      """
+    And I use DB fixture "transactions/partial-capture/third-party-payment"
+    When I send a POST request to "/api/business/{{businessId}}/{{transactionId}}/action/refund" with json:
     """
     {
-      "name": "payever.event.payment.action.completed",
-      "payload": {
-        "payment": {
-          "id": "b140034c74959b9f45c383e33f937e56",
-          "uuid": "ad738281-f9f0-4db7-a4f6-670b0dff5327",
-          "amount": 5290,
-          "total": 5290,
-          "currency": "NOK",
-          "reference": "1906191249319025",
-          "customer_name": "Test Customer",
-          "customer_email": "test@test.com",
-          "specific_status": "PAID",
-          "status": "STATUS_CANCELLED",
-          "address": {
-            "country": "NO",
-            "city": "HAUGLANDSHELLA",
-            "zip_code": "5310",
-            "street": "Ravnetua 21",
-            "phone": "90782130",
-            "salutation": "SALUTATION_MR",
-            "first_name": "Christian",
-            "last_name": "Breivik"
-          },
-          "fee": 0,
-          "delivery_fee": 0,
-          "payment_fee": 0,
-          "down_payment": 0,
-          "place": "cancelled",
-          "business_payment_option": {
-            "payment_option": {
-              "payment_method": "santander_invoice_no"
-            }
-          },
-          "created_at": "2019-06-19T10:50:00+00:00"
-        },
-        "action": "refund",
-        "data": {
-          "amount": "5290",
-          "refunded_amount": 0
-        }
+      "fields": {
+        "amount": 25
       }
     }
     """
-    Then I process messages from RabbitMQ "async_events_transactions_micro" channel
     When look for model "Transaction" by following JSON and remember as "transaction":
       """
       {
-        "uuid": "ad738281-f9f0-4db7-a4f6-670b0dff5327"
+        "uuid": "{{transactionId}}"
       }
       """
+    Then print RabbitMQ message list
     Then RabbitMQ exchange "async_events" should contain following ordered messages:
     """
     [
       {
+        "createdAt": "*",
+        "encryption": "none",
+        "metadata": {
+         "locale": "en"
+        },
+        "name": "transactions_app.payment.updated",
+        "payload": "*",
+        "uuid": "*",
+        "version": 0
+      },
+      {
         "name": "transactions.event.payment.subtract",
         "payload": {
-          "amount": 5290,
+          "amount": 25,
           "business": {
             "id": "{{transaction.business_uuid}}"
           },

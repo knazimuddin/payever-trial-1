@@ -12,11 +12,24 @@ service:
   wsPort: 8080
 
 resources:
-  requests:
-    cpu: 156m
-    memory: 284Mi
-  limits:
-    memory: 600Mi
+  app:
+    requests:
+      cpu: 156m
+      memory: 284Mi
+    limits:
+      memory: 600Mi
+  consumer:
+    requests:
+      cpu: 156m
+      memory: 284Mi
+    limits:
+      memory: 600Mi
+  consumer_export:
+    requests:
+      cpu: 256m
+      memory: 284Mi
+    limits:
+      memory: 8Gi
 #high
 replicas:
   http:

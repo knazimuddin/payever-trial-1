@@ -5,6 +5,13 @@ export interface TransactionPaymentInterface {
   business: {
     id: string,
   };
+  customer: {
+    email: string;
+    name: string;
+  };
+  user: {
+    id: string;
+  };
   channel_set: {
     id: string,
   };

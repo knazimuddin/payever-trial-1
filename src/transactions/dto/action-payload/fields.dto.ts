@@ -62,7 +62,7 @@ export class FieldsDto extends GenericDto implements FieldsInterface, UnwrappedF
   public amount?: number;
 
   @IsOptional()
-  public reason?: string | boolean;
+  public reason?: string;
 
   @IsOptional()
   public refunded_amount?: number;

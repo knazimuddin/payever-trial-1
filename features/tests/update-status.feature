@@ -1,3 +1,4 @@
+@update_transaction_status
 Feature: Update transaction status
 
   Background:
@@ -91,6 +92,22 @@ Feature: Update transaction status
           }
          ],
         "result": {}
+      }
+      """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
       }
       """
     And I mock RPC request "payment_option.payex_creditcard.action" to "rpc_payment_payex" with:

@@ -1,9 +1,8 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CancelDataDto {
   @IsOptional()
-  // @IsString()
-  @IsNumber()
+  @IsString()
   public reason: string;
 
   @IsString()
