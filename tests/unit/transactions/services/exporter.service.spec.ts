@@ -5,7 +5,7 @@ import * as sinon from 'sinon';
 import { chaiExpect } from '../../../bootstrap';
 import { HttpService, Logger } from '@nestjs/common';
 import { TransactionModel } from '../../../../src/transactions/models';
-import { ExportedFileResultDto, ExportQueryDto } from '../../../../src/transactions/dto';
+import { ExportedFileResultDto, ExportQueryDto, PagingResultDto } from '../../../../src/transactions/dto';
 import { ExportFormatEnum } from '../../../../src/transactions/enum';
 import { FastifyReply } from 'fastify';
 import * as PdfMakePrinter from 'pdfmake/src/printer';
@@ -15,7 +15,6 @@ import { BusinessService } from '@pe/business-kit';
 import { ConfigService } from '@nestjs/config';
 import { RabbitMqClient } from '@pe/nest-kit';
 import { ExporterService } from '../../../../src/transactions/services';
-import { PagingResultDto } from '@pe/folders-plugin/module/dto';
 
 const expect: Chai.ExpectStatic = chaiExpect;
 
