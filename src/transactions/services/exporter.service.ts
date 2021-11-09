@@ -9,10 +9,14 @@ import {
   ExportedFileResultDto,
   ExportQueryDto,
   ExportTransactionsSettingsDto,
-  PagingResultDto,
   ExportedTransactionsMailDto,
 } from '../dto';
-import { FoldersElasticSearchService, ElasticFilterBodyInterface, ElasticSearchCountResultsDto } from '@pe/folders-plugin';
+import { 
+  FoldersElasticSearchService, 
+  ElasticFilterBodyInterface, 
+  ElasticSearchCountResultsDto, 
+  PagingResultDto,
+} from '@pe/folders-plugin';
 import { BusinessService } from '@pe/business-kit';
 import { ConfigService } from '@nestjs/config';
 import { HttpException, HttpService, HttpStatus, Injectable, Logger } from '@nestjs/common';
