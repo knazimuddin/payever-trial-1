@@ -1,4 +1,4 @@
 include:
   - project: "infra/ci-config"
-    ref: "master"
+    ref: "transaction-log"
     file: "/nodejs-backend/transactions.yml"
