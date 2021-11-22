@@ -94,8 +94,7 @@ export const RulesOptions: RulesSdkOptionsInterface = {
     exchange: RabbitExchangesEnum.transactionsFolders,
   },
   useBusiness: true,
-  wsConfig: {
-    jwtSecret: environment.jwtOptions.secret,
-    rulesWsMicro: `ws://localhost:${environment.webSocket.port}`,
-  },
+  jwtSecret: environment.jwtOptions.secret,
+  rulesWsMicro: `ws://localhost:${environment.webSocket.port}`,
+  redisUrl: environment.redis.url,
 };
