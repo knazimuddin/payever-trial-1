@@ -1,4 +1,5 @@
 import { ConditionsService, RulesSdkOptionsInterface, RuleActionEnum } from '@pe/rules-sdk';
+import { environment } from '../environments';
 import { RabbitChannels, RabbitExchangesEnum } from '../enums';
 
 export const RulesOptions: RulesSdkOptionsInterface = {
@@ -93,4 +94,8 @@ export const RulesOptions: RulesSdkOptionsInterface = {
     exchange: RabbitExchangesEnum.transactionsFolders,
   },
   useBusiness: true,
+  wsConfig: {
+    jwtSecret: environment.jwtOptions.secret,
+    rulesWsMicro: `ws://localhost:${environment.webSocket.port}`,
+  },
 };
