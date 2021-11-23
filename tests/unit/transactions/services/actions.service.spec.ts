@@ -1,3 +1,4 @@
+// tslint:disable:no-identical-functions
 import 'mocha';
 
 import * as chai from 'chai';
@@ -31,7 +32,7 @@ describe('ActionRetriver', () => {
       action: 'Action 2',
       enabled: false,
     },
-  ]
+  ];
 
   before(() => {
     messagingService = {
@@ -40,6 +41,9 @@ describe('ActionRetriver', () => {
 
     logger = {
       error: (): any => { },
+    } as any;
+
+    thirdPartyCallerService = {
     } as any;
 
     testService = new ActionsRetriever(messagingService, thirdPartyCallerService, logger);
@@ -56,14 +60,14 @@ describe('ActionRetriver', () => {
 
   describe('retrive()', () => {
     it('should retrieve actions', async () => {
-      sandbox.stub(messagingService, 'getActionsList').resolves(actions)
-      const result: ActionItemInterface[] = await testService.retrieve({} as any);
+      sandbox.stub(messagingService, 'getActionsList').resolves(actions);
+      const result: ActionItemInterface[] = await testService.retrieve({ } as any);
       expect(result).to.eq(actions);
     });
 
     it('should retrieve actions type instant_payment', async () => {
-      sandbox.stub(messagingService, 'getActionsList').resolves(actions)
-      const result: ActionItemInterface[] = await testService.retrieve({type:'instant_payment'} as any);
+      sandbox.stub(messagingService, 'getActionsList').resolves(actions);
+      const result: ActionItemInterface[] = await testService.retrieve({ type: 'instant_payment'} as any);
       expect(result).to.deep.eq([]);
     });
 
@@ -73,7 +77,7 @@ describe('ActionRetriver', () => {
         stack: 'stract trace fake',
       });
       expect(
-        await testService.retrieve({} as any),
+        await testService.retrieve({ } as any),
       ).to.throw;
     });
   });
@@ -88,14 +92,17 @@ describe('ActionRetriver', () => {
         {
           action: 'refund',
           enabled: true,
+          partialAllowed: false,
         },
         {
           action: 'cancel',
           enabled: true,
+          partialAllowed: false,
         },
         {
           action: 'shipping_goods',
           enabled: true,
+          partialAllowed: false,
         },
       ]);
     });
@@ -107,15 +114,16 @@ describe('ActionRetriver', () => {
     } as any;
     expect(
       testService.retrieveFakeActions(unpackaedTransaction),
-    ).to.deep.eq([])
+    ).to.deep.eq([]);
   });
+
   it('should retrive fake actions for UNKNOWN_STATUS', async () => {
     const unpackaedTransaction: TransactionUnpackedDetailsInterface = {
       status: 'UNKNOWN_STATUS',
     } as any;
     expect(
       testService.retrieveFakeActions(unpackaedTransaction),
-    ).to.deep.eq([])
+    ).to.deep.eq([]);
   });
 
 });

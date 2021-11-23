@@ -1,3 +1,4 @@
+@third-party-actions
 Feature: Third party payment actions
 
   Background:
@@ -19,8 +20,34 @@ Feature: Third party payment actions
     """
     {
       "request": {
+        "method": "get",
+        "url": "*/api/integration/instant_payment",
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "authorization": "*"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "actions": [
+            {
+              "name": "action-options-list"
+            },
+            {
+              "name": "action-list"
+            }
+          ]
+        }
+      }
+    }
+    """
+    And I mock an axios request with parameters:
+    """
+    {
+      "request": {
         "method": "post",
-        "url": "*/api/business/{{businessId}}/integration/instant_payment/action/action-list",
+        "url": "*/api/business/{{businessId}}/integration/instant_payment/action/action-options-list",
         "body": "{\"paymentId\":\"{{transactionId}}\"}",
         "headers": {
           "Accept": "application/json, text/plain, */*",
@@ -30,9 +57,13 @@ Feature: Third party payment actions
       },
       "response": {
         "status": 200,
-        "body": {
-          "shipping_goods": true
-        }
+        "body": [
+          {
+            "action": "shipping_goods",
+            "enabled": true,
+            "partialAllowed": true
+          }
+        ]
       }
     }
     """
@@ -157,6 +188,25 @@ Feature: Third party payment actions
     Given I authenticate as a user with the following data:
     """
     {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
+    """
+    And I mock an axios request with parameters:
+    """
+    {
+      "request": {
+        "method": "get",
+        "url": "*/api/integration/instant_payment",
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "authorization": "*"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "actions": []
+        }
+      }
+    }
     """
     And I mock an axios request with parameters:
     """
@@ -360,6 +410,25 @@ Feature: Third party payment actions
     Given I authenticate as a user with the following data:
     """
     {"id": "test_id", "firstName": "test_first", "lastName": "test_last", "email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]}
+    """
+    And I mock an axios request with parameters:
+    """
+    {
+      "request": {
+        "method": "get",
+        "url": "*/api/integration/instant_payment",
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "authorization": "*"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "actions": []
+        }
+      }
+    }
     """
     And I mock an axios request with parameters:
     """
@@ -605,6 +674,25 @@ Feature: Third party payment actions
             "status": "STATUS_ACCEPTED",
             "specificStatus": "DELIVERY_RELEASE"
           }
+        }
+      }
+    }
+    """
+    And I mock an axios request with parameters:
+    """
+    {
+      "request": {
+        "method": "get",
+        "url": "*/api/integration/santander_installment_at",
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "authorization": "*"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "actions": []
         }
       }
     }

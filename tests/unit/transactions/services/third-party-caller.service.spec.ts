@@ -1,13 +1,13 @@
+// tslint:disable:no-big-function
+// tslint:disable:object-literal-sort-keys
 import 'mocha';
 
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
-import * as uuid from 'uuid';
 import { Observable } from 'rxjs';
 import { AxiosResponse } from 'axios';
-import { catchError, map as MapStub } from 'rxjs/operators';
 
 import { ThirdPartyCallerService, TransactionsService } from '../../../../src/transactions/services';
 import { IntercomService } from '@pe/nest-kit';
@@ -37,21 +37,21 @@ describe('CurrencyExchangeService', () => {
         amount: 12,
         created_at: new Date('2020-10-10'),
         payment_status: 'PAYMENT_ACCAPTED',
-        params: {},
+        params: { },
         reason: 'reason 1',
         is_restock_items: true,
         upload_items: [
-          {},
+          { },
         ],
         refund_items: [
-          {},
+          { },
         ],
       },
     ],
     original_id: 'beab4573-e69c-45e2-afc0-5487b9e670ec',
     type: 'santander_installment_dk',
     uuid: '9e90b7d9-1920-4e5a-ba5f-f5aebb382e10',
-    billing_address: {},
+    billing_address: { },
     created_at: new Date('2020-10-10'),
     updated_at: new Date('2020-10-10'),
     action_running: true,
@@ -93,7 +93,7 @@ describe('CurrencyExchangeService', () => {
     } as any;
 
     httpService = {
-      post: (): any => { },
+      request: (): any => { },
     } as any;
 
     logger = {
@@ -103,7 +103,7 @@ describe('CurrencyExchangeService', () => {
 
     configService = {
       get: (): any => true,
-    } as any
+    } as any;
 
     testService = new ThirdPartyCallerService(transactionsService, httpService, logger, configService);
   });
@@ -129,15 +129,15 @@ describe('CurrencyExchangeService', () => {
       const actionsResponse: { [key: string]: boolean } = {
         create: true,
         edit: false,
-      }
+      };
 
-      let response: Observable<AxiosResponse<any>> = {
+      const response: Observable<AxiosResponse<any>> = {
         pipe: (): any => { },
       } as any;
-      let responseData: Observable<any> = {
+      const responseData: Observable<any> = {
         toPromise: (): any => { },
       } as any;
-      sandbox.stub(httpService, 'post').resolves(response);
+      sandbox.stub(httpService, 'request').resolves(response);
       sandbox.stub(response, 'pipe').returns(responseData);
       sandbox.stub(responseData, 'toPromise').resolves(actionsResponse);
 
@@ -146,11 +146,11 @@ describe('CurrencyExchangeService', () => {
 
       const result: ActionItemInterface[] = await testService.getActionsList(transactionUnpackedDetails);
       expect(result).to.deep.equal(actionItems);
-      expect(logger.log).calledOnce;
+      expect(logger.log).calledTwice;
     });
 
     it('should post throw error', async () => {
-      sandbox.stub(httpService, 'post').throws({});
+      sandbox.stub(httpService, 'request').throws({ });
 
       sandbox.stub(logger, 'log');
       sandbox.stub(logger, 'error');
@@ -161,12 +161,12 @@ describe('CurrencyExchangeService', () => {
     });
 
     it('should pipe throw error', async () => {
-      let response: Observable<AxiosResponse<any>> = {
+      const response: Observable<AxiosResponse<any>> = {
         pipe: (): any => { },
       } as any;
 
-      sandbox.stub(httpService, 'post').resolves(response);
-      sandbox.stub(response, 'pipe').throws({});
+      sandbox.stub(httpService, 'request').resolves(response);
+      sandbox.stub(response, 'pipe').throws({ });
 
       sandbox.stub(logger, 'log');
       sandbox.stub(logger, 'error');
@@ -179,7 +179,7 @@ describe('CurrencyExchangeService', () => {
   });
 
   describe('runAction()', () => {
-    const availableAction = [
+    const availableAction: PaymentActionsEnum[] = [
       PaymentActionsEnum.Refund,
       PaymentActionsEnum.Authorize,
       PaymentActionsEnum.ShippingGoods,
@@ -187,43 +187,43 @@ describe('CurrencyExchangeService', () => {
 
     for (const actionName of availableAction) {
       it(`should send action if action name is ${actionName}`, async () => {
-      const actionsResponse: { } = { };
+        const actionsResponse: { } = { };
 
+        const actionPayload: ActionPayloadInterface = {
+          paymentId: transactionUnpackedDetails.uuid,
+        };
+
+        const response: Observable<AxiosResponse<any>> = {
+          pipe: (): any => { },
+        } as any;
+        const responseData: Observable<any> = {
+          toPromise: (): any => { },
+        } as any;
+
+        sandbox.stub(httpService, 'request').resolves(response);
+        sandbox.stub(response, 'pipe').returns(responseData);
+        sandbox.stub(responseData, 'toPromise').resolves(actionsResponse);
+
+        sandbox.stub(logger, 'log');
+        sandbox.stub(logger, 'error');
+
+        await testService.runAction(transactionUnpackedDetails, actionName, actionPayload);
+        expect(logger.log).calledOnce;
+      });
+    }
+
+    it ('should run action throw error', async () => {
+      const actionName: string = 'throw-error';
       const actionPayload: ActionPayloadInterface = {
         paymentId: transactionUnpackedDetails.uuid,
       };
 
-      let response: Observable<AxiosResponse<any>> = {
-        pipe: (): any => { },
-      } as any;
-      let responseData: Observable<any> = {
-        toPromise: (): any => { },
-      } as any;
-
-      sandbox.stub(httpService, 'post').resolves(response);
-      sandbox.stub(response, 'pipe').returns(responseData);
-      sandbox.stub(responseData, 'toPromise').resolves(actionsResponse);
-
-      sandbox.stub(logger, 'log');
-      sandbox.stub(logger, 'error');
-
-      await testService.runAction(transactionUnpackedDetails, actionName, actionPayload);
-      expect(logger.log).calledOnce;
+      const spy: sinon.SinonSpy = sandbox.spy(testService.runAction);
+      try {
+        await testService.runAction(transactionUnpackedDetails, actionName, actionPayload);
+      } catch (e) { }
+      expect(spy.threw());
     });
-  }
-
-  it('should run action throw error', async () => {
-    const actionName = "throw-error";
-    const actionPayload: ActionPayloadInterface = {
-      paymentId: transactionUnpackedDetails.uuid,
-    };
-
-    const spy: sinon.SinonSpy = sandbox.spy(testService.runAction);
-    try {
-      await testService.runAction(transactionUnpackedDetails, actionName, actionPayload);
-    } catch (e) { }
-    expect(spy.threw());
-  });
 
   });
 });
