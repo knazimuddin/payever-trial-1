@@ -91,6 +91,7 @@ describe('TransactionOutputConverter', () => {
         {
           action: 'action_1',
           enabled: true,
+          partialAllowed: false,
         },
       ]
       expect(TransactionOutputConverter.convert(transaction, actions))
@@ -99,6 +100,7 @@ describe('TransactionOutputConverter', () => {
             {
               action: 'action_1',
               enabled: true,
+              partialAllowed: false,
             },
           ],
           transaction: {

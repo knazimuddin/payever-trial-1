@@ -2,6 +2,7 @@ import { PaymentActionsEnum } from './payment-actions.enum';
 
 export enum ThirdPartyPaymentActionsEnum {
   actionList = 'action-list',
+  actionOptions = 'action-options',
   actionCancel = 'action-cancel',
   actionCapture = 'action-capture',
   actionEdit = 'action-edit',

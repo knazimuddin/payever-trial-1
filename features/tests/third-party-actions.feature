@@ -1,3 +1,4 @@
+@third-party-actions
 Feature: Third party payment actions
 
   Background:
@@ -20,7 +21,7 @@ Feature: Third party payment actions
     {
       "request": {
         "method": "post",
-        "url": "*/api/business/{{businessId}}/integration/instant_payment/action/action-list",
+        "url": "*/api/business/{{businessId}}/integration/instant_payment/action/action-options",
         "body": "{\"paymentId\":\"{{transactionId}}\"}",
         "headers": {
           "Accept": "application/json, text/plain, */*",
@@ -30,9 +31,13 @@ Feature: Third party payment actions
       },
       "response": {
         "status": 200,
-        "body": {
-          "shipping_goods": true
-        }
+        "body": [
+          {
+            "action": "shipping_goods",
+            "allowed": true,
+            "partialAllowed": true
+          }
+        ]
       }
     }
     """

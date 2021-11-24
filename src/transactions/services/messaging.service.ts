@@ -82,6 +82,7 @@ export class MessagingService implements ActionCallerInterface {
         (key: string) => ({
           action: key,
           enabled: actionsResponse[key],
+          partialAllowed: false,
         }),
       );
 
