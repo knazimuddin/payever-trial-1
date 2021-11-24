@@ -124,6 +124,7 @@ describe('CurrencyExchangeService', () => {
         {
           action: 'create',
           enabled: true,
+          partialAllowed: false,
         },
       ];
       const actionsResponse: { [key: string]: boolean } = {

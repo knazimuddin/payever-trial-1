@@ -9,7 +9,7 @@ import { ActionCallerInterface, ActionItemInterface } from '../interfaces';
 import { ActionPayloadInterface } from '../interfaces/action-payload';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionsService } from './transactions.service';
-import { InnerActionInterface } from '../../integration/interfaces';
+import { ActionOptionItemInterface } from 'src/transactions/interfaces/action-option-item.interface';
 
 @Injectable()
 export class ThirdPartyCallerService implements ActionCallerInterface {
@@ -32,15 +32,21 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
       paymentId: transaction.uuid,
     };
 
-    const isActionOptionsListAllowed: boolean = await this.isActionOptionsListImplemented(transaction);
-
-    if (isActionOptionsListAllowed) {
-      actions = await this.runThirdPartyAction(
+    try {
+      const actionOptions: ActionOptionItemInterface[] = await this.runThirdPartyAction(
         transaction,
-        ThirdPartyPaymentActionsEnum.actionOptionsList,
+        ThirdPartyPaymentActionsEnum.actionOptions,
         actionPayload,
       );
-    } else {
+
+      actions = actionOptions.map((actionOption: ActionOptionItemInterface ) => {
+        return {
+          action: actionOption.action,
+          enabled: actionOption.allowed,
+          partialAllowed: actionOption.partialAllowed,
+        };
+      });
+    } catch (e) {
       const actionsResponse: { [key: string]: boolean } = await this.runThirdPartyAction(
         transaction,
         ThirdPartyPaymentActionsEnum.actionList,
@@ -53,6 +59,7 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
             (key: string) => ({
               action: key,
               enabled: actionsResponse[key],
+              partialAllowed: false,
             }),
           );
       }
@@ -159,31 +166,6 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
 
     if (Object.keys(updateData).length > 0) {
       await this.transactionsService.updateByUuid(transaction.uuid, updateData);
-    }
-  }
-
-  private async isActionOptionsListImplemented(
-    transaction: TransactionUnpackedDetailsInterface,
-  ): Promise<boolean> {
-    const integrationName: string = transaction.type;
-    const url: string = `${this.thirdPartyPaymentsMicroUrl}/api/integration/${integrationName}`;
-
-    const config: AxiosRequestConfig = {
-      headers: {
-        'Accept': 'application/json, text/plain, */*',
-      },
-      method: 'GET',
-      params: { },
-      url: url,
-    };
-    const result: any = await this.executeThirdPartyRequest(config);
-
-    if (result && result.actions ) {
-      return result.actions.findIndex((action: InnerActionInterface) => {
-        return action.name === ThirdPartyPaymentActionsEnum.actionOptionsList;
-      }) > -1;
-    } else {
-      return false;
     }
   }
 
