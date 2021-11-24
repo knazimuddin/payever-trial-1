@@ -27,10 +27,12 @@ describe('ActionRetriver', () => {
     {
       action: 'Action 1',
       enabled: true,
+      partialAllowed: false,
     },
     {
       action: 'Action 2',
       enabled: false,
+      partialAllowed: true,
     },
   ];
 

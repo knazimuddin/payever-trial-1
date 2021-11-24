@@ -618,25 +618,6 @@ Feature: Third party payment actions
     """
     {
       "request": {
-        "method": "get",
-        "url": "*/api/integration/santander_installment_at",
-        "headers": {
-          "Accept": "application/json, text/plain, */*",
-          "authorization": "*"
-        }
-      },
-      "response": {
-        "status": 200,
-        "body": {
-          "actions": []
-        }
-      }
-    }
-    """
-    And I mock an axios request with parameters:
-    """
-    {
-      "request": {
         "method": "post",
         "url": "*/api/business/{{businessId}}/integration/santander_installment_at/action/action-list",
         "body": "{\"paymentId\":\"{{transactionId}}\"}",
