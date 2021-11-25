@@ -129,5 +129,6 @@ export const environment: any = {
   thirdPartyPaymentsMicroUrl: env.MICRO_URL_THIRD_PARTY_PAYMENTS,
   webSocket: {
     port: env.WS_PORT,
+    wsMicro: env.MICRO_WS_TRANSACTIONS,
   },
 };

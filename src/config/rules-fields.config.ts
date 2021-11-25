@@ -1,4 +1,5 @@
 import { ConditionsService, RulesSdkOptionsInterface, RuleActionEnum } from '@pe/rules-sdk';
+import { environment } from '../environments';
 import { RabbitChannels, RabbitExchangesEnum } from '../enums';
 
 export const RulesOptions: RulesSdkOptionsInterface = {
@@ -88,9 +89,12 @@ export const RulesOptions: RulesSdkOptionsInterface = {
       label: 'filters.seller_email',
     },
   ],
+  jwtSecret: environment.jwtOptions.secret,
   rabbitConfig: {
     channel: RabbitChannels.TransactionsFolders,
     exchange: RabbitExchangesEnum.transactionsFolders,
   },
+  redisUrl: environment.redis.url,
+  rulesWsMicro: environment.webSocket.wsMicro,
   useBusiness: true,
 };
