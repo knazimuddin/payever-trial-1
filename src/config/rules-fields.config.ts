@@ -89,12 +89,12 @@ export const RulesOptions: RulesSdkOptionsInterface = {
       label: 'filters.seller_email',
     },
   ],
+  jwtSecret: environment.jwtOptions.secret,
   rabbitConfig: {
     channel: RabbitChannels.TransactionsFolders,
     exchange: RabbitExchangesEnum.transactionsFolders,
   },
-  useBusiness: true,
-  jwtSecret: environment.jwtOptions.secret,
-  rulesWsMicro: `ws://localhost:${environment.webSocket.port}`,
   redisUrl: environment.redis.url,
+  rulesWsMicro: `ws://localhost:${environment.webSocket.port}`,
+  useBusiness: true,
 };
