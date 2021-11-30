@@ -231,6 +231,7 @@ describe('MessagingService', () => {
         {
           action: 'create',
           enabled: true,
+          partialAllowed: false,
         },
       ]
 
@@ -346,10 +347,12 @@ describe('MessagingService', () => {
         {
           action: 'create',
           enabled: true,
+          partialAllowed: false,
         },
         {
           action: 'edit',
           enabled: false,
+          partialAllowed: false,
         },
       ]
 
@@ -793,7 +796,7 @@ describe('MessagingService', () => {
           capture_funds: {
             amount: '1.23',
           },
-          payment_change_amount: {            
+          payment_change_amount: {
           },
         },
         files: [
@@ -1537,7 +1540,7 @@ describe('MessagingService', () => {
     });
 
     it('should send transaction update event', async () => {
-      
+
       const transactionUnpackedDetailsSimple: TransactionUnpackedDetailsInterface = {
         id: '0dcb9da7-3836-44cf-83b1-9e6c091d15dc',
         history: [
@@ -1585,7 +1588,7 @@ describe('MessagingService', () => {
         },
         shipping_category: 'Category 1',
       } as TransactionUnpackedDetailsInterface;
-      
+
       const message: MessageInterface = {
         name: 'name',
       } as MessageInterface;
