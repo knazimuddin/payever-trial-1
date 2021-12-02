@@ -30,12 +30,12 @@
     "@nestjs/platform-ws": "7.6.5",
     "@nestjs/websockets": "7.6.5",
     "@pe/business-kit": "^0.7.0",
-    "@pe/common-sdk": "^4.2.0",
+    "@pe/common-sdk": "^4.2.2",
     "@pe/cron-kit": "^1.0.1",
     "@pe/elastic-kit": "^3.5.0",
     "@pe/folders-plugin": "^3.10.2",
     "@pe/migration-kit": "^2.0.0",
-    "@pe/nest-kit": "^7.17.0",
+    "@pe/nest-kit": "^8.3.1",
     "@pe/notifications-sdk": "^5.0.0",
     "@pe/rules-sdk": "^1.4.0",
     "exceljs": "^4.3.0",
@@ -48,7 +48,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@pe/cucumber-sdk": "^3.1.0",
+    "@pe/cucumber-sdk": "^3.2.0",
     "@pe/dev-kit": "^2.0.2",
     "@pe/pact-kit": "^2.1.1"
   }
