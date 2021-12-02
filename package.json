@@ -45,6 +45,7 @@
     "pdfmake": "^0.2.2",
     "php-serialize": "^2.1.0",
     "php-unserialize": "0.0.1",
+    "qs": "^6.10.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
