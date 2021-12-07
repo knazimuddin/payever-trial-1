@@ -21,5 +21,6 @@ export enum ThirdPartyPaymentsEnum {
   santanderSEInstallment = 'santander_installment_se',
   santanderSEPosInstallment = 'santander_pos_installment_se',
   santanderUKInstallment = 'santander_installment_uk',
+  santanderUKPosInstallment = 'santander_pos_installment_uk',
   openbank = 'openbank',
 }
