@@ -177,6 +177,11 @@ Feature: Values
           "icon": "#channel-commercetools",
           "label": "integrations.shopsystems.commercetools.title",
           "name": "commercetools"
+        },
+        {
+          "icon": "#channel-pos",
+          "label": "integrations.payments.pos.title",
+          "name": "pos"
         }
       ],
       "filters": [
@@ -317,6 +322,58 @@ Feature: Values
             {
               "label": "integrations.payments.openbank.title",
               "value": "openbank"
+            },
+            {
+              "label": "integrations.payments.invoice.title",
+              "value": "invoice"
+            },
+            {
+              "label": "integrations.payments.payex_faktura.title",
+              "value": "payex_faktura"
+            },
+            {
+              "label": "integrations.payments.paymill_creditcard.title",
+              "value": "paymill_creditcard"
+            },
+            {
+              "label": "integrations.payments.paymill_directdebit.title",
+              "value": "paymill_directdebit"
+            },
+            {
+              "label": "integrations.payments.santander_ccp_installment.title",
+              "value": "santander_ccp_installment"
+            },
+            {
+              "label": "integrations.payments.santander_installment.title",
+              "value": "santander_installment"
+            },
+            {
+              "label": "integrations.payments.santander_pos_installment.title",
+              "value": "santander_pos_installment"
+            },
+            {
+              "label": "integrations.payments.santander_pos_installment_dk.title",
+              "value": "santander_pos_installment_dk"
+            },
+            {
+              "label": "integrations.payments.santander_pos_installment_no.title",
+              "value": "santander_pos_installment_no"
+            },
+            {
+              "label": "integrations.payments.santander_pos_invoice_no.title",
+              "value": "santander_pos_invoice_no"
+            },
+            {
+              "label": "integrations.payments.google_wallet.title",
+              "value": "google_wallet"
+            },
+            {
+              "label": "integrations.payments.santander_installment_uk.title",
+              "value": "santander_installment_uk"
+            },
+            {
+              "label": "integrations.payments.santander_pos_installment_uk.title",
+              "value": "santander_pos_installment_uk"
             }
           ],
           "type": "option"
@@ -622,6 +679,10 @@ Feature: Values
             {
               "value": "commercetools",
               "label": "integrations.shopsystems.commercetools.title"
+            },
+            {
+              "value": "pos",
+              "label": "integrations.payments.pos.title"
             }
           ],
           "type": "option"
@@ -854,6 +915,71 @@ Feature: Values
           "icon": "#payment-method-openbank",
           "label": "integrations.payments.openbank.title",
           "name": "openbank"
+        },
+        {
+          "icon": "#payment-method-invoice",
+          "label": "integrations.payments.invoice.title",
+          "name": "invoice"
+        },
+        {
+          "icon": "#payment-method-payex_faktura",
+          "label": "integrations.payments.payex_faktura.title",
+          "name": "payex_faktura"
+        },
+        {
+          "icon": "#payment-method-paymill_creditcard",
+          "label": "integrations.payments.paymill_creditcard.title",
+          "name": "paymill_creditcard"
+        },
+        {
+          "icon": "#payment-method-paymill_directdebit",
+          "label": "integrations.payments.paymill_directdebit.title",
+          "name": "paymill_directdebit"
+        },
+        {
+          "icon": "#payment-method-santander_ccp_installment",
+          "label": "integrations.payments.santander_ccp_installment.title",
+          "name": "santander_ccp_installment"
+        },
+        {
+          "icon": "#payment-method-santander_installment",
+          "label": "integrations.payments.santander_installment.title",
+          "name": "santander_installment"
+        },
+        {
+          "icon": "#payment-method-santander_pos_installment",
+          "label": "integrations.payments.santander_pos_installment.title",
+          "name": "santander_pos_installment"
+        },
+        {
+          "icon": "#payment-method-santander_pos_installment_dk",
+          "label": "integrations.payments.santander_pos_installment_dk.title",
+          "name": "santander_pos_installment_dk"
+        },
+        {
+          "icon": "#payment-method-santander_pos_installment_no",
+          "label": "integrations.payments.santander_pos_installment_no.title",
+          "name": "santander_pos_installment_no"
+        },
+        {
+          "icon": "#payment-method-santander_pos_invoice_no",
+          "label": "integrations.payments.santander_pos_invoice_no.title",
+          "name": "santander_pos_invoice_no"
+        },
+        {
+          "icon": "#payment-method-google_wallet",
+          "label": "integrations.payments.google_wallet.title",
+          "name": "google_wallet"
+        },
+        {
+          "icon": "#payment-method-santander_installment_uk",
+          "label": "integrations.payments.santander_installment_uk.title",
+          "name": "santander_installment_uk"
+        },
+        {
+          "icon": "#payment-method-santander_pos_installment_uk",
+          "label": "integrations.payments.santander_pos_installment_uk.title",
+          "name": "santander_pos_installment_uk"
         }
       ]
     }

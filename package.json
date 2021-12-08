@@ -30,7 +30,7 @@
     "@nestjs/platform-ws": "7.6.5",
     "@nestjs/websockets": "7.6.5",
     "@pe/business-kit": "^0.7.0",
-    "@pe/common-sdk": "^4.2.2",
+    "@pe/common-sdk": "^4.2.4",
     "@pe/cron-kit": "^1.0.1",
     "@pe/elastic-kit": "^3.5.0",
     "@pe/folders-plugin": "^3.10.2",
