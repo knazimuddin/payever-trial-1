@@ -71,7 +71,13 @@ spec:
             failureThreshold: 15
 
           resources:
-{{ toYaml $values.resources.app | indent 12 }}
+{{ if eq .Values.deploy.env "test" }}
+{{ toYaml $values.resourcestest.app | indent 12 }}
+{{ else if eq .Values.deploy.env "stage" }}
+{{ toYaml $values.resourcesstage.app | indent 12 }}
+{{ else }}
+{{ toYaml $values.resourceslive.app | indent 12 }}
+{{ end }}
 
           envFrom:
             - configMapRef:
