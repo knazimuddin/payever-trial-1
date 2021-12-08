@@ -59,11 +59,6 @@ Feature: Values
           "name": "instagram_messenger"
         },
         {
-          "icon": "#channel-commercetools",
-          "label": "integrations.plugins.commercetools.title",
-          "name": "commercetools"
-        },
-        {
           "icon": "#channel-ebay",
           "label": "integrations.products.ebay.title",
           "name": "ebay"
@@ -177,6 +172,11 @@ Feature: Values
           "icon": "#channel-commercetools",
           "label": "integrations.shopsystems.commercetools.title",
           "name": "commercetools"
+        },
+        {
+          "icon": "#channel-shop",
+          "label": "integrations.shopsystems.shop.title",
+          "name": "shop"
         },
         {
           "icon": "#channel-pos",
@@ -430,38 +430,6 @@ Feature: Values
           "label": "transactions.values.filter_labels.specific_status",
           "options": [
             {
-              "label": "transactions.values.specific_statuses.STATUS_NEW",
-              "value": "STATUS_NEW"
-            },
-            {
-              "label": "transactions.values.specific_statuses.STATUS_IN_PROCESS",
-              "value": "STATUS_IN_PROCESS"
-            },
-            {
-              "label": "transactions.values.specific_statuses.STATUS_ACCEPTED",
-              "value": "STATUS_ACCEPTED"
-            },
-            {
-              "label": "transactions.values.specific_statuses.STATUS_PAID",
-              "value": "STATUS_PAID"
-            },
-            {
-              "label": "transactions.values.specific_statuses.STATUS_DECLINED",
-              "value": "STATUS_DECLINED"
-            },
-            {
-              "label": "transactions.values.specific_statuses.STATUS_REFUNDED",
-              "value": "STATUS_REFUNDED"
-            },
-            {
-              "label": "transactions.values.specific_statuses.STATUS_FAILED",
-              "value": "STATUS_FAILED"
-            },
-            {
-              "label": "transactions.values.specific_statuses.STATUS_CANCELLED",
-              "value": "STATUS_CANCELLED"
-            },
-            {
               "label": "transactions.values.specific_statuses.STATUS_INVOICE_CANCELLATION",
               "value": "STATUS_INVOICE_CANCELLATION"
             },
@@ -506,8 +474,8 @@ Feature: Values
               "value": "STATUS_SANTANDER_CANCELLED"
             },
             {
-              "label": "transactions.values.specific_statuses.STATUS_SANTANDER_AUTOMATIC_DECLINE declined",
-              "value": "STATUS_SANTANDER_AUTOMATIC_DECLINE declined"
+              "label": "transactions.values.specific_statuses.STATUS_SANTANDER_AUTOMATIC_DECLINE",
+              "value": "STATUS_SANTANDER_AUTOMATIC_DECLINE"
             },
             {
               "label": "transactions.values.specific_statuses.STATUS_SANTANDER_IN_DECISION",
@@ -583,10 +551,6 @@ Feature: Values
             {
               "value": "instagram_messenger",
               "label": "integrations.messaging.instagram_messenger.title"
-            },
-            {
-              "value": "commercetools",
-              "label": "integrations.plugins.commercetools.title"
             },
             {
               "value": "ebay",
@@ -679,6 +643,10 @@ Feature: Values
             {
               "value": "commercetools",
               "label": "integrations.shopsystems.commercetools.title"
+            },
+            {
+              "value": "shop",
+              "label": "integrations.shopsystems.shop.title"
             },
             {
               "value": "pos",
