@@ -184,7 +184,7 @@ export class ExporterService {
       exportedCount += result.collection.length;
       exportDto.page++;
 
-      if (exportDto.page > 500000) {
+      if (exportDto.page > 500000 || result.collection.length === 0)  {
         break;
       }
       await this.sleep(2);

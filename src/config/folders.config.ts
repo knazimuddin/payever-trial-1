@@ -34,6 +34,11 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
       },
       currency: {
         fielddata: true,
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
         type: 'text',
       },
       customer_name: {
@@ -66,10 +71,20 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
       },
       specific_status: {
         fielddata: true,
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
         type: 'text',
       },
       status: {
         fielddata: true,
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
         type: 'text',
       },
       total: {
