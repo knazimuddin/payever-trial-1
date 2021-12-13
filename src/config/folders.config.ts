@@ -29,11 +29,21 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
         type: 'long',
       },
       channel: {
-        fielddata: true,
+        // fielddata: true,
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
         type: 'text',
       },
       currency: {
-        fielddata: true,
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
+        // fielddata: true,
         type: 'text',
       },
       customer_name: {
@@ -65,11 +75,21 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
         type: 'long',
       },
       specific_status: {
-        fielddata: true,
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
+        // fielddata: true,
         type: 'text',
       },
       status: {
-        fielddata: true,
+        // fielddata: true,
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
         type: 'text',
       },
       total: {
