@@ -11,7 +11,45 @@ service:
   statusPort: 8081
   wsPort: 8080
 
-resources:
+resourcestest:
+  app:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      memory: 150Mi
+  consumer:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      memory: 150Mi
+  consumer_export:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      memory: 150Mi
+resourcesstage:
+  app:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      memory: 150Mi
+  consumer:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      memory: 150Mi
+  consumer_export:
+    requests:
+      cpu: 10m
+      memory: 50Mi
+    limits:
+      memory: 150Mi
+resourceslive:
   app:
     requests:
       cpu: 156m
