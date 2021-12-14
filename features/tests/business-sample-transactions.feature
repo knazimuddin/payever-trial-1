@@ -46,6 +46,15 @@ Feature: Handling business events
       """
 
   Scenario: Create business
+    Given I mock Elasticsearch method "bulkIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions",
+          []
+        ]
+      }
+      """
     Given I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
       """
       {

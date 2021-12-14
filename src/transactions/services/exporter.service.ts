@@ -11,10 +11,9 @@ import {
   ExportTransactionsSettingsDto,
   ExportedTransactionsMailDto,
 } from '../dto';
-import { 
-  FoldersElasticSearchService, 
-  ElasticFilterBodyInterface, 
-  ElasticSearchCountResultsDto, 
+import {
+  FoldersElasticSearchService,
+  ElasticSearchCountResultsDto,
   PagingResultDto,
 } from '@pe/folders-plugin';
 import { BusinessService } from '@pe/business-kit';
@@ -67,13 +66,13 @@ export class ExporterService {
     exportDto: ExportQueryDto,
     businessId?: string,
   ): Promise<number> {
-    const filter: ElasticFilterBodyInterface = this.elasticSearchService.createFiltersBody();
-    filter.must.push({ term: { isFolder: false}});
     if (businessId) {
-      filter.must.push({ match_phrase: { businessId: businessId}});
+      exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
+      const business: BusinessModel = await this.businessService
+        .findOneById(businessId) as unknown as BusinessModel;
+      exportDto.currency = business ? business.currency : this.defaultCurrency;
     }
-
-    const result: ElasticSearchCountResultsDto = await this.elasticSearchService.count(filter);
+    const result: ElasticSearchCountResultsDto = await this.elasticSearchService.getFilteredDocumentsCount(exportDto);
 
     return result.count;
   }
@@ -181,6 +180,10 @@ export class ExporterService {
       }
       exportedCount += result.collection.length;
       exportDto.page++;
+
+      if (exportDto.page > 1000 || result.collection.length === 0)  {
+        break;
+      }
       await this.sleep(2);
     }
 
