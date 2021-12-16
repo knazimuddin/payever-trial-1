@@ -59,6 +59,7 @@ export class TransactionPaymentDetailsConverter {
       store_id: transaction.store_id,
       store_name: transaction.store_name,
       total: transaction.total,
+      total_with_refund: transaction.total_with_refund,
       type: transaction.type,
       updated_at: transaction.updated_at,
       user_uuid: transaction.user_uuid,

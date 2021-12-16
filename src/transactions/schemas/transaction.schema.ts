@@ -155,3 +155,7 @@ TransactionSchema.virtual('available_refund_items').get(function (): Transaction
 
   return refundItems;
 });
+
+TransactionSchema.virtual('total_with_refund').get(function (): number {
+  return Math.round((this.total - this.amount_refunded + Number.EPSILON) * 100) / 100;
+});
