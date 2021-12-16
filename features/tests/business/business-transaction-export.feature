@@ -110,7 +110,7 @@ Feature: Transaction export for business
                "aggs": {
                  "total_amount": {
                    "sum": {
-                     "field": "total"
+                     "field": "total_left"
                    }
                  }
                },
