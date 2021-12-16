@@ -90,7 +90,7 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
       total: {
         type: 'long',
       },
-      total_with_refund: {
+      total_left: {
         type: 'long',
       },
       type: {

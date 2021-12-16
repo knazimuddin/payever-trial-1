@@ -50,7 +50,7 @@ export const RulesOptions: RulesSdkOptionsInterface = {
     },
     {
       conditions: ConditionsService.getNumberConditions(),
-      fieldName: 'total_with_refund',
+      fieldName: 'total_left',
       label: 'filters.total',
     },
     {

@@ -55,7 +55,7 @@ export interface TransactionBasicInterface extends SantanderApplicationAwareInte
   store_id: string;
   store_name: string;
   total: number;
-  total_with_refund?: number;
+  total_left?: number;
   type: string;
   updated_at: Date;
   user_uuid: string;

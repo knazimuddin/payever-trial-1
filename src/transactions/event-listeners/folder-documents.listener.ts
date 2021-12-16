@@ -105,6 +105,7 @@ export class FolderDocumentsListener {
       TransactionTransformer.transactionToFoldersIndex(elasticSearchElementDto.document);
     transactionFoldersIndex.amount = Math.trunc(transactionFoldersIndex.amount * 100);
     transactionFoldersIndex.total = Math.trunc(transactionFoldersIndex.total * 100);
+    transactionFoldersIndex.total_left = Math.trunc(transactionFoldersIndex.total_left * 100);
 
     elasticSearchElementDto.document = transactionFoldersIndex;
   }
@@ -115,6 +116,7 @@ export class FolderDocumentsListener {
   ): Promise<void> {
     elasticSearchElementDto.document.amount = elasticSearchElementDto.document.amount / 100;
     elasticSearchElementDto.document.total = elasticSearchElementDto.document.total / 100;
+    elasticSearchElementDto.document.total_left = elasticSearchElementDto.document.total_left / 100;
   }
 
   @EventListener(FoldersEventsEnum.ElasticGetAdditionalSearchResults)
@@ -155,7 +157,7 @@ export class FolderDocumentsListener {
       aggs : {
         total_amount: {
           sum: {
-            field : 'total',
+            field : 'total_left',
           },
         },
       },
@@ -183,7 +185,7 @@ export class FolderDocumentsListener {
           aggs: {
             total_amount: {
               sum: {
-                field: 'total',
+                field: 'total_left',
               },
             },
           },
