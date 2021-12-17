@@ -7,7 +7,8 @@ import { PaymentActionsEnum } from '../enum';
 
 export const TransactionSchemaName: string = 'Transaction';
 
-export const TransactionSchema: Schema = new Schema({
+export const TransactionSchema: Schema = new Schema(
+{
   /** Original id for legacy purposes */
   original_id: { type: String, unique: true },
   uuid: { type: String, required: true, unique: true },
@@ -72,6 +73,10 @@ export const TransactionSchema: Schema = new Schema({
   example: Boolean,
   example_shipping_label: String,
   example_shipping_slip: String,
+},
+{
+  toJSON: { virtuals: true},
+  toObject: { virtuals: true},
 });
 
 TransactionSchema.index({ santander_applications: 1 });
