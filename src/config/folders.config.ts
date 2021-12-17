@@ -28,6 +28,9 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
       amount: {
         type: 'long',
       },
+      amount_left: {
+        type: 'long',
+      },
       channel: {
         fielddata: true,
         type: 'text',

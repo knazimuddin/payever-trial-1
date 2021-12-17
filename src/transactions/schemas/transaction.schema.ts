@@ -117,7 +117,14 @@ TransactionSchema.virtual('amount_captured').get(function (): number {
   return Math.round((totalCaptured + Number.EPSILON) * 100) / 100;
 });
 
+/**
+ * @deprecated use amount_left instead of amount_refund_rest
+ */
 TransactionSchema.virtual('amount_refund_rest').get(function (): number {
+  return Math.round((this.amount - this.amount_refunded + Number.EPSILON) * 100) / 100;
+});
+
+TransactionSchema.virtual('amount_left').get(function (): number {
   return Math.round((this.amount - this.amount_refunded + Number.EPSILON) * 100) / 100;
 });
 

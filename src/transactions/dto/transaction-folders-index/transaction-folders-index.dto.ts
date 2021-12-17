@@ -13,6 +13,7 @@ export class TransactionFoldersIndexDto {
   public specific_status: string;
   public channel: string;
   public amount: number;
+  public amount_left: number;
   public total: number;
   public total_left: number;
   public currency: string;

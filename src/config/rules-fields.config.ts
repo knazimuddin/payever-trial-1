@@ -45,7 +45,7 @@ export const RulesOptions: RulesSdkOptionsInterface = {
     },
     {
       conditions: ConditionsService.getNumberConditions(),
-      fieldName: 'amount',
+      fieldName: 'amount_left',
       label: 'filters.amount',
     },
     {
