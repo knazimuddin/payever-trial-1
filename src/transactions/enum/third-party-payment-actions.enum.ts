@@ -10,6 +10,7 @@ export enum ThirdPartyPaymentActionsEnum {
   actionRefund = 'action-refund',
   actionShippingGoods = 'action-shipping-goods',
   actionVerify = 'action-verify',
+  actionUpload = 'action-upload',
   actionUpdateStatus = 'update-status',
 }
 
@@ -23,4 +24,5 @@ export const TransactionActionsToThirdPartyActions: Map<string, string> = new Ma
   [PaymentActionsEnum.Edit, ThirdPartyPaymentActionsEnum.actionEdit],
   [PaymentActionsEnum.EditDelivery, ThirdPartyPaymentActionsEnum.actionEditDelivery],
   [PaymentActionsEnum.Verify, ThirdPartyPaymentActionsEnum.actionVerify],
+  [PaymentActionsEnum.Upload, ThirdPartyPaymentActionsEnum.actionUpload],
 ]);
