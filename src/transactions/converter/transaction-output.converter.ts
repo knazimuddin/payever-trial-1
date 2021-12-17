@@ -51,6 +51,7 @@ export class TransactionOutputConverter {
         amount_refunded: transaction.amount_refunded,
         currency: transaction.currency,
         total: transaction.total,
+        total_left: transaction.total_left,
 
         created_at: transaction.created_at,
         updated_at: transaction.updated_at,

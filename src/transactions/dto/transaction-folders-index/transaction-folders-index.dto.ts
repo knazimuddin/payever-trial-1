@@ -14,6 +14,7 @@ export class TransactionFoldersIndexDto {
   public channel: string;
   public amount: number;
   public total: number;
+  public total_left: number;
   public currency: string;
   public customer_name: string;
   public customer_email: string;

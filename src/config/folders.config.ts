@@ -90,6 +90,9 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
       total: {
         type: 'long',
       },
+      total_left: {
+        type: 'long',
+      },
       type: {
         fielddata: true,
         type: 'text',
