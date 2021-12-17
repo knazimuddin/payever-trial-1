@@ -108,8 +108,6 @@ export class FolderDocumentsListener {
     transactionFoldersIndex.total = Math.trunc(transactionFoldersIndex.total * 100);
     transactionFoldersIndex.total_left = Math.trunc(transactionFoldersIndex.total_left * 100);
 
-    console.log('elasticSearchElementDto.document', elasticSearchElementDto.document);
-    console.log('transactionFoldersIndex', transactionFoldersIndex);
     elasticSearchElementDto.document = transactionFoldersIndex;
   }
 
