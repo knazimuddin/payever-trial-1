@@ -20,6 +20,7 @@ export interface TransactionOutputInterface {
     amount_refunded?: number;
     amount_refund_rest?: number;
     total: number;
+    total_left?: number;
     created_at: Date;
     updated_at: Date;
     example: boolean;

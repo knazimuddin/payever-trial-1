@@ -32,6 +32,7 @@ export class TransactionTransformer {
       specific_status: transaction.specific_status,
       status: transaction.status,
       total: transaction.total,
+      total_left: transaction.total_left,
       type: transaction.type,
       uuid: transaction.uuid,
     };

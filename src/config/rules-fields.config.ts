@@ -50,7 +50,7 @@ export const RulesOptions: RulesSdkOptionsInterface = {
     },
     {
       conditions: ConditionsService.getNumberConditions(),
-      fieldName: 'total',
+      fieldName: 'total_left',
       label: 'filters.total',
     },
     {
