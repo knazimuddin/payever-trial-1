@@ -4,6 +4,7 @@ import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { CreateIntegrationDto } from '../dto';
 import { IntegrationModel } from '../models';
 import { IntegrationService } from '../services';
+import { Acl, AclActionsEnum } from '@pe/nest-kit';
 
 @ApiBearerAuth()
 @Controller('integration')
@@ -22,12 +23,14 @@ export class IntegrationController {
 
   @Get()
   @Roles(RolesEnum.merchant)
+  @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async findAll(): Promise<IntegrationModel[]> {
     return this.integrationService.findAll();
   }
 
   @Get(':integrationName')
   @Roles(RolesEnum.merchant)
+  @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async findByName(
     @Param('integrationName') integrationName: string,
   ): Promise<IntegrationModel> {
