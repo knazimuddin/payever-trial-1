@@ -114,5 +114,6 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
     ],
   },
   filters: FiltersConfig,
+  microservice: 'transactions',
   useBusiness: true,
 };
