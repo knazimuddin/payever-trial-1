@@ -14,10 +14,10 @@ service:
 resourcestest:
   app:
     requests:
-      cpu: 10m
+      cpu: 200m
       memory: 50Mi
     limits:
-      memory: 150Mi
+      memory: 350Mi
   consumer:
     requests:
       cpu: 10m
