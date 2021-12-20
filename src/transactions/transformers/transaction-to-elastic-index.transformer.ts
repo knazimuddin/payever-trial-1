@@ -12,6 +12,7 @@ export class TransactionTransformer {
   ): TransactionFoldersIndexDto {
     return {
       amount: transaction.amount,
+      amount_left: transaction.amount_left,
       billing_address: TransactionTransformer.addressToFoldersAddress(transaction.billing_address),
       business_uuid: transaction.business_uuid,
       channel: transaction.channel,

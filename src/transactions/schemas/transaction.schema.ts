@@ -7,7 +7,8 @@ import { PaymentActionsEnum } from '../enum';
 
 export const TransactionSchemaName: string = 'Transaction';
 
-export const TransactionSchema: Schema = new Schema({
+export const TransactionSchema: Schema = new Schema(
+{
   /** Original id for legacy purposes */
   original_id: { type: String, unique: true },
   uuid: { type: String, required: true, unique: true },
@@ -72,6 +73,10 @@ export const TransactionSchema: Schema = new Schema({
   example: Boolean,
   example_shipping_label: String,
   example_shipping_slip: String,
+},
+{
+  toJSON: { virtuals: true},
+  toObject: { virtuals: true},
 });
 
 TransactionSchema.index({ santander_applications: 1 });
@@ -117,6 +122,9 @@ TransactionSchema.virtual('amount_captured').get(function (): number {
   return Math.round((totalCaptured + Number.EPSILON) * 100) / 100;
 });
 
+/**
+ * @deprecated use amount_left instead of amount_refund_rest
+ */
 TransactionSchema.virtual('amount_refund_rest').get(function (): number {
   return Math.round((this.amount - this.amount_refunded + Number.EPSILON) * 100) / 100;
 });
@@ -156,6 +164,18 @@ TransactionSchema.virtual('available_refund_items').get(function (): Transaction
   return refundItems;
 });
 
+TransactionSchema.virtual('amount_left').get(function (): number {
+  if (this.status === 'STATUS_CANCELLED') {
+    return this.amount;
+  } else {
+    return Math.round((this.amount - this.amount_refunded + Number.EPSILON) * 100) / 100;
+  }
+});
+
 TransactionSchema.virtual('total_left').get(function (): number {
-  return Math.round((this.total - this.amount_refunded + Number.EPSILON) * 100) / 100;
+  if (this.status === 'STATUS_CANCELLED') {
+    return this.total;
+  } else {
+    return Math.round((this.total - this.amount_refunded + Number.EPSILON) * 100) / 100;
+  }
 });

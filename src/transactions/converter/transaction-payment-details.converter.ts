@@ -16,6 +16,7 @@ export class TransactionPaymentDetailsConverter {
       amount: transaction.amount,
       amount_capture_rest: transaction.amount_capture_rest,
       amount_captured: transaction.amount_captured,
+      amount_left: transaction.amount_left,
       amount_refund_rest: transaction.amount_refund_rest,
       amount_refunded: transaction.amount_refunded,
       api_call_id: transaction.api_call_id,

@@ -104,6 +104,7 @@ export class FolderDocumentsListener {
     const transactionFoldersIndex: TransactionFoldersIndexDto =
       TransactionTransformer.transactionToFoldersIndex(elasticSearchElementDto.document);
     transactionFoldersIndex.amount = Math.trunc(transactionFoldersIndex.amount * 100);
+    transactionFoldersIndex.amount_left = Math.trunc(transactionFoldersIndex.amount_left * 100);
     transactionFoldersIndex.total = Math.trunc(transactionFoldersIndex.total * 100);
     transactionFoldersIndex.total_left = Math.trunc(transactionFoldersIndex.total_left * 100);
 
@@ -115,6 +116,7 @@ export class FolderDocumentsListener {
     elasticSearchElementDto: ElasticSearchElementDto,
   ): Promise<void> {
     elasticSearchElementDto.document.amount = elasticSearchElementDto.document.amount / 100;
+    elasticSearchElementDto.document.amount_left = elasticSearchElementDto.document.amount_left / 100;
     elasticSearchElementDto.document.total = elasticSearchElementDto.document.total / 100;
     elasticSearchElementDto.document.total_left = elasticSearchElementDto.document.total_left / 100;
   }

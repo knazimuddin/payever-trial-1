@@ -14,4 +14,5 @@ export enum PaymentActionsEnum {
   Edit = 'edit',
   EditDelivery = 'edit_delivery',
   Verify = 'verify',
+  SendSigningLink = 'send_signing_link',
 }
