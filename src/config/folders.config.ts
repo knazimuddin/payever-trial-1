@@ -66,8 +66,7 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
         type: 'text',
       },
       original_id: {
-        fielddata: true,
-        type: 'text',
+        type: 'keyword',
       },
       payment_fee: {
         type: 'long',
@@ -117,5 +116,6 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
     ],
   },
   filters: FiltersConfig,
+  microservice: 'transactions',
   useBusiness: true,
 };
