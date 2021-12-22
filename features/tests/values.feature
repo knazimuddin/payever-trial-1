@@ -179,6 +179,11 @@ Feature: Values
           "name": "shop"
         },
         {
+          "icon": "#channel-link",
+          "label": "integrations.shopsystems.link.title",
+          "name": "link"
+        },
+        {
           "icon": "#channel-pos",
           "label": "integrations.payments.pos.title",
           "name": "pos"
@@ -292,16 +297,12 @@ Feature: Values
               "value": "santander_installment_dk"
             },
             {
-              "label": "integrations.payments.santander_installment_no.title",
-              "value": "santander_installment_no"
+              "label": "integrations.payments.santander_pos_installment_dk.title",
+              "value": "santander_pos_installment_dk"
             },
             {
               "label": "integrations.payments.apple_pay.title",
               "value": "apple_pay"
-            },
-            {
-              "label": "integrations.payments.santander_invoice_no.title",
-              "value": "santander_invoice_no"
             },
             {
               "label": "integrations.payments.google_pay.title",
@@ -324,20 +325,8 @@ Feature: Values
               "value": "openbank"
             },
             {
-              "label": "integrations.payments.invoice.title",
-              "value": "invoice"
-            },
-            {
               "label": "integrations.payments.payex_faktura.title",
               "value": "payex_faktura"
-            },
-            {
-              "label": "integrations.payments.paymill_creditcard.title",
-              "value": "paymill_creditcard"
-            },
-            {
-              "label": "integrations.payments.paymill_directdebit.title",
-              "value": "paymill_directdebit"
             },
             {
               "label": "integrations.payments.santander_ccp_installment.title",
@@ -352,20 +341,20 @@ Feature: Values
               "value": "santander_pos_installment"
             },
             {
-              "label": "integrations.payments.santander_pos_installment_dk.title",
-              "value": "santander_pos_installment_dk"
+              "label": "integrations.payments.santander_installment_no.title",
+              "value": "santander_installment_no"
             },
             {
               "label": "integrations.payments.santander_pos_installment_no.title",
               "value": "santander_pos_installment_no"
             },
             {
-              "label": "integrations.payments.santander_pos_invoice_no.title",
-              "value": "santander_pos_invoice_no"
+              "label": "integrations.payments.santander_invoice_no.title",
+              "value": "santander_invoice_no"
             },
             {
-              "label": "integrations.payments.google_wallet.title",
-              "value": "google_wallet"
+              "label": "integrations.payments.santander_pos_invoice_no.title",
+              "value": "santander_pos_invoice_no"
             },
             {
               "label": "integrations.payments.santander_installment_uk.title",
@@ -649,6 +638,10 @@ Feature: Values
               "label": "integrations.shopsystems.shop.title"
             },
             {
+              "value": "link",
+              "label": "integrations.shopsystems.link.title"
+            },
+            {
               "value": "pos",
               "label": "integrations.payments.pos.title"
             }
@@ -845,19 +838,14 @@ Feature: Values
           "name": "santander_installment_dk"
         },
         {
-          "icon": "#payment-method-santander_installment_no",
-          "label": "integrations.payments.santander_installment_no.title",
-          "name": "santander_installment_no"
+          "icon": "#payment-method-santander_pos_installment_dk",
+          "label": "integrations.payments.santander_pos_installment_dk.title",
+          "name": "santander_pos_installment_dk"
         },
         {
           "icon": "#payment-method-apple_pay",
           "label": "integrations.payments.apple_pay.title",
           "name": "apple_pay"
-        },
-        {
-          "icon": "#payment-method-santander_invoice_no",
-          "label": "integrations.payments.santander_invoice_no.title",
-          "name": "santander_invoice_no"
         },
         {
           "icon": "#payment-method-google_pay",
@@ -885,24 +873,9 @@ Feature: Values
           "name": "openbank"
         },
         {
-          "icon": "#payment-method-invoice",
-          "label": "integrations.payments.invoice.title",
-          "name": "invoice"
-        },
-        {
           "icon": "#payment-method-payex_faktura",
           "label": "integrations.payments.payex_faktura.title",
           "name": "payex_faktura"
-        },
-        {
-          "icon": "#payment-method-paymill_creditcard",
-          "label": "integrations.payments.paymill_creditcard.title",
-          "name": "paymill_creditcard"
-        },
-        {
-          "icon": "#payment-method-paymill_directdebit",
-          "label": "integrations.payments.paymill_directdebit.title",
-          "name": "paymill_directdebit"
         },
         {
           "icon": "#payment-method-santander_ccp_installment",
@@ -920,9 +893,9 @@ Feature: Values
           "name": "santander_pos_installment"
         },
         {
-          "icon": "#payment-method-santander_pos_installment_dk",
-          "label": "integrations.payments.santander_pos_installment_dk.title",
-          "name": "santander_pos_installment_dk"
+          "icon": "#payment-method-santander_installment_no",
+          "label": "integrations.payments.santander_installment_no.title",
+          "name": "santander_installment_no"
         },
         {
           "icon": "#payment-method-santander_pos_installment_no",
@@ -930,14 +903,14 @@ Feature: Values
           "name": "santander_pos_installment_no"
         },
         {
+          "icon": "#payment-method-santander_invoice_no",
+          "label": "integrations.payments.santander_invoice_no.title",
+          "name": "santander_invoice_no"
+        },
+        {
           "icon": "#payment-method-santander_pos_invoice_no",
           "label": "integrations.payments.santander_pos_invoice_no.title",
           "name": "santander_pos_invoice_no"
-        },
-        {
-          "icon": "#payment-method-google_wallet",
-          "label": "integrations.payments.google_wallet.title",
-          "name": "google_wallet"
         },
         {
           "icon": "#payment-method-santander_installment_uk",
