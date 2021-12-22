@@ -66,8 +66,7 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
         type: 'text',
       },
       original_id: {
-        fielddata: true,
-        type: 'text',
+        type: 'keyword',
       },
       payment_fee: {
         type: 'long',
