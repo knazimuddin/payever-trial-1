@@ -90,6 +90,7 @@ export const RulesOptions: RulesSdkOptionsInterface = {
     },
   ],
   jwtSecret: environment.jwtOptions.secret,
+  microservice: 'transactions',
   rabbitConfig: {
     channel: RabbitChannels.TransactionsFolders,
     exchange: RabbitExchangesEnum.transactionsFolders,
