@@ -96,5 +96,6 @@ export const RulesOptions: RulesSdkOptionsInterface = {
   },
   redisUrl: environment.redis.url,
   rulesWsMicro: environment.webSocket.wsMicro,
+  microservice: 'transactions',
   useBusiness: true,
 };
