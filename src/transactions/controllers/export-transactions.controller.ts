@@ -7,6 +7,7 @@ import { FastifyReply } from 'fastify';
 import { ExporterService } from '../services';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ExportFormatEnum } from '../enum';
+import { environment } from '../../environments';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -32,7 +33,7 @@ export class ExportTransactionsController {
     exportDto.page = 1;
     const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto, businessId);
 
-    if (transactionsCount > 2000) {
+    if (transactionsCount > environment.exportTransactionsCountDirectLimitMerchant) {
       if (exportDto.format === ExportFormatEnum.pdf) {
         throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
       }
@@ -61,7 +62,7 @@ export class ExportTransactionsController {
     exportDto.page = 1;
     const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto);
 
-    if (transactionsCount > 10000) {
+    if (transactionsCount > environment.exportTransactionsCountDirectLimitAdmin) {
       if (exportDto.format === ExportFormatEnum.pdf) {
         throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
       }

@@ -131,4 +131,7 @@ export const environment: any = {
     port: env.WS_PORT,
     wsMicro: env.MICRO_WS_TRANSACTIONS,
   },
+
+  exportTransactionsCountDirectLimitAdmin: env.EXPORT_TRANSACTIONS_COUNT_DIRECT_LIMIT_ADMIN,
+  exportTransactionsCountDirectLimitMerchant: env.EXPORT_TRANSACTIONS_COUNT_DIRECT_LIMIT_MERCHANT,
 };
