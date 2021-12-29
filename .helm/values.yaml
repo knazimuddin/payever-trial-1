@@ -29,7 +29,7 @@ resourcestest:
       cpu: 10m
       memory: 50Mi
     limits:
-      memory: 150Mi
+      memory: 350Mi
 resourcesstage:
   app:
     requests:
@@ -48,7 +48,7 @@ resourcesstage:
       cpu: 10m
       memory: 50Mi
     limits:
-      memory: 150Mi
+      memory: 350Mi
 resourceslive:
   app:
     requests:
