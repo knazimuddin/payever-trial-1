@@ -32,7 +32,7 @@ export class ExportTransactionsController {
     exportDto.page = 1;
     const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto, businessId);
 
-    if (transactionsCount > 10000) {
+    if (transactionsCount > 2000) {
       if (exportDto.format === ExportFormatEnum.pdf) {
         throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
       }
