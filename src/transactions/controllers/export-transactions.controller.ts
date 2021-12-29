@@ -10,7 +10,7 @@ import { ExportFormatEnum } from '../enum';
 import { environment } from '../../environments';
 
 @Controller()
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class ExportTransactionsController {
@@ -22,7 +22,7 @@ export class ExportTransactionsController {
   @ApiTags('business')
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  @Roles(RolesEnum.merchant)
+  // @Roles(RolesEnum.merchant)
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async exportBusinessTransactions(
     @User() user: AccessTokenPayload,
