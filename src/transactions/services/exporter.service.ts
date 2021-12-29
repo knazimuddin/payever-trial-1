@@ -18,7 +18,7 @@ import {
 } from '@pe/folders-plugin';
 import { BusinessService } from '@pe/business-kit';
 import { ConfigService } from '@nestjs/config';
-import { HttpException, HttpService, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { catchError, map } from 'rxjs/operators';
@@ -26,7 +26,7 @@ import { environment } from '../../environments';
 import * as FormData from 'form-data';
 import * as moment from 'moment';
 import { RabbitExchangesEnum, RabbitRoutingKeys } from '../../enums';
-import { RabbitMqClient } from '@pe/nest-kit';
+import { RabbitMqClient, IntercomService } from '@pe/nest-kit';
 
 const shippingColumns: Array<{ title: string, name: string }> = [
   { title: 'Shipping City', name: 'city' },
@@ -55,7 +55,7 @@ export class ExporterService {
     private readonly elasticSearchService: FoldersElasticSearchService,
     private readonly businessService: BusinessService,
     private readonly configService: ConfigService,
-    private readonly httpService: HttpService,
+    private readonly httpService: IntercomService,
     private readonly logger: Logger,
     private readonly rabbitClient: RabbitMqClient,
   ) {
@@ -427,7 +427,7 @@ export class ExporterService {
       message: 'Sending file to media',
     });
 
-    const request: Observable<any> = this.httpService.request(axiosRequestConfig);
+    const request: Observable<any> = await this.httpService.request(axiosRequestConfig);
 
     return request.pipe(
       map(( response: AxiosResponse<any>) => {
