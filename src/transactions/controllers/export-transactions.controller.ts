@@ -10,7 +10,7 @@ import { ExportFormatEnum } from '../enum';
 import { environment } from '../../environments';
 
 @Controller()
-// @UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class ExportTransactionsController {
@@ -22,7 +22,7 @@ export class ExportTransactionsController {
   @ApiTags('business')
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  // @Roles(RolesEnum.merchant)
+  @Roles(RolesEnum.merchant)
   @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
   public async exportBusinessTransactions(
     @User() user: AccessTokenPayload,
@@ -34,7 +34,7 @@ export class ExportTransactionsController {
     const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto, businessId);
 
     if (transactionsCount > environment.exportTransactionsCountDirectLimitMerchant) {
-      if (exportDto.format === ExportFormatEnum.pdf) {
+      if (exportDto.format === ExportFormatEnum.pdf && transactionsCount > 10000) {
         throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
       }
       exportDto.limit = 1000;
@@ -62,11 +62,9 @@ export class ExportTransactionsController {
     exportDto.page = 1;
     const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto);
 
+    this.checkPdfLimit(transactionsCount, exportDto);
     if (transactionsCount > environment.exportTransactionsCountDirectLimitAdmin) {
-      if (exportDto.format === ExportFormatEnum.pdf) {
-        throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
-      }
-      exportDto.limit = 10000;
+      exportDto.limit = 1000;
       await this.exporterService.sendRabbitEvent(exportDto, transactionsCount, user.email);
       this.returnExportingStarted(res);
     } else {
@@ -125,6 +123,12 @@ export class ExportTransactionsController {
       res.send(Buffer.concat(chunks));
     });
     document.data.end();
+  }
+
+  private checkPdfLimit(transactionsCount: number, exportQuery: ExportQueryDto): void {
+    if (exportQuery.format === ExportFormatEnum.pdf && transactionsCount > 10000) {
+      throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
+    }
   }
 
 }
