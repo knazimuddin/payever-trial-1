@@ -132,6 +132,8 @@ export const environment: any = {
     wsMicro: env.MICRO_WS_TRANSACTIONS,
   },
 
-  exportTransactionsCountDirectLimitAdmin: env.EXPORT_TRANSACTIONS_COUNT_DIRECT_LIMIT_ADMIN,
-  exportTransactionsCountDirectLimitMerchant: env.EXPORT_TRANSACTIONS_COUNT_DIRECT_LIMIT_MERCHANT,
+  exportTransactionsCountDirectLimitAdmin: env.EXPORT_TRANSACTIONS_COUNT_DIRECT_LIMIT_ADMIN ?
+    env.EXPORT_TRANSACTIONS_COUNT_DIRECT_LIMIT_ADMIN : 10000,
+  exportTransactionsCountDirectLimitMerchant: env.EXPORT_TRANSACTIONS_COUNT_DIRECT_LIMIT_MERCHANT ?
+    env.EXPORT_TRANSACTIONS_COUNT_DIRECT_LIMIT_MERCHANT : 2000,
 };
