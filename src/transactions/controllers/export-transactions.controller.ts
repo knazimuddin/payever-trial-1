@@ -7,6 +7,7 @@ import { FastifyReply } from 'fastify';
 import { ExporterService } from '../services';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ExportFormatEnum } from '../enum';
+import { environment } from '../../environments';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -32,10 +33,8 @@ export class ExportTransactionsController {
     exportDto.page = 1;
     const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto, businessId);
 
-    if (transactionsCount > 2000) {
-      if (exportDto.format === ExportFormatEnum.pdf) {
-        throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
-      }
+    this.checkPdfLimit(transactionsCount, exportDto, environment.exportTransactionsCountDirectLimitMerchant);
+    if (transactionsCount > environment.exportTransactionsCountDirectLimitMerchant) {
       exportDto.limit = 1000;
       await this.exporterService.sendRabbitEvent(exportDto, transactionsCount, user.email, '', businessId);
       this.returnExportingStarted(res);
@@ -61,11 +60,9 @@ export class ExportTransactionsController {
     exportDto.page = 1;
     const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto);
 
-    if (transactionsCount > 10000) {
-      if (exportDto.format === ExportFormatEnum.pdf) {
-        throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
-      }
-      exportDto.limit = 10000;
+    this.checkPdfLimit(transactionsCount, exportDto, environment.exportTransactionsCountDirectLimitAdmin);
+    if (transactionsCount > environment.exportTransactionsCountDirectLimitAdmin) {
+      exportDto.limit = 1000;
       await this.exporterService.sendRabbitEvent(exportDto, transactionsCount, user.email);
       this.returnExportingStarted(res);
     } else {
@@ -124,6 +121,13 @@ export class ExportTransactionsController {
       res.send(Buffer.concat(chunks));
     });
     document.data.end();
+  }
+
+  private checkPdfLimit(transactionsCount: number, exportQuery: ExportQueryDto, generalLimit: number): void {
+    const exportCountLimit: number = Math.min(generalLimit, environment.exportTransactionsCountPdfLimit);
+    if (exportQuery.format === ExportFormatEnum.pdf && transactionsCount > exportCountLimit) {
+      throw new BadRequestException(`transactions.export.error.limit_more_than_10000_not_allowed_for_pdf`);
+    }
   }
 
 }
