@@ -74,8 +74,6 @@ export class ExporterService {
     }
     const result: ElasticSearchCountResultsDto = await this.elasticSearchService.getFilteredDocumentsCount(exportDto);
 
-    console.log('result.count', result.count)
-
     return result.count;
   }
 
@@ -172,7 +170,6 @@ export class ExporterService {
     let maxItemsCount: number = 0;
 
     while (exportedCount < totalCount) {
-      console.log(`get next 1000 results`)
       const result: PagingResultDto = await this.elasticSearchService.getResult(exportDto);
 
       for (const item of result.collection) {
@@ -184,14 +181,11 @@ export class ExporterService {
       }
       exportedCount += result.collection.length;
       exportDto.page++;
-      console.log(`got next 1000 results exportedCount ${exportedCount} exportDto.page ${exportDto.page}`)
       if (exportDto.page > 1000 || result.collection.length === 0)  {
         break;
       }
       await this.sleep(2);
     }
-
-    console.log(`load results finished`);
 
     const columns: Array<{ title: string, name: string }> = JSON.parse(exportDto.columns);
 
@@ -433,7 +427,6 @@ export class ExporterService {
       message: 'Sending file to media',
     });
 
-    console.log('send request to media axiosRequestConfig=', axiosRequestConfig)
     const request: Observable<any> = await this.httpService.request(axiosRequestConfig);
 
     return request.pipe(
