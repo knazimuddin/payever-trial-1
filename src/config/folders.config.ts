@@ -46,6 +46,11 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
       },
       customer_name: {
         fielddata: true,
+        fields: {
+          keyword: {
+            type: 'keyword',
+          },
+        },
         type: 'text',
       },
       delivery_fee: {
