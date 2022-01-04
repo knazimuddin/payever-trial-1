@@ -46,6 +46,12 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
       },
       customer_name: {
         fielddata: true,
+        fields: {
+          keyword: {
+            normalizer: 'case_insensitive',
+            type: 'keyword',
+          },
+        },
         type: 'text',
       },
       delivery_fee: {
