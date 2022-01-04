@@ -48,6 +48,7 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
         fielddata: true,
         fields: {
           keyword: {
+            normalizer: 'case_insensitive',
             type: 'keyword',
           },
         },
