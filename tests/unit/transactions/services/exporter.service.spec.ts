@@ -3,7 +3,7 @@
 import 'mocha';
 import * as sinon from 'sinon';
 import { chaiExpect } from '../../../bootstrap';
-import { HttpService, Logger } from '@nestjs/common';
+import {  Logger } from '@nestjs/common';
 import { TransactionModel } from '../../../../src/transactions/models';
 import { ExportedFileResultDto, ExportQueryDto, PagingResultDto } from '../../../../src/transactions/dto';
 import { ExportFormatEnum } from '../../../../src/transactions/enum';
@@ -13,7 +13,7 @@ import { EventEmitter } from 'events';
 import { FoldersElasticSearchService } from '@pe/folders-plugin';
 import { BusinessService } from '@pe/business-kit';
 import { ConfigService } from '@nestjs/config';
-import { RabbitMqClient } from '@pe/nest-kit';
+import { RabbitMqClient, IntercomService } from '@pe/nest-kit';
 import { ExporterService } from '../../../../src/transactions/services';
 
 const expect: Chai.ExpectStatic = chaiExpect;
@@ -102,7 +102,7 @@ describe('ExporterService', () => {
   let exporterService: ExporterService;
   let businessService: BusinessService;
   let configService: ConfigService;
-  let httpService: HttpService;
+  let httpService: IntercomService;
   let logger: Logger;
   let rabbitClient: RabbitMqClient;
 
