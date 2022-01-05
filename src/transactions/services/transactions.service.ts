@@ -89,7 +89,7 @@ export class TransactionsService {
 
     const updated: TransactionModel = await this.mutex.lock(
       TransactionMutexKey,
-      transactionDto.uuid,
+      transactionUuid,
       async () => this.transactionModel.findOneAndUpdate(
         {
           uuid: transactionUuid,
