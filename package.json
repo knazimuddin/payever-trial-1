@@ -37,7 +37,7 @@
     "@pe/migration-kit": "^2.0.0",
     "@pe/nest-kit": "^9.1.0",
     "@pe/notifications-sdk": "^5.0.0",
-    "@pe/rules-sdk": "^2.1.0-beta",
+    "@pe/rules-sdk": "^2.0.0",
     "exceljs": "^4.3.0",
     "form-data": "^4.0.0",
     "lodash": "^4.17.21",
