@@ -1,6 +1,13 @@
 import { ConditionsService, RulesSdkOptionsInterface, RuleActionEnum } from '@pe/rules-sdk';
 import { environment } from '../environments';
 import { RabbitChannels, RabbitExchangesEnum } from '../enums';
+import {
+  TranslationPrefixEnum,
+  ValuesService,
+  PaymentOptionsEnum,
+} from '@pe/common-sdk';
+import { PaymentStatusesEnum, PaymentSpecificStatusEnum } from '../transactions/enum';
+
 
 export const RulesOptions: RulesSdkOptionsInterface = {
   actions: [
@@ -27,21 +34,25 @@ export const RulesOptions: RulesSdkOptionsInterface = {
       conditions: ConditionsService.getStringConditions(),
       fieldName: 'type',
       label: 'filters.payment_option',
+      options: ValuesService.getChoices(TranslationPrefixEnum.integrationsPayments, PaymentOptionsEnum, 'title'),
     },
     {
       conditions: ConditionsService.getStringConditions(),
       fieldName: 'status',
       label: 'filters.status',
+      options: ValuesService.getChoices(TranslationPrefixEnum.transactionStatuses, PaymentStatusesEnum),
     },
     {
       conditions: ConditionsService.getStringConditions(),
       fieldName: 'specific_status',
       label: 'filters.specific_status',
+      options: ValuesService.getChoices(TranslationPrefixEnum.transactionSpecificStatus, PaymentSpecificStatusEnum),
     },
     {
       conditions: ConditionsService.getStringConditions(),
       fieldName: 'channel',
       label: 'filters.channel',
+      options: ValuesService.getChannelValuesChoices(),
     },
     {
       conditions: ConditionsService.getNumberConditions(),
