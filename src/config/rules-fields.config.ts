@@ -8,7 +8,6 @@ import {
 } from '@pe/common-sdk';
 import { PaymentStatusesEnum, PaymentSpecificStatusEnum } from '../transactions/enum';
 
-
 export const RulesOptions: RulesSdkOptionsInterface = {
   actions: [
     RuleActionEnum.copy,
@@ -27,8 +26,8 @@ export const RulesOptions: RulesSdkOptionsInterface = {
     },
     {
       conditions: ConditionsService.getNumberConditions(),
-      fieldName: 'date',
-      label: 'filters.date',
+      fieldName: 'created_at',
+      label: 'filters.created_at',
     },
     {
       conditions: ConditionsService.getStringConditions(),
