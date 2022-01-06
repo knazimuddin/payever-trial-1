@@ -13,6 +13,7 @@ export enum PaymentActionsEnum {
   Upload = 'upload',
   Edit = 'edit',
   EditDelivery = 'edit_delivery',
+  EditReference = 'edit_reference',
   Verify = 'verify',
   SendSigningLink = 'send_signing_link',
 }
