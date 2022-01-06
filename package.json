@@ -49,7 +49,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@pe/cucumber-sdk": "^3.2.0",
+    "@pe/cucumber-sdk": "^3.6.0",
     "@pe/dev-kit": "^2.0.2",
     "@pe/pact-kit": "^2.1.1"
   }
