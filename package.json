@@ -35,7 +35,7 @@
     "@pe/elastic-kit": "^3.5.0",
     "@pe/folders-plugin": "^6.4.0",
     "@pe/migration-kit": "^2.0.0",
-    "@pe/nest-kit": "^9.1.0",
+    "@pe/nest-kit": "^9.2.1",
     "@pe/notifications-sdk": "^5.0.0",
     "@pe/rules-sdk": "^2.0.0",
     "exceljs": "^4.3.0",
@@ -49,7 +49,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@pe/cucumber-sdk": "^3.2.0",
+    "@pe/cucumber-sdk": "^4.0.0",
     "@pe/dev-kit": "^2.0.2",
     "@pe/pact-kit": "^2.1.1"
   }

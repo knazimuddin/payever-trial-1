@@ -50,10 +50,10 @@ export const options: CucumberOptionsInterface = {
   },
   mongodb: env.MONGODB_URL,
   providers: [
-    InMemoryProvider,
     ElasticSearchProvider,
+    HttpProvider,
+    InMemoryProvider,
     RabbitMqProvider,
     RedisProvider,
-    HttpProvider,
   ],
 };
