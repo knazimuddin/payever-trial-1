@@ -649,7 +649,7 @@ Feature: Values
           "type": "option"
         },
         {
-          "fieldName": "amount",
+          "fieldName": "amount_left",
           "filterConditions": [
             "is",
             "isNot",
@@ -661,7 +661,7 @@ Feature: Values
           "type": "number"
         },
         {
-          "fieldName": "total",
+          "fieldName": "total_left",
           "filterConditions": [
             "is",
             "isNot",

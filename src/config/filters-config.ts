@@ -59,13 +59,13 @@ export const FiltersConfig: FilterOptionInterface[] = [
     type: FilterOptionTypeEnum.option,
   },
   {
-    fieldName: 'amount',
+    fieldName: 'amount_left',
     filterConditions: FiltersService.getNumberFilterConditions(),
     label: 'transactions.values.filter_labels.amount',
     type: FilterOptionTypeEnum.number,
   },
   {
-    fieldName: 'total',
+    fieldName: 'total_left',
     filterConditions: FiltersService.getNumberFilterConditions(),
     label: 'transactions.values.filter_labels.total',
     type: FilterOptionTypeEnum.number,
