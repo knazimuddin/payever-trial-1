@@ -22,6 +22,7 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
       documentIdField: 'uuid',
       elasticIndex: 'folder_transactions',
       type: 'folder_transaction',
+      userIdField: 'user_uuid',
     },
 
     mappingFields: {
@@ -124,4 +125,5 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
   filters: FiltersConfig,
   microservice: 'transactions',
   useBusiness: true,
+  useUserScope: true,
 };

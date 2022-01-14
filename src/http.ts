@@ -39,7 +39,6 @@ async function bootstrap(): Promise<void> {
     .setTitle('Transactions')
     .setDescription('The transactions app API description')
     .setVersion('1.0')
-    .setBasePath('/api/')
     .addTag('transactions')
     .addBearerAuth();
   const document: OpenAPIObject = SwaggerModule.createDocument(app, options.build());
