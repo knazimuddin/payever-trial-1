@@ -28,4 +28,9 @@ export class ExportTransactionsSettingsDto {
   @Expose()
   public transactionsCount: number;
 
+  @IsString()
+  @Expose()
+  @IsOptional()
+  public userId?: string;
+
 }
