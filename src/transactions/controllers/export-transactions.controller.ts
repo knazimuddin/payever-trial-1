@@ -86,7 +86,7 @@ export class ExportTransactionsController {
     @Res() res: FastifyReply<any>,
   ): Promise<void> {
     exportDto.page = 1;
-    const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto, userId);
+    const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto, null, userId);
 
     this.checkPdfLimit(transactionsCount, exportDto, environment.exportTransactionsCountDirectLimitMerchant);
     if (transactionsCount > environment.exportTransactionsCountDirectLimitMerchant) {
