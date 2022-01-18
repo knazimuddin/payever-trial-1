@@ -73,6 +73,43 @@ export class ExportTransactionsController {
     }
   }
 
+  @Get('user/:userId/export')
+  @ApiTags('user')
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.user)
+  @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
+  public async exportUserTransactions(
+    @User() user: AccessTokenPayload,
+    @Param('userId') userId: string,
+    @QueryDto() exportDto: ExportQueryDto,
+    @Res() res: FastifyReply<any>,
+  ): Promise<void> {
+    exportDto.page = 1;
+    const transactionsCount: number = await this.exporterService.getTransactionsCount(exportDto, null, userId);
+
+    this.checkPdfLimit(transactionsCount, exportDto, environment.exportTransactionsCountDirectLimitMerchant);
+    if (transactionsCount > environment.exportTransactionsCountDirectLimitMerchant) {
+      exportDto.limit = 1000;
+      await this.exporterService.sendRabbitEvent(
+        exportDto,
+        transactionsCount,
+        user.email,
+        '',
+        null,
+        userId,
+      );
+      this.returnExportingStarted(res);
+    } else {
+      exportDto.limit = transactionsCount;
+      const document: ExportedFileResultDto =
+        await this.exporterService.exportUserTransactions(
+          exportDto, userId, transactionsCount,
+        );
+      await this.returnDocument(exportDto.format, document, res);
+    }
+  }
+
   private async returnDocument(
     exportFormat: ExportFormatEnum,
     document: ExportedFileResultDto,

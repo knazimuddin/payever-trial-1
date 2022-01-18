@@ -64,13 +64,23 @@ export class ExporterService {
 
   public async getTransactionsCount(
     exportDto: ExportQueryDto,
-    businessId?: string,
+    businessId: string = null,
+    userId: string = null,
   ): Promise<number> {
     if (businessId) {
       exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
       const business: BusinessModel = await this.businessService
         .findOneById(businessId) as unknown as BusinessModel;
       exportDto.currency = business ? business.currency : this.defaultCurrency;
+    }
+    if (userId) {
+      exportDto.filters = {
+        ...exportDto.filters,
+        userId: [{
+          condition: 'is',
+          value: [userId],
+        }],
+      };
     }
     const result: ElasticSearchCountResultsDto = await this.elasticSearchService.getFilteredDocumentsCount(exportDto);
 
@@ -85,6 +95,12 @@ export class ExporterService {
       exportedDocument = await this.exportBusinessTransactions(
         exportSettings.exportDto,
         exportSettings.businessId,
+        exportSettings.transactionsCount,
+      );
+    } else if (exportSettings.userId) {
+      exportedDocument = await this.exportUserTransactions(
+        exportSettings.exportDto,
+        exportSettings.userId,
         exportSettings.transactionsCount,
       );
     } else {
@@ -130,12 +146,33 @@ export class ExporterService {
     };
   }
 
+  public async exportUserTransactions(
+    exportDto: ExportQueryDto,
+    userId: string,
+    totalCount: number,
+  ): Promise<ExportedFileResultDto> {
+    exportDto.filters = {
+      ...exportDto.filters,
+      userId: [{
+        condition: 'is',
+        value: [userId],
+      }],
+    };
+    const fileName: string = `transactions-${moment().format('DD-MM-YYYY-hh-mm-ss')}.${exportDto.format}`;
+
+    return {
+      data: await this.exportToFile(exportDto, fileName, totalCount, 'transactions'),
+      fileName,
+    };
+  }
+
   public async sendRabbitEvent(
     exportDto: ExportQueryDto,
     transactionsCount: number,
     sendEmailTo: string,
-    fileName?: string,
-    businessId?: string,
+    fileName: string = '',
+    businessId: string = null,
+    userId: string = null,
   ): Promise<void> {
     const exportTransactionsSettings: ExportTransactionsSettingsDto = {
       businessId,
@@ -143,6 +180,7 @@ export class ExporterService {
       fileName,
       sendEmailTo: sendEmailTo,
       transactionsCount,
+      userId,
     };
 
     await this.rabbitClient.send(

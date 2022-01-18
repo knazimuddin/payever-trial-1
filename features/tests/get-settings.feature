@@ -58,5 +58,5 @@ Feature: Transaction settings
       | path                                  | token                                                                                                                     |
       | /api/business/{{businessId}}/settings | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
       | /api/admin/settings                   | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
-      | /api/user/settings                    | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
+      | /api/user/settings                    | {"email": "email@email.com","roles": [{"name": "user","permissions": []}, {"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
       | /api/user/settings                    | {"email": "email@email.com","roles": [{"name": "user","permissions": []}]} |
