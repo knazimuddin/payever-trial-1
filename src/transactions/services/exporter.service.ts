@@ -81,7 +81,6 @@ export class ExporterService {
           value: [userId],
         }],
       };
-      exportDto.currency = this.defaultCurrency;
     }
     const result: ElasticSearchCountResultsDto = await this.elasticSearchService.getFilteredDocumentsCount(exportDto);
 
@@ -159,7 +158,6 @@ export class ExporterService {
         value: [userId],
       }],
     };
-    exportDto.currency = this.defaultCurrency;
     const fileName: string = `transactions-${moment().format('DD-MM-YYYY-hh-mm-ss')}.${exportDto.format}`;
 
     return {
