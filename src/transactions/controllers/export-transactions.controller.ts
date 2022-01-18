@@ -74,7 +74,7 @@ export class ExportTransactionsController {
   }
 
   @Get('user/:userId/export')
-  @ApiTags('business')
+  @ApiTags('user')
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @Roles(RolesEnum.user)
