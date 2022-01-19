@@ -43,14 +43,17 @@ export class ActionsRetriever {
           {
             action: 'refund',
             enabled: true,
+            partialAllowed: false,
           },
           {
             action: 'cancel',
             enabled: true,
+            partialAllowed: false,
           },
           {
             action: 'shipping_goods',
             enabled: true,
+            partialAllowed: false,
           },
         ];
       case 'STATUS_PAID':

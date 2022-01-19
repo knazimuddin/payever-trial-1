@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Command, Positional } from '@pe/nest-kit';
-import { ExportMonthlyBusinessTransactionService } from '../services';
+import {
+  ExportMonthlyBusinessTransactionService,
+  ExportUserPerBusinessTransactionService,
+} from '../services';
 
 @Injectable()
 export class ExportTransactionToWidgetCommand {
   constructor(
     private readonly exportMonthlyBusinessTransactionService: ExportMonthlyBusinessTransactionService,
+    private readonly exportUserPerBusinessTransactionService: ExportUserPerBusinessTransactionService,
   ) { }
 
 
@@ -20,6 +24,8 @@ export class ExportTransactionToWidgetCommand {
   ): Promise<void> {
     for (let i: number = 0; i <= monthCount; i++) {
       await this.exportMonthlyBusinessTransactionService.exportBusinessTransactionPreviousNMonth(i);
+      await this.exportUserPerBusinessTransactionService.exportUserPerBusinessTransactionPreviousNMonth(i);
     }
+    await this.exportUserPerBusinessTransactionService.exportUserPerBusinessTransactionTotal();
   }
 }

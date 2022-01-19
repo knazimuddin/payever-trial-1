@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
-import { RabbitChannels } from '../enums';
+import { RabbitChannels, RabbitExchangesEnum } from '../enums';
 import ProcessEnv = NodeJS.ProcessEnv;
 
 dotenv.config();
@@ -61,7 +61,7 @@ export const environment: any = {
 
     exchanges: [
       {
-        name: 'async_events',
+        name: RabbitExchangesEnum.asyncEvents,
         options: { durable: true },
         type: 'direct',
 
@@ -71,6 +71,38 @@ export const environment: any = {
             options: {
               deadLetterExchange: 'async_events_fallback',
               deadLetterRoutingKey: RabbitChannels.Transactions,
+              durable: true,
+            },
+          },
+        ],
+      },
+      {
+        name: RabbitExchangesEnum.transactionsFolders,
+        options: { durable: true },
+        type: 'direct',
+
+        queues: [
+          {
+            name: RabbitChannels.TransactionsFolders,
+            options: {
+              deadLetterExchange: 'transactions_folders_fallback',
+              deadLetterRoutingKey: RabbitChannels.TransactionsFolders,
+              durable: true,
+            },
+          },
+        ],
+      },
+      {
+        name: RabbitExchangesEnum.transactionsExport,
+        options: { durable: true },
+        type: 'direct',
+
+        queues: [
+          {
+            name: RabbitChannels.TransactionsExport,
+            options: {
+              deadLetterExchange: 'transactions_export_fallback',
+              deadLetterRoutingKey: RabbitChannels.TransactionsExport,
               durable: true,
             },
           },
@@ -97,5 +129,13 @@ export const environment: any = {
   thirdPartyPaymentsMicroUrl: env.MICRO_URL_THIRD_PARTY_PAYMENTS,
   webSocket: {
     port: env.WS_PORT,
+    wsMicro: env.MICRO_WS_TRANSACTIONS,
   },
+
+  exportTransactionsCountDirectLimitAdmin: env.EXPORT_TRANSACTIONS_COUNT_DIRECT_LIMIT_ADMIN ?
+    env.EXPORT_TRANSACTIONS_COUNT_DIRECT_LIMIT_ADMIN : 10000,
+  exportTransactionsCountDirectLimitMerchant: env.EXPORT_TRANSACTIONS_COUNT_DIRECT_LIMIT_MERCHANT ?
+    env.EXPORT_TRANSACTIONS_COUNT_DIRECT_LIMIT_MERCHANT : 2000,
+  exportTransactionsCountPdfLimit: env.EXPORT_TRANSACTIONS_COUNT_PDF_LIMIT ?
+    env.EXPORT_TRANSACTIONS_COUNT_PDF_LIMIT : 10000,
 };

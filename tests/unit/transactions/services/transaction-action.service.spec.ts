@@ -154,6 +154,7 @@ describe('TransactonActionService()', () => {
 
   before(() => {
     transactionsService = {
+      findModelByUuid: (): any => { },
       findUnpackedByUuid: (): any => { },
     } as any;
 
@@ -209,6 +210,7 @@ describe('TransactonActionService()', () => {
 
       sandbox.spy(messagingService, 'runAction');
       sandbox.stub(transactionsService, 'findUnpackedByUuid').resolves(unpackedTransaction);
+      sandbox.stub(transactionsService, 'findModelByUuid').resolves(transaction);
       expect(
         await testService.doAction(transaction, actionPayload, 'action')
       ).to.deep.equal(unpackedTransaction);

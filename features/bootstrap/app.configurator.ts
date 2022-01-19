@@ -1,16 +1,26 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { AppConfiguratorInterface } from '@pe/cucumber-sdk';
-import { RABBITMQ_SERVER } from '@pe/nest-kit';
+import { Consumer, ProviderNameTransformer, RabbitMqConfig } from '@pe/nest-kit';
 import * as cors from 'cors';
 
 export class AppConfigurator implements AppConfiguratorInterface {
   public setup(application: INestApplication): void {
-    application.useGlobalPipes(new ValidationPipe());
-    application.setGlobalPrefix('/api');
-    application.use(cors());
+      application.useGlobalPipes(new ValidationPipe());
+      application.setGlobalPrefix('/api');
+      application.use(cors());
 
-    application.connectMicroservice({
-      strategy: application.get(RABBITMQ_SERVER),
-    });
+      const config: RabbitMqConfig = application.get(RabbitMqConfig);
+      const queueNames: string[] = config.getQueuesNames();
+
+      for (const queue of queueNames) {
+
+        const provider: string = ProviderNameTransformer.transform(queue);
+        const server: Consumer = application.get(provider);
+
+        application.connectMicroservice(
+        {
+          strategy: server,
+        });
+      }
   }
 }

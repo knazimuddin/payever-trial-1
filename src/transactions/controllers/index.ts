@@ -1,7 +1,6 @@
 export * from './admin.controller';
 export * from './bpo-events.controller';
 export * from './business.controller';
-export * from './business-bus-messages.controller';
 export * from './daily-report-transactions-bus-messages.controller';
 export * from './flow-events.controller';
 export * from './history-events.controller';
@@ -16,3 +15,5 @@ export * from './auth-events.controller';
 export * from './sample-products-bus-messages.controller';
 export * from './internal-transaction-controller';
 export * from './proxy.controller';
+export * from './export-transactions.controller';
+export * from './export-transactions-bus-messages.controller';

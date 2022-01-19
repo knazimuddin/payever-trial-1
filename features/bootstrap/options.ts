@@ -3,7 +3,6 @@ import {
   AxiosContext,
   CucumberOptionsInterface,
   DatabaseContext,
-  ElasticsearchContext,
   HttpContext,
   HttpProvider,
   InMemoryProvider,
@@ -12,7 +11,6 @@ import {
   StorageContext,
   WorldContext,
 } from '@pe/cucumber-sdk/module/';
-import { ElasticSearchProvider } from '@pe/cucumber-sdk/module/elasticsearch';
 import { RabbitMqProvider } from '@pe/cucumber-sdk/module/rabbit';
 import { RedisProvider } from '@pe/cucumber-sdk/module/redis';
 import * as dotenv from 'dotenv';
@@ -20,6 +18,10 @@ import * as path from 'path';
 import { AppConfigurator } from './app.configurator';
 import { environment } from '../../src/environments';
 import ProcessEnv = NodeJS.ProcessEnv;
+import { FastifyAdapter } from '@nestjs/platform-fastify';
+import { ElasticsearchContext } from '@pe/cucumber-sdk/module/contexts/elasticsearch.context';
+import { ElasticSearchProvider } from '@pe/cucumber-sdk/module/elasticsearch';
+import * as qs from 'qs';
 
 dotenv.config({});
 const env: ProcessEnv = process.env;
@@ -39,12 +41,19 @@ export const options: CucumberOptionsInterface = {
     WorldContext,
   ],
   fixtures: path.resolve('./features/fixtures'),
+  httpAdapter: {
+    class: FastifyAdapter,
+    options: {
+      maxParamLength: 255,
+      querystringParser: (str: string): any => qs.parse(str),
+    },
+  },
   mongodb: env.MONGODB_URL,
   providers: [
-    InMemoryProvider,
     ElasticSearchProvider,
+    HttpProvider,
+    InMemoryProvider,
     RabbitMqProvider,
     RedisProvider,
-    HttpProvider,
   ],
 };

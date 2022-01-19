@@ -12,5 +12,8 @@ export enum PaymentActionsEnum {
   Remind = 'remind',
   Upload = 'upload',
   Edit = 'edit',
+  EditDelivery = 'edit_delivery',
+  EditReference = 'edit_reference',
   Verify = 'verify',
+  SendSigningLink = 'send_signing_link',
 }

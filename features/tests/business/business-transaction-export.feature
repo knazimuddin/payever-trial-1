@@ -1,3 +1,4 @@
+@export
 Feature: Transaction export for business
   Background:
     Given I remember as "businessId" following value:
@@ -31,7 +32,7 @@ Feature: Transaction export for business
     Then print last response
     And the response status code should be 403
 
-  Scenario: Export transactions for business
+  Scenario Outline: Export transactions for business "<formatType>"
     Given I use DB fixture "transactions/transactions-list-with-different-currencies"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-transactions-list.json" content and remember as "elasticTransactionsListJson"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-transactions-count.json" content and remember as "elasticTransactionsCountJson"
@@ -39,11 +40,40 @@ Feature: Transaction export for business
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-statuses-response.json" content and remember as "statusesResponse"
     And I get file "features/fixtures/json/transaction-list-elastica/elastic-specific-statuses-response.json" content and remember as "specificStatusesResponse"
     And I get file "features/fixtures/json/transaction-list-elastica/business-transactions-list-response.json" content and remember as "transactionsListJson"
+    And I mock Elasticsearch method "count" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions",
+          {
+            "query": {
+              "bool": {
+                "must": [
+                  {
+                    "term": {
+                      "isFolder": false
+                    }
+                  },
+                  {
+                    "match_phrase": {
+                      "businessId": "{{businessId}}"
+                    }
+                  }
+                ],
+                "must_not": [],
+                "should": []
+              }
+            }
+          }
+        ],
+        "result": {{elasticTransactionsCountJson}}
+      }
+      """
     And I mock Elasticsearch method "search" with:
       """
       {
         "arguments": [
-          "transactions",
+          "folder_transactions",
           {
             "from": 0,
             "query": {
@@ -58,7 +88,7 @@ Feature: Transaction export for business
                 "must_not": []
               }
             },
-            "size": 10000,
+            "size": 4,
             "sort": [
               {
                 "created_at": "desc"
@@ -73,14 +103,14 @@ Feature: Transaction export for business
       """
       {
         "arguments": [
-          "transactions",
+          "folder_transactions",
           {
            "aggs": {
              "total_amount": {
                "aggs": {
                  "total_amount": {
                    "sum": {
-                     "field": "total"
+                     "field": "total_left"
                    }
                  }
                },
@@ -111,7 +141,7 @@ Feature: Transaction export for business
       """
       {
         "arguments": [
-          "transactions",
+          "folder_transactions",
           {
            "aggs": {
              "status": {
@@ -142,7 +172,7 @@ Feature: Transaction export for business
       """
       {
         "arguments": [
-          "transactions",
+          "folder_transactions",
           {
            "aggs": {
              "specific_status": {
@@ -173,7 +203,7 @@ Feature: Transaction export for business
       """
       {
         "arguments": [
-          "transactions",
+          "folder_transactions",
           {
             "query": {
               "bool": {
@@ -192,6 +222,10 @@ Feature: Transaction export for business
         "result": {{elasticTransactionsCountJson}}
       }
       """
-    When I send a GET request to "/api/business/{{businessId}}/export?orderBy=created_at&direction=desc&limit=20&page=1&currency=EUR&format=csv&businessName=test&columns=%5B%7B%22name%22:%22type%22,%22title%22:%22Payment%20type%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22customer_name%22,%22title%22:%22Customer%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22merchant_name%22,%22title%22:%22Merchant%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22created_at%22,%22title%22:%22Date%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22status%22,%22title%22:%22Status%22,%22isActive%22:true,%22isToggleable%22:true%7D%5D"
-    Then print last response
+    When I send a GET request to "<path>"
     And the response status code should be 200
+    Examples:
+      | formatType  | path |
+      | pdf         | /api/business/{{businessId}}/export?orderBy=created_at&direction=desc&limit=20&page=1&currency=EUR&format=pdf&businessName=test&columns=%5B%7B%22name%22:%22type%22,%22title%22:%22Payment%20type%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22customer_name%22,%22title%22:%22Customer%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22merchant_name%22,%22title%22:%22Merchant%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22created_at%22,%22title%22:%22Date%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22status%22,%22title%22:%22Status%22,%22isActive%22:true,%22isToggleable%22:true%7D%5D  |
+      | csv         | /api/business/{{businessId}}/export?orderBy=created_at&direction=desc&limit=20&page=1&currency=EUR&format=csv&businessName=test&columns=%5B%7B%22name%22:%22type%22,%22title%22:%22Payment%20type%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22customer_name%22,%22title%22:%22Customer%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22merchant_name%22,%22title%22:%22Merchant%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22created_at%22,%22title%22:%22Date%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22status%22,%22title%22:%22Status%22,%22isActive%22:true,%22isToggleable%22:true%7D%5D  |
+      | xlsx        | /api/business/{{businessId}}/export?orderBy=created_at&direction=desc&limit=20&page=1&currency=EUR&format=xlsx&businessName=test&columns=%5B%7B%22name%22:%22type%22,%22title%22:%22Payment%20type%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22customer_name%22,%22title%22:%22Customer%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22merchant_name%22,%22title%22:%22Merchant%20name%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22created_at%22,%22title%22:%22Date%22,%22isActive%22:true,%22isToggleable%22:true%7D,%7B%22name%22:%22status%22,%22title%22:%22Status%22,%22isActive%22:true,%22isToggleable%22:true%7D%5D |

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsIn, IsNumber, IsOptional, IsString, Max, Min, IsNotEmpty } from 'class-validator';
+import {  Type } from 'class-transformer';
 import { PagingDto } from './paging.dto';
 import { SortingDto } from './sorting.dto';
 
@@ -17,12 +18,14 @@ export class ListQueryDto {
 
   @ApiProperty()
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Min(1)
   public page: number = 1;
 
   @ApiProperty()
   @IsOptional()
+  @Type(() => Number)
   @IsNumber()
   @Max(100)
   public limit: number = 10;
@@ -30,11 +33,11 @@ export class ListQueryDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  public query: string;
+  public query?: string;
 
   @ApiProperty()
   @IsNotEmpty()
-  public filters: any = { };
+  public filters?: any = { };
 
   @ApiProperty()
   @IsOptional()

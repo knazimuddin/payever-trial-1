@@ -70,6 +70,22 @@ Feature: Run payment action
         "result": {}
       }
       """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
+      }
+      """
     When I send a POST request to "<path>" with json:
       """
         {
@@ -175,6 +191,22 @@ Feature: Run payment action
           }
          ],
         "result": {}
+      }
+      """
+    And I mock Elasticsearch method "search" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+        ]
+      }
+      """
+    And I mock Elasticsearch method "singleIndex" with:
+      """
+      {
+        "arguments": [
+          "folder_transactions"
+         ]
       }
       """
     When I send a POST request to "<path>" with json:
@@ -301,4 +333,4 @@ Feature: Run payment action
       | path                                                  | token                                                                                                                     |
       | /api/business/{{businessId}}/detail/{{transactionId}} | {"email": "email@email.com","roles": [{"name": "merchant","permissions": [{"businessId": "{{businessId}}","acls": []}]}]} |
       | /api/admin/detail/{{transactionId}}                   | {"email": "email@email.com","roles": [{"name": "admin","permissions": []}]}                                               |
-
+    

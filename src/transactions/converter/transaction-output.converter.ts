@@ -11,7 +11,7 @@ export class TransactionOutputConverter {
 
   public static convert(
     transaction: TransactionUnpackedDetailsInterface,
-    actions: ActionItemInterface[],
+    actions?: ActionItemInterface[],
   ): TransactionOutputInterface {
     const details: UnpackedDetailsInterface = Object.assign({ }, transaction.payment_details);
     delete details.finance_id;
@@ -38,7 +38,7 @@ export class TransactionOutputConverter {
     }
 
     return {
-      actions: actions,
+      actions: actions || [],
       transaction: {
         id: transaction.id,
         original_id: transaction.original_id,
@@ -47,10 +47,12 @@ export class TransactionOutputConverter {
         amount: transaction.amount,
         amount_capture_rest: transaction.amount_capture_rest,
         amount_captured: transaction.amount_captured,
+        amount_left: transaction.amount_left,
         amount_refund_rest: transaction.amount_refund_rest,
         amount_refunded: transaction.amount_refunded,
         currency: transaction.currency,
         total: transaction.total,
+        total_left: transaction.total_left,
 
         created_at: transaction.created_at,
         updated_at: transaction.updated_at,

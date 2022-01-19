@@ -1,7 +1,7 @@
 import { HttpException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IntercomService } from '@pe/nest-kit';
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { ThirdPartyPaymentActionsEnum, TransactionActionsToThirdPartyActions } from '../enum';
@@ -9,6 +9,7 @@ import { ActionCallerInterface, ActionItemInterface } from '../interfaces';
 import { ActionPayloadInterface } from '../interfaces/action-payload';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { TransactionsService } from './transactions.service';
+import { ActionOptionItemInterface } from 'src/transactions/interfaces/action-option-item.interface';
 
 @Injectable()
 export class ThirdPartyCallerService implements ActionCallerInterface {
@@ -31,17 +32,37 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
       paymentId: transaction.uuid,
     };
 
-    const actionsResponse: { [key: string]: boolean } =
-      await this.runThirdPartyAction(transaction, ThirdPartyPaymentActionsEnum.actionList, actionPayload);
+    try {
+      const actionOptions: ActionOptionItemInterface[] = await this.runThirdPartyAction(
+        transaction,
+        ThirdPartyPaymentActionsEnum.actionOptions,
+        actionPayload,
+      );
 
-    if (Object.keys(actionsResponse).length) {
-      actions = Object.keys(actionsResponse)
-        .map(
-          (key: string) => ({
-            action: key,
-            enabled: actionsResponse[key],
-          }),
-        );
+      actions = actionOptions.map((actionOption: ActionOptionItemInterface ) => {
+        return {
+          action: actionOption.action,
+          enabled: actionOption.allowed,
+          partialAllowed: actionOption.partialAllowed,
+        };
+      });
+    } catch (e) {
+      const actionsResponse: { [key: string]: boolean } = await this.runThirdPartyAction(
+        transaction,
+        ThirdPartyPaymentActionsEnum.actionList,
+        actionPayload,
+      );
+
+      if (Object.keys(actionsResponse).length) {
+        actions = Object.keys(actionsResponse)
+          .map(
+            (key: string) => ({
+              action: key,
+              enabled: actionsResponse[key],
+              partialAllowed: false,
+            }),
+          );
+      }
     }
 
     /**
@@ -152,7 +173,7 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
     transaction: TransactionUnpackedDetailsInterface,
     action: string,
     actionPayload?: ActionPayloadInterface,
-  ): Promise<{ }> {
+  ): Promise<any> {
     const businessId: string = transaction.business_uuid;
     const integrationName: string = transaction.type;
 
@@ -160,36 +181,53 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
       `${this.thirdPartyPaymentsMicroUrl}`
         + `/api/business/${businessId}/integration/${integrationName}/action/${action}`;
 
-    this.logger.log({
+    const config: AxiosRequestConfig = {
       data: actionPayload,
-      message: 'Starting third party payment action call',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+      },
+      method: 'POST',
+      params: { },
       url: url,
+    };
+
+    return this.executeThirdPartyRequest(config);
+  }
+
+
+  private async executeThirdPartyRequest(axiosRequestConfig: AxiosRequestConfig): Promise<any> {
+
+    this.logger.log({
+      data: axiosRequestConfig.data,
+      message: 'Starting third party payment call',
+      url: axiosRequestConfig.url,
     });
 
-    const response: Observable<AxiosResponse<any>> = await this.httpService.post(url, actionPayload);
+    const response: Observable<AxiosResponse<any>> = await this.httpService.request(axiosRequestConfig);
 
     return response.pipe(
-        map((res: any) => {
-          this.logger.log({
-            data: actionPayload,
-            message: 'Received response from third party payment action call',
-            response: res.data,
-            url: url,
-          });
+      map((res: any) => {
+        this.logger.log({
+          data: axiosRequestConfig.data,
+          message: 'Received response from third party payment call',
+          response: res.data,
+          url: axiosRequestConfig.url,
+        });
 
-          return res.data;
-        }),
-        catchError((error: AxiosError) => {
-          this.logger.error({
-            data: actionPayload,
-            error: error.response.data,
-            message: 'Failed response from third party payment action call',
-            url: url,
-          });
+        return res.data;
+      }),
+      catchError((error: AxiosError) => {
+        this.logger.error({
+          data: axiosRequestConfig.data,
+          error: error.response.data,
+          message: 'Failed response from third party payment call',
+          url: axiosRequestConfig.url,
+        });
 
-          throw new HttpException(error.response.data.message, error.response.data.code);
-        }),
-      )
+        throw new HttpException(error.response.data.message, error.response.data.code);
+      }),
+    )
       .toPromise();
   }
+
 }

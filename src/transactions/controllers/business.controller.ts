@@ -13,31 +13,32 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Acl, AclActionsEnum, ParamModel } from '@pe/nest-kit';
+import { AccessTokenPayload, Acl, AclActionsEnum, ParamModel, User } from '@pe/nest-kit';
 import { JwtAuthGuard, Roles, RolesEnum } from '@pe/nest-kit/modules/auth';
 import { QueryDto } from '@pe/nest-kit/modules/nest-decorator';
 import { FastifyReply } from 'fastify';
 import { createReadStream, readFileSync, ReadStream, Stats, statSync } from 'fs';
 import * as path from 'path';
-import { TransactionOutputConverter, TransactionPaymentDetailsConverter } from '../converter';
-import { BusinessDto, ExportQueryDto, ListQueryDto, PagingResultDto } from '../dto';
+import { BusinessDto,  BusinessService } from '@pe/business-kit';
+import { TransactionOutputConverter } from '../converter';
+import { ListQueryDto, PagingResultDto } from '../dto';
 import { ActionPayloadDto } from '../dto/action-payload';
 import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
 import { BusinessModel, TransactionModel } from '../models';
-import { TransactionsNotifier } from '../notifiers';
 import { TransactionSchemaName } from '../schemas';
 import {
   ActionsRetriever,
-  BusinessService,
   ElasticSearchService,
   MessagingService,
   MongoSearchService,
   TransactionActionService,
   TransactionsExampleService,
   TransactionsService,
+  TransactionsInfoService,
 } from '../services';
-import { BusinessFilter, Exporter, ExportFormat } from '../tools';
+import { BusinessFilter } from '../tools';
 import { PaymentActionsEnum } from '../enum';
+import { ActionItemInterface } from 'src/transactions/interfaces';
 
 const BusinessPlaceholder: string = ':businessId';
 const UuidPlaceholder: string = ':uuid';
@@ -49,7 +50,7 @@ const UuidPlaceholder: string = ':uuid';
 @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid authorization token.' })
 @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Unauthorized.' })
 export class BusinessController {
-  private defaultCurrency: string;
+  private readonly defaultCurrency: string;
 
   constructor(
     private readonly transactionsService: TransactionsService,
@@ -61,8 +62,8 @@ export class BusinessController {
     private readonly logger: Logger,
     private readonly businessService: BusinessService,
     private readonly exampleService: TransactionsExampleService,
-    private readonly transactionsNotifier: TransactionsNotifier,
     private readonly configService: ConfigService,
+    private readonly transactionsInfoService: TransactionsInfoService,
   ) {
     this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
   }
@@ -84,7 +85,7 @@ export class BusinessController {
       throw new NotFoundException(`Transaction by reference ${reference} not found`);
     }
 
-    return this.getDetails(transaction);
+    return this.transactionsInfoService.getFullDetails(transaction);
   }
 
   @Get('detail/original_id/:original_id')
@@ -100,7 +101,7 @@ export class BusinessController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
   ): Promise<TransactionOutputInterface> {
-    return this.getDetails(transaction);
+    return this.transactionsInfoService.getFullDetails(transaction);
   }
 
   @Get('detail/:uuid')
@@ -116,7 +117,39 @@ export class BusinessController {
       TransactionSchemaName,
     ) transaction: TransactionModel,
   ): Promise<TransactionOutputInterface> {
-    return this.getDetails(transaction);
+    return this.transactionsInfoService.getFullDetails(transaction);
+  }
+
+  @Get('transaction/:uuid/details')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
+  public async getTransactionDetails(
+    @ParamModel(
+      {
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+  ): Promise<TransactionOutputInterface> {
+    return this.transactionsInfoService.getDetails(transaction);
+  }
+
+  @Get('transaction/:uuid/actions')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant, RolesEnum.oauth)
+  @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
+  public async getTransactionActions(
+    @ParamModel(
+      {
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+  ): Promise<ActionItemInterface[]> {
+    return this.transactionsInfoService.getActionList(transaction);
   }
 
   @Post(':uuid/action/:action')
@@ -132,6 +165,7 @@ export class BusinessController {
       },
       TransactionSchemaName,
     ) transaction: TransactionModel,
+    @User() user: AccessTokenPayload,
     @Body() actionPayload: ActionPayloadDto,
   ): Promise<TransactionOutputInterface> {
     const updatedTransaction: TransactionUnpackedDetailsInterface = !transaction.example
@@ -139,6 +173,7 @@ export class BusinessController {
         transaction,
         actionPayload,
         action,
+        user,
       )
       : await this.transactionActionService.doFakeAction(
         transaction,
@@ -216,6 +251,7 @@ export class BusinessController {
       transaction,
       actionPayload,
       PaymentActionsEnum.ShippingGoods,
+      null,
       true,
     );
   }
@@ -272,7 +308,8 @@ export class BusinessController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
-    const business: BusinessModel = await this.businessService.findBusinessById(businessId);
+    const business: BusinessModel = await this.businessService
+    .findOneById(businessId) as unknown as BusinessModel;
     listDto.currency = business ? business.currency : this.defaultCurrency;
 
     return this.elasticSearchService.getResult(listDto);
@@ -287,32 +324,12 @@ export class BusinessController {
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
     listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
-    const business: BusinessModel = await this.businessService.findBusinessById(businessId);
+    const business: BusinessModel = await this.businessService
+    .findOneById(businessId) as unknown as BusinessModel;
+
     listDto.currency = business ? business.currency : this.defaultCurrency;
 
     return this.mongoSearchService.getResult(listDto);
-  }
-
-  @Get('export')
-  @HttpCode(HttpStatus.OK)
-  @Roles(RolesEnum.merchant)
-  @Acl({ microservice: 'transactions', action: AclActionsEnum.read })
-  public async export(
-    @Param('businessId') businessId: string,
-    @QueryDto() exportDto: ExportQueryDto,
-    @Res() res: FastifyReply<any>,
-  ): Promise<void> {
-    // override the page and limit (max: 10000)
-    exportDto.limit = 10000;
-    exportDto.page = 1;
-    exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
-    const business: BusinessModel = await this.businessService.findBusinessById(businessId);
-    exportDto.currency = business ? business.currency : this.defaultCurrency;
-    const result: PagingResultDto =  await this.elasticSearchService.getResult(exportDto);
-    const format: ExportFormat = exportDto.format;
-    const fileName: string = `"${exportDto.businessName.replace(/[^\x00-\x7F]/g, '')}"`;
-    const columns: Array<{ title: string, name: string }> = JSON.parse(exportDto.columns);
-    Exporter.export(result.collection as TransactionModel[] , res, fileName, columns, format);
   }
 
   @Get('settings')
@@ -348,19 +365,4 @@ export class BusinessController {
     return this.exampleService.createBusinessExamples(businessDto, []);
   }
 
-  private async getDetails(transaction: TransactionModel): Promise<TransactionOutputInterface>  {
-    const unpackedTransaction: TransactionUnpackedDetailsInterface = TransactionPaymentDetailsConverter.convert(
-      transaction.toObject({ virtuals: true }),
-    );
-
-    await this.transactionsNotifier.cancelNewTransactionNotification(transaction);
-
-    return TransactionOutputConverter.convert(
-      unpackedTransaction,
-      !transaction.example
-        ? await this.actionsRetriever.retrieve(unpackedTransaction)
-        : this.actionsRetriever.retrieveFakeActions(unpackedTransaction)
-      ,
-    );
-  }
 }

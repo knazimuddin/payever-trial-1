@@ -7,13 +7,14 @@ import * as sinonChai from 'sinon-chai';
 import * as uuid from 'uuid';
 import { Logger } from '@nestjs/common';
 import { Model } from 'mongoose';
+import { BusinessDto } from '@pe/business-kit';
+
 import { TransactionExampleModel, TransactionModel } from '../../../../src/transactions/models';
 import { TransactionsExampleService } from '../../../../src/transactions/services/transactions-example.service';
 import { NotificationsEmitter } from '@pe/notifications-sdk';
 import { TransactionEventProducer } from '../../../../src/transactions/producer';
 import { RabbitMqClient } from '@pe/nest-kit';
 import { TransactionsService } from '../../../../src/transactions/services/transactions.service';
-import { BusinessDto } from '../../../../src/transactions/dto';
 import { RabbitRoutingKeys } from '../../../../src/enums';
 import { SampleProductsService } from '../../../../src/transactions/services';
 

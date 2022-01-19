@@ -13,6 +13,10 @@ export interface TransactionBasicInterface extends SantanderApplicationAwareInte
   amount_capture_rest?: number;
   amount_captured?: number;
   amount_refunded?: number;
+  amount_left?: number;
+  /**
+   * @deprecated use amount_left instead of amount_refund_rest
+   */
   amount_refund_rest?: number;
   api_call_id?: string;
   available_refund_items?: TransactionRefundItemInterface[];
@@ -55,6 +59,7 @@ export interface TransactionBasicInterface extends SantanderApplicationAwareInte
   store_id: string;
   store_name: string;
   total: number;
+  total_left?: number;
   type: string;
   updated_at: Date;
   user_uuid: string;

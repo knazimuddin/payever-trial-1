@@ -18,8 +18,13 @@ export interface TransactionOutputInterface {
     amount_capture_rest?: number;
     amount_captured?: number;
     amount_refunded?: number;
+    amount_left?: number;
+    /**
+     * @deprecated use amount_left instead of amount_refund_rest
+     */
     amount_refund_rest?: number;
     total: number;
+    total_left?: number;
     created_at: Date;
     updated_at: Date;
     example: boolean;

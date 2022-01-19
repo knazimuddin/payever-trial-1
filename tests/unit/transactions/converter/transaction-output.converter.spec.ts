@@ -18,6 +18,7 @@ describe('TransactionOutputConverter', () => {
         uuid: 'b4fd1c4d-d2b6-4484-be63-8f5d027d4585',
         action_running: true,
         amount: 123,
+        amount_left: 789,
         amount_capture_rest: 100,
         amount_captured: 23,
         amount_refunded: 456,
@@ -78,6 +79,7 @@ describe('TransactionOutputConverter', () => {
         store_id: '4deedcf7-255c-466f-ae25-9073b349dcc7',
         store_name: 'wallmart',
         total: 901,
+        total_left: 456,
         type: 'type_1',
         updated_at: new Date('2019-11-04T18:55:41.000Z'),
         user_uuid: '4e75b65b-3f89-4c11-9fc8-a8b2a34fa86d',
@@ -91,6 +93,7 @@ describe('TransactionOutputConverter', () => {
         {
           action: 'action_1',
           enabled: true,
+          partialAllowed: false,
         },
       ]
       expect(TransactionOutputConverter.convert(transaction, actions))
@@ -99,6 +102,7 @@ describe('TransactionOutputConverter', () => {
             {
               action: 'action_1',
               enabled: true,
+              partialAllowed: false,
             },
           ],
           transaction: {
@@ -108,10 +112,12 @@ describe('TransactionOutputConverter', () => {
             amount: 123,
             amount_capture_rest: 100,
             amount_captured: 23,
+            amount_left: 789,
             amount_refunded: 456,
             amount_refund_rest: 789,
             currency: 'EUR',
             total: 901,
+            total_left: 456,
             created_at: new Date('2009-11-04T18:55:41.000Z'),
             updated_at: new Date('2019-11-04T18:55:41.000Z'),
             example: true,
