@@ -20,6 +20,7 @@ export class SendHistoryEventAfterActionListener {
     action: string,
     user?: AccessTokenPayload,
   ): Promise<void> {
+    console.log('PaymentActionEventEnum.PaymentActionAfter actionPayload', actionPayload);
     const message: HistoryEventActionCompletedInterface = {
       action,
       data: {
@@ -60,6 +61,9 @@ export class SendHistoryEventAfterActionListener {
       case PaymentActionsEnum.Refund:
       case PaymentActionsEnum.Return:
         amount = actionPayload.fields?.payment_return?.amount ? actionPayload.fields.payment_return.amount : null;
+        break;
+      case PaymentActionsEnum.ShippingGoods:
+        amount = actionPayload.fields?.capture_funds?.amount ? actionPayload.fields.capture_funds.amount : null;
         break;
     }
 

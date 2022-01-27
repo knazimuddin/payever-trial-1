@@ -1,6 +1,8 @@
-import { IsString } from 'class-validator';
+import { IsString, IsNumber, Min, IsNotEmpty } from 'class-validator';
 
 export class CaptureDataDto {
-  @IsString()
-  public amount: string;
+  @IsNumber()
+  @Min(0)
+  @IsNotEmpty()
+  public amount: number;
 }

@@ -1,3 +1,3 @@
 export interface CaptureDataInterface {
-  amount: string;
+  amount: number;
 }
