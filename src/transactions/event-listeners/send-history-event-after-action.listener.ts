@@ -63,7 +63,9 @@ export class SendHistoryEventAfterActionListener {
         amount = actionPayload.fields?.payment_return?.amount ? actionPayload.fields.payment_return.amount : null;
         break;
       case PaymentActionsEnum.ShippingGoods:
-        amount = actionPayload.fields?.capture_funds?.amount ? actionPayload.fields.capture_funds.amount : null;
+        amount = actionPayload.fields?.capture_funds?.amount
+          ? parseFloat(actionPayload.fields.capture_funds.amount)
+          : null;
         break;
     }
 

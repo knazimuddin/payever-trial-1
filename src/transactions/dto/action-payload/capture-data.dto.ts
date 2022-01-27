@@ -4,5 +4,5 @@ export class CaptureDataDto {
   @IsNumber()
   @Min(0)
   @IsNotEmpty()
-  public amount: number;
+  public amount: string;
 }
