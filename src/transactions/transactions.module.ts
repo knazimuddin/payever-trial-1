@@ -90,6 +90,7 @@ import {
   ActionValidatorsList,
   TransactionsInfoService,
   ExporterService,
+  TranslationService,
 } from './services';
 import { EventsGateway } from './ws';
 import { RabbitChannels } from '../enums';
@@ -199,6 +200,7 @@ import { ExportMonthlyBusinessTransactionCronService } from '../cron/export-mont
     ExportUserPerBusinessTransactionService,
     ...ActionValidatorsList,
     TransactionsInfoService,
+    TranslationService,
     ExportMonthlyBusinessTransactionCronService,
     ExporterService,
   ],
