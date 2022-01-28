@@ -88,10 +88,6 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
     action = TransactionActionsToThirdPartyActions.get(action.toLowerCase());
     actionPayload.paymentId = transaction.uuid;
 
-    console.log('transaction.uuid', transaction.uuid);
-    console.log('action', action);
-    console.log('actionPayload', actionPayload);
-
     const result: any = await this.runThirdPartyAction(transaction, action, actionPayload);
 
     await this.updateTransactionFromThirdPartyResult(transaction, result);

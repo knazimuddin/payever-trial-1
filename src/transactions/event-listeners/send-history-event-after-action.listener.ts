@@ -20,7 +20,6 @@ export class SendHistoryEventAfterActionListener {
     action: string,
     user?: AccessTokenPayload,
   ): Promise<void> {
-    console.log('PaymentActionEventEnum.PaymentActionAfter actionPayload', actionPayload);
     const message: HistoryEventActionCompletedInterface = {
       action,
       data: {
