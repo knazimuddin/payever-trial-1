@@ -7,6 +7,7 @@ import {
   ElasticSearchElementDto,
   ElasticAdditionalSearchResultsDto,
   FoldersElasticSearchService,
+  ElasticFilterBodyInterface,
 } from '@pe/folders-plugin';
 import { ListQueryDto, TransactionFoldersIndexDto } from '../dto';
 import { TransactionsService } from '../services';
@@ -91,6 +92,7 @@ export class FolderDocumentsListener {
   @EventListener(FoldersEventsEnum.ElasticBeforeGetResults)
   public async elasticBeforeGetResults(
     listDto: ListQueryDto,
+    filter: ElasticFilterBodyInterface,
     businessId: string,
   ): Promise<void> {
     const business: BusinessModel = await this.businessService.findOneById(businessId) as unknown as BusinessModel;
