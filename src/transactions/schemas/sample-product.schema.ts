@@ -4,8 +4,8 @@ import { v4 as uuid } from 'uuid';
 export const SampleProductSchemaName: string = 'SampleProducts';
 export const SampleProductSchema: Schema = new Schema(
   {
-    _id: { 
-      default: uuid, 
+    _id: {
+      default: uuid,
       type: String,
     },
     description: String,
@@ -22,7 +22,7 @@ export const SampleProductSchema: Schema = new Schema(
     product: String,
     quantity: Number,
     uuid: String,
-    vat_rate: Number,    
+    vat_rate: Number,
   },
   { timestamps: true },
 );

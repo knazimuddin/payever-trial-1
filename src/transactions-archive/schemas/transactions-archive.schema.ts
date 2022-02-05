@@ -1,14 +1,26 @@
 import { Schema } from 'mongoose';
-import { TransactionCartItemInterface, TransactionRefundItemInterface } from '../interfaces/transaction';
-import { AddressSchema } from './address.schema';
-import { TransactionCartItemSchema } from './transaction-cart-item-schema';
-import { TransactionHistoryEntrySchema } from './transaction-history-entry.schema';
-import { PaymentActionsEnum } from '../enum';
 
-export const TransactionSchemaName: string = 'Transaction';
+import { TransactionCartItemInterface, TransactionRefundItemInterface } from '../../transactions/interfaces/transaction';
+import { AddressSchema, TransactionCartItemSchema, TransactionHistoryEntrySchema } from '../../transactions/schemas';
+import { PaymentActionsEnum } from '../../transactions/enum';
 
-export const TransactionSchema: Schema = new Schema(
+export const TransactionsArchiveSchemaName: string = 'TransactionsArchive';
+
+export const TransactionsArchiveSchema: Schema = new Schema(
 {
+  archiveEmail: {
+    required: true,
+    type: String,
+  },
+  businessId: {
+    required: true,
+    type: String,
+  },
+
+  /*
+   * Transaction schame (synced 2022.02.04)
+   */
+
   /** Original id for legacy purposes */
   original_id: { type: String, unique: true },
   uuid: { type: String, required: true, unique: true },
@@ -79,21 +91,21 @@ export const TransactionSchema: Schema = new Schema(
   toObject: { virtuals: true },
 });
 
-TransactionSchema.index({ santander_applications: 1 });
-TransactionSchema.index({ reference: 1 });
-TransactionSchema.index({ customer_name: 1 });
-TransactionSchema.index({ customer_email: 1 });
-TransactionSchema.index({ merchant_name: 1 });
-TransactionSchema.index({ merchant_email: 1 });
-TransactionSchema.index({ status: 1, _id: 1 });
-TransactionSchema.index({ business_uuid: 1 });
-TransactionSchema.index({ example: 1 });
-TransactionSchema.index({ type: 1 });
-TransactionSchema.index({ created_at: -1 });
-TransactionSchema.index({ created_at: 1 });
-TransactionSchema.index({ business_uuid: 1, example: 1 });
+TransactionsArchiveSchema.index({ santander_applications: 1 });
+TransactionsArchiveSchema.index({ reference: 1 });
+TransactionsArchiveSchema.index({ customer_name: 1 });
+TransactionsArchiveSchema.index({ customer_email: 1 });
+TransactionsArchiveSchema.index({ merchant_name: 1 });
+TransactionsArchiveSchema.index({ merchant_email: 1 });
+TransactionsArchiveSchema.index({ status: 1, _id: 1 });
+TransactionsArchiveSchema.index({ business_uuid: 1 });
+TransactionsArchiveSchema.index({ example: 1 });
+TransactionsArchiveSchema.index({ type: 1 });
+TransactionsArchiveSchema.index({ created_at: -1 });
+TransactionsArchiveSchema.index({ created_at: 1 });
+TransactionsArchiveSchema.index({ business_uuid: 1, example: 1 });
 
-TransactionSchema.virtual('amount_refunded').get(function (): number {
+TransactionsArchiveSchema.virtual('amount_refunded').get(function (): number {
   let totalRefunded: number = 0;
 
   if (this.history) {
@@ -109,7 +121,7 @@ TransactionSchema.virtual('amount_refunded').get(function (): number {
   return Math.round((totalRefunded + Number.EPSILON) * 100) / 100;
 });
 
-TransactionSchema.virtual('amount_captured').get(function (): number {
+TransactionsArchiveSchema.virtual('amount_captured').get(function (): number {
   let totalCaptured: number = 0;
 
   if (this.history) {
@@ -125,18 +137,18 @@ TransactionSchema.virtual('amount_captured').get(function (): number {
 /**
  * @deprecated use amount_left instead of amount_refund_rest
  */
-TransactionSchema.virtual('amount_refund_rest').get(function (): number {
+TransactionsArchiveSchema.virtual('amount_refund_rest').get(function (): number {
   return Math.round((this.amount - this.amount_refunded + Number.EPSILON) * 100) / 100;
 });
 
-TransactionSchema.virtual('amount_capture_rest').get(function (): number {
+TransactionsArchiveSchema.virtual('amount_capture_rest').get(function (): number {
   const amountCaptureRest: number =
     Math.round((this.total - this.amount_captured - this.amount_refunded + Number.EPSILON) * 100) / 100;
 
   return amountCaptureRest >= 0 ? amountCaptureRest : 0;
 });
 
-TransactionSchema.virtual('available_refund_items').get(function (): TransactionRefundItemInterface[] {
+TransactionsArchiveSchema.virtual('available_refund_items').get(function (): TransactionRefundItemInterface[] {
   const refundItems: TransactionRefundItemInterface[] = [];
 
   this.items.forEach((item: TransactionCartItemInterface) => {
@@ -164,7 +176,7 @@ TransactionSchema.virtual('available_refund_items').get(function (): Transaction
   return refundItems;
 });
 
-TransactionSchema.virtual('amount_left').get(function (): number {
+TransactionsArchiveSchema.virtual('amount_left').get(function (): number {
   if (this.status === 'STATUS_CANCELLED') {
     return this.amount;
   } else {
@@ -172,7 +184,7 @@ TransactionSchema.virtual('amount_left').get(function (): number {
   }
 });
 
-TransactionSchema.virtual('total_left').get(function (): number {
+TransactionsArchiveSchema.virtual('total_left').get(function (): number {
   if (this.status === 'STATUS_CANCELLED') {
     return this.total;
   } else {
