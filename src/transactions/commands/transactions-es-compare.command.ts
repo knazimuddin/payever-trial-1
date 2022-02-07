@@ -7,7 +7,7 @@ import { ListQueryDto, PagingResultDto } from '../dto';
 import { BusinessModel } from '../models';
 import { BusinessSchemaName } from '../schemas';
 import { ElasticSearchService, MongoSearchService } from '../services';
-import { BusinessFilter } from '../tools';
+import { TransactionsFilter } from '../tools';
 
 @Injectable()
 export class TransactionsEsCompareCommand {
@@ -42,7 +42,7 @@ export class TransactionsEsCompareCommand {
         Logger.log(business.id);
         const listDto: ListQueryDto = new ListQueryDto();
 
-        listDto.filters = BusinessFilter.apply(business.id, listDto.filters);
+        listDto.filters = TransactionsFilter.applyBusinessFilter(business.id, listDto.filters);
         listDto.currency = business.currency;
 
         const mongoResult: PagingResultDto = await this.mongo.getResult(listDto);
