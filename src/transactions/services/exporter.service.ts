@@ -119,11 +119,12 @@ export class ExporterService {
       .findOneById(businessId) as unknown as BusinessModel;
     exportDto.currency = business ? business.currency : this.defaultCurrency;
     let businessName: string = `${exportDto.businessName.replace(/[^\x00-\x7F]/g, '')}`;
-    businessName = businessName.replace(/\s/, '-');
-    const fileName: string = `${businessName}-${moment().format('DD-MM-YYYY-hh-mm-ss')}.${exportDto.format}`;
+    businessName = businessName.replace(/\s/g, '-');
+    const sheetName: string = moment().format('DD-MM-YYYY-hh-mm-ss');
+    const fileName: string = `${businessName}-${sheetName}.${exportDto.format}`;
 
     return {
-      data: await this.exportToFile(exportDto, fileName, totalCount, businessName),
+      data: await this.exportToFile(exportDto, fileName, totalCount, sheetName),
       fileName,
     };
   }
@@ -187,7 +188,7 @@ export class ExporterService {
     exportDto: ExportQueryDto,
     fileName: string,
     totalCount: number,
-    fileNamePrefix: string,
+    sheetName: string,
   ): Promise<any> {
     let exportedCount: number = 0;
     const transactions: TransactionModel[] = [];
@@ -220,7 +221,7 @@ export class ExporterService {
         return this.exportCSV(transactions, columns, maxItemsCount);
       }
       case ExportFormatEnum.xlsx: {
-        return this.exportXLSX(transactions, fileName, fileNamePrefix, columns, maxItemsCount);
+        return this.exportXLSX(transactions, fileName, sheetName, columns, maxItemsCount);
       }
       case ExportFormatEnum.pdf: {
         return this.exportPDF(transactions, columns, maxItemsCount);
