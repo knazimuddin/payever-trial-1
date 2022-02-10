@@ -156,7 +156,7 @@ TransactionSchema.virtual('available_refund_items').get(function (): Transaction
       refundItems.push({
         count: availableCount,
         identifier: item.identifier,
-        item_uuid: item.uuid,
+        item_uuid: item.uuid ? item.uuid : item._id,
       });
     }
   });
