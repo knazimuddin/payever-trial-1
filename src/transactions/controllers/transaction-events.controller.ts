@@ -58,7 +58,11 @@ export class TransactionEventsController {
       || (transaction.status === PaymentStatusesEnum.Cancelled)) {
       await this.statisticsService.processRefundedTransactionAfterPaid(transaction.uuid, transaction);
     }
+
+    console.log('PaymentUpdated transaction', transaction.refunded_items);
     const updated: TransactionModel = await this.transactionsService.updateByUuid(transaction.uuid, transaction);
+    console.log('PaymentUpdated updated', updated.refunded_items);
+
     this.logger.log({ text: 'PAYMENT.UPDATE: Updated transaction', transaction: updated.toObject() });
   }
 
