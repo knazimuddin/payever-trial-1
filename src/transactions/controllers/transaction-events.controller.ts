@@ -48,6 +48,7 @@ export class TransactionEventsController {
     const checkoutTransaction: CheckoutTransactionInterface = data.payment;
     const transaction: TransactionPackedDetailsInterface =
       TransactionConverter.fromCheckoutTransaction(checkoutTransaction);
+    console.log('PaymentUpdated checkoutTransaction', transaction.refunded_items);
 
     this.logger.log({ text: 'PAYMENT.UPDATE: Prepared transaction', transaction });
     await this.statisticsService.processAcceptedTransaction(transaction.uuid, transaction);

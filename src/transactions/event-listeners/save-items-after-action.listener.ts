@@ -39,7 +39,7 @@ export class SaveItemsAfterActionListener {
         await this.transactionsService.saveRefundItems(transaction, actionPayload.fields.payment_items);
         break;
       case PaymentActionsEnum.ShippingGoods:
-        await this.transactionsService.saveCaptureItems(transaction, actionPayload.fields.payment_items);
+        //await this.transactionsService.saveCaptureItems(transaction, actionPayload.fields.payment_items);
         break;
     }
   }
