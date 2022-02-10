@@ -62,6 +62,8 @@ export class TransactionActionService {
         }
       }
 
+      console.log('updatedActionPayload', updatedActionPayload);
+
       await actionCallerService.runAction(unpackedTransaction, action, updatedActionPayload);
     } catch (e) {
       this.logger.log(
