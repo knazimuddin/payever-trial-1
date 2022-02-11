@@ -21,18 +21,15 @@ export class TransactionDto implements CheckoutTransactionInterface {
   @IsDefined()
   public uuid: string;
 
-  @Expose()
   @IsOptional()
   @ValidateNested()
   @Type(() => AddressDto)
   public address?: AddressDto;
 
-  @Expose()
   @IsString()
   @IsOptional()
   public api_call_id?: string;
 
-  @Expose()
   @IsOptional()
   @ValidateNested()
   @Type(() => TransactionBusinessDto)
@@ -105,13 +102,11 @@ export class TransactionDto implements CheckoutTransactionInterface {
   public fee_accepted: boolean;
 
   @Expose()
-  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => TransactionHistoryItemDto)
   public history: TransactionHistoryItemDto[];
 
   @Expose()
-  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => TransactionCartItemDto)
   public items: TransactionCartItemDto[];
@@ -140,10 +135,9 @@ export class TransactionDto implements CheckoutTransactionInterface {
   @IsString()
   public reference: string;
 
-  @Expose()
   @IsString({ each: true })
   @IsOptional()
-  public santander_applications: string[];
+  public santander_applications?: string[];
 
   @Expose()
   @ValidateNested()

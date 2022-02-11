@@ -1,3 +1,4 @@
+@payment-flow
 Feature: Full real payment flow
   Scenario: Payment flow from creation to checkout and transaction
     Given I publish in RabbitMQ channel "async_events_transactions_micro" message with json:
@@ -23,7 +24,7 @@ Feature: Full real payment flow
           "currency":"EUR",
           "channel_set_uuid":"42debf61-e648-48cd-a1bb-5f7155ad9670",
           "step":"payment_step.initialize",
-          "state":"IN PROGRESS",
+          "state":"IN_PROGRESS",
           "origin":"web",
           "express":false,
           "extra":[]
@@ -54,7 +55,7 @@ Feature: Full real payment flow
           "currency":"EUR",
           "channel_set_uuid":"42debf61-e648-48cd-a1bb-5f7155ad9670",
           "step":"payment_step.initialize",
-          "state":"IN PROGRESS",
+          "state":"IN_PROGRESS",
           "origin":"restapi.v2",
           "express":false,
           "x_frame_host":"https:\/\/checkout.test.devpayever.com",
@@ -87,7 +88,7 @@ Feature: Full real payment flow
           "reference":"diusfhiuwehfui",
           "channel_set_uuid":"42debf61-e648-48cd-a1bb-5f7155ad9670",
           "step":"payment_step.initialize",
-          "state":"IN PROGRESS",
+          "state":"IN_PROGRESS",
           "origin":"restapi.v2",
           "express":false,
           "x_frame_host":"https:\/\/checkout.test.devpayever.com",
@@ -120,7 +121,7 @@ Feature: Full real payment flow
           "reference":"diusfhiuwehfui",
           "channel_set_uuid":"42debf61-e648-48cd-a1bb-5f7155ad9670",
           "step":"payment_step.initialize",
-          "state":"IN PROGRESS",
+          "state":"IN_PROGRESS",
           "origin":"restapi.v2",
           "express":false,
           "x_frame_host":"https:\/\/checkout.test.devpayever.com",
@@ -160,7 +161,7 @@ Feature: Full real payment flow
           "street":"Am Strandkai",
           "channel_set_uuid":"42debf61-e648-48cd-a1bb-5f7155ad9670",
           "step":"payment_step.initialize",
-          "state":"IN PROGRESS",
+          "state":"IN_PROGRESS",
           "origin":"restapi.v2",
           "express":false,
           "x_frame_host":"https:\/\/checkout.test.devpayever.com",
@@ -188,6 +189,7 @@ Feature: Full real payment flow
           "uuid":"f61e09b6-61ca-426b-8ee6-e8ce3118e932",
           "status":"STATUS_NEW",
           "business":{
+            "id":"504dbe56-a67f-4e92-9470-477e88b12bae",
             "uuid":"504dbe56-a67f-4e92-9470-477e88b12bae",
             "slug":"504dbe56-a67f-4e92-9470-477e88b12bae",
             "company_name":"testing widgets 1",
@@ -254,12 +256,58 @@ Feature: Full real payment flow
       "payload":{
         "flow":{
           "id":"a6a85f9d44fb95f83912521016fc34fe",
+          "api_call_id": "test_api_call_id_12345",
+          "uuid":"f61e09b6-61ca-426b-8ee6-e8ce3118e932",
+          "business":{
+            "id":"504dbe56-a67f-4e92-9470-477e88b12bae",
+            "uuid":"504dbe56-a67f-4e92-9470-477e88b12bae",
+            "slug":"504dbe56-a67f-4e92-9470-477e88b12bae",
+            "company_name":"testing widgets 1",
+            "company_email":"testingplugins@gmail.com"
+          },
+          "address":{
+            "uuid":"df036ec4-8ab1-4870-bdd2-7f732ec5752a",
+            "salutation":"SALUTATION_MR",
+            "first_name":"asdasd",
+            "last_name":"asdsad",
+            "email":"ewfowefioweuh@gmail.com",
+            "country":"DE",
+            "country_name":"Germany",
+            "city":"Hamburg",
+            "zip_code":"20457",
+            "street":"Am Strandkai"
+          },
+          "currency":"EUR",
+          "payment_type":"stripe_directdebit",
+          "customer_name":"asdasd asdsad",
+          "customer_email":"ewfowefioweuh@gmail.com",
+          "channel":"link",
           "amount":650,
+          "total":650,
+          "total_base_currency":650,
+          "items":[],
+          "payment_details":[],
+          "business_option_id":34196,
+          "reference":"diusfhiuwehfui",
+          "color_state":"yellow",
+          "history":[],
+          "payment_flow":{
+            "id":"a6a85f9d44fb95f83912521016fc34fe"
+          },
+          "channel_set":{
+            "uuid":"42debf61-e648-48cd-a1bb-5f7155ad9670",
+            "original_id":"42debf61-e648-48cd-a1bb-5f7155ad9670",
+            "channel_type":"link",
+            "business_uuid":"504dbe56-a67f-4e92-9470-477e88b12bae"
+          },
+          "user_uuid":"72b87c60-bd12-4413-ab44-6b182d9e7948",
+          "delivery_fee":0,
+          "payment_fee":19.1,
+          "down_payment":0,
+          "shipping_method_name":"",
           "shipping_fee":0,
           "shipping_method_code":"",
-          "shipping_method_name":"",
           "tax_value":0,
-          "currency":"EUR",
           "reference":"diusfhiuwehfui",
           "salutation":"SALUTATION_MR",
           "first_name":"asdasd",
@@ -270,7 +318,7 @@ Feature: Full real payment flow
           "street":"Am Strandkai",
           "channel_set_uuid":"42debf61-e648-48cd-a1bb-5f7155ad9670",
           "step":"payment_step.initialize",
-          "state":"IN PROGRESS",
+          "state":"IN_PROGRESS",
           "origin":"restapi.v2",
           "express":false,
           "x_frame_host":"https:\/\/checkout.test.devpayever.com",
@@ -340,6 +388,7 @@ Feature: Full real payment flow
           "uuid":"f61e09b6-61ca-426b-8ee6-e8ce3118e932",
           "status":"STATUS_IN_PROCESS",
           "business":{
+            "id":"504dbe56-a67f-4e92-9470-477e88b12bae",
             "uuid":"504dbe56-a67f-4e92-9470-477e88b12bae",
             "slug":"504dbe56-a67f-4e92-9470-477e88b12bae",
             "company_name":"testing widgets 1",
@@ -480,6 +529,7 @@ Feature: Full real payment flow
           "uuid":"f61e09b6-61ca-426b-8ee6-e8ce3118e932",
           "status":"STATUS_ACCEPTED",
           "business":{
+            "id":"504dbe56-a67f-4e92-9470-477e88b12bae",
             "uuid":"504dbe56-a67f-4e92-9470-477e88b12bae",
             "slug":"504dbe56-a67f-4e92-9470-477e88b12bae",
             "company_name":"testing widgets 1",
@@ -582,20 +632,6 @@ Feature: Full real payment flow
             "transactionId": "f61e09b6-61ca-426b-8ee6-e8ce3118e932"
           }
         }
-      },
-      {
-        "name": "transactions.event.payment.add",
-        "payload": {
-          "id": "f61e09b6-61ca-426b-8ee6-e8ce3118e932",
-          "amount": 650,
-          "items": [],
-          "channel_set": {
-            "id": "42debf61-e648-48cd-a1bb-5f7155ad9670"
-          },
-          "business": {
-            "id": "504dbe56-a67f-4e92-9470-477e88b12bae"
-          }
-        }
       }
     ]
     """
@@ -665,6 +701,7 @@ Feature: Full real payment flow
       "original_id": "8ecc3fbbf663c2908503cedeaa61a79a"
     }
     """
+    Then print storage key "createdTransaction"
     Then model "Transaction" with id "{{createdTransaction._id}}" should contain json:
     """
     {
