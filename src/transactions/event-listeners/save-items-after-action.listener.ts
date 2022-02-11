@@ -33,11 +33,14 @@ export class SaveItemsAfterActionListener {
       return;
     }
 
+    // disable update items, transaction updated on PAYMENT.UPDATE
     switch (action) {
       case PaymentActionsEnum.Refund:
+        // tslint:disable-next-line:no-commented-code
         await this.transactionsService.saveRefundItems(transaction, actionPayload.fields.payment_items);
         break;
       case PaymentActionsEnum.ShippingGoods:
+        // tslint:disable-next-line:no-commented-code
         await this.transactionsService.saveCaptureItems(transaction, actionPayload.fields.payment_items);
         break;
     }
