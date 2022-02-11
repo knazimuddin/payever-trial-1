@@ -301,9 +301,6 @@ export class TransactionsService {
     transaction: TransactionModel,
     refundItems: TransactionCartItemInterface[],
   ): Promise<void> {
-    console.log('saveRefundItems', refundItems);
-    console.log('transaction.refunded_items', transaction.refunded_items);
-
     refundItems.forEach((refundItem: TransactionCartItemInterface) => {
       const existingRefundItem: TransactionCartItemInterface =
         transaction.refunded_items.find((transactionItem: TransactionCartItemInterface) => {

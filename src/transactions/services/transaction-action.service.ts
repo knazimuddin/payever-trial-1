@@ -62,8 +62,6 @@ export class TransactionActionService {
         }
       }
 
-      console.log('updatedActionPayload', updatedActionPayload);
-
       await actionCallerService.runAction(unpackedTransaction, action, updatedActionPayload);
     } catch (e) {
       this.logger.log(
@@ -79,7 +77,6 @@ export class TransactionActionService {
 
     transaction = await this.transactionsService.findModelByUuid(unpackedTransaction.uuid);
 
-    console.log('transaction.refunded_items findModelByUuid', transaction.refunded_items)
     await this.eventDispatcher.dispatch(
       PaymentActionEventEnum.PaymentActionAfter,
       transaction,

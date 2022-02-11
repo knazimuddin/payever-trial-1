@@ -18,7 +18,6 @@ export class SaveItemsAfterActionListener {
     actionPayload: ActionPayloadDto,
     action: string,
   ): Promise<void> {
-    console.log('PaymentActionEventEnum.PaymentActionAfter', action, actionPayload)
     const allowedActions: string[] = [
       PaymentActionsEnum.Refund,
       PaymentActionsEnum.ShippingGoods,

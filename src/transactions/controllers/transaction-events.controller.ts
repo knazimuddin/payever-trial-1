@@ -46,12 +46,10 @@ export class TransactionEventsController {
   public async onTransactionUpdateEvent(data: any): Promise<void> {
     this.logger.log({ text: 'PAYMENT.UPDATE', data });
     const transactionChangedDto: TransactionChangedDto = plainToClass(TransactionChangedDto, data);
-    console.log('PaymentUpdated transactionChangedDto', transactionChangedDto);
 
     const checkoutTransaction: CheckoutTransactionInterface = transactionChangedDto.payment;
     const transaction: TransactionPackedDetailsInterface =
       TransactionConverter.fromCheckoutTransaction(checkoutTransaction);
-    console.log('PaymentUpdated checkoutTransaction', transaction.refunded_items);
 
     this.logger.log({ text: 'PAYMENT.UPDATE: Prepared transaction', transaction });
     await this.statisticsService.processAcceptedTransaction(transaction.uuid, transaction);
@@ -63,9 +61,7 @@ export class TransactionEventsController {
       await this.statisticsService.processRefundedTransactionAfterPaid(transaction.uuid, transaction);
     }
 
-    console.log('PaymentUpdated transaction', transaction.refunded_items);
     const updated: TransactionModel = await this.transactionsService.updateByUuid(transaction.uuid, transaction);
-    console.log('PaymentUpdated updated', updated.refunded_items);
 
     this.logger.log({ text: 'PAYMENT.UPDATE: Updated transaction', transaction: updated.toObject() });
   }

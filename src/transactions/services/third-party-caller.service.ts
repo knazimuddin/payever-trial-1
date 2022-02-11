@@ -90,7 +90,6 @@ export class ThirdPartyCallerService implements ActionCallerInterface {
 
     const result: any = await this.runThirdPartyAction(transaction, action, actionPayload);
 
-    console.log('result', result)
     await this.updateTransactionFromThirdPartyResult(transaction, result);
   }
 
