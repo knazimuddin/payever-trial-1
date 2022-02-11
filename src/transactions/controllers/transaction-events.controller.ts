@@ -9,6 +9,7 @@ import { TransactionModel } from '../models';
 import { PaymentMailEventProducer } from '../producer';
 import { StatisticsService, TransactionsExampleService, TransactionsService } from '../services';
 import { PaymentStatusesEnum } from '../enum';
+import { plainToClass } from 'class-transformer';
 
 @Controller()
 export class TransactionEventsController {
@@ -42,10 +43,11 @@ export class TransactionEventsController {
     channel: RabbitChannels.Transactions,
     name: RabbitRoutingKeys.PaymentUpdated,
   })
-  public async onTransactionUpdateEvent(data: TransactionChangedDto): Promise<void> {
+  public async onTransactionUpdateEvent(data: any): Promise<void> {
     this.logger.log({ text: 'PAYMENT.UPDATE', data });
+    const transactionChangedDto: TransactionChangedDto = plainToClass(TransactionChangedDto, data);
 
-    const checkoutTransaction: CheckoutTransactionInterface = data.payment;
+    const checkoutTransaction: CheckoutTransactionInterface = transactionChangedDto.payment;
     const transaction: TransactionPackedDetailsInterface =
       TransactionConverter.fromCheckoutTransaction(checkoutTransaction);
 
@@ -58,7 +60,9 @@ export class TransactionEventsController {
       || (transaction.status === PaymentStatusesEnum.Cancelled)) {
       await this.statisticsService.processRefundedTransactionAfterPaid(transaction.uuid, transaction);
     }
+
     const updated: TransactionModel = await this.transactionsService.updateByUuid(transaction.uuid, transaction);
+
     this.logger.log({ text: 'PAYMENT.UPDATE: Updated transaction', transaction: updated.toObject() });
   }
 
