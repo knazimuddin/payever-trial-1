@@ -34,6 +34,7 @@ export class SaveItemsAfterActionListener {
     }
 
     // disable update items, transaction updated on PAYMENT.UPDATE
+    // creates double items quantity
     switch (action) {
       case PaymentActionsEnum.Refund:
         // tslint:disable-next-line:no-commented-code
