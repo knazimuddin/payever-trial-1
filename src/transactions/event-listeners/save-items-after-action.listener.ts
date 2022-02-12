@@ -33,12 +33,16 @@ export class SaveItemsAfterActionListener {
       return;
     }
 
+    // disable update items, transaction updated on PAYMENT.UPDATE
+    // creates double items quantity
     switch (action) {
       case PaymentActionsEnum.Refund:
-        await this.transactionsService.saveRefundItems(transaction, actionPayload.fields.payment_items);
+        // tslint:disable-next-line:no-commented-code
+        // await this.transactionsService.saveRefundItems(transaction, actionPayload.fields.payment_items);
         break;
       case PaymentActionsEnum.ShippingGoods:
-        await this.transactionsService.saveCaptureItems(transaction, actionPayload.fields.payment_items);
+        // tslint:disable-next-line:no-commented-code
+        // await this.transactionsService.saveCaptureItems(transaction, actionPayload.fields.payment_items);
         break;
     }
   }
