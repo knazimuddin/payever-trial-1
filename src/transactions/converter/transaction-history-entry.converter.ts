@@ -18,6 +18,7 @@ export class TransactionHistoryEntryConverter {
       created_at: createdAt,
       payment_status: data.payment_status,
       reason: data.reason,
+      reference: data.reference,
     };
 
     if (data.saved_data) {
