@@ -26,6 +26,7 @@ export class SendHistoryEventAfterActionListener {
         amount: this.getAmountFromPayload(transaction, action, actionPayload),
         payment_status: transaction.status,
         reason: this.getReasonFromPayload(actionPayload),
+        reference: this.getReferenceFromPayload(actionPayload),
       },
       payment: {
         id: transaction.original_id,
@@ -85,6 +86,12 @@ export class SendHistoryEventAfterActionListener {
     }
 
     return amount ? amount : transaction.total;
+  }
+
+  private getReferenceFromPayload(
+    actionPayload: ActionPayloadDto,
+  ): string {
+    return actionPayload.fields?.reference ? actionPayload.fields.reference : null;
   }
 
   private getReasonFromPayload(actionPayload: ActionPayloadDto): string {

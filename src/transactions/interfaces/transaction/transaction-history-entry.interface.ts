@@ -17,4 +17,5 @@ export interface TransactionHistoryEntryInterface {
     template_name: string,
   };
   user?: HistoryEventUserInterface;
+  reference?: string;
 }

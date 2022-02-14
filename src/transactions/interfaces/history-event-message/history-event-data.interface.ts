@@ -15,4 +15,5 @@ export interface HistoryEventDataInterface {
     template_name: string;
   };
   user?: HistoryEventUserInterface;
+  reference?: string;
 }

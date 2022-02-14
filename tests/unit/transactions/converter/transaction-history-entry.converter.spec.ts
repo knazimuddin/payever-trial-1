@@ -1,3 +1,6 @@
+/* tslint:disable:no-big-function */
+/* tslint:disable:object-literal-sort-keys */
+/* tslint:disable:no-duplicate-string */
 import 'mocha';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
@@ -16,6 +19,7 @@ describe('TransactionHistoryEntryConverter', () => {
     amount: 12,
     payment_status: 'ACCEPTED',
     reason: 'reason_1',
+    reference: 'test_ref',
     saved_data: [
       {
         type: 'type_1',
@@ -34,7 +38,7 @@ describe('TransactionHistoryEntryConverter', () => {
         identifier: 'test_id',
       },
     ],
-  }
+  };
 
   const historyEventDataDifferent: HistoryEventDataInterface = {
     amount: 12,
@@ -57,7 +61,7 @@ describe('TransactionHistoryEntryConverter', () => {
         payment_item_id: '86b62cc1-cf75-4065-ac91-b1df6ccc6158',
       },
     ],
-  }
+  };
 
   const transaction: TransactionModel = {
     items: [
@@ -87,6 +91,7 @@ describe('TransactionHistoryEntryConverter', () => {
             created_at: createdAt,
             payment_status: 'ACCEPTED',
             reason: 'reason_1',
+            reference: 'test_ref',
             upload_items: [
               {
                 type: 'type_1',
@@ -99,7 +104,7 @@ describe('TransactionHistoryEntryConverter', () => {
               template_name: 'template_name_1',
             },
           },
-        )
+        );
     });
 
     it('should complete message from history action', () => {
@@ -109,8 +114,9 @@ describe('TransactionHistoryEntryConverter', () => {
         amount: 12,
         payment_status: 'ACCEPTED',
         reason: 'reason_1',
+        reference: 'test_ref',
         items_restocked: false,
-      }
+      };
       expect(TransactionHistoryEntryConverter.fromHistoryActionCompletedMessage(type, createdAt, data))
         .to.deep.equal(
           {
@@ -119,8 +125,9 @@ describe('TransactionHistoryEntryConverter', () => {
             created_at: createdAt,
             payment_status: 'ACCEPTED',
             reason: 'reason_1',
+            reference: 'test_ref',
           },
-        )
+        );
     });
   });
 
@@ -159,7 +166,7 @@ describe('TransactionHistoryEntryConverter', () => {
         payment_status: 'ACCEPTED',
         reason: 'reason_1',
         items_restocked: false,
-      }
+      };
 
       expect(TransactionHistoryEntryConverter.fromHistoryRefundCompletedMessage(
         transaction,
@@ -214,7 +221,7 @@ describe('TransactionHistoryEntryConverter', () => {
         reason: 'reason_1',
         items_restocked: true,
         params: [],
-      }
+      };
       expect(TransactionHistoryEntryConverter.fromCheckoutTransactionHistoryItem(
         type,
         createdAt,
@@ -227,9 +234,9 @@ describe('TransactionHistoryEntryConverter', () => {
           payment_status: 'REFUNDED',
           reason: 'reason_1',
           is_restock_items: true,
-          params: {},
+          params: { },
         },
-      )
+      );
     });
 
     it('should return transactionHistoryentry from checkoutTransactionHistory', () => {
@@ -245,7 +252,7 @@ describe('TransactionHistoryEntryConverter', () => {
         params: {
           value: 'val',
         },
-      }
+      };
       expect(TransactionHistoryEntryConverter.fromCheckoutTransactionHistoryItem(
         type,
         createdAt,
@@ -261,7 +268,7 @@ describe('TransactionHistoryEntryConverter', () => {
             value: 'val',
           },
         },
-      )
+      );
     });
 
     it('should return transactionHistoryentry from checkoutTransactionHistory without params', () => {
@@ -274,7 +281,7 @@ describe('TransactionHistoryEntryConverter', () => {
         payment_status: 'REFUNDED',
         reason: 'reason_1',
         items_restocked: true,
-      }
+      };
       expect(TransactionHistoryEntryConverter.fromCheckoutTransactionHistoryItem(
         type,
         createdAt,
@@ -288,7 +295,7 @@ describe('TransactionHistoryEntryConverter', () => {
           reason: 'reason_1',
           is_restock_items: true,
         },
-      )
+      );
     });
   });
 });
