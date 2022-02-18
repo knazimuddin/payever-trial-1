@@ -54,7 +54,7 @@ export class FolderDocumentsTransactionsEsBusinessUpdateCommand {
       const transactions: TransactionModel[] = await this.getWithLimit(processed, limit, criteria);
       Logger.log(`Starting next ${transactions.length} transactions.`);
       
-      const tasks: any = transactions.map(transaction => this.folderDocumentsService.prepareIndexedFields(transaction));
+      const tasks: any = transactions.map((transaction: TransactionModel) => this.folderDocumentsService.prepareIndexedFields(transaction));
       
       const prepared: any = await Promise.all(tasks);
 
