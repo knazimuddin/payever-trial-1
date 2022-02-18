@@ -14,7 +14,7 @@ export class NewIndexTransactionsEsBusinessUpdateCommand {
   ) { }
 
   @Command({
-    command: 'new:index:transactions:es:business-update',
+    command: 'new-index:transactions:es:business-update',
     describe: 'Update transactions ElasticSearch index for business.',
   })
   public async update(
