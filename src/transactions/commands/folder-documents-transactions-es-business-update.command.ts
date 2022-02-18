@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ElasticSearchClient } from '@pe/elastic-kit';
 import { Command, Positional } from '@pe/nest-kit';
+import { FolderDocumentsService } from '@pe/folders-plugin';
 import { Model } from 'mongoose';
 import { NewElasticTransactionEnum } from '../enum';
 import { TransactionModel } from '../models';
@@ -10,6 +11,7 @@ import { TransactionModel } from '../models';
 export class FolderDocumentsTransactionsEsBusinessUpdateCommand {
   constructor(
     @InjectModel('Transaction') private readonly transactionsModel: Model<TransactionModel>,
+    private readonly folderDocumentsService: FolderDocumentsService,
     private readonly elasticSearchClient: ElasticSearchClient,
   ) { }
 
@@ -54,7 +56,7 @@ export class FolderDocumentsTransactionsEsBusinessUpdateCommand {
       const prepared: any = [];
 
       for (const transaction of transactions) {
-        prepared.push(transaction.toObject());
+        prepared.push(await this.folderDocumentsService.prepareIndexedFields(transaction));
       }
 
       await this.elasticSearchClient.bulkIndex(
