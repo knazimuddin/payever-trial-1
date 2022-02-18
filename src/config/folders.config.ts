@@ -1,4 +1,5 @@
 import { FoldersPluginOptionsInterface } from '@pe/folders-plugin';
+import { NewElasticTransactionEnum } from '../transactions/enum';
 import { environment } from '../environments';
 import { TransactionSchemaName, TransactionSchema } from '../transactions/schemas';
 import { FiltersConfig } from './filters-config';
@@ -20,8 +21,8 @@ export const FoldersConfig: FoldersPluginOptionsInterface<any> = {
     index: {
       businessIdField: 'business_uuid',
       documentIdField: 'uuid',
-      elasticIndex: 'folder_transactions',
-      type: 'folder_transaction',
+      elasticIndex: NewElasticTransactionEnum.index,
+      type: NewElasticTransactionEnum.type,
       userIdField: 'user_uuid',
     },
 

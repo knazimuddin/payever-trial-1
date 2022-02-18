@@ -14,6 +14,7 @@ import { environment } from '../environments';
 import {
   BpoFixCommand,
   ExportTransactionToWidgetCommand,
+  NewIndexTransactionsEsBusinessUpdateCommand,
   TransactionsEsBusinessCheckCommand,
   TransactionsEsBusinessUpdateCommand,
   TransactionsEsCompareCommand,
@@ -183,6 +184,7 @@ import { ExportMonthlyBusinessTransactionCronService } from '../cron/export-mont
     TransactionHistoryService,
     TransactionsEsBusinessCheckCommand,
     TransactionsEsBusinessUpdateCommand,
+    NewIndexTransactionsEsBusinessUpdateCommand,
     TransactionsEsCompareCommand,
     TransactionsEsExportCommand,
     TransactionsEsFixDiffCommand,
