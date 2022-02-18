@@ -9,4 +9,4 @@ export * from './transactions-export-for-widgets-command.service';
 export * from './transactions-export-for-blank-migrate.command';
 export * from './trigger-payex-capture.command';
 export * from './export-transaction-to-widget.command';
-export * from './new-index-transactions-es-business-update.command';
+export * from './folder-documents-transactions-es-business-update.command';
