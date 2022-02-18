@@ -53,11 +53,10 @@ export class FolderDocumentsTransactionsEsBusinessUpdateCommand {
     while (processed < total) {
       const transactions: TransactionModel[] = await this.getWithLimit(processed, limit, criteria);
       Logger.log(`Starting next ${transactions.length} transactions.`);
-      const prepared: any = [];
-
-      for (const transaction of transactions) {
-        prepared.push(await this.folderDocumentsService.prepareIndexedFields(transaction));
-      }
+      
+      const tasks: any = transactions.map(transaction => this.folderDocumentsService.prepareIndexedFields(transaction));
+      
+      const prepared: any = await Promise.all(tasks);
 
       await this.elasticSearchClient.bulkIndex(
         NewElasticTransactionEnum.index,
