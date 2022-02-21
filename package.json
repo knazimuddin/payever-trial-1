@@ -24,6 +24,7 @@
     "ws:prod": "node dist/src/ws.js"
   },
   "dependencies": {
+    "@nestjs/axios": "^0.0.6",
     "@nestjs/platform-socket.io": "^7.6.17",
     "@nestjs/platform-ws": "7.6.5",
     "@nestjs/websockets": "7.6.5",

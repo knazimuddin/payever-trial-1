@@ -1,4 +1,5 @@
 import { HttpModule, Module } from '@nestjs/common';
+import { HttpModule as AxiosHttpModule } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CommonModelsNamesEnum, CommonSdkModule } from '@pe/common-sdk';
@@ -121,6 +122,7 @@ import { ExportMonthlyBusinessTransactionCronService } from '../cron/export-mont
   imports: [
     ConfigModule,
     HttpModule,
+    AxiosHttpModule,
     IntercomModule,
     BusinessModule.forRoot(
       {
