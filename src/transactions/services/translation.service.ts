@@ -21,7 +21,6 @@ export class TranslationService {
 
   private async convert(keys: string[], langCode: string): Promise<object> {
     const url = this.translationUrl.replace('{{lang}}', langCode);
-    let result = {};
     let data = await this.httpService.get(url);
 
     return data.pipe(
@@ -30,7 +29,7 @@ export class TranslationService {
           const result = {};
 
           if (!apiData) {
-            this.logger.warn(`keys is empty`);
+            this.logger.warn(`Response keys is empty`);
             return result;
           };
 
@@ -43,32 +42,9 @@ export class TranslationService {
       catchError(err => {
           this.logger.error({
               error: err.response.data,
-              message: 'Translate api failed',
+              message: 'Translate api call failed',
               url: url,
           });
       })).toPromise();
   }
-
-
-  // private async convert(keys: string[], langCode: string): Promise<string[]> {
-  //   const url = `https://payeverstaging.azureedge.net/translations/frontend-transactions-app-${langCode}.json`;
-  //   let result: string[] = [];
-  //   return new Promise<string[]>((resolve, reject) => {
-  //     this.httpService.get(url).subscribe(response => {
-  //       if(response.status == 200){
-  //         let data = response.data;
-  //         for (let index = 0; index < keys.length; index++) {
-  //           const key = keys[index];
-  //           if(data[key])
-  //             result.push(data[key]);
-  //         }
-  //         resolve(result);
-  //       }
-  //       else
-  //         reject(response.statusText);
-  //     });
-  //   });
-
-  // }
-
 }
