@@ -1,3 +1,5 @@
+import 'mocha';
+
 import { TranslationService } from "../../../../src/transactions/services/translation.service";
 import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
