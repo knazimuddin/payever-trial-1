@@ -15,19 +15,19 @@ export class TranslationService {
       this.translationUrl = this.configService.get<string>("MICRO_Translation_Service");
     }
 
-  public async translate(keys: string[], langCode: string): Promise<string[]> {
+  public async translate(keys: string[], langCode: string): Promise<object> {
     return this.convert(keys, langCode);
   }
 
-  private async convert(keys: string[], langCode: string): Promise<string[]> {
+  private async convert(keys: string[], langCode: string): Promise<object> {
     const url = this.translationUrl.replace('{{lang}}', langCode);
-    let result = [];
+    let result = {};
     let data = await this.httpService.get(url);
 
     return data.pipe(
       map(response => {
           const apiData = response.data;
-          const result = [];
+          const result = {};
 
           if (!apiData) {
             this.logger.warn(`keys is empty`);

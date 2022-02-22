@@ -54,7 +54,7 @@ describe("TranslationService", () => {
     describe("translate()", () => {
         it("return array of translation", async () => {
 
-            const getResponse: [] = ["actions.back": "Back", "actions.cancel": "Cancel" ];
+            const getResponse: [] = {"actions.back": "Back", "actions.cancel": "Cancel" };
 
             const response: Observable<AxiosResponse<any>> = {
                 pipe: (fn): any => { return fn() },
