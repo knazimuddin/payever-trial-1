@@ -1,13 +1,7 @@
-import { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { IntercomService } from '@pe/nest-kit';
 import { environment } from '../../environments';
-import { Observable } from 'rxjs'
-import { map, catchError } from 'rxjs/operators'
 import { TranslatedObjectInterface, TranslatedPairInterface } from '../interfaces';
 import { get } from 'https'
-import { NIL } from 'uuid';
-import { keyBy } from 'lodash';
 
 @Injectable()
 export class TranslationService {
