@@ -67,6 +67,9 @@ export class SendHistoryEventAfterActionListener {
           ? parseFloat(actionPayload.fields.capture_funds.amount)
           : null;
         break;
+      case PaymentActionsEnum.Cancel:
+        amount = actionPayload.fields?.payment_cancel?.amount ? actionPayload.fields.payment_cancel.amount : null;
+        break;
     }
 
     if (amount) {

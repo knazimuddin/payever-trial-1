@@ -57,10 +57,18 @@ Feature: Transaction details for business
            "original_id": "440ec879-7f02-48d4-9ffb-77adfaf79a06",
            "uuid": "ad738281-f9f0-4db7-a4f6-670b0dff5327",
            "amount": 50,
-           "amount_refunded": 0,
+           "amount_cancel_rest": 50,
+           "amount_canceled": 0,
+           "amount_capture_rest": 50,
+           "amount_capture_rest_with_partial_cancel": 50,
+           "amount_captured": 0,
+           "amount_left": 50,
            "amount_refund_rest": 50,
+           "amount_refund_rest_with_partial_capture": 0,
+           "amount_refunded": 0,
            "currency": "EUR",
-           "total": 50
+           "total": 50,
+           "total_left": 50
          },
          "billing_address": {
            "salutation": "SALUTATION_MR",

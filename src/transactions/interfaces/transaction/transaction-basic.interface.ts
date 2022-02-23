@@ -11,8 +11,12 @@ export interface TransactionBasicInterface extends SantanderApplicationAwareInte
   action_running: boolean;
   amount: number;
   amount_capture_rest?: number;
+  amount_capture_rest_with_partial_cancel?: number;
   amount_captured?: number;
+  amount_canceled?: number;
+  amount_cancel_rest?: number;
   amount_refunded?: number;
+  amount_refund_rest_with_partial_capture?: number;
   amount_left?: number;
   /**
    * @deprecated use amount_left instead of amount_refund_rest
