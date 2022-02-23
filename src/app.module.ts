@@ -15,6 +15,7 @@ import { StatusModule } from '@pe/nest-kit/modules/status';
 import { environment } from './environments';
 import { IntegrationModule } from './integration';
 import { TransactionsModule } from './transactions/transactions.module';
+import { TranslationModule } from './translation/translation.module'
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { TransactionsModule } from './transactions/transactions.module';
     IntegrationModule,
     TransactionsModule,
     CronModule,
+    TranslationModule
   ],
   providers: [
   ],

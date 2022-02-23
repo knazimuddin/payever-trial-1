@@ -20,6 +20,7 @@ export const environment: any = {
       serviceName: env.ELASTIC_APM_SERVICE_NAME,
     },
   },
+  frontendTranslationsUrl: env.FRONTEND_TRANSLATIONS_URL,
   appCors: env.APP_CORS === 'true',
   applicationName: env.APP_NAME,
   connectMicroUrlBase: env.MICRO_URL_CONNECT,
