@@ -37,6 +37,8 @@ export enum RabbitRoutingKeys {
   TransactionsPaymentRemoved = 'transactions.event.payment.removed',
   TransactionsMigrate = 'transactions.event.payment.migrate',
 
+  TransactionsPaymentExport = 'transactions.event.payment.export',
+
   InternalTransactionPaymentRefund = 'transactions.event.payment.refund.internal',
 
   ThirdPartyPaymentActionRequested = 'third-party.event.payment.action',
