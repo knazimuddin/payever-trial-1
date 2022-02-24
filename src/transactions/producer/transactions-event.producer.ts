@@ -147,6 +147,13 @@ export class TransactionEventProducer {
       transaction, null, RabbitRoutingKeys.InternalTransactionPaymentRefund, last_updated);
   }
 
+  public async produceTransactionExportEvent(
+    transaction: TransactionPackedDetailsInterface,
+  ): Promise<void> {
+    await this.produceTransactionUpdateEvent(
+      transaction, transaction.amount, RabbitRoutingKeys.TransactionsPaymentExport, null);
+  }
+
   private async send(eventName: string, payload: any): Promise<void> {
     await this.rabbitClient.send(
       {
@@ -191,4 +198,5 @@ export class TransactionEventProducer {
 
     await this.send(event, payload);
   }
+
 }
