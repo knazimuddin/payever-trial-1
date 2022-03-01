@@ -9,7 +9,7 @@ import { TransactionOutputInterface, TransactionUnpackedDetailsInterface } from 
 import { TransactionModel } from '../models';
 import { TransactionSchemaName } from '../schemas';
 import { ElasticSearchService, MongoSearchService, TransactionsService } from '../services';
-import { UserFilter } from '../tools';
+import { TransactionsFilter } from '../tools';
 import { ConfigService } from '@nestjs/config';
 
 @Controller('user')
@@ -37,7 +37,7 @@ export class UserController {
     @User() user: UserTokenInterface,
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
-    listDto.filters = UserFilter.apply(user?.id, listDto.filters);
+    listDto.filters = TransactionsFilter.applyUserUuidFilter(user?.id, listDto.filters);
     listDto.currency = this.defaultCurrency;
 
     return this.elasticSearchService.getResult(listDto);
@@ -49,7 +49,7 @@ export class UserController {
     @User() user: UserTokenInterface,
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
-    listDto.filters = UserFilter.apply(user?.id, listDto.filters);
+    listDto.filters = TransactionsFilter.applyUserUuidFilter(user?.id, listDto.filters);
     listDto.currency = this.defaultCurrency;
 
     return this.mongoSearchService.getResult(listDto);

@@ -36,7 +36,7 @@ import {
   TransactionsService,
   TransactionsInfoService,
 } from '../services';
-import { BusinessFilter } from '../tools';
+import { TransactionsFilter } from '../tools';
 import { PaymentActionsEnum } from '../enum';
 import { ActionItemInterface } from 'src/transactions/interfaces';
 
@@ -307,7 +307,7 @@ export class BusinessController {
     @Param('businessId') businessId: string,
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
-    listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
+    listDto.filters = TransactionsFilter.applyBusinessFilter(businessId, listDto.filters);
     const business: BusinessModel = await this.businessService
     .findOneById(businessId) as unknown as BusinessModel;
     listDto.currency = business ? business.currency : this.defaultCurrency;
@@ -323,7 +323,7 @@ export class BusinessController {
     @Param('businessId') businessId: string,
     @QueryDto() listDto: ListQueryDto,
   ): Promise<PagingResultDto> {
-    listDto.filters = BusinessFilter.apply(businessId, listDto.filters);
+    listDto.filters = TransactionsFilter.applyBusinessFilter(businessId, listDto.filters);
     const business: BusinessModel = await this.businessService
     .findOneById(businessId) as unknown as BusinessModel;
 

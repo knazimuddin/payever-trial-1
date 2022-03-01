@@ -1,9 +1,11 @@
+/* tslint:disable:no-big-function */
+/* tslint:disable:object-literal-sort-keys */
 import 'mocha';
 import * as chai from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 import * as sinonChai from 'sinon-chai';
 import { TransactionUnpackedDetailsInterface, ActionItemInterface } from '../../../../src/transactions/interfaces';
-import { TransactionOutputConverter } from '../../../../src/transactions/converter/transaction-output.converter';
+import { TransactionOutputConverter } from '../../../../src/transactions/converter';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -19,10 +21,14 @@ describe('TransactionOutputConverter', () => {
         action_running: true,
         amount: 123,
         amount_left: 789,
+        amount_canceled: 0,
+        amount_cancel_rest: 0,
         amount_capture_rest: 100,
+        amount_capture_rest_with_partial_cancel: 0,
         amount_captured: 23,
         amount_refunded: 456,
         amount_refund_rest: 789,
+        amount_refund_rest_with_partial_capture: 0,
         available_refund_items: [
           {
             count: 123,
@@ -64,10 +70,10 @@ describe('TransactionOutputConverter', () => {
         merchant_name: 'Merchant Mann',
         payment_fee: 123,
         payment_flow_id: '921fb499-6250-4773-9615-1e2d179af30a',
-        payment_details: {},
+        payment_details: { },
         place: 'Hamburg',
         reference: 'reference',
-        shipping_address: {},
+        shipping_address: { },
         shipping_category: 'category_1',
         shipping_method_name: 'dhl',
         shipping_option_name: 'dhl-option',
@@ -95,7 +101,7 @@ describe('TransactionOutputConverter', () => {
           enabled: true,
           partialAllowed: false,
         },
-      ]
+      ];
       expect(TransactionOutputConverter.convert(transaction, actions))
         .to.deep.eq({
           actions: [
@@ -110,11 +116,15 @@ describe('TransactionOutputConverter', () => {
             original_id: '6bceacfc-178e-4cc5-a91f-2104cf04c1a0',
             uuid: 'b4fd1c4d-d2b6-4484-be63-8f5d027d4585',
             amount: 123,
+            amount_canceled: 0,
+            amount_cancel_rest: 0,
             amount_capture_rest: 100,
+            amount_capture_rest_with_partial_cancel: 0,
             amount_captured: 23,
             amount_left: 789,
             amount_refunded: 456,
             amount_refund_rest: 789,
+            amount_refund_rest_with_partial_capture: 0,
             currency: 'EUR',
             total: 901,
             total_left: 456,
@@ -189,7 +199,7 @@ describe('TransactionOutputConverter', () => {
           },
           shipping: {
 
-            address: {},
+            address: { },
             category: 'category_1',
             delivery_fee: 345,
             method_name: 'dhl',
@@ -211,7 +221,7 @@ describe('TransactionOutputConverter', () => {
           user: {
             uuid: '4e75b65b-3f89-4c11-9fc8-a8b2a34fa86d',
           },
-        })
+        });
     });
   });
 });
