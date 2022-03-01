@@ -28,6 +28,38 @@ Feature: Transactions archive
       ]
     }
     """
+    And I mock Elasticsearch method "deleteByQuery" with:
+    """
+    {
+      "arguments": [
+        "folder_transactions",
+        {
+          "query": {
+            "match_phrase": {
+              "serviceEntityId": "{{transactionId}}"
+            }
+          }
+        }
+       ],
+      "result": {}
+    }
+    """
+    And I mock Elasticsearch method "deleteByQuery" with:
+    """
+    {
+      "arguments": [
+        "transactions",
+        {
+          "query": {
+            "match_phrase": {
+              "uuid": "{{transactionId}}"
+            }
+          }
+        }
+       ],
+      "result": {}
+    }
+    """
     And I use DB fixture "transactions-archive/transactions"
     When I send a POST request to "/api/business/{{businessId}}/transaction/{{transactionId}}/archive"
     Then print last response
@@ -39,6 +71,12 @@ Feature: Transactions archive
     }
     """
     And stored value "transaction" should contain json:
+    """
+    {
+      "uuid": "{{transactionId}}"
+    }
+    """
+    And model "Transaction" found by following JSON should not exist:
     """
     {
       "uuid": "{{transactionId}}"

@@ -34,7 +34,7 @@ export class TransactionActionService {
   ): Promise<void> {
     const archivedTransaction: TransactionsArchiveModel = await this.transactionsArchiveService.createOrUpdateById(transaction.business_uuid, transaction);
 
-    // TODO: to remove transaction
+    await this.transactionsService.removeByUuid(transaction.uuid);
   }
 
   public async doAction(
