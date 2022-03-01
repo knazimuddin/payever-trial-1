@@ -156,6 +156,7 @@ export class TransactionEventProducer {
       business: {
         id: transaction.business_uuid,
       },
+      channel: transaction.channel,
       channel_set: {
         id: transaction.channel_set_uuid,
       },
@@ -163,11 +164,10 @@ export class TransactionEventProducer {
         email: transaction.customer_email,
         name: transaction.customer_name,
       },
-      reference: transaction.reference,
-      channel: transaction.channel,
       date: transaction.updated_at,
       id: transaction.uuid,
       items: transaction.items,
+      reference: transaction.reference,
       user: {
         id: transaction.user_uuid,
       },
