@@ -6,6 +6,7 @@ import {get} from 'https';
 export class TranslationService {
   private keys: string[];
   private language: string;
+  private package: string;
 
   constructor(
     private readonly logger: Logger,
@@ -19,9 +20,15 @@ export class TranslationService {
     return await this.translate();
   }
 
+  public setPackage(languagePackage) {
+    this.package = languagePackage;
+
+    return this;
+  }
+
   private async translate() {
     return new Promise((resolve, reject) => {
-      let url = `${environment.translationService.baseUrl}/frontend-transactions-app-${this.language}.json`;
+      let url = `${environment.translationService.baseUrl}/${this.package}-${this.language}.json`;
       get(url, (response) => {
         if (response.statusCode !== 200) {
           this.logger.log({
@@ -37,9 +44,12 @@ export class TranslationService {
           data += chunk;
         });
         response.on('close', () => {
-          let affectedTranslator = Object.entries(JSON.parse(data))
-            .filter(key => this.keys.includes(key[0]))
-            .map(key => ({'key': key[0], 'translated': key[1]}));
+          data = JSON.parse(data);
+          let affectedTranslator = Object.entries(this.keys)
+            .map(function (key){
+
+              return data[key[1]] ?? key[1];
+            });
 
           return resolve((affectedTranslator));
         });

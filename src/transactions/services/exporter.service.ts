@@ -27,6 +27,7 @@ import * as FormData from 'form-data';
 import * as moment from 'moment';
 import { RabbitExchangesEnum, RabbitRoutingKeys } from '../../enums';
 import { RabbitMqClient, IntercomService } from '@pe/nest-kit';
+import {TranslationService} from "./translation.service";
 
 const shippingColumns: Array<{ title: string, name: string }> = [
   { title: 'Shipping City', name: 'city' },
@@ -38,18 +39,21 @@ const shippingColumns: Array<{ title: string, name: string }> = [
 ];
 
 const productColumnsFunc: any = (key: number): Array<{ index: number, title: string, name: string }> => [
-  { index: key, title: `Lineitem${key + 1} identifier`, name: 'uuid' },
-  { index: key, title: `Lineitem${key + 1} name`, name: 'name' },
-  { index: key, title: `Lineitem${key + 1} variant`, name: 'options' },
-  { index: key, title: `Lineitem${key + 1} price`, name: 'price' },
-  { index: key, title: `Lineitem${key + 1} vat`, name: 'vat_rate' },
-  { index: key, title: `Lineitem${key + 1} sku`, name: 'sku' },
-  { index: key, title: `Lineitem${key + 1} quantity`, name: 'quantity' },
+  { index: key, title: `Lineitem identifier`, name: 'uuid' },
+  { index: key, title: `Lineitem name`, name: 'name' },
+  { index: key, title: `Lineitem variant`, name: 'options' },
+  { index: key, title: `Lineitem price`, name: 'price' },
+  { index: key, title: `Lineitem vat`, name: 'vat_rate' },
+  { index: key, title: `Lineitem sku`, name: 'sku' },
+  { index: key, title: `Lineitem quantity`, name: 'quantity' },
 ];
 
 @Injectable()
 export class ExporterService {
   private readonly defaultCurrency: string;
+  private static translatorKey: string;
+  private static translatorLanguage: string;
+  private static translator: TranslationService;
 
   constructor(
     private readonly elasticSearchService: FoldersElasticSearchService,
@@ -58,8 +62,12 @@ export class ExporterService {
     private readonly httpService: IntercomService,
     private readonly logger: Logger,
     private readonly rabbitClient: RabbitMqClient,
+    private readonly translator: TranslationService
   ) {
     this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
+    ExporterService.translator = translator;
+    ExporterService.translatorKey= 'transactions-export-api';
+    ExporterService.translatorLanguage= 'en';
   }
 
   public async getTransactionsCount(
@@ -215,7 +223,7 @@ export class ExporterService {
     }
 
     const columns: Array<{ title: string, name: string }> = JSON.parse(exportDto.columns);
-
+    ExporterService.translatorLanguage = exportDto.language;
     switch (exportDto.format) {
       case ExportFormatEnum.csv: {
         return this.exportCSV(transactions, columns, maxItemsCount);
@@ -236,7 +244,7 @@ export class ExporterService {
   ): Promise<any> {
     const productColumns: Array<{ index: number, title: string, name: string }> =
       ExporterService.getProductColumns(maxItemsCount);
-    const data: string[][] = ExporterService.getTransactionData(transactions, productColumns, columns);
+    const data: string[][] = await ExporterService.getTransactionData(transactions, productColumns, columns);
 
     const workbook: ExcelJS.Workbook = new ExcelJS.Workbook();
     const worksheet: ExcelJS.Worksheet = workbook.addWorksheet('sheet1');
@@ -265,7 +273,7 @@ export class ExporterService {
   ): Promise<any> {
     const productColumns: Array<{ index: number, title: string, name: string }> =
       ExporterService.getProductColumns(maxItemsCount);
-    const data: string[][] = ExporterService.getTransactionData(transactions, productColumns, columns);
+    const data: string[][] = await ExporterService.getTransactionData(transactions, productColumns, columns);
 
     const options: ExcelJS.stream.xlsx.WorkbookStreamWriterOptions = {
       filename: fileName,
@@ -304,7 +312,7 @@ export class ExporterService {
     const pageHeight: number = 5000;
     const productColumns: Array<{ index: number, title: string, name: string }> =
       ExporterService.getProductColumns(maxItemsCount);
-    const data: any[][] = ExporterService.getTransactionData(transactions, productColumns, columns, true)
+    const data: any[][] = (await ExporterService.getTransactionData(transactions, productColumns, columns, true))
       .map((entity: any) => entity.map((e: string) => ({ text: e ? e.toString() : '',  fontSize: 9 })));
 
     const allColumns: any[] = [...shippingColumns, ...productColumns, ...columns];
@@ -375,18 +383,19 @@ export class ExporterService {
   }
 
   // tslint:disable-next-line:cognitive-complexity
-  private static getTransactionData(
+  private static async getTransactionData(
     transactions: TransactionModel[],
     productColumns: Array<{ index: number, title: string, name: string }>,
     columns: Array<{ title: string, name: string }>,
     isFormatDate: boolean = false,
-  ): any[] {
-    const header: string[] = [
+  ): Promise<any[]> {
+    let header: string[] = [
       ...['CHANNEL', 'ID', 'TOTAL'],
       ...shippingColumns.map((c: { title: string, name: string }) => c.title),
-      ...productColumns.map((c: { index: number, title: string, name: string }) => c.title),
-      ...columns.map((c: { title: string, name: string }) => c.title)];
-
+      ...productColumns.map((c: { index: number, title: string, name: string }) => c.title)];
+    let translatedKeys = await this.translator.setPackage(this.translatorKey).do(header, this.translatorLanguage);
+    // @ts-ignore
+    header = [...translatedKeys,...columns.map((c: { title: string, name: string }) => c.title)];
     const exportedTransactions: any[] = transactions
       .map((t: TransactionModel) => [
         ...[t.channel, t.original_id, t.total],

@@ -30,4 +30,9 @@ export class ExportQueryDto extends ListQueryDto {
   @Max(20000)
   public limit: number = 10;
 
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  public language: string = 'en';
+
 }
