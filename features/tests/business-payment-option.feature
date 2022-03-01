@@ -142,4 +142,3 @@ Feature: Full real payment flow
           "variable_fee" : 0
       }
       """
-

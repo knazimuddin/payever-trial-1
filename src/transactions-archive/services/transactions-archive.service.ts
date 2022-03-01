@@ -10,7 +10,8 @@ import { TransactionModel } from '../../transactions/models';
 @Injectable()
 export class TransactionsArchiveService {
   constructor(
-    @InjectModel(TransactionsArchiveSchemaName) private readonly transactionsArchiveModel: Model<TransactionsArchiveModel>,
+    @InjectModel(TransactionsArchiveSchemaName)
+      private readonly transactionsArchiveModel: Model<TransactionsArchiveModel>,
     private readonly eventDispatcher: EventDispatcher,
     private readonly logger: Logger,
   ) { }
@@ -31,10 +32,5 @@ export class TransactionsArchiveService {
         upsert: true,
       },
     );
-
-    // await this.eventDispatcher.dispatch(
-    //   TransactionEventEnum.TransactionUpdated,
-    //   updated,
-    // );
   }
 }

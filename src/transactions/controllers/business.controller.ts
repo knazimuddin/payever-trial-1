@@ -38,7 +38,7 @@ import {
 } from '../services';
 import { BusinessFilter } from '../tools';
 import { PaymentActionsEnum } from '../enum';
-import { ActionItemInterface } from 'src/transactions/interfaces';
+import { ActionItemInterface } from '../../transactions/interfaces';
 
 const BusinessPlaceholder: string = ':businessId';
 const UuidPlaceholder: string = ':uuid';
@@ -134,6 +134,23 @@ export class BusinessController {
     ) transaction: TransactionModel,
   ): Promise<TransactionOutputInterface> {
     return this.transactionsInfoService.getDetails(transaction);
+  }
+
+  @Post('transaction/:uuid/archive')
+  @HttpCode(HttpStatus.OK)
+  @Roles(RolesEnum.merchant)
+  @Acl({ microservice: 'transactions', action: AclActionsEnum.update })
+  public async archiveTransaction(
+    @ParamModel(
+      {
+        business_uuid: BusinessPlaceholder,
+        uuid: UuidPlaceholder,
+      },
+      TransactionSchemaName,
+    ) transaction: TransactionModel,
+  ): Promise<void> {
+  // ): Promise<TransactionOutputInterface> {
+    return this.transactionActionService.archiveTransaction(transaction);
   }
 
   @Get('transaction/:uuid/actions')

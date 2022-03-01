@@ -1,5 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+
 import { CronModule } from '@pe/cron-kit';
 import {
   ApmModule,
@@ -15,6 +16,7 @@ import { StatusModule } from '@pe/nest-kit/modules/status';
 import { environment } from './environments';
 import { IntegrationModule } from './integration';
 import { TransactionsModule } from './transactions/transactions.module';
+import { TransactionsArchiveModule } from './transactions-archive';
 
 @Module({
   imports: [
@@ -41,6 +43,7 @@ import { TransactionsModule } from './transactions/transactions.module';
     MutexModule,
     IntegrationModule,
     TransactionsModule,
+    TransactionsArchiveModule,
     CronModule,
   ],
   providers: [

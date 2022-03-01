@@ -95,6 +95,7 @@ import { EventsGateway } from './ws';
 import { RabbitChannels } from '../enums';
 import { FiltersConfig, FoldersConfig, RulesOptions } from '../config';
 import { ExportMonthlyBusinessTransactionCronService } from '../cron/export-monthly-business-transaction.cron.service';
+import { TransactionsArchiveModule } from '../transactions-archive';
 
 @Module({
   controllers: [
@@ -154,6 +155,7 @@ import { ExportMonthlyBusinessTransactionCronService } from '../cron/export-mont
     MigrationModule,
     FoldersPluginModule.forFeature(FoldersConfig),
     RulesSdkModule.forRoot(RulesOptions),
+    TransactionsArchiveModule,
   ],
   providers: [
     ActionsRetriever,

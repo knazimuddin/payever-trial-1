@@ -13,6 +13,8 @@ import { TransactionsExampleService } from './transactions-example.service';
 import { TransactionsService } from './transactions.service';
 import { AccessTokenPayload, EventDispatcher } from '@pe/nest-kit';
 import { PaymentActionEventEnum } from '../enum/events';
+import { TransactionsArchiveModel } from '../../transactions-archive/models';
+import { TransactionsArchiveService } from '../../transactions-archive/services';
 
 @Injectable()
 export class TransactionActionService {
@@ -21,10 +23,19 @@ export class TransactionActionService {
     private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
     private readonly thirdPartyCallerService: ThirdPartyCallerService,
+    private readonly transactionsArchiveService: TransactionsArchiveService,
     private readonly logger: Logger,
     private readonly exampleService: TransactionsExampleService,
     private readonly eventDispatcher: EventDispatcher,
   ) { }
+
+  public async archiveTransaction(
+    transaction: TransactionModel,
+  ): Promise<void> {
+    const archivedTransaction: TransactionsArchiveModel = await this.transactionsArchiveService.createOrUpdateById(transaction.business_uuid, transaction);
+
+    // TODO: to remove transaction
+  }
 
   public async doAction(
     transaction: TransactionModel,
@@ -221,5 +232,4 @@ export class TransactionActionService {
 
     return updatedActionPayload;
   }
-
 }

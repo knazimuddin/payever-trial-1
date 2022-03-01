@@ -44,5 +44,4 @@ export class TransactionsInfoService {
     return !transaction.example ? this.actionsRetriever.retrieve(unpackedTransaction)
       : this.actionsRetriever.retrieveFakeActions(unpackedTransaction);
   }
-
 }
