@@ -21,3 +21,4 @@ export * from './action-amount-validators/action-amount-validators.collector';
 export * from './action-validators.list';
 export * from './transactions-info.service';
 export * from './exporter.service';
+export * from './translation.service';

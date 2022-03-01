@@ -91,6 +91,7 @@ import {
   ActionValidatorsList,
   TransactionsInfoService,
   ExporterService,
+  TranslationService,
 } from './services';
 import { EventsGateway } from './ws';
 import { RabbitChannels } from '../enums';
@@ -203,6 +204,7 @@ import { ExportMonthlyBusinessTransactionCronService } from '../cron/export-mont
     TransactionsInfoService,
     ExportMonthlyBusinessTransactionCronService,
     ExporterService,
+    TranslationService,
   ],
 })
 export class TransactionsModule { }

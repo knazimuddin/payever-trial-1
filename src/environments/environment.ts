@@ -10,6 +10,9 @@ const isNumeric: (n: any) => boolean = (n: any): boolean => {
 };
 
 export const environment: any = {
+  translationService: {
+    baseUrl: env.TRANSLATION_SERVICE_BASE_URL,
+  },
   apm: {
     enable: env.APM_SERVICE_ENABLE === 'true',
     options: {
