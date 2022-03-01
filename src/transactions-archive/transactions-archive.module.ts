@@ -4,16 +4,16 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { EventDispatcherModule, IntercomModule } from '@pe/nest-kit';
 import { ElasticSearchModule } from '@pe/elastic-kit';
-import { BusinessEventListener } from './event-listeners';
+import { ArchivedTransactionEventListener, BusinessEventListener } from './event-listeners';
 import {
-  TransactionsArchiveSchema,
-  TransactionsArchiveSchemaName,
+  ArchivedTransactionSchema,
+  ArchivedTransactionSchemaName,
   TransactionsArchiveAccessSchemaName,
   TransactionsArchiveAccessSchema,
 } from './schemas';
 import {
-  TransactionsArchiveService,
-  TransactionsArchiveAccessService,
+  ArchivedTransactionService,
+  ArchivedTransactionAccessService,
 } from './services';
 import { environment } from '../environments';
 
@@ -21,7 +21,7 @@ import { environment } from '../environments';
   controllers: [
   ],
   exports: [
-    TransactionsArchiveService,
+    ArchivedTransactionService,
   ],
   imports: [
     ConfigModule,
@@ -33,8 +33,8 @@ import { environment } from '../environments';
         schema: TransactionsArchiveAccessSchema,
       },
       {
-        name: TransactionsArchiveSchemaName,
-        schema: TransactionsArchiveSchema,
+        name: ArchivedTransactionSchemaName,
+        schema: ArchivedTransactionSchema,
       },
     ]),
     EventDispatcherModule,
@@ -47,10 +47,11 @@ import { environment } from '../environments';
   ],
   providers: [
     // Listeners
+    ArchivedTransactionEventListener,
     BusinessEventListener,
     // Services
-    TransactionsArchiveService,
-    TransactionsArchiveAccessService,
+    ArchivedTransactionService,
+    ArchivedTransactionAccessService,
   ],
 })
 export class TransactionsArchiveModule { }

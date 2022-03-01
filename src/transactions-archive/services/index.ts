@@ -1,2 +1,2 @@
-export * from './transactions-archive.service';
-export * from './transactions-archive-access.service';
+export * from './archived-transaction.service';
+export * from './archived-transaction-access.service';

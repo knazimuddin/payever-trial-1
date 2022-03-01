@@ -1,2 +1,2 @@
-export * from './transactions-archive-access.schema';
-export * from './transactions-archive.schema';
+export * from './archived-transaction-access.schema';
+export * from './archived-transaction.schema';

@@ -5,6 +5,9 @@ import * as chaiAsPromised from 'chai-as-promised';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import { Logger } from '@nestjs/common';
+import * as uuid from 'uuid';
+
+import { EventDispatcher } from '@pe/nest-kit';
 import { TransactionActionService } from '../../../../src/transactions/services/transaction-action.service';
 import { TransactionsService } from '../../../../src/transactions/services/transactions.service';
 import { DtoValidationService } from '../../../../src/transactions/services/dto-validation.service';
@@ -13,9 +16,8 @@ import { TransactionsExampleService } from '../../../../src/transactions/service
 import { ThirdPartyCallerService } from '../../../../src/transactions/services/third-party-caller.service';
 import { ActionPayloadDto } from '../../../../src/transactions/dto/action-payload';
 import { TransactionModel } from '../../../../src/transactions/models';
-import * as uuid from 'uuid';
 import { TransactionUnpackedDetailsInterface } from '../../../../src/transactions/interfaces';
-import { EventDispatcher } from '@pe/nest-kit';
+import { ArchivedTransactionService } from '../../../../src/transactions-archive/services';
 
 chai.use(sinonChai);
 chai.use(chaiAsPromised);
@@ -27,10 +29,11 @@ describe('TransactonActionService()', () => {
   let transactionsService: TransactionsService;
   let dtoValidation: DtoValidationService;
   let messagingService: MessagingService;
-  let logger: Logger;
-  let exampleService: TransactionsExampleService;
-  let eventDispatcher: EventDispatcher;
   let thirdPartyCallerService: ThirdPartyCallerService;
+  let exampleService: TransactionsExampleService;
+  let archivedTransactionService: ArchivedTransactionService;
+  let eventDispatcher: EventDispatcher;
+  let logger: Logger;
 
   const actionPayload: ActionPayloadDto = {
     fields: {
@@ -167,16 +170,20 @@ describe('TransactonActionService()', () => {
       sendTransactionUpdate: (): any => { },
     } as any;
 
-    logger = {
-      log: (): any => { },
-    } as any;
-
     exampleService = {
       refundExample: (): any => { },
     } as any;
 
+    archivedTransactionService = {
+      createOrUpdateById: (): any => { },
+    } as any;
+
     eventDispatcher = {
       dispatch: (): any => { },
+    } as any;
+
+    logger = {
+      log: (): any => { },
     } as any;
 
     testService = new TransactionActionService(
@@ -184,9 +191,10 @@ describe('TransactonActionService()', () => {
       dtoValidation,
       messagingService,
       thirdPartyCallerService,
-      logger,
       exampleService,
+      archivedTransactionService,
       eventDispatcher,
+      logger,
     );
   });
 

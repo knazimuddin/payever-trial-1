@@ -1,2 +1,2 @@
-export * from './transactions-archive-access.model';
-export * from './transactions-archive.model';
+export * from './archived-transaction-access.model';
+export * from './archived-transaction.model';

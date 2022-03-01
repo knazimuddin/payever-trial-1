@@ -2,18 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { EventDispatcher } from '@pe/nest-kit';
 import { BusinessModel } from '@pe/business-kit';
-import { TransactionsArchiveAccessModel } from '../models';
+import { ArchivedTransactionAccessModel, ArchivedTransactionModel } from '../models';
 import { TransactionsArchiveAccessSchemaName } from '../schemas';
 
 @Injectable()
-export class TransactionsArchiveAccessService {
+export class ArchivedTransactionAccessService {
   constructor(
-    @InjectModel(TransactionsArchiveAccessSchemaName) private readonly transactionsArchiveAccessModel: Model<TransactionsArchiveAccessModel>,
+    @InjectModel(TransactionsArchiveAccessSchemaName)
+      private readonly transactionsArchiveAccessModel: Model<ArchivedTransactionAccessModel>,
   ) { }
 
-  public async createOrUpdateById(business: BusinessModel): Promise<TransactionsArchiveAccessModel> {
+  public async createOrUpdateById(
+    business: BusinessModel,
+  ): Promise<ArchivedTransactionAccessModel> {
     return this.transactionsArchiveAccessModel.findOneAndUpdate(
       {
         businessId: business._id,
@@ -28,5 +30,9 @@ export class TransactionsArchiveAccessService {
         upsert: true,
       },
     );
+  }
+
+  public async index(archivedTransaction: ArchivedTransactionModel): Promise<void> {
+    // TODO
   }
 }

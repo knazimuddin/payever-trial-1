@@ -1,4 +1,4 @@
-Feature: Transactions archive
+Feature: Archive transactions
 
   Background:
     Given I remember as "businessId" following value:
@@ -64,7 +64,7 @@ Feature: Transactions archive
     When I send a POST request to "/api/business/{{businessId}}/transaction/{{transactionId}}/archive"
     Then print last response
     Then the response status code should be 200
-    And look for model "TransactionsArchive" by following JSON and remember as "transaction":
+    And look for model "ArchivedTransaction" by following JSON and remember as "transaction":
     """
     {
       "uuid": "{{transactionId}}"

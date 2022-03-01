@@ -1,2 +1,2 @@
-export * from './transactions-archive-access.interface';
-export * from './transactions-archive.interface';
+export * from './archived-transaction-access.interface';
+export * from './archived-transaction.interface';

@@ -1,12 +1,19 @@
 import { Schema } from 'mongoose';
 
-import { TransactionCartItemInterface, TransactionRefundItemInterface } from '../../transactions/interfaces/transaction';
-import { AddressSchema, TransactionCartItemSchema, TransactionHistoryEntrySchema } from '../../transactions/schemas';
+import {
+  TransactionCartItemInterface,
+  TransactionRefundItemInterface,
+} from '../../transactions/interfaces/transaction';
+import {
+  AddressSchema,
+  TransactionCartItemSchema,
+  TransactionHistoryEntrySchema,
+} from '../../transactions/schemas';
 import { PaymentActionsEnum } from '../../transactions/enum';
 
-export const TransactionsArchiveSchemaName: string = 'TransactionsArchive';
+export const ArchivedTransactionSchemaName: string = 'ArchivedTransaction';
 
-export const TransactionsArchiveSchema: Schema = new Schema(
+export const ArchivedTransactionSchema: Schema = new Schema(
 {
   archiveEmail: {
     required: true,
@@ -91,21 +98,21 @@ export const TransactionsArchiveSchema: Schema = new Schema(
   toObject: { virtuals: true },
 });
 
-TransactionsArchiveSchema.index({ santander_applications: 1 });
-TransactionsArchiveSchema.index({ reference: 1 });
-TransactionsArchiveSchema.index({ customer_name: 1 });
-TransactionsArchiveSchema.index({ customer_email: 1 });
-TransactionsArchiveSchema.index({ merchant_name: 1 });
-TransactionsArchiveSchema.index({ merchant_email: 1 });
-TransactionsArchiveSchema.index({ status: 1, _id: 1 });
-TransactionsArchiveSchema.index({ business_uuid: 1 });
-TransactionsArchiveSchema.index({ example: 1 });
-TransactionsArchiveSchema.index({ type: 1 });
-TransactionsArchiveSchema.index({ created_at: -1 });
-TransactionsArchiveSchema.index({ created_at: 1 });
-TransactionsArchiveSchema.index({ business_uuid: 1, example: 1 });
+ArchivedTransactionSchema.index({ santander_applications: 1 });
+ArchivedTransactionSchema.index({ reference: 1 });
+ArchivedTransactionSchema.index({ customer_name: 1 });
+ArchivedTransactionSchema.index({ customer_email: 1 });
+ArchivedTransactionSchema.index({ merchant_name: 1 });
+ArchivedTransactionSchema.index({ merchant_email: 1 });
+ArchivedTransactionSchema.index({ status: 1, _id: 1 });
+ArchivedTransactionSchema.index({ business_uuid: 1 });
+ArchivedTransactionSchema.index({ example: 1 });
+ArchivedTransactionSchema.index({ type: 1 });
+ArchivedTransactionSchema.index({ created_at: -1 });
+ArchivedTransactionSchema.index({ created_at: 1 });
+ArchivedTransactionSchema.index({ business_uuid: 1, example: 1 });
 
-TransactionsArchiveSchema.virtual('amount_refunded').get(function (): number {
+ArchivedTransactionSchema.virtual('amount_refunded').get(function (): number {
   let totalRefunded: number = 0;
 
   if (this.history) {
@@ -121,7 +128,7 @@ TransactionsArchiveSchema.virtual('amount_refunded').get(function (): number {
   return Math.round((totalRefunded + Number.EPSILON) * 100) / 100;
 });
 
-TransactionsArchiveSchema.virtual('amount_captured').get(function (): number {
+ArchivedTransactionSchema.virtual('amount_captured').get(function (): number {
   let totalCaptured: number = 0;
 
   if (this.history) {
@@ -137,18 +144,18 @@ TransactionsArchiveSchema.virtual('amount_captured').get(function (): number {
 /**
  * @deprecated use amount_left instead of amount_refund_rest
  */
-TransactionsArchiveSchema.virtual('amount_refund_rest').get(function (): number {
+ArchivedTransactionSchema.virtual('amount_refund_rest').get(function (): number {
   return Math.round((this.amount - this.amount_refunded + Number.EPSILON) * 100) / 100;
 });
 
-TransactionsArchiveSchema.virtual('amount_capture_rest').get(function (): number {
+ArchivedTransactionSchema.virtual('amount_capture_rest').get(function (): number {
   const amountCaptureRest: number =
     Math.round((this.total - this.amount_captured - this.amount_refunded + Number.EPSILON) * 100) / 100;
 
   return amountCaptureRest >= 0 ? amountCaptureRest : 0;
 });
 
-TransactionsArchiveSchema.virtual('available_refund_items').get(function (): TransactionRefundItemInterface[] {
+ArchivedTransactionSchema.virtual('available_refund_items').get(function (): TransactionRefundItemInterface[] {
   const refundItems: TransactionRefundItemInterface[] = [];
 
   this.items.forEach((item: TransactionCartItemInterface) => {
@@ -176,7 +183,7 @@ TransactionsArchiveSchema.virtual('available_refund_items').get(function (): Tra
   return refundItems;
 });
 
-TransactionsArchiveSchema.virtual('amount_left').get(function (): number {
+ArchivedTransactionSchema.virtual('amount_left').get(function (): number {
   if (this.status === 'STATUS_CANCELLED') {
     return this.amount;
   } else {
@@ -184,7 +191,7 @@ TransactionsArchiveSchema.virtual('amount_left').get(function (): number {
   }
 });
 
-TransactionsArchiveSchema.virtual('total_left').get(function (): number {
+ArchivedTransactionSchema.virtual('total_left').get(function (): number {
   if (this.status === 'STATUS_CANCELLED') {
     return this.total;
   } else {

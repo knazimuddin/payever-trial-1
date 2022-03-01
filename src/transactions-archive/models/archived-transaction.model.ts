@@ -1,9 +1,9 @@
 import { Document, Types } from 'mongoose';
 
-import { TransactionsArchiveInterface } from '../interfaces';
+import { ArchivedTransactionInterface } from '../interfaces';
 import { AddressModel, TransactionCartItemModel, TransactionHistoryEntryModel } from '../../transactions/models';
 
-export interface TransactionsArchiveModel extends TransactionsArchiveInterface, Document {
+export interface ArchivedTransactionModel extends ArchivedTransactionInterface, Document {
   id: string;
   billing_address: AddressModel;
   history: Types.DocumentArray<TransactionHistoryEntryModel>;

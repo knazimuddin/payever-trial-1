@@ -1,20 +1,24 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+
+import { AccessTokenPayload, EventDispatcher } from '@pe/nest-kit';
 import { TransactionPaymentDetailsConverter } from '../converter';
 import { ActionPayloadDto } from '../dto/action-payload';
-import { AllowedUpdateStatusPaymentMethodsEnum, PaymentStatusesEnum, ThirdPartyPaymentsEnum, PaymentActionsEnum } from '../enum';
+import {
+  AllowedUpdateStatusPaymentMethodsEnum,
+  PaymentStatusesEnum,
+  ThirdPartyPaymentsEnum,
+  PaymentActionsEnum,
+} from '../enum';
+import { PaymentActionEventEnum } from '../enum/events';
 import { ActionCallerInterface } from '../interfaces';
 import { TransactionUnpackedDetailsInterface } from '../interfaces/transaction';
-
 import { TransactionModel } from '../models';
 import { DtoValidationService } from './dto-validation.service';
 import { MessagingService } from './messaging.service';
 import { ThirdPartyCallerService } from './third-party-caller.service';
 import { TransactionsExampleService } from './transactions-example.service';
 import { TransactionsService } from './transactions.service';
-import { AccessTokenPayload, EventDispatcher } from '@pe/nest-kit';
-import { PaymentActionEventEnum } from '../enum/events';
-import { TransactionsArchiveModel } from '../../transactions-archive/models';
-import { TransactionsArchiveService } from '../../transactions-archive/services';
+import { ArchivedTransactionService } from '../../transactions-archive/services';
 
 @Injectable()
 export class TransactionActionService {
@@ -23,16 +27,16 @@ export class TransactionActionService {
     private readonly dtoValidation: DtoValidationService,
     private readonly messagingService: MessagingService,
     private readonly thirdPartyCallerService: ThirdPartyCallerService,
-    private readonly transactionsArchiveService: TransactionsArchiveService,
-    private readonly logger: Logger,
     private readonly exampleService: TransactionsExampleService,
+    private readonly archivedTransactionService: ArchivedTransactionService,
     private readonly eventDispatcher: EventDispatcher,
+    private readonly logger: Logger,
   ) { }
 
   public async archiveTransaction(
     transaction: TransactionModel,
   ): Promise<void> {
-    const archivedTransaction: TransactionsArchiveModel = await this.transactionsArchiveService.createOrUpdateById(transaction.business_uuid, transaction);
+    await this.archivedTransactionService.createOrUpdateById(transaction.business_uuid, transaction);
 
     await this.transactionsService.removeByUuid(transaction.uuid);
   }
