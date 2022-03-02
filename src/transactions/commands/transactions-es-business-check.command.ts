@@ -10,7 +10,7 @@ import { TransactionBasicInterface } from '../interfaces/transaction';
 import { BusinessModel, TransactionModel } from '../models';
 import { BusinessSchemaName, TransactionSchemaName } from '../schemas';
 import { ElasticSearchService } from '../services';
-import { BusinessFilter } from '../tools';
+import { TransactionsFilter } from '../tools';
 
 @Injectable()
 export class TransactionsEsBusinessCheckCommand {
@@ -40,7 +40,7 @@ export class TransactionsEsBusinessCheckCommand {
     const business: BusinessModel = await this.getBusiness(business_uuid);
 
     const listDto: ListQueryDto = new ListQueryDto();
-    listDto.filters = BusinessFilter.apply(business.id, listDto.filters);
+    listDto.filters = TransactionsFilter.applyBusinessFilter(business.id, listDto.filters);
     listDto.currency = business.currency;
 
     if (after) {

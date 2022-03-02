@@ -1,6 +1,9 @@
 import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 import { RefundItemDto } from './refund-item.dto';
 
+/**
+ * @deprecated The class should not be used
+ */
 export class ReturnDataDto {
   @IsNumber()
   @Min(0)

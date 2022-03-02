@@ -82,12 +82,10 @@ export class TransactionDto implements CheckoutTransactionInterface {
   @IsString()
   public fee_accepted: boolean;
 
-  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => TransactionHistoryItemDto)
   public history: TransactionHistoryItemDto[];
 
-  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => TransactionCartItemDto)
   public items: TransactionCartItemDto[];
@@ -112,7 +110,7 @@ export class TransactionDto implements CheckoutTransactionInterface {
 
   @IsString({ each: true })
   @IsOptional()
-  public santander_applications: string[];
+  public santander_applications?: string[];
 
   @ValidateNested()
   @Type(() => AddressDto)

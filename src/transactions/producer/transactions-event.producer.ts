@@ -147,6 +147,35 @@ export class TransactionEventProducer {
       transaction, null, RabbitRoutingKeys.InternalTransactionPaymentRefund, last_updated);
   }
 
+  public async produceTransactionExportEvent(
+    transaction: TransactionPackedDetailsInterface,
+  ): Promise<void> {
+
+    const payload: any = {
+      amount: transaction.amount,
+      business: {
+        id: transaction.business_uuid,
+      },
+      channel: transaction.channel,
+      channel_set: {
+        id: transaction.channel_set_uuid,
+      },
+      customer: {
+        email: transaction.customer_email,
+        name: transaction.customer_name,
+      },
+      date: transaction.updated_at,
+      id: transaction.uuid,
+      items: transaction.items,
+      reference: transaction.reference,
+      user: {
+        id: transaction.user_uuid,
+      },
+    };
+
+    await this.send(RabbitRoutingKeys.TransactionsPaymentExport, payload);
+  }
+
   private async send(eventName: string, payload: any): Promise<void> {
     await this.rabbitClient.send(
       {
@@ -159,7 +188,6 @@ export class TransactionEventProducer {
       },
     );
   }
-
 
   private async produceTransactionUpdateEvent(
     transaction: TransactionPackedDetailsInterface,
@@ -191,4 +219,5 @@ export class TransactionEventProducer {
 
     await this.send(event, payload);
   }
+
 }

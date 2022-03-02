@@ -4,7 +4,7 @@ import * as ExcelJS from 'exceljs';
 import * as fs from 'fs';
 import { BusinessModel, TransactionModel } from '../models';
 import { ExportFormatEnum } from '../enum';
-import { BusinessFilter } from '../tools';
+import { TransactionsFilter } from '../tools';
 import {
   ExportedFileResultDto,
   ExportQueryDto,
@@ -68,19 +68,13 @@ export class ExporterService {
     userId: string = null,
   ): Promise<number> {
     if (businessId) {
-      exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
+      exportDto.filters = TransactionsFilter.applyBusinessFilter(businessId, exportDto.filters, true);
       const business: BusinessModel = await this.businessService
         .findOneById(businessId) as unknown as BusinessModel;
       exportDto.currency = business ? business.currency : this.defaultCurrency;
     }
     if (userId) {
-      exportDto.filters = {
-        ...exportDto.filters,
-        userId: [{
-          condition: 'is',
-          value: [userId],
-        }],
-      };
+      exportDto.filters = TransactionsFilter.applyUserIdFilter(userId, exportDto.filters, true);
     }
     const result: ElasticSearchCountResultsDto = await this.elasticSearchService.getFilteredDocumentsCount(exportDto);
 
@@ -119,17 +113,18 @@ export class ExporterService {
     businessId: string,
     totalCount: number,
   ): Promise<ExportedFileResultDto> {
-    exportDto.filters = BusinessFilter.apply(businessId, exportDto.filters);
+    exportDto.filters = TransactionsFilter.applyBusinessFilter(businessId, exportDto.filters, true);
 
     const business: BusinessModel = await this.businessService
       .findOneById(businessId) as unknown as BusinessModel;
     exportDto.currency = business ? business.currency : this.defaultCurrency;
     let businessName: string = `${exportDto.businessName.replace(/[^\x00-\x7F]/g, '')}`;
-    businessName = businessName.replace(/\s/, '-');
-    const fileName: string = `${businessName}-${moment().format('DD-MM-YYYY-hh-mm-ss')}.${exportDto.format}`;
+    businessName = businessName.replace(/\s/g, '-');
+    const sheetName: string = moment().format('DD-MM-YYYY-hh-mm-ss');
+    const fileName: string = `${businessName}-${sheetName}.${exportDto.format}`;
 
     return {
-      data: await this.exportToFile(exportDto, fileName, totalCount, businessName),
+      data: await this.exportToFile(exportDto, fileName, totalCount, sheetName),
       fileName,
     };
   }
@@ -151,13 +146,7 @@ export class ExporterService {
     userId: string,
     totalCount: number,
   ): Promise<ExportedFileResultDto> {
-    exportDto.filters = {
-      ...exportDto.filters,
-      userId: [{
-        condition: 'is',
-        value: [userId],
-      }],
-    };
+    exportDto.filters = TransactionsFilter.applyUserIdFilter(userId, exportDto.filters, true);
     const fileName: string = `transactions-${moment().format('DD-MM-YYYY-hh-mm-ss')}.${exportDto.format}`;
 
     return {
@@ -199,7 +188,7 @@ export class ExporterService {
     exportDto: ExportQueryDto,
     fileName: string,
     totalCount: number,
-    fileNamePrefix: string,
+    sheetName: string,
   ): Promise<any> {
     let exportedCount: number = 0;
     const transactions: TransactionModel[] = [];
@@ -232,7 +221,7 @@ export class ExporterService {
         return this.exportCSV(transactions, columns, maxItemsCount);
       }
       case ExportFormatEnum.xlsx: {
-        return this.exportXLSX(transactions, fileName, fileNamePrefix, columns, maxItemsCount);
+        return this.exportXLSX(transactions, fileName, sheetName, columns, maxItemsCount);
       }
       case ExportFormatEnum.pdf: {
         return this.exportPDF(transactions, columns, maxItemsCount);

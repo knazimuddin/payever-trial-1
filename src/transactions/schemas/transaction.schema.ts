@@ -122,6 +122,19 @@ TransactionSchema.virtual('amount_captured').get(function (): number {
   return Math.round((totalCaptured + Number.EPSILON) * 100) / 100;
 });
 
+TransactionSchema.virtual('amount_canceled').get(function (): number {
+  let totalCanceled: number = 0;
+
+  if (this.history) {
+    this.history
+      .filter((entry: { action: string }) => entry.action === PaymentActionsEnum.Cancel)
+      .forEach((entry: { amount: number }) => totalCanceled += (entry.amount || 0))
+    ;
+  }
+
+  return Math.round((totalCanceled + Number.EPSILON) * 100) / 100;
+});
+
 /**
  * @deprecated use amount_left instead of amount_refund_rest
  */
@@ -129,11 +142,32 @@ TransactionSchema.virtual('amount_refund_rest').get(function (): number {
   return Math.round((this.amount - this.amount_refunded + Number.EPSILON) * 100) / 100;
 });
 
+TransactionSchema.virtual('amount_refund_rest_with_partial_capture').get(function (): number {
+  const amountCaptureRest: number =
+    Math.round((this.amount_captured - this.amount_refunded + Number.EPSILON) * 100) / 100;
+
+  return amountCaptureRest >= 0 ? amountCaptureRest : 0;
+});
+
 TransactionSchema.virtual('amount_capture_rest').get(function (): number {
   const amountCaptureRest: number =
     Math.round((this.total - this.amount_captured - this.amount_refunded + Number.EPSILON) * 100) / 100;
 
   return amountCaptureRest >= 0 ? amountCaptureRest : 0;
+});
+
+TransactionSchema.virtual('amount_capture_rest_with_partial_cancel').get(function (): number {
+  const amountCaptureRestWithPartialCancel: number =
+    Math.round((this.total - this.amount_captured - this.amount_canceled + Number.EPSILON) * 100) / 100;
+
+  return amountCaptureRestWithPartialCancel >= 0 ? amountCaptureRestWithPartialCancel : 0;
+});
+
+TransactionSchema.virtual('amount_cancel_rest').get(function (): number {
+  const amountCancelRest: number =
+    Math.round((this.total - this.amount_captured - this.amount_canceled + Number.EPSILON) * 100) / 100;
+
+  return amountCancelRest >= 0 ? amountCancelRest : 0;
 });
 
 TransactionSchema.virtual('available_refund_items').get(function (): TransactionRefundItemInterface[] {
@@ -176,6 +210,6 @@ TransactionSchema.virtual('total_left').get(function (): number {
   if (this.status === 'STATUS_CANCELLED') {
     return this.total;
   } else {
-    return Math.round((this.total - this.amount_refunded + Number.EPSILON) * 100) / 100;
+    return Math.round((this.total - this.amount_refunded - this.amount_canceled + Number.EPSILON) * 100) / 100;
   }
 });

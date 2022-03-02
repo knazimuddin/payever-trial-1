@@ -6,8 +6,9 @@ import { ActionCompletedMessageDto, AddHistoryEventMessageDto } from '../dto/pay
 import { PaymentActionEventEnum } from '../enum/events';
 import { TransactionModel } from '../models';
 import { TransactionHistoryService, TransactionsService } from '../services';
+import { PaymentActionsEnum, PaymentTypesEnum } from '../enum';
 
-const allowedHistoryActions: string[] = ['statuschanged', 'preauthorize', 'capture'];
+const allowedHistoryActions: string[] = ['statuschanged', 'preauthorize', 'capture', 'edit'];
 
 @Controller()
 export class HistoryEventsController {
@@ -45,6 +46,11 @@ export class HistoryEventsController {
     }
 
     this.logger.log({ text: 'ACTION.COMPLETED: Transaction found', transaction });
+
+    // Edit action for POS DE is managed by checkout wrapper, so we need to handle history from event only for POS DE
+    if (message.action === PaymentActionsEnum.Edit && transaction.type !== PaymentTypesEnum.santanderPosDeInstallment) {
+      return;
+    }
 
     await this.eventDispatcher.dispatch(
       PaymentActionEventEnum.PaymentActionCompleted,
