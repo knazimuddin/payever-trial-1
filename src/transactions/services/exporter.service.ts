@@ -27,6 +27,7 @@ import * as FormData from 'form-data';
 import * as moment from 'moment';
 import { RabbitExchangesEnum, RabbitRoutingKeys } from '../../enums';
 import { RabbitMqClient, IntercomService } from '@pe/nest-kit';
+import {TranslationService} from './translation.service';
 
 const shippingColumns: Array<{ title: string, name: string }> = [
   { title: 'Shipping City', name: 'city' },
@@ -58,6 +59,7 @@ export class ExporterService {
     private readonly httpService: IntercomService,
     private readonly logger: Logger,
     private readonly rabbitClient: RabbitMqClient,
+    private readonly translationService:TranslationService,
   ) {
     this.defaultCurrency = this.configService.get<string>('DEFAULT_CURRENCY');
   }
@@ -215,16 +217,20 @@ export class ExporterService {
     }
 
     const columns: Array<{ title: string, name: string }> = JSON.parse(exportDto.columns);
-
+    let titles:Array<string> = [];
+    columns.forEach( (element) => {
+      titles.push(element.title);
+    });
+    const translatedColumns = await this.translationService.translate(titles, 'en');
     switch (exportDto.format) {
       case ExportFormatEnum.csv: {
-        return this.exportCSV(transactions, columns, maxItemsCount);
+        return this.exportCSV(transactions, translatedColumns, maxItemsCount);
       }
       case ExportFormatEnum.xlsx: {
-        return this.exportXLSX(transactions, fileName, sheetName, columns, maxItemsCount);
+        return this.exportXLSX(transactions, fileName, sheetName, translatedColumns, maxItemsCount);
       }
       case ExportFormatEnum.pdf: {
-        return this.exportPDF(transactions, columns, maxItemsCount);
+        return this.exportPDF(transactions, translatedColumns, maxItemsCount);
       }
     }
   }
